@@ -6,9 +6,15 @@ import sys
 
 import cherrypy
 
+# JB: codecs necessary for Unicode Greek support
+import codecs
+
 class Treedraw(object):
 
-    thefile = 'xxx'
+    # JB: added __init__ because was throwing AttributeError: 'Treedraw' object has no attribute 'thefile'
+    def __init__(self):
+
+        self.thefile = ""
 
     _cp_config = {'tools.staticdir.on' : True,
                   'tools.staticdir.dir' : '~/Annotald/treedrawing/data',
@@ -19,7 +25,8 @@ class Treedraw(object):
     @cherrypy.expose
     def doSave(self, trees=None):
 	os.system('mv '+self.thefile+' '+self.thefile+'.bak')
-	f = open(self.thefile,'w')
+        # JB: using codecs here
+	f = codecs.open(self.thefile, 'w', 'utf-8')
 	tosave = trees.strip()[1:-1]
 	f.write(tosave)
 	f.close()
@@ -27,12 +34,15 @@ class Treedraw(object):
 	os.system('mv '+self.thefile+'.out '+self.thefile)
 
     def loadPsd( self, fileName ):
+
 	self.thefile = fileName
 
-#	print("sdssssssssssssssssssssssssssssss")
-	f = open(fileName, 'r')
+        # JB: using codecs here
+	f = codecs.open(fileName, 'r', 'utf-8')
 	currentText = f.read()	
 	allchars = 'a-zA-Z0-9þæðöÞÆÐÖáéýúíóÁÉÝÚÍÓ\*\"\,\.\?\!\:$\+\-\{\}\_\<\>\/\&\;'
+        # greekchars should work with Greek and English, but includes no Extended Latin codepoints (but this will be an easy fix)
+        greekchars = ur'0-9a-zA-Z",.;·$-=*\u0370-\u03FF\u1F00-\u1FFF'
 	currentText = currentText.replace("<","&lt;");
 	currentText = currentText.replace(">","&gt;");
 	trees = currentText.split("\n\n")	
@@ -42,26 +52,13 @@ class Treedraw(object):
 		tree0 = tree.strip()
 		tree0 = re.sub('^\(','',tree0)
 		tree0 = re.sub('\)$','',tree0).strip()
-		tree0 = re.sub('\((['+allchars+']+) (['+allchars+']+)\)','<div class="snode">\\1<span class="wnode">\\2</span></div>',tree0)
+		tree0 = re.sub('\((['+greekchars+']+) (['+greekchars+']+)\)','<div class="snode">\\1<span class="wnode">\\2</span></div>',tree0)
 		tree0 = re.sub('\(','<div class="snode">',tree0)
 		tree0 = re.sub('\)','</div>',tree0)		
 		alltrees = alltrees + tree0
 
  	alltrees = alltrees + '</div>'
 	return alltrees
-
-    def loadPsdOld( self, fileName ):
-	f = open("torf06.psd", 'r')
-	currentText = f.read()	
-	allchars = '0-9a-zA-ZþæðöÞÆÐÖáéýúíóÁÉÝÚÍÓ\"\,\.$\-\=\*α-ωΑ-Ω\u1F00-\u1FFF'
-	trees = currentText.split("\n\n")
-	tree0 = trees[0].strip()
-	tree0 = re.sub('^\(','',tree0)
-	tree0 = re.sub('\)$','',tree0).strip()
-	tree0 = re.sub('\((['+allchars+']+) (['+allchars+']+)\)','<div class="snode">\\1<span class="wnode">\\2</span></div>',tree0)
-	tree0 = re.sub('\(','<div class="snode">',tree0)
-	tree0 = re.sub('\)','</div>',tree0)
-	return tree0
 
     def loadTxt( self, fileName ):
 	f = open( fileName )
@@ -77,7 +74,6 @@ class Treedraw(object):
 	thetree=thetree+"</div>"
 	return thetree	
     
-
     @cherrypy.expose
     def index(self):
         if len(sys.argv)==2:
