@@ -1,17 +1,15 @@
-Icelandic Parsed Historical Corpus (IcePaHC)
-Version 0.5
-Copyright 2011 Joel C. Wallenberg, Anton Karl Ingason, Einar Freyr Sigurðsson, Eiríkur Rögnvaldsson
-Website: http://linguist.is/icelandic_treebank/
-Contact: anton.karl.ingason@gmail.com
+Annotald
+Version 0.1
+Copyright 2011 Anton Karl Ingason, Jana E. Beck
+Contact: jana.eliz.beck@gmail.com
 
-Icelandic Parsed Historical Corpus (IcePaHC) is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+Annotald is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-The Icelandic Parsed Historical Corpus (IcePaHC) is a set of software tools for developing a treebank and a treebank that is developed using the same tools. The treebank contains Icelandic texts organized by period. See website, http://linguist.is/icelandic_treebank/, for further information.
+Annotald is a software tool for annotating phrase-structure treebanks in the Penn Treebank style.
 
 The project is funded in part by the following grants:
-From the Icelandic Research Fund (RANNÍS), grant nr. 090662011, Viable Language Technology beyond English – Icelandic as a test case.
-From the U.S. National Science Foundation (NSF) International Research Fellowship Program (IRFP), grant #OISE-0853114, Evolution of Language Systems: Comparative Study of Grammatical Change in Icelandic and English.
+From the Icelandic Research Fund (RANNÍS), grant nr. 090662011, Viable Language Technology beyond English – Icelandic as a Test Case.
