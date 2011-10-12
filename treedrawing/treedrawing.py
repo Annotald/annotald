@@ -38,6 +38,8 @@ class Treedraw(object):
 	os.system('mv '+self.thefile+' '+self.thefile+'.bak')
         # JB: using codecs here
 	f = codecs.open(self.thefile, 'w', 'utf-8')
+        # without codecs
+        #f = open(self.thefile, 'w')
 	tosave = trees.strip()[1:-1]
 	f.write(tosave)
 	f.close()
@@ -50,6 +52,8 @@ class Treedraw(object):
 
         # JB: using codecs here
 	f = codecs.open(fileName, 'r', 'utf-8')
+        # without codecs
+        #f = open(fileName, 'r')
 	currentText = f.read()	
 	allchars = 'a-zA-Z0-9þæðöÞÆÐÖáéýúíóÁÉÝÚÍÓ\*\"\,\.\?\!\:$\+\-\{\}\_\<\>\/\&\;'
         # greekchars should work with Greek and English, but includes no Extended Latin codepoints (but this will be an easy fix)
