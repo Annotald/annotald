@@ -10,6 +10,8 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 @contact: jana.eliz.beck@gmail.com
 """
 
+VERSION = "0.2"
+
 import os.path
 # current_dir = os.path.dirname(os.path.abspath(__file__))
 import re
@@ -112,7 +114,9 @@ class Treedraw(object):
 <br />
 
 <div id="floatMenu">
-<div style="background-color: #2E2E2E; color: white; font-weight: bold;">Annotald 0.2</div>
+<div style="background-color: #2E2E2E; color: white; font-weight: bold;">
+  Annotald """ + VERSION + """
+</div>
 
 Editing: """+self.thefile+""" <br />
 <input class="menubutton" type="button" value="Save" id="butsave"><br />
