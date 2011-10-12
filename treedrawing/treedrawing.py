@@ -96,9 +96,13 @@ class Treedraw(object):
         if len(sys.argv) == 2:
             currentSettings = open(sys.path[0] + "/settings.js").read()
             filename = sys.argv[1]
-            currentTree = self.loadPsd(filename)
+        elif len(sys.argv) == 3:
+            currentSettings = open(sys.argv[1]).read()
+            filename = sys.argv[2]
         else:
             print("Usage: annotald [settingsFile.js] file.psd")
+
+        currentTree = self.loadPsd(filename)
         
         return """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
 <html>
