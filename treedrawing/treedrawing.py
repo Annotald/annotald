@@ -26,6 +26,7 @@ import cherrypy
 # JB: codecs necessary for Unicode Greek support
 import codecs
 
+
 class Treedraw(object):
 
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
@@ -55,8 +56,10 @@ class Treedraw(object):
     def loadPsd(self, fileName):
 	self.thefile = fileName
         # JB: using codecs here
-	f = codecs.open(fileName, 'r', 'utf-8')
-	currentText = f.read()	
+	#f = codecs.open(fileName, 'r', 'utf-8')
+        f = open(fileName, 'r')
+        # no longer using codecs to open the file, using .decode('utf-8') instead
+	currentText = f.read().decode('utf-8')	
 	currentText = currentText.replace("<","&lt;")
 	currentText = currentText.replace(">","&gt;")
 	trees = currentText.split("\n\n")	
