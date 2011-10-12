@@ -42,8 +42,11 @@ class Treedraw(object):
     @cherrypy.expose
     def doSave(self, trees = None):
 	os.system('mv ' + self.thefile + ' ' + self.thefile + '.bak')
-        # JB: using codecs here
-	f = codecs.open(self.thefile, 'w', 'utf-8')
+        # JB: using codecs here when in Mac OS X
+        if "Darwin" in os.uname():
+            f = codecs.open(self.thefile, 'w', 'utf-8')
+        else:
+            f = open(self.thefile, 'w')
 	tosave = trees.strip()[1:-1]
 	f.write(tosave)
 	f.close()
@@ -55,8 +58,11 @@ class Treedraw(object):
     def loadPsd(self, fileName):
 	self.thefile = fileName
         f = open(fileName, 'r')
-        # no longer using codecs to open the file, using .decode('utf-8') instead
-	currentText = f.read().decode('utf-8')	
+        # no longer using codecs to open the file, using .decode('utf-8') instead when in Mac OS X
+        if "Darwin" in os.uname():
+            currentText = f.read().decode('utf-8')
+        else:
+            currentText = f.read()
 	currentText = currentText.replace("<","&lt;")
 	currentText = currentText.replace(">","&gt;")
 	trees = currentText.split("\n\n")	
