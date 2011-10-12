@@ -53,9 +53,6 @@ class Treedraw(object):
         # JB: using codecs here
 	f = codecs.open(fileName, 'r', 'utf-8')
 	currentText = f.read()	
-	allchars = 'a-zA-Z0-9þæðöÞÆÐÖáéýúíóÁÉÝÚÍÓ\*\"\,\.\?\!\:$\+\-\{\}\_\<\>\/\&\;'
-        # greekchars should work with Greek and English, but includes no Extended Latin codepoints (but this will be an easy fix)
-        greekchars = ur'0-9a-zA-Z",.;·$-=*\u0370-\u03FF\u1F00-\u1FFF'
 	currentText = currentText.replace("<","&lt;");
 	currentText = currentText.replace(">","&gt;");
 	trees = currentText.split("\n\n")	
@@ -65,7 +62,9 @@ class Treedraw(object):
 		tree0 = tree.strip()
 		tree0 = re.sub('^\(','',tree0)
 		tree0 = re.sub('\)$','',tree0).strip()
-		tree0 = re.sub('\((['+greekchars+']+) (['+greekchars+']+)\)','<div class="snode">\\1<span class="wnode">\\2</span></div>',tree0)
+		tree0 = re.sub('\(([^ ]+) ([^ ]+)\)',
+                               '<div class="snode">\\1'
+                                 '<span class="wnode">\\2</span></div>',tree0)
 		tree0 = re.sub('\(','<div class="snode">',tree0)
 		tree0 = re.sub('\)','</div>',tree0)		
 		alltrees = alltrees + tree0
