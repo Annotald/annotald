@@ -6,8 +6,11 @@ Created 2011/10/10
 @author: Anton Karl Ingason
 @author: Jana E. Beck
 @author: Aaron Ecay
-@copyright: GNU Lesser General Public License http://www.gnu.org/licenses/
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+@copyright: GNU Lesser General Public License
+http://www.gnu.org/licenses/ This program is distributed in the hope
+that it will be useful, but WITHOUT ANY WARRANTY; without even the
+implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE. See the GNU Lesser General Public License for more details.
 @contact: jana.eliz.beck@gmail.com
 """
 
@@ -17,7 +20,6 @@ import os.path
 # current_dir = os.path.dirname(os.path.abspath(__file__))
 import re
 import sys
-
 import cherrypy
 
 # JB: codecs necessary for Unicode Greek support
@@ -25,37 +27,37 @@ import codecs
 
 class Treedraw(object):
 
-    # JB: added __init__ because was throwing AttributeError: 'Treedraw' object has no attribute 'thefile'
+    # JB: added __init__ because was throwing AttributeError: 'Treedraw'
+    # object has no attribute 'thefile'
     def __init__(self):
-
         self.thefile = ""
 
-    _cp_config = {'tools.staticdir.on' : True,
-                  'tools.staticdir.dir' : '~/Annotald/treedrawing/data',
-                  'tools.staticdir.index' : 'index.html',
-  	           'tools.caching.on' : False,
-    }
+    _cp_config = { 'tools.staticdir.on'    : True,
+                   'tools.staticdir.dir'   : '~/Annotald/treedrawing/data',
+                   'tools.staticdir.index' : 'index.html',
+  	           'tools.caching.on'      : False
+                   }
 
     @cherrypy.expose
-    def doSave(self, trees=None):
-	os.system('mv '+self.thefile+' '+self.thefile+'.bak')
+    def doSave(self, trees = None):
+	os.system('mv ' + self.thefile + ' ' + self.thefile + '.bak')
         # JB: using codecs here
 	f = codecs.open(self.thefile, 'w', 'utf-8')
 	tosave = trees.strip()[1:-1]
 	f.write(tosave)
 	f.close()
-	os.system('java -classpath ~/Annotald/CS_Tony_oct19.jar csearch.CorpusSearch ~/Annotald/treedrawing/nothing.q '+self.thefile)
-	os.system('mv '+self.thefile+'.out '+self.thefile)
+	os.system('java -classpath ~/Annotald/CS_Tony_oct19.jar'
+                  ' csearch.CorpusSearch ~/Annotald/treedrawing/nothing.q ' + \
+                      self.thefile)
+	os.system('mv ' + self.thefile + '.out ' + self.thefile)
 
-    def loadPsd( self, fileName ):
-
+    def loadPsd(self, fileName):
 	self.thefile = fileName
-
         # JB: using codecs here
 	f = codecs.open(fileName, 'r', 'utf-8')
 	currentText = f.read()	
-	currentText = currentText.replace("<","&lt;");
-	currentText = currentText.replace(">","&gt;");
+	currentText = currentText.replace("<","&lt;")
+	currentText = currentText.replace(">","&gt;")
 	trees = currentText.split("\n\n")	
 
 	alltrees = '<div class="snode">'
@@ -73,26 +75,27 @@ class Treedraw(object):
  	alltrees = alltrees + '</div>'
 	return alltrees
 
-    def loadTxt( self, fileName ):
-	f = open( fileName )
+    def loadTxt(self, fileName):
+	f = open(fileName)
 	currentText = f.read()
 	trees = currentText.split("\n\n")
 	tree0 = trees[1].strip();
 	words = tree0.split('\n');
-	thetree='<div class="snode">IP-MAT'
-	wordnr=0
+	thetree = '<div class="snode">IP-MAT'
+	wordnr = 0
 	for word in words:
-		thetree=thetree+'<div class="snode">X<span class="wnode">'+word+'</span></div>'
+		thetree = thetree + '<div class="snode">X<span class="wnode">' + \
+                    word + '</span></div>'
 
-	thetree=thetree+"</div>"
+	thetree = thetree + "</div>"
 	return thetree	
     
     @cherrypy.expose
     def index(self):
-        if len(sys.argv)==2:
-            currentSettings = open( sys.path[0] + "/settings.js").read()
+        if len(sys.argv) == 2:
+            currentSettings = open(sys.path[0] + "/settings.js").read()
             filename = sys.argv[1]
-            currentTree=self.loadPsd( filename )                
+            currentTree = self.loadPsd(filename)
         else:
             print("Usage: annotald [settingsFile.js] file.psd")
         
@@ -100,11 +103,13 @@ class Treedraw(object):
 <html>
 <head>  <title>Annotald</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <link rel="stylesheet" type="text/css" href="css/treedrawing.css" type="text/css"></link>
-    <script type= "application/javascript"/>"""+ currentSettings + """    </script>
+        <link rel="stylesheet" type="text/css" href="css/treedrawing.css"
+          type="text/css"></link>
+    <script type= "application/javascript"/>""" + currentSettings + """</script>
 	<script type= "application/javascript" src="scripts/jquery.js"/></script>		
 	<script type= "application/javascript" src="scripts/treedrawing.js"/></script>		
-	<script type= "application/javascript" src="scripts/treedrawing.contextMenu.js"/></script>		
+	<script type= "application/javascript"
+          src="scripts/treedrawing.contextMenu.js"/></script>
 
 </head>
 <body oncontextmenu="return false;">
