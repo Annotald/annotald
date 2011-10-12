@@ -17,7 +17,8 @@ PURPOSE. See the GNU Lesser General Public License for more details.
 VERSION = "0.2"
 
 import os.path
-# current_dir = os.path.dirname(os.path.abspath(__file__))
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 import re
 import sys
 import cherrypy
@@ -33,7 +34,7 @@ class Treedraw(object):
         self.thefile = ""
 
     _cp_config = { 'tools.staticdir.on'    : True,
-                   'tools.staticdir.dir'   : '~/Annotald/treedrawing/data',
+                   'tools.staticdir.dir'   : CURRENT_DIR + '/data',
                    'tools.staticdir.index' : 'index.html',
   	           'tools.caching.on'      : False
                    }
@@ -46,8 +47,8 @@ class Treedraw(object):
 	tosave = trees.strip()[1:-1]
 	f.write(tosave)
 	f.close()
-	os.system('java -classpath ~/Annotald/CS_Tony_oct19.jar'
-                  ' csearch.CorpusSearch ~/Annotald/treedrawing/nothing.q ' + \
+	os.system('java -classpath ' + CURRENT_DIR + '/../CS_Tony_oct19.jar'
+                  ' csearch.CorpusSearch ' + CURRENT_DIR + '/nothing.q ' + \
                       self.thefile)
 	os.system('mv ' + self.thefile + '.out ' + self.thefile)
 
