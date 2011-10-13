@@ -1,6 +1,6 @@
 Annotald
-Version 0.1
-Copyright 2011 Anton Karl Ingason, Jana E. Beck
+Version 0.3
+Copyright 2011 Anton Karl Ingason, Jana E. Beck, Aaron Ecay
 Contact: jana.eliz.beck@gmail.com
 
 Annotald is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -12,4 +12,4 @@ You should have received a copy of the GNU Lesser General Public License along w
 Annotald is a software tool for annotating phrase-structure treebanks in the Penn Treebank style.
 
 The project is funded in part by the following grants:
-From the Icelandic Research Fund (RANNÍS), grant nr. 090662011, Viable Language Technology beyond English – Icelandic as a Test Case.
+From the Icelandic Research Fund (RANNÍS), grant nr. 090662011, Viable Language Technology beyond English--Icelandic as a Test Case.
