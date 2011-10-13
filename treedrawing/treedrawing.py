@@ -14,7 +14,7 @@ PURPOSE. See the GNU Lesser General Public License for more details.
 @contact: jana.eliz.beck@gmail.com
 """
 
-VERSION = "0.2"
+VERSION = "0.3"
 
 import os.path
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -42,8 +42,11 @@ class Treedraw(object):
     @cherrypy.expose
     def doSave(self, trees = None):
 	os.system('mv ' + self.thefile + ' ' + self.thefile + '.bak')
-        # JB: using codecs here
-	f = codecs.open(self.thefile, 'w', 'utf-8')
+        # JB: using codecs here when in Mac OS X
+        if "Darwin" in os.uname():
+            f = codecs.open(self.thefile, 'w', 'utf-8')
+        else:
+            f = open(self.thefile, 'w')
 	tosave = trees.strip()[1:-1]
 	f.write(tosave)
 	f.close()
@@ -54,9 +57,12 @@ class Treedraw(object):
 
     def loadPsd(self, fileName):
 	self.thefile = fileName
-        # JB: using codecs here
-	f = codecs.open(fileName, 'r', 'utf-8')
-	currentText = f.read()	
+        f = open(fileName, 'r')
+        # no longer using codecs to open the file, using .decode('utf-8') instead when in Mac OS X
+        if "Darwin" in os.uname():
+            currentText = f.read().decode('utf-8')
+        else:
+            currentText = f.read()
 	currentText = currentText.replace("<","&lt;")
 	currentText = currentText.replace(">","&gt;")
 	trees = currentText.split("\n\n")	
