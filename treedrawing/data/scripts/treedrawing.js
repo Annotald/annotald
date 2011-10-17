@@ -245,7 +245,11 @@ function handleKeyDown(e){
 			}
 			else if (type=="leafafter"){
 				leafAfter();
-			}
+			} else if (type == "toggleLemmata") {
+                            toggleLemmata();
+                        } else if (type == "editLemma") {
+                            editLemma();
+                        }
 		}
 
 	}
@@ -690,132 +694,137 @@ function isNonWord(word){
 		return false;
 }
 
-function displayRename(){
-		
-	if( startnode && !endnode ){
-
-		if( $("#"+startnode.id+">.wnode").size() > 0 ){
-			// this is a terminal
-
-		    stackTree();
-			document.body.onkeydown = null;	
-			label = $("#"+startnode.id).contents().filter(function() {
-	  			return this.nodeType == 3;
-			}).first().text();
-			label = $.trim(label);
-			
-			word = $.trim( $("#"+startnode.id).children().first().text() );
-			
-			editor=$("<div id='leafeditor' class='snode'><input id='leafphrasebox' class='labeledit' type='text' value='"+label+"' /> <input id='leaftextbox' class='labeledit' type='text' value='"+word+"' /></div>");
-	
-				$("#"+startnode.id).replaceWith(editor);
-				// $("#leaftextbox").attr("value") );
-				if( ! isNonWord( word ) ){
-					$("#leaftextbox").attr("disabled",true);
-				}
-	
-				$("#leafphrasebox,#leaftextbox").keydown(function(event) {
-					
-				
-					if(event.keyCode == '9'){
-							// tab, do nothing								  	
-	  					var elementId = (event.target || event.srcElement).id;
-						// alert( elementId );	
-						// $("#"+elementId).val( $("#"+elementId).val() );
-						if ($("#leaftextbox").attr("disabled")) {					
-							event.preventDefault();
-						}
-					}				
-					if(event.keyCode == '32'){
-															  	
-	  					var elementId = (event.target || event.srcElement).id;
-						// alert( elementId );	
-						$("#"+elementId).val( $("#"+elementId).val() );
-						event.preventDefault();
-					}
-					if(event.keyCode == '13'){			   
-					   newphrase = $("#leafphrasebox").val().toUpperCase()+" ";
-					   newtext = $("#leaftextbox").val();
-					   newtext = newtext.replace("<","&lt;");
-					   newtext = newtext.replace(">","&gt;");
-	
-		  			   $("#leafeditor").replaceWith( "<div id='theNewPhrase' class='snode'>"+ newphrase+" <span class='wnode'>"+newtext+"</span></div>" );
-						 if( isIpNode(newphrase) ){
-						    $("#theNewPhrase").addClass("ipnode");									
-						  }
-						  else {
-						  	$("#theNewPhrase").removeClass("ipnode");				
-						  }
-	
-					   startnode=null; endnode=null;
-					   resetIds();
-					   updateSelection();
-					   document.body.onkeydown = handleKeyDown;	
-					}
-	
-				});
-	
-			
-				setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
-		} 
-		else {
-			// this is not a terminal
-			stackTree();
-			document.body.onkeydown = null;	
-			label = $("#"+startnode.id).contents().filter(function() {
-	  			return this.nodeType == 3;
-			}).first().text();
-			label = $.trim(label);
-			// alert(label);
-			
-			editor=$("<input id='labelbox' class='labeledit' type='text' value='"+label+"' />");
-	
-				$("#"+startnode.id).contents().filter(function() {
-	  			return this.nodeType == 3;
-			}).first().replaceWith(editor);
-			
-				// $("#leaftextbox").attr("value") );
-			
-				$("#labelbox").keydown(function(event) {
-					
-				
-					if(event.keyCode == '9'){
-							// tab, do nothing								  	
-	  					var elementId = (event.target || event.srcElement).id;
-					}				
-					if(event.keyCode == '32'){
-															  	
-	  					var elementId = (event.target || event.srcElement).id;
-						// alert( elementId );	
-						$("#"+elementId).val( $("#"+elementId).val() );
-						event.preventDefault();
-					}
-					if(event.keyCode == '13'){			   
-					   newphrase = $("#labelbox").val().toUpperCase()+" ";
-				
-		  			   $("#labelbox").replaceWith(  newphrase );
-	
-			  
-						  if( isIpNode(newphrase) ){
-						    $("#"+startnode.id).addClass("ipnode");									
-						  }
-						  else {
-						  	$("#"+startnode.id).removeClass("ipnode");				
-						  }
-	
-					   startnode=null; endnode=null;
-					   resetIds();
-					   updateSelection();
-					   document.body.onkeydown = handleKeyDown;	
-					}
-	
-				});
-				setTimeout(function(){ $("#labelbox").focus(); }, 10);			
-			
-	
-		}
-
+function displayRename() {
+    if (startnode && !endnode) {
+	stackTree();
+	document.body.onkeydown = null;
+        function space(event) {
+	    var elementId = (event.target || event.srcElement).id;
+	    $("#"+elementId).val( $("#"+elementId).val() );
+	    event.preventDefault();
+        }
+        function postChange(newphrase) {
+            if(isIpNode(newphrase)) {
+		$("#theNewPhrase").addClass("ipnode");
+	    } else {
+		$("#theNewPhrase").removeClass("ipnode");
+	    }
+	    startnode = null; endnode = null;
+	    resetIds();
+	    updateSelection();
+	    document.body.onkeydown = handleKeyDown;
+        }
+        var label = $("#"+startnode.id).contents().filter(
+            function() {
+	  	return this.nodeType == 3;
+	    }).first().text();
+	label = $.trim(label);
+	if ($("#"+startnode.id+">.wnode").size() > 0) {
+	    // this is a terminal
+	    var preword = $.trim($("#"+startnode.id).children().first().text());
+            preword = preword.split("-");
+            var lemma = preword.pop();
+            var word = preword.join("-");
+	    var editor=$("<div id='leafeditor' class='snode'><input id='leafphrasebox' class='labeledit' type='text' value='"+label+"' /> <input id='leaftextbox' class='labeledit' type='text' value='"+word+"' /><input id='leaflemmabox' class='labeledit' type='text' value='" + lemma + "' /></div>");
+	    $("#"+startnode.id).replaceWith(editor);
+	    if (!isNonWord(word)) {
+		$("#leaftextbox").attr("disabled", true);
+	    }
+	    $("#leafphrasebox,#leaftextbox,#leaflemmabox").keydown(
+                function(event) {
+		    if (event.keyCode == '9') {
+	  		var elementId = (event.target || event.srcElement).id;
+		    }
+		    if (event.keyCode == '32') {
+                        space(event);
+		    }
+		    if (event.keyCode == '13') {
+			var newphrase = $("#leafphrasebox").val().toUpperCase()+" ";
+			var newtext = $("#leaftextbox").val();
+                        var newlemma = $('#leaflemmabox').val();
+			newtext = newtext.replace("<","&lt;");
+			newtext = newtext.replace(">","&gt;");
+			newlemma = newlemma.replace("<","&lt;");
+			newlemma = newlemma.replace(">","&gt;");
+		  	$("#leafeditor").replaceWith(
+                            "<div id='theNewPhrase' class='snode'>" + newphrase +
+                                " <span class='wnode'>" + newtext +
+                                "<span class='lemma " + lemmaClass + "'>-" +
+                                newlemma + "</span></span></div>" );
+                        postChange(newphrase);
+		    }
+		});
+	    setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
+	} else {
+	    // this is not a terminal
+	    var editor=$("<input id='labelbox' class='labeledit' type='text' value='" +
+                         label + "' />");
+	    $("#"+startnode.id).contents().filter(
+                function() {
+	  	    return this.nodeType == 3;
+		}).first().replaceWith(editor);
+	    $("#labelbox").keydown(
+                function(event) {
+		    if(event.keyCode == '9'){
+			// tab, do nothing
+	  		var elementId = (event.target || event.srcElement).id;
+		    }
+		    if(event.keyCode == '32'){
+                        space(event);
+		    }
+		    if(event.keyCode == '13'){
+			var newphrase = $("#labelbox").val().toUpperCase()+" ";
+		  	$("#labelbox").replaceWith(newphrase);
+			postChange(newphrase);
+		    }
+		});
+	    setTimeout(function(){ $("#labelbox").focus(); }, 10);
 	}
+    }
+}
+
+function editLemma() {
+    var foo = $("#"+startnode.id+">.wnode>.lemma");
+    if (startnode && !endnode && foo.size() > 0) {
+	stackTree();
+	document.body.onkeydown = null;
+        function space(event) {
+	    var elementId = (event.target || event.srcElement).id;
+	    $("#"+elementId).val( $("#"+elementId).val() );
+	    event.preventDefault();
+        }
+        function postChange() {
+	    startnode = null; endnode = null;
+            // Need we do this?
+	    resetIds();
+	    updateSelection();
+	    document.body.onkeydown = handleKeyDown;	
+        }
+        var lemma = $("#"+startnode.id+">.wnode>.lemma").text();
+        lemma = lemma.substring(1);
+	var editor=$("<span id='leafeditor' class='wnode'><input id='leaflemmabox' class='labeledit' type='text' value='" + lemma + "' /></span>");
+	$("#"+startnode.id+">.wnode>.lemma").replaceWith(editor);
+	$("#leaflemmabox").keydown(
+            function(event) {
+		if (event.keyCode == '9') {
+	  	    var elementId = (event.target || event.srcElement).id;
+                    event.preventDefault();
+		}				
+		if (event.keyCode == '32') {
+                    space(event);
+		}
+		if (event.keyCode == '13') {			   
+                    var newlemma = $('#leaflemmabox').val();
+		    newlemma = newlemma.replace("<","&lt;");
+		    newlemma = newlemma.replace(">","&gt;");
+		    $("#leafeditor").replaceWith("<span class='lemma " + 
+                                                 lemmaClass + "'>-" +
+                                                 newlemma + "</span>");
+                    postChange();
+		}
+	    });
+	setTimeout(function(){ $("#leaflemmabox").focus(); }, 10);
+    }
 }
 
 function changeJustLabel( oldlabel, newlabel ){
@@ -1456,15 +1465,9 @@ function resetIds(){
 	// assignEvents();
 
 
-function wnodeString( node ){
-	thenode = node.clone();
-	wnodes = thenode.find(".wnode");
-	text="";
-	for( i=0; i<wnodes.length; i++){		
-		text = text + wnodes[i].innerHTML + " ";		
-	}
-	
-	return text;
+function wnodeString(node) {
+    var text = $(node).find('.wnode').text();
+    return text;
 }
 
 function toLabeledBrackets( node ){		
@@ -1481,3 +1484,10 @@ function toLabeledBrackets( node ){
 	return out.text();
 }
 
+var lemmaClass = "lemmaHide";
+
+function toggleLemmata() {
+    $('.lemma').toggleClass('lemmaShow');
+    $('.lemma').toggleClass('lemmaHide');
+    lemmaClass = lemmaClass == "lemmaHide" ? "lemmaShow" : "lemmaHide";
+}

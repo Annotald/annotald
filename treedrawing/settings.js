@@ -45,6 +45,9 @@ function customCommands(){
     addCommand(90,"undo"); // z
     addCommand(76,"rename"); // l
     addCommand(32,"clearselection"); // spacebar
+    addCommand(192, "toggleLemmata");
+    addCommand(79, "editLemma"); // o, TODO find a better binding (shift-L?
+                                 // or move whole-hog edit to shift-L and make this l)
 
 // addCommand(51,"makenode","NP","NP-PRD","NP-POS"); // 3
 // addCommand(188,"clearselection"); // <

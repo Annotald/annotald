@@ -87,7 +87,7 @@ body {
     background-color: #DCDBFF;
     margin: 0px;
     border: 0px;
-    width: 40%;
+    width: 32%;
 }
 
 #conMenu {
@@ -150,4 +150,12 @@ body {
 
 .shown {
     visibility: visible;
+}
+
+.lemmaShow {
+
+}
+
+.lemmaHide {
+    display: none;
 }
