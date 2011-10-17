@@ -25,30 +25,31 @@ var ipnodes=["IP-SUB","IP-MAT","IP-IMP","IP-INF","IP-PPL","RRC"];
  * http://www.asquare.net/javascript/tests/KeyCode.html
  */
 function customCommands(){
-	addCommand(65,"leafafter"); // a
-	addCommand(66,"leafbefore"); // b
-	addCommand(69,"setlabel",["CP-ADV","CP-CMP"]); //e
-	addCommand(88,"makenode","XP"); // x
-	addCommand(67,"coindex"); // c
-	addCommand(82,"setlabel",["CP-REL","CP-FRL","CP-CAR","CP-CLF"]); // r
-	addCommand(83,"setlabel",["IP-SUB","IP-MAT","IP-IMP"]); // s
-	addCommand(86,"setlabel",["IP-SMC","IP-INF","IP-INF-PRP"]); // v
-	addCommand(84,"setlabel",["CP-THT","CP-THT-PRN","CP-DEG","CP-QUE"]); // t
-	addCommand(71,"setlabel",["ADJP","ADJP-SPR","NP-MSR","QP"]); // g
-	addCommand(70,"setlabel",["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR"]); // f
-//	addCommand(49,"redo"); // 1
-	addCommand(50,"setlabel",["NP","NP-PRN","NP-POS","NP-COM"]); // 2
-//	addCommand(51,"makenode","NP","NP-PRD","NP-POS"); // 3
-	addCommand(52,"toggleextension","-PRN"); // 4
-        addCommand(53,"toggleextension","-SPE"); // 5
-	addCommand(81,"setlabel",["CONJP","ALSO","FP"]); // q
-	addCommand(87,"setlabel",["NP-SBJ","NP-OB1","NP-OB2","NP-PRD"]); // w
-	addCommand(68,"prunenode"); // d
-	addCommand(90,"undo"); // z
-	addCommand(76,"rename"); // l
-//	addCommand(188,"clearselection"); // <
-	addCommand(32,"clearselection"); // spacebar
-//	addCommand(78, "makenode","XP"); // n    
+    addCommand(65,"leafafter"); // a
+    addCommand(66,"leafbefore"); // b
+    addCommand(69,"setlabel",["CP-ADV","CP-CMP"]); //e
+    addCommand(88,"makenode","XP"); // x
+    addCommand(67,"coindex"); // c
+    addCommand(82,"setlabel",["CP-REL","CP-FRL","CP-CAR","CP-CLF"]); // r
+    addCommand(83,"setlabel",["IP-SUB","IP-MAT","IP-IMP"]); // s
+    addCommand(86,"setlabel",["IP-SMC","IP-INF","IP-INF-PRP"]); // v
+    addCommand(84,"setlabel",["CP-THT","CP-THT-PRN","CP-DEG","CP-QUE"]); // t
+    addCommand(71,"setlabel",["ADJP","ADJP-SPR","NP-MSR","QP"]); // g
+    addCommand(70,"setlabel",["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR"]); // f
+    addCommand(50,"setlabel",["NP","NP-PRN","NP-POS","NP-COM"]); // 2
+    addCommand(52,"toggleextension","-PRN"); // 4
+    addCommand(53,"toggleextension","-SPE"); // 5
+    addCommand(81,"setlabel",["CONJP","ALSO","FP"]); // q
+    addCommand(87,"setlabel",["NP-SBJ","NP-OB1","NP-OB2","NP-PRD"]); // w
+    addCommand(68,"prunenode"); // d
+    addCommand(90,"undo"); // z
+    addCommand(76,"rename"); // l
+    addCommand(32,"clearselection"); // spacebar
+
+// addCommand(51,"makenode","NP","NP-PRD","NP-POS"); // 3
+// addCommand(188,"clearselection"); // <
+// addCommand(78, "makenode","XP"); // n
+// addCommand(49,"redo"); // 1
 }
 
 
