@@ -1,21 +1,21 @@
 body {
-	font-family:sans;
-	font-size:12px;
-	margin: 0px;
-	padding: 0px;
-	background-color: #D2B48C;
-//        height:2000px;  
-//	width: 100%;
+    font-family: sans;
+    font-size: 12px;
+    margin: 0px;
+    padding: 0px;
+    background-color: #D2B48C;
+/*  height: 2000px;
+    width: 100%; */
 }
 
 .snode {
-	margin-left:20px;
-	border:1px solid silver;
-	border-left: 4px solid #4682B4;
-	background-color:#efefef;
-	padding: 2px;
-	cursor: pointer;
-	// -webkit-user-select: none;
+    margin-left: 20px;
+    border: 1px solid silver;
+    border-left: 4px solid #4682B4;
+    background-color: #efefef;
+    padding: 2px;
+    cursor: pointer;
+/*  -webkit-user-select: none; */
 }
 
 .tnode {
@@ -23,131 +23,131 @@ body {
 }
 
 .wnode {
-	margin-left:20px;
-	padding-left:4px;
-	padding-right:4px;
-	border:1px solid black;	
-	background-color: white;
+    margin-left: 20px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border: 1px solid black;
+    background-color: white;
 }
 
 #sn0 {
-	background-color: #D2B48C;
-	border: 1px solid black;
-        margin-left: 75px;
-        margin-right: 25px;
+    background-color: #D2B48C;
+    border: 1px solid black;
+    margin-left: 75px;
+    margin-right: 25px;
 }
 
- #sn0 > .snode {
-//	background-color: silver;
-	border: 2px solid black;	
- }
+#sn0 > .snode {
+/*  background-color: silver;*/
+    border: 2px solid black;
+}
 
 .ipnode {
-//	border-left: 3px solid navy;
-	border-top: 1px solid black;
-	border-bottom: 1px solid black;
-	background-color: #D2B48C;
+/*  border-left: 3px solid navy; */
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    background-color: #D2B48C;
 }
 
 .snodesel {
-	background-color: #4682B4;
+    background-color: #4682B4;
 }
 
 .menubutton {
     width: 80%;
 }
 
-#floatMenu {  
-    position:absolute;  
-    top:50px;  
-    left:0px;  
-    margin-left:5px;  
-    width:200px;  
-   background: #FEF6EA;
-   padding-bottom: 4px;
-   border: 1px solid #857259;
+#floatMenu {
+    position: absolute;
+    top: 50px;
+    left: 0px;
+    margin-left: 5px;
+    width: 200px;
+    background: #FEF6EA;
+    padding-bottom: 4px;
+    border: 1px solid #857259;
     text-align: center;
-}  
+}
 
 #editpane{
-   position: absolute;
-    top:0px; 
-   left:210px;
-   margin:0px;
-   padding: 0px;
-	padding-right:20px;
-//   width: 800px;
-   border: 1px solid #857259;
-  background-color: #FEEDD5;
+    position: absolute;
+    top: 0px;
+    left: 210px;
+    margin: 0px;
+    padding: 0px;
+    padding-right: 20px;
+/*  width: 800px; */
+    border: 1px solid #857259;
+    background-color: #FEEDD5;
 }
 
 .labeledit {
-	font-family:sans;
-	font-size:12px;
-	background-color: #DCDBFF;	
-	margin: 0px;
-	border: 0px;
-	width: 40%;
+    font-family: sans;
+    font-size: 12px;
+    background-color: #DCDBFF;
+    margin: 0px;
+    border: 0px;
+    width: 40%;
 }
 
 #conMenu {
-	background-color:white;
-	border: 1px solid black;
-	width: 345px;
-	z-index: 999;
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	background-color: #efefef;
-	visibility: hidden;
+    background-color:white;
+    border: 1px solid black;
+    width: 345px;
+    z-index: 999;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: #efefef;
+    visibility: hidden;
 }
 
 .conMenuColumn {
-	width:115px;
+    width: 115px;
 }
 
 .conMenuItem {
-	padding: 2px;
-	padding-left:5px;
-//	border-bottom: 1px solid silver;
+    padding: 2px;
+    padding-left: 5px;
+/*   border-bottom: 1px solid silver; */
 }
 
 .conMenuHeading {
-	color: #FEEDD5;
-	background-color: black;
-	padding: 2px;
-	padding-left:5px;
-	border-bottom: 1px solid silver;
-	border-left: 1px solid silver;
-	font-weight:bold;
+    color: #FEEDD5;
+    background-color: black;
+    padding: 2px;
+    padding-left:5px;
+    border-bottom: 1px solid silver;
+    border-left: 1px solid silver;
+    font-weight: bold;
 }
 
-.conMenuItem:hover{
-	background-color: silver;
+.conMenuItem:hover {
+    background-color: silver;
 }
 
 .conMenuItem > a {
-	text-decoration: none;
-	color: black;
-	display: block;
+    text-decoration: none;
+    color: black;
+    display: block;
 }
 
 #conLeft, #conRight {
-	border-right:1px solid silver;
+    border-right: 1px solid silver;
 }
 
 #conRight {
-	position:absolute;
-	left:115px;
-	top:0px;
+    position: absolute;
+    left: 115px;
+    top: 0px;
 }
 
 #conRightest {
-	position:absolute;
-	left:230px;
-	top:0px;
+    position: absolute;
+    left: 230px;
+    top: 0px;
 }
 
 .shown {
-	visibility: visible;
+    visibility: visible;
 }
