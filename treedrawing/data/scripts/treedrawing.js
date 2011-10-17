@@ -10,12 +10,12 @@ var menuYloc = null;
 
 String.prototype.startsWith = function(str){
     return (this.substr(0,str.length) === str);
-}
+};
 
 String.prototype.endsWith = function(str){
 	// alert(this.substr(this.length-str.length));	
     return (this.substr(this.length-str.length) === str);
-}
+};
 
 /**
  * unique function by: Shamasis Bhattacharya
@@ -32,7 +32,8 @@ $(document).ready(function() {
 	$("#debugpane").empty();
 
     // make menu float
-    menuYloc = parseInt($(name).css("top").substring(0,$(name).css("top").indexOf("px")))  
+    menuYloc = parseInt($(name).css("top").substring(0,$(name).css("top").indexOf("px")));
+ 
     $(window).scroll(function () {  
         var offset = menuYloc+$(document).scrollTop()+"px";  
         $(name).animate({top:offset},{duration:500,queue:false});  
@@ -137,7 +138,7 @@ function addCommand( keycode, type, label ){
 	commands[keycode]=new function(){
 		this.type = type;
 		this.label=label;
-	}
+	};
 }
 
 function stackTree(){
@@ -510,7 +511,7 @@ function moveNodes(targetParent){
 	// BUG when making XP and then use context menu: todo XXX
 	clearSelection();
 	selectNode( toselect.attr("id") );
-	toselect.attr("xxx",null)
+	toselect.attr("xxx",null);
 	updateSelection();
 	resetIds();
 	//toselect.mousedown(handleNodeClick);
@@ -700,7 +701,7 @@ function displayRename(){
 			
 			word = $.trim( $("#"+startnode.id).children().first().text() );
 			
-			editor=$("<div id='leafeditor' class='snode'><input id='leafphrasebox' class='labeledit' type='text' value='"+label+"' /> <input id='leaftextbox' class='labeledit' type='text' value='"+word+"' /></div>")
+			editor=$("<div id='leafeditor' class='snode'><input id='leafphrasebox' class='labeledit' type='text' value='"+label+"' /> <input id='leaftextbox' class='labeledit' type='text' value='"+word+"' /></div>");
 	
 				$("#"+startnode.id).replaceWith(editor);
 				// $("#leaftextbox").attr("value") );
@@ -863,7 +864,7 @@ function toogleJustExtension( oldlabel, extension ){
 		}
 		
 		out = extendedlabel;
-		count = currentextensions.length
+		count = currentextensions.length;
 		for( i=0; i<count; i++){
 			out+=currentextensions.pop();
 		}
@@ -900,7 +901,7 @@ function parseExtensions( label ){
 		}
 		
 		out = "";
-		count = currentextensions.length
+		count = currentextensions.length;
 		for( i=0; i<count; i++){
 			out+=currentextensions.pop();
 		}
@@ -963,7 +964,7 @@ function setLabel(label){
 		   if( i<label.length-1 ){
 		   			   	  		   
 		   			   	  		   
-		   	  newlabel = changeJustLabel( oldlabel, label[i+1] )
+		   	  newlabel = changeJustLabel( oldlabel, label[i+1] );
 		   	 // alert("u"+newlabel);	   	  		   	  
 		      textnode.replaceWith(newlabel+" ");
 			  
@@ -979,7 +980,7 @@ function setLabel(label){
 		   else {
 		   	
 		   			   	  		   
-		   	  newlabel = changeJustLabel( oldlabel, label[0] )
+		   	  newlabel = changeJustLabel( oldlabel, label[0] );
 		  // 	  alert("d"+newlabel);	   	  		   	  
 		      textnode.replaceWith(newlabel+" ");		   	
 		      //textnode.replaceWith(label[0]+" ");
@@ -1056,7 +1057,7 @@ function makeNode(label){
 
 	// BUG when making XP and then use context menu: todo XXX
 	selectNode( toselect.attr("id") );
-	toselect.attr("xxx",null)
+	toselect.attr("xxx",null);
 	updateSelection();
 	resetIds();
 
