@@ -59,7 +59,7 @@ $(document).ready(function() {
 // checks if the given node label is an ip node in the gui coloring sense
 function isIpNode( text ){	
 //	alert(ipnodes.length); 
-/*
+/* TODO(AWE)
 	for( i=0; i<ipnodes.length; i++){
 		if( ipnodes[i].startsWith(text) ){
 			return true;
@@ -190,7 +190,12 @@ function assignEvents(){
 }
 
 
-function handleKeyDown(e){	
+function handleKeyDown(e){
+
+    // TODO(AWE): can we make this function dispatch on arbitrary code,
+    // instead of a string argument?
+
+    // TODO(AWE): allow specification of modifier keys
 
 		// alert(e.keyCode);
 		if( e.ctrlKey && e.keyCode == 83) {
