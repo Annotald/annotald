@@ -23,15 +23,15 @@ var undostack=new Array();
 var redostack=new Array();
 var commands=new Object();
 
-var name = "#floatMenu";  
-var menuYloc = null;  
+var name = "#floatMenu";
+var menuYloc = null;
 
 String.prototype.startsWith = function(str){
     return (this.substr(0,str.length) === str);
 };
 
 String.prototype.endsWith = function(str){
-	// alert(this.substr(this.length-str.length));	
+	// alert(this.substr(this.length-str.length));
     return (this.substr(this.length-str.length) === str);
 };
 
@@ -39,26 +39,26 @@ String.prototype.endsWith = function(str){
  * unique function by: Shamasis Bhattacharya
  * http://www.shamasis.net/2009/09/fast-algorithm-to-find-unique-items-in-javascript-array/
  */
-Array.prototype.unique = function() {   
+Array.prototype.unique = function() {
 		var o = {}, i, l = this.length, r = [];    for(i=0; i<l;i+=1) o[this[i]] = this[i];    for(i in o) r.push(o[i]);    return r;
 };
 
 
 $(document).ready(function() {
 	resetIds();
-	assignEvents(); 
+	assignEvents();
 	$("#debugpane").empty();
 
     // make menu float
     menuYloc = parseInt($(name).css("top").substring(0,$(name).css("top").indexOf("px")));
- 
-    $(window).scroll(function () {  
-        var offset = menuYloc+$(document).scrollTop()+"px";  
-        $(name).animate({top:offset},{duration:500,queue:false});  
-    });  
+
+    $(window).scroll(function () {
+        var offset = menuYloc+$(document).scrollTop()+"px";
+        $(name).animate({top:offset},{duration:500,queue:false});
+    });
 
     // inital highlight of IPs
-    var snodes = $(".snode"); 
+    var snodes = $(".snode");
     for( i=0; i<snodes.length; i++ ){
 
 		text = $("#"+snodes[i].id).contents().filter(function() {
@@ -75,8 +75,8 @@ $(document).ready(function() {
 
 // menuon=true;
 // checks if the given node label is an ip node in the gui coloring sense
-function isIpNode( text ){	
-//	alert(ipnodes.length); 
+function isIpNode( text ){
+//	alert(ipnodes.length);
 /* TODO(AWE)
 	for( i=0; i<ipnodes.length; i++){
 		if( ipnodes[i].startsWith(text) ){
@@ -85,8 +85,8 @@ function isIpNode( text ){
 	}
 	*/
 	return text.startsWith("IP-SUB") || text.startsWith("IP-MAT") || text.startsWith("IP-IMP") || text.startsWith("IP-INF");
-		
-//	return contains( ipnodes, parseLabel(text) );		
+
+//	return contains( ipnodes, parseLabel(text) );
 }
 
 // returns true if array a contains object o
@@ -105,51 +105,51 @@ function isEmpty( text ){
 	    return true;
 	 }
 	 if( text.startsWith("{") ){
-	 	return true;	
+	 	return true;
 	 }
 	 if( text == 0 ){
-	 	return true;	
-	 }	 
-	 
+	 	return true;
+	 }
+
 	 return false;
 }
 
 function showContextMenu(){
-	
+
   		e = window.event;
-  		var elementId = (e.target || e.srcElement).id;	
-		
+  		var elementId = (e.target || e.srcElement).id;
+
 
 		if( elementId == "sn0" ){
 			clearSelection();
-			return;			
+			return;
 		}
-					
+
 		left = $("#"+elementId).offset().left+4;
 		toppos = $("#"+elementId).offset().top+17;
 		left = left + "px";
 		top = top + "px";
-		
+
 	$("#conLeft").empty();
 	loadContextMenu(elementId);
-	
+
 	// Make the columns equally high
 	$("#conLeft").height( "auto" );
-	$("#conRight").height( "auto" );	
-	if( $("#conLeft").height() < $("#conRight").height() ){		
+	$("#conRight").height( "auto" );
+	if( $("#conLeft").height() < $("#conRight").height() ){
 		$("#conLeft").height( $("#conRight").height() );
-	}	
+	}
 	else {
 		$("#conRight").height( $("#conLeft").height() );
 	}
-	
+
 	$("#conMenu").css("left",left);
 	$("#conMenu").css("top",toppos);
 	$("#conMenu").css("visibility","visible");
 }
 
 function hideContextMenu(){
-	$("#conMenu").css("visibility","hidden");	
+	$("#conMenu").css("visibility","hidden");
 }
 
 function addCommand( keycode, type, label ){
@@ -170,34 +170,34 @@ function redo(){
 		undostack.push(currentstate);
 		$("#editpane").empty();
 		$("#editpane").append(nextstate);
-		clearSelection();		
+		clearSelection();
 		$(".snode").mousedown(handleNodeClick);
 	}
 }
 
-function undo() {	
+function undo() {
 	var prevstate = undostack.pop();
 
-	if( !(prevstate == undefined) ) {		
+	if( !(prevstate == undefined) ) {
 		currentstate=$("#editpane").html();
 		redostack.push(currentstate);
 
 		$("#editpane").empty();
 		$("#editpane").append(prevstate);
 		clearSelection();
-		$(".snode").mousedown(handleNodeClick);		
-	} 
+		$(".snode").mousedown(handleNodeClick);
+	}
 }
 
 function save(){
 	var tosave = toLabeledBrackets($("#editpane"));
-	$.post("/doSave", {trees: tosave});	
+	$.post("/doSave", {trees: tosave});
 }
 
 function assignEvents(){
 	// load custom commands from user settings file
-    customCommands();	
-	document.body.onkeydown = handleKeyDown;	
+    customCommands();
+	document.body.onkeydown = handleKeyDown;
 	$(".snode").mousedown(handleNodeClick);
 	$("#butsave").mousedown(save);
 	$("#butundo").mousedown(undo);
@@ -230,8 +230,8 @@ function handleKeyDown(e){
 				else {
 					makeNode(label);
 				}
-			}	
-			else if( type=="toggleextension"){				
+			}
+			else if( type=="toggleextension"){
 				toggleExtension(label);
 			}
 			else if (type=="undo"){
@@ -281,34 +281,34 @@ function handleNodeClick(e){
 			if( e.button == 2 ){
 					// rightclick
 				if(!elementId){return;} // stop this if clicking a trace, for now
-				
+
 				if (startnode && !endnode) {
-				
+
 					if (startnode.id != elementId) {
 						// menuon=false;
-						e.stopPropagation();					
-						moveNode(elementId);						
+						e.stopPropagation();
+						moveNode(elementId);
 					}
 					else {
 						showContextMenu();
 					}
 				}
 				else if (startnode && endnode){
-					   e.stopPropagation();					   
+					   e.stopPropagation();
 					   moveNodes(elementId);
 				}
 				else {
 					showContextMenu();
 				}
-				
-				
+
+
 	//	???		e.stopPropagation();
 			}
-			else { 					
+			else {
 				// leftclick
 				hideContextMenu();
 				selectNode(elementId);
-				
+
 				if (e.ctrlKey) {
 					makeNode("XP");
 				//	displayRename();
@@ -322,12 +322,12 @@ function handleNodeClick(e){
 function selectNode(nodeId){
 	// fix???
 	var node = document.getElementById(nodeId);
-	
+
 	if( nodeId == "sn0"){
 		clearSelection();
-		return;		
+		return;
 	}
-	
+
 	if( node == startnode ){
 	     startnode=null;
 	     if(endnode){
@@ -384,7 +384,7 @@ function updateSelection(){
 		$("#"+endnode.id).addClass('snodesel');
 	}
 
-	
+
 }
 
 function isPossibleTarget(node){
@@ -422,30 +422,30 @@ function moveNode(targetParent){
 	if (startnode.id == firstchildId) {
 	    stackTree();
 	    $("#"+startnode.id).insertBefore($("#"+targetParent).children().filter(
-                                                 $("#"+startnode.id).parents()));		
+                                                 $("#"+startnode.id).parents()));
 	    if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
-            } else {				
+            } else {
 		resetIds();
-		//   updateSelection();	
+		//   updateSelection();
 	    }
 	} else if (startnode.id == lastchildId) {
 	    stackTree();
- 	    $("#"+startnode.id).insertAfter($("#"+targetParent).children().filter($("#"+startnode.id).parents()));		
+ 	    $("#"+startnode.id).insertAfter($("#"+targetParent).children().filter($("#"+startnode.id).parents()));
 	    if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
-            } else {				
+            } else {
 		resetIds();
-		//   updateSelection();	
+		//   updateSelection();
 	    }
 	} else {
 	    // alert("cannot move from this position");
 	}
-    } else { // otherwise move under my sister		
+    } else { // otherwise move under my sister
         // if( parseInt( startnode.id.substr(2) ) >  parseInt( targetParent.substr(2) ) ){
-	var tokenMerge = isRootNode( $("#"+startnode.id) );	    
+	var tokenMerge = isRootNode( $("#"+startnode.id) );
 	var maxindex = maxIndex( getTokenRoot($("#"+targetParent) ).attr("id") );
 	var movednode = $("#"+startnode.id);
 	// alert(maxindex);
@@ -465,24 +465,24 @@ function moveNode(targetParent){
                     redostack.pop();
                 } else {
 		    resetIds();
-		}				
+		}
 	    }
-	} else if( parseInt( startnode.id.substr(2) ) < 
+	} else if( parseInt( startnode.id.substr(2) ) <
                    parseInt( targetParent.substr(2) ) ) {
 	    stackTree();
 	    if (tokenMerge) {
 		addToIndices( movednode, maxindex );
 	    }
-	    $("#"+startnode.id).insertBefore( $("#"+targetParent).children().first() );	
+	    $("#"+startnode.id).insertBefore( $("#"+targetParent).children().first() );
 	    if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
-            } else {				
+            } else {
 		resetIds();
 		// if( tokenMerge ){
 		// 	   addToIndices( movednode, maxindex );
 		// }
-		//   updateSelection();	
+		//   updateSelection();
 	    }
 	}
     }
@@ -490,8 +490,8 @@ function moveNode(targetParent){
     //	menuon=true;
 }
 
-function isRootNode( node ){	
-	return node.filter("#sn0>.snode").size() > 0;	
+function isRootNode( node ){
+	return node.filter("#sn0>.snode").size() > 0;
 }
 
 // return jquery node based on annotald id
@@ -506,29 +506,29 @@ function moveNodes(targetParent) {
     stackTree();
     if (parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2))) {
 	// reverse them if wrong order
-	var temp = startnode;	
+	var temp = startnode;
 	startnode = endnode;
 	endnode = temp;
-    } 
+    }
     // check if they are really sisters XXXXXXXXXXXXXXX
     if ($("#"+startnode.id).siblings().is("#"+endnode.id)) {
 	// then, collect startnode and its sister up until endnode
 	var oldtext = currentText(parent_ip);
 	//stackTree();
-	$("#"+startnode.id).add($("#"+startnode.id).nextUntil("#"+endnode.id)).add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">XP</div>');	
+	$("#"+startnode.id).add($("#"+startnode.id).nextUntil("#"+endnode.id)).add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">XP</div>');
 	// undo if this messed up the text order
 	if (currentText(parent_ip) != oldtext) {
-            undo(); 
-            redostack.pop(); 
-            return; 
+            undo();
+            redostack.pop();
+            return;
         }
     } else {
 	return; // the are not sisters
     }
     resetIds();
-    var toselect = $(".snode[xxx=newnode]").first();	
+    var toselect = $(".snode[xxx=newnode]").first();
     // alert(toselect.attr("id"));
-    
+
     // BUG when making XP and then use context menu: todo XXX
     clearSelection();
     selectNode( toselect.attr("id") );
@@ -536,52 +536,52 @@ function moveNodes(targetParent) {
     updateSelection();
     resetIds();
     //toselect.mousedown(handleNodeClick);
-    
-    targetParent = destination.attr("id");		
-    
+
+    targetParent = destination.attr("id");
+
     if( ! isPossibleTarget(targetParent) ){
 	//alert("can't move under a tag node");
-	undo(); redostack.pop(); return;		
+	undo(); redostack.pop(); return;
     } else if ($("#"+startnode.id).parent().children().length == 1) {
 	//alert("cant move an only child");
-	undo(); 
-        redostack.pop(); 
+	undo();
+        redostack.pop();
         return;
-    } else if ($("#"+targetParent).parents().is("#"+startnode.id)) { 
+    } else if ($("#"+targetParent).parents().is("#"+startnode.id)) {
 	//alert("can't move under one's own child");
-	undo(); 
-        redostack.pop(); 
+	undo();
+        redostack.pop();
         return;
     } else if ($("#"+startnode.id).parents().is("#"+targetParent)) {
         // move up if moving to a node that is already my parent
 	// alert( startnode.id );
 	var firstchildId = $("#"+startnode.id).parent().children().first().closest("div").attr("id");
 	var lastchildId = $("#"+startnode.id).parent().children().last().closest("div").attr("id");
-	
+
 	if (startnode.id == firstchildId) {
 	    //stackTree();
 	    $("#"+startnode.id).insertBefore( $("#"+targetParent).children().filter($("#"+startnode.id).parents()));
-	    //resetIds();	
+	    //resetIds();
 	    //pruneNode();
-	    
+
 	    if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
                 return;
-            } else {				
+            } else {
 		resetIds();
-		//   updateSelection();	
+		//   updateSelection();
 	    }
 	} else if (startnode.id == lastchildId) {
 	    //stackTree();
- 	    $("#"+startnode.id).insertAfter($("#"+targetParent).children().filter($("#"+startnode.id).parents()));		
+ 	    $("#"+startnode.id).insertAfter($("#"+targetParent).children().filter($("#"+startnode.id).parents()));
 	    if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
                 return;
-            } else {				
+            } else {
 		resetIds();
-		//   updateSelection();	
+		//   updateSelection();
 	    }
 	} else {
 	    // alert("cannot move from this position");
@@ -589,39 +589,39 @@ function moveNodes(targetParent) {
             redostack.pop();
             return;
 	}
-    } else { 
+    } else {
         // otherwise move under my sister
         // if( parseInt( startnode.id.substr(2) ) >  parseInt( targetParent.substr(2) ) ){
 	if (parseInt( startnode.id.substr(2) ) > parseInt(targetParent.substr(2))) {
 	    //if( $("#"+startnode.id).siblings().is("#"+startnode.id+"~.snode") ){
 	    //stackTree();
-	    $("#"+startnode.id).appendTo("#"+targetParent);	
+	    $("#"+startnode.id).appendTo("#"+targetParent);
 	    if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
                 return;
-            } else {				
+            } else {
 		resetIds();
-		//   updateSelection();	
+		//   updateSelection();
 	    }
 	    //}
 	} else if (parseInt( startnode.id.substr(2) ) < parseInt(targetParent.substr(2))) {	       //stackTree();
-	    $("#"+startnode.id).insertBefore( $("#"+targetParent).children().first() );	
+	    $("#"+startnode.id).insertBefore( $("#"+targetParent).children().first() );
 	    if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
                 return;
-            } else {				
+            } else {
 		resetIds();
-		//   updateSelection();	
+		//   updateSelection();
 	    }
 	}
     }
-    
+
     // AWE: unused --> delete?
     // var toprune = $("#"+toselect.attr("id")+">*").first();
-    $("#"+startnode.id).replaceWith($("#"+startnode.id+">*"));	
-    clearSelection();	
+    $("#"+startnode.id).replaceWith($("#"+startnode.id+">*"));
+    clearSelection();
 }
 
 function trim( s ){
@@ -651,21 +651,21 @@ function makeLeaf(before, label, word, targetId, fixed){
 	if (!targetId) {
 		targetId = startnode.id;
 	}
-	
+
 	startRoot = null;
 	endRoot = null;
-	
+
 	if (endnode) {
 		startRoot = getTokenRoot( $("#"+startnode.id) ).attr("id");
 		endRoot = getTokenRoot( $("#"+endnode.id) ).attr("id");
 		// alert(startRoot + " - " + endRoot );
 
-		stackTree();		
+		stackTree();
 		if (startRoot == endRoot) {
-		
+
 			word = "*ICH*";
 			label = getLabel($(endnode));
-			
+
 			if (label.startsWith("W")) {
 				word = "*T*";
 				label = label.substr(1);
@@ -679,7 +679,7 @@ function makeLeaf(before, label, word, targetId, fixed){
 			undo(); redostack.pop(); return;
 		}
 	}
-	
+
 
 	newleaf = $("<div class='snode'>" + label + " <span class='wnode'>" + word + "</span></div>");
 	if (before) {
@@ -691,14 +691,14 @@ function makeLeaf(before, label, word, targetId, fixed){
 		newleaf.insertAfter("#" + targetId);
 	}
 	startnode = null;
-	endnode = null;		
+	endnode = null;
 	resetIds();
-	
+
 	selectNode( $(newleaf).attr("id") );
 	updateSelection();
-	
-	
-}			   	
+
+
+}			
 
 function isNonWord(word){
 		if( word.startsWith("*") ){
@@ -709,8 +709,8 @@ function isNonWord(word){
 		}
 		if( word == "0" ){
 			return true;
-		}	
-		
+		}
+
 		return false;
 }
 
@@ -818,7 +818,7 @@ function editLemma() {
             // Need we do this?
 	    resetIds();
 	    updateSelection();
-	    document.body.onkeydown = handleKeyDown;	
+	    document.body.onkeydown = handleKeyDown;
         }
         var lemma = $("#"+startnode.id+">.wnode>.lemma").text();
         lemma = lemma.substring(1);
@@ -829,15 +829,15 @@ function editLemma() {
 		if (event.keyCode == '9') {
 	  	    var elementId = (event.target || event.srcElement).id;
                     event.preventDefault();
-		}				
+		}
 		if (event.keyCode == '32') {
                     space(event);
 		}
-		if (event.keyCode == '13') {			   
+		if (event.keyCode == '13') {
                     var newlemma = $('#leaflemmabox').val();
 		    newlemma = newlemma.replace("<","&lt;");
 		    newlemma = newlemma.replace(">","&gt;");
-		    $("#leafeditor").replaceWith("<span class='lemma " + 
+		    $("#leafeditor").replaceWith("<span class='lemma " +
                                                  lemmaClass + "'>-" +
                                                  newlemma + "</span>");
                     postChange();
@@ -854,10 +854,10 @@ function changeJustLabel( oldlabel, newlabel ){
 	if( index > 0 ){
 		label = parseLabel(oldlabel);
 		indextype = parseIndexType(oldlabel);
-		return newlabel+indextype+index;		
-	} 
+		return newlabel+indextype+index;
+	}
 	// alert(label);
-	return newlabel;	
+	return newlabel;
 }
 
 function toogleJustExtension( oldlabel, extension ){
@@ -868,7 +868,7 @@ function toogleJustExtension( oldlabel, extension ){
 			indextype=parseIndexType(oldlabel);
 		}
 		extendedlabel = parseLabel(oldlabel);
-		
+
 		currentextensions = new Array();
 	    textension = false;
 		for( i=extensions.length-1; i>-1; i--){
@@ -878,25 +878,25 @@ function toogleJustExtension( oldlabel, extension ){
 			else {
 				textension = false;
 			}
-			
+
 			//alert( "'"+ extendedlabel+ "' '" +extensions[i] +"'"  );
 			//alert( extendedlabel.endsWith( extensions[i] )  )
 			if( extendedlabel.endsWith( extensions[i] ) ){
 				//alert("y");
-				
-				if( !textension ){																			
+
+				if( !textension ){
 					currentextensions.push( extensions[i] );
-				}			
+				}
 				extendedlabel = extendedlabel.substr(0,extendedlabel.length-extensions[i].length);
-				//alert(extendedlabel);				
+				//alert(extendedlabel);
 			}
 			else if (textension) {
 				currentextensions.push( extensions[i] );
 			}
-			
-			//alert( "'"+ extendedlabel+ "' '" +extensions[i] +"'"  );			
+
+			//alert( "'"+ extendedlabel+ "' '" +extensions[i] +"'"  );
 		}
-		
+
 		out = extendedlabel;
 		count = currentextensions.length;
 		for( i=0; i<count; i++){
@@ -906,8 +906,8 @@ function toogleJustExtension( oldlabel, extension ){
 			out+=indextype;
 			out+=index;
 		}
-				
-		return out; 		
+
+		return out;
 }
 
 function parseExtensions( label ){
@@ -917,23 +917,23 @@ function parseExtensions( label ){
 		if( index > 0 ){
 			indextype=parseIndexType(label);
 		}
-		extendedlabel = parseLabel(label);		
+		extendedlabel = parseLabel(label);
 		currentextensions = new Array();
 
 		for( i=extensions.length-1; i>-1; i--){
-			
+
 			//alert( "'"+ extendedlabel+ "' '" +extensions[i] +"'"  );
 			//alert( extendedlabel.endsWith( extensions[i] )  )
 			if( extendedlabel.endsWith( extensions[i] ) ){
 				//alert("y");
-																							
+
 				currentextensions.push( extensions[i] );
-			
+
 				extendedlabel = extendedlabel.substr(0,extendedlabel.length-extensions[i].length);
-				//alert(extendedlabel);				
+				//alert(extendedlabel);
 			}
 		}
-		
+
 		out = "";
 		count = currentextensions.length;
 		for( i=0; i<count; i++){
@@ -944,8 +944,8 @@ function parseExtensions( label ){
 			out+=indextype;
 			out+=index;
 		}
-			*/	
-		return out; 
+			*/
+		return out;
 }
 
 function toggleExtension(extension){
@@ -953,18 +953,18 @@ function toggleExtension(extension){
 	// there has to be a startnode
 	if( !startnode ){
 		return;
-	} 
+	}
 
     // there can't be an endnode
 	if( endnode ){
 		return;
-	} 
-
-	if( !isPossibleTarget(startnode.id) && !isEmpty(  wnodeString( $("#"+startnode.id) )  ) ){
-		return;	
 	}
 
-	
+	if( !isPossibleTarget(startnode.id) && !isEmpty(  wnodeString( $("#"+startnode.id) )  ) ){
+		return;
+	}
+
+
 	stackTree();
 	textnode = $("#"+startnode.id).contents().filter(function() {
   			return this.nodeType == 3;
@@ -972,18 +972,18 @@ function toggleExtension(extension){
 	oldlabel=trim(textnode.text());
 	newlabel = 	 toogleJustExtension(oldlabel,extension);
 	textnode.replaceWith(newlabel+" ");
-	
-	
 
-	//alert( "XXX: "+ toogleJustExtension(oldlabel,"-SPE") );	
-	
+
+
+	//alert( "XXX: "+ toogleJustExtension(oldlabel,"-SPE") );
+
 }
 
 function setLabel(label){
 //	if( startnode && endnode )
 
 	if( !isPossibleTarget(startnode.id) && !isEmpty(  wnodeString( $("#"+startnode.id) )  ) ){
-		return;	
+		return;
 	}
 	//alert( wnodeString( $("#"+startnode.id) ) );
 
@@ -994,49 +994,49 @@ function setLabel(label){
 	oldlabel=trim(textnode.text());
 //	newlabel=label[0];
 	for( i=0; i<label.length; i++ ){
-		if( label[i] == parseLabel(oldlabel) ){						
+		if( label[i] == parseLabel(oldlabel) ){
 		   if( i<label.length-1 ){
-		   			   	  		   
-		   			   	  		   
+		   			   	
+		   			   	
 		   	  newlabel = changeJustLabel( oldlabel, label[i+1] );
-		   	 // alert("u"+newlabel);	   	  		   	  
+		   	 // alert("u"+newlabel);	   	  		
 		      textnode.replaceWith(newlabel+" ");
-			  
+
 			  if( isIpNode(label[i+1]) ){
-			    $("#"+startnode.id).addClass("ipnode");									
+			    $("#"+startnode.id).addClass("ipnode");
 			  }
 			  else {
-			  	$("#"+startnode.id).removeClass("ipnode");				
+			  	$("#"+startnode.id).removeClass("ipnode");
 			  }
-			  			  
+			
 		      return;
 		   }
 		   else {
-		   	
-		   			   	  		   
+		
+		   			   	
 		   	  newlabel = changeJustLabel( oldlabel, label[0] );
-		  // 	  alert("d"+newlabel);	   	  		   	  
-		      textnode.replaceWith(newlabel+" ");		   	
+		  // 	  alert("d"+newlabel);	   	  		
+		      textnode.replaceWith(newlabel+" ");		
 		      //textnode.replaceWith(label[0]+" ");
-			  
+
 			  if( isIpNode(label[0]) ){
-			    $("#"+startnode.id).addClass("ipnode");									
+			    $("#"+startnode.id).addClass("ipnode");
 			  }
 			  else {
-			  	$("#"+startnode.id).removeClass("ipnode");				
+			  	$("#"+startnode.id).removeClass("ipnode");
 			  }
-			  
+
 		      return;
-		   }		   
+		   }
 		}
 	}
 	    newlabel = changeJustLabel(oldlabel,label[0] );
         textnode.replaceWith(newlabel+" ");
 			  if( isIpNode(label[0]) ){
-			    $("#"+startnode.id).addClass("ipnode");									
+			    $("#"+startnode.id).addClass("ipnode");
 			  }
 			  else {
-			  	$("#"+startnode.id).removeClass("ipnode");				
+			  	$("#"+startnode.id).removeClass("ipnode");
 			  }
 
 
@@ -1050,7 +1050,7 @@ function makeNode(label) {
     var parent_ip = $("#" + startnode.id).parentsUntil(".ipnode", ".ipnode");
     if (!startnode) {
 	return;
-    } 
+    }
     // FIX, note one node situation
     //if( (startnode.id == "sn0") || (endnode.id == "sn0") ){
     // can't make node above root
@@ -1064,41 +1064,41 @@ function makeNode(label) {
     } else {
 	if (parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2))) {
 	    // reverse them if wrong order
-	    var temp = startnode;	
+	    var temp = startnode;
 	    startnode = endnode;
 	    endnode = temp;
 	}
-        
+
 	// check if they are really sisters XXXXXXXXXXXXXXX
 	if ($("#"+startnode.id).siblings().is("#"+endnode.id)) {
 	    // then, collect startnode and its sister up until endnode
 	    var oldtext = currentText(parent_ip);
 	    stackTree();
-	    $("#"+startnode.id).add($("#"+startnode.id).nextUntil("#"+endnode.id)).add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">'+label+'</div>');	
+	    $("#"+startnode.id).add($("#"+startnode.id).nextUntil("#"+endnode.id)).add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">'+label+'</div>');
 	    // undo if this messed up the text order
 	    if( currentText(parent_ip) != oldtext) {
-                undo(); 
-                redostack.pop(); 
+                undo();
+                redostack.pop();
             }
 	}
     }
-    
+
     startnode = null;
     endnode = null;
-    
-    // toselect = $(".snode[xxx=newnode]").first();	
+
+    // toselect = $(".snode[xxx=newnode]").first();
     //	alert(toselect.attr("xxx"));
-    
+
     resetIds();
-    var toselect = $(".snode[xxx=newnode]").first();	
+    var toselect = $(".snode[xxx=newnode]").first();
     // alert(toselect.attr("id"));
-    
+
     // BUG when making XP and then use context menu: todo XXX
     selectNode(toselect.attr("id"));
     toselect.attr("xxx",null);
     updateSelection();
     resetIds();
-    
+
     toselect.mousedown(handleNodeClick);
     // connectContextMenu( toselect );
 }
@@ -1146,9 +1146,9 @@ function pruneNode(){
 
 //		$("#"+startnode.id+">*:text").remove();
 		stackTree();
-		
+
 		toselect = $("#"+startnode.id+">*").first();
-		$("#"+startnode.id).replaceWith( $("#"+startnode.id+">*") );		
+		$("#"+startnode.id).replaceWith( $("#"+startnode.id+">*") );
 		startnode=null;
 		endnode=null;
 		resetIds();
@@ -1158,7 +1158,7 @@ function pruneNode(){
 /*
 		startnode.removeChild(startnode.firstChild);
 		while (startnode.firstChild)
-		{  
+		{
 		    startnode.parentNode.insertBefore(startnode.firstChild, startnode);
 		}
 		startnode.parentNode.removeChild(startnode);
@@ -1172,19 +1172,19 @@ function pruneNode(){
 }
 
 function setNodeLabel(node, label, noUndo){
-	if (!noUndo) {		
+	if (!noUndo) {
 		stackTree();
 	}
 	node.contents().filter(function() {
   			return this.nodeType == 3;
 	}).first().replaceWith($.trim(label)+" ");
-	
+
 			  if( isIpNode( $.trim(label) ) ){
-			    node.addClass("ipnode");									
+			    node.addClass("ipnode");
 			  }
 			  else {
-			  	node.removeClass("ipnode");				
-			  }			
+			  	node.removeClass("ipnode");
+			  }
 }
 
 function getLabel(node){
@@ -1195,7 +1195,7 @@ function getLabel(node){
 
 function appendExtension(node,extension,type){
 	if( !type ){ type="-";}
-	
+
 	setNodeLabel(node,getLabel(node)+type+extension,true);
 /*
 	node.contents().filter(function() {
@@ -1206,7 +1206,7 @@ function appendExtension(node,extension,type){
 
 function getTokenRoot(node){
 	if( isRootNode(node) ){
-		return node;	
+		return node;
 	}
 	//	return $("#sn0>.snode").filter($("#"+node.id).parents($("#sn0>.snode")));
 	return $("#sn0>.snode").filter($(node).parents($("#sn0>.snode")));
@@ -1236,7 +1236,7 @@ function minIndex( tokenRoot, offset ){
 			if( index < offset){return -1;}
 
 			// alert(temp);
-			return index;	
+			return index;
 }
 
 function parseIndex( label ){
@@ -1245,30 +1245,30 @@ function parseIndex( label ){
 	if( lastindex == -1 ){
 		return -1;
 	}
-	
+
 	lastpart=parseInt( label.substr(lastindex+1) );
-	
+
 	if( ! isNaN( parseInt(lastpart) ) ){
 		index = Math.max( lastpart, index );
-	}	
+	}
 	if( index == 0){
 		return -1;
 	}
-	
+
 	return index;
 }
 
 function parseLabel( label ){
 	index=parseIndex(label);
-	
+
 	if( index > 0 ){
 		lastindex=Math.max(label.lastIndexOf("-"),label.lastIndexOf("=") );
-		
+
 		out = trim( ""+label.substr(0,lastindex) );
-		return out;						
+		return out;
 	}
-	
-	return label; 
+
+	return label;
 }
 
 
@@ -1282,24 +1282,24 @@ function getIndex( node ){
 function parseIndexType(label){
 	lastindex=Math.max(label.lastIndexOf("-"),label.lastIndexOf("="));
 	lastpart=label.charAt(lastindex);
-	return lastpart;	
+	return lastpart;
 }
 
 function getIndexType( node ){
 	if( getIndex(node) < 0 ){
 		return -1;
 	}
-	
+
 	label=getLabel( node );
-	lastpart = parseIndexType(label);		
+	lastpart = parseIndexType(label);
 	return lastpart;
 }
 
 
-function getNodesByIndex(tokenRoot, ind){	
-	nodes = $("#"+tokenRoot+" .snode,#"+tokenRoot+" .wnode").filter(function(index) {		
+function getNodesByIndex(tokenRoot, ind){
+	nodes = $("#"+tokenRoot+" .snode,#"+tokenRoot+" .wnode").filter(function(index) {
 	  return getIndex( $(this) )==ind;
-	});  
+	});
 	// alert("count "+nodes.size() );
 	return nodes;
 }
@@ -1309,7 +1309,7 @@ function updateIndices( tokenRoot ){
 	ind=1;
 
 	// alert( minIndex( tokenRoot, index )  );
-	
+
 	while( minIndex( tokenRoot, ind ) != -1){
 		// alert( "startind: "+ind+" minind"+ minIndex( tokenRoot, ind )  );
 		minindex = minIndex( tokenRoot, ind );
@@ -1323,38 +1323,38 @@ function updateIndices( tokenRoot ){
 		      label=label+ind;
 		      setNodeLabel( $(this), label, true );
 		});
-		ind++;		
+		ind++;
 		// replaceIndex( tokenRoot, minindex, index ); XXX todo getbyindex
 	}
 }
 */
 
 function addToIndices( tokenRoot, numberToAdd ){
-	
+
 	var ind = 1;
-	
-	
+
+
 	maxindex = maxIndex(tokenRoot.attr("id"));
-	
+
 	nodes = tokenRoot.find(".snode,.wnode").andSelf();
 	nodes.each( function(index) {
 		nindex = getIndex($(this));
-		if( nindex>0){			  
-			
+		if( nindex>0){
+
 		      label=getLabel($(this)).substr(0,getLabel($(this)).length-1);
 		      label=label+(nindex+numberToAdd);
-		      setNodeLabel( $(this), label, true );			
+		      setNodeLabel( $(this), label, true );
 		}
 	});
-	
-				
+
+
 }
 
-function maxIndex( tokenRoot ){ 
+function maxIndex( tokenRoot ){
 			//alert( "tr: "+tokenRoot );
 			allSNodes = $("#"+tokenRoot+",#"+tokenRoot+" .snode,#"+tokenRoot+" .wnode");
 			 temp="";
-			ind=0;						
+			ind=0;
 			/*
 			for( i=0; i<allSNodes.length; i++){
 				label=getLabel( $(allSNodes[i]) );
@@ -1367,16 +1367,16 @@ function maxIndex( tokenRoot ){
 			}
 			*/
 			for( i=0; i<allSNodes.length; i++){
-				label=getLabel( $(allSNodes[i]) );			
-				ind = Math.max( parseIndex(label), ind );			   
-			 }			
+				label=getLabel( $(allSNodes[i]) );
+				ind = Math.max( parseIndex(label), ind );
+			 }
 			// alert(temp);
 			// alert(ind);
 			return ind;
 }
 
 function removeIndex( node ){
-	setNodeLabel( $(node), getLabel( $(node)).substr(0, getLabel( $(node)).length-2 ), true );	
+	setNodeLabel( $(node), getLabel( $(node)).substr(0, getLabel( $(node)).length-2 ), true );
 }
 
 function coIndex(){
@@ -1389,48 +1389,48 @@ function coIndex(){
 	}
 	else if( startnode && endnode ){
 
-            // don't do anything if different token roots		
+            // don't do anything if different token roots
 			startRoot = getTokenRoot($(startnode)).attr("id");
 			endRoot = getTokenRoot($(endnode)).attr("id");
-			if( startRoot != endRoot ){			
+			if( startRoot != endRoot ){
 				return;
 			}
-		
+
 
 		// if both nodes already have an index
 		if( getIndex($(startnode)) > 0 && getIndex($(endnode)) > 0 ){
 
 			// and if it is the same index
 			if( getIndex($(startnode)) == getIndex($(endnode)) ){
-				theIndex=getIndex($(startnode));				
+				theIndex=getIndex($(startnode));
 				types = ""+getIndexType($(startnode))+""+getIndexType($(endnode));
-											
-				//alert(types);				
-				// remove it								
-				stackTree();
-				
+
 				//alert(types);
-				
+				// remove it
+				stackTree();
+
+				//alert(types);
+
 				if( types == "=-"){
 				  removeIndex(startnode);
-				  removeIndex(endnode);			
-				  appendExtension( $(startnode), theIndex,"=" );				  
-				  appendExtension( $(endnode), theIndex,"=" );																		
+				  removeIndex(endnode);
+				  appendExtension( $(startnode), theIndex,"=" );
+				  appendExtension( $(endnode), theIndex,"=" );
 				}
-				else if( types == "--" ){				
-				  removeIndex(endnode);			
+				else if( types == "--" ){
+				  removeIndex(endnode);
 				  appendExtension( $(endnode), getIndex($(startnode)),"=" );
 				}
 				else if( types == "-=" ){
 				  removeIndex(startnode);
-				  removeIndex(endnode);			
-				  appendExtension( $(startnode), theIndex,"=" );				  
-				  appendExtension( $(endnode), theIndex,"-" );
-				}				
-				else if( types == "==" ){
-				  removeIndex(startnode);				
 				  removeIndex(endnode);
-				} 
+				  appendExtension( $(startnode), theIndex,"=" );
+				  appendExtension( $(endnode), theIndex,"-" );
+				}
+				else if( types == "==" ){
+				  removeIndex(startnode);
+				  removeIndex(endnode);
+				}
 			}
 
 		}
@@ -1443,13 +1443,13 @@ function coIndex(){
 			appendExtension( $(startnode), getIndex($(endnode)) );
 		}
 		else { // no indices here, so make them
-				
+
 			startRoot = getTokenRoot($(startnode)).attr("id");
 			endRoot = getTokenRoot($(endnode)).attr("id");
 			// alert( lowestIndex(startRoot) );
-		
-			// if start and end are within the same token, do coindexing		
-			if( startRoot == endRoot ){			
+
+			// if start and end are within the same token, do coindexing
+			if( startRoot == endRoot ){
 				index = maxIndex(startRoot)+1;
 				stackTree();
 				appendExtension($(startnode),index);
@@ -1464,12 +1464,12 @@ function coIndex(){
 function resetIds(){
 	var snodes = $(".snode"); // document.getElementsByClassName("snode");
 	for (i = 0; i < snodes.length; i++) {
-		snodes[i].id = "sn" + i;			    
+		snodes[i].id = "sn" + i;
 	}
 }
-	
-		
-		
+
+
+
 //		$("#"+snodes[i].id).addClass('snodesel');
 /*
 		text = $("#"+snodes[i].id).contents().filter(function() {
@@ -1483,7 +1483,7 @@ function resetIds(){
 //		snodes[i].="sn"+i;
 		//snodes[i].onmousedown=null;
                 //snodes[i].onmousedown=handleNodeClick;
-	
+
 
 	// assignEvents();
 
@@ -1493,9 +1493,9 @@ function wnodeString(node) {
     return text;
 }
 
-function toLabeledBrackets( node ){		
+function toLabeledBrackets( node ){
 	// return recurseNode(node,"");
-	out=node.clone();		
+	out=node.clone();
 	out.find("#sn0>.snode").after("\n\n");
 	out.find("#sn0>.snode").before("( ");
 	out.find("#sn0>.snode").after(")");
@@ -1503,7 +1503,7 @@ function toLabeledBrackets( node ){
 	out.find(".snode").before("(");
 	out.find(".snode").after(")");
 	out.find(".wnode").before(" ");
-	
+
 	return out.text();
 }
 
