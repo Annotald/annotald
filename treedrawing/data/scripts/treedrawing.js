@@ -401,100 +401,93 @@ function isPossibleTarget(node){
 	return true;
 }
 
-function currentText(){
-	return wnodeString($("#editpane"));
+function currentText(root){
+	return wnodeString(root);
 }
 
 function moveNode(targetParent){
-	textbefore = currentText();
-
-	if( ! isPossibleTarget(targetParent) ){
-		// can't move under a tag node		
+    var parent_ip = $("#" + startnode.id).parentsUntil(".ipnode", ".ipnode");
+    var textbefore = currentText(parent_ip);
+    if (!isPossibleTarget(targetParent)) {
+	// can't move under a tag node
+    } else if ($("#"+startnode.id).parent().children().length == 1) {
+	// alert("cant move an only child");
+    } else if ($("#"+targetParent).parents().is("#"+startnode.id)) {
+	// alert("can't move under one's own child");
+    } else if ($("#"+startnode.id).parents().is("#"+targetParent)) {
+        // move up if moving to a node that is already my parent
+	// alert( startnode.id );
+	var firstchildId = $("#"+startnode.id).parent().children().first().closest("div").attr("id");
+	var lastchildId = $("#"+startnode.id).parent().children().last().closest("div").attr("id");
+	if (startnode.id == firstchildId) {
+	    stackTree();
+	    $("#"+startnode.id).insertBefore($("#"+targetParent).children().filter(
+                                                 $("#"+startnode.id).parents()));		
+	    if (currentText(parent_ip) != textbefore) {
+                undo();
+                redostack.pop();
+            } else {				
+		resetIds();
+		//   updateSelection();	
+	    }
+	} else if (startnode.id == lastchildId) {
+	    stackTree();
+ 	    $("#"+startnode.id).insertAfter($("#"+targetParent).children().filter($("#"+startnode.id).parents()));		
+	    if (currentText(parent_ip) != textbefore) {
+                undo();
+                redostack.pop();
+            } else {				
+		resetIds();
+		//   updateSelection();	
+	    }
+	} else {
+	    // alert("cannot move from this position");
 	}
-	else if( $("#"+startnode.id).parent().children().length == 1 ){
-		// alert("cant move an only child");
+    } else { // otherwise move under my sister		
+        // if( parseInt( startnode.id.substr(2) ) >  parseInt( targetParent.substr(2) ) ){
+	var tokenMerge = isRootNode( $("#"+startnode.id) );	    
+	var maxindex = maxIndex( getTokenRoot($("#"+targetParent) ).attr("id") );
+	var movednode = $("#"+startnode.id);
+	// alert(maxindex);
+	// ZZZZZZZZZZ
+	// alert( getTokenRoot( node(targetParent) ).attr("id") );
+	//alert( getTokenRoot($("#"+startnode.id) ).attr("id") );
+	if (parseInt( startnode.id.substr(2) ) > parseInt(targetParent.substr(2))) {
+	    stackTree();
+	    if (tokenMerge) {
+		addToIndices( movednode, maxindex );
+		$("#"+startnode.id).appendTo("#"+targetParent);
+		resetIds();
+	    } else {
+		$("#"+startnode.id).appendTo("#"+targetParent);
+		if (currentText(parent_ip) != textbefore)  {
+                    undo();
+                    redostack.pop();
+                } else {
+		    resetIds();
+		}				
+	    }
+	} else if( parseInt( startnode.id.substr(2) ) < 
+                   parseInt( targetParent.substr(2) ) ) {
+	    stackTree();
+	    if (tokenMerge) {
+		addToIndices( movednode, maxindex );
+	    }
+	    $("#"+startnode.id).insertBefore( $("#"+targetParent).children().first() );	
+	    if (currentText(parent_ip) != textbefore) {
+                undo();
+                redostack.pop();
+            } else {				
+		resetIds();
+		// if( tokenMerge ){
+		// 	   addToIndices( movednode, maxindex );
+		// }
+		//   updateSelection();	
+	    }
 	}
-	else if( $("#"+targetParent).parents().is( "#"+startnode.id ) ){ 
-		// alert("can't move under one's own child");
-        } // move up if moving to a node that is already my parent	
-	else if( $("#"+startnode.id).parents().is( "#"+targetParent ) ){
-		// alert( startnode.id );
-		var firstchildId = $("#"+startnode.id).parent().children().first().closest("div").attr("id");
-		var lastchildId = $("#"+startnode.id).parent().children().last().closest("div").attr("id");
-		
-		if( startnode.id == firstchildId ){
-			stackTree();
-			$("#"+startnode.id).insertBefore( $("#"+targetParent).children().filter( $("#"+startnode.id).parents() ) );		
-			if( currentText() != textbefore ){undo();redostack.pop();}
-			else {				
-				   resetIds();
-				//   updateSelection();	
-			}
-		}
-		else if( startnode.id == lastchildId ){
-			stackTree();
- 			$("#"+startnode.id).insertAfter( $("#"+targetParent).children().filter( $("#"+startnode.id).parents() ) );		
-			if( currentText() != textbefore ){undo();redostack.pop();}
-			else {				
-				   resetIds();
-				//   updateSelection();	
-			}
-		}
-		else {
-			// alert("cannot move from this position");
-		}
-	} // otherwise move under my sister
-	else {		
-//		if( parseInt( startnode.id.substr(2) ) >  parseInt( targetParent.substr(2) ) ){
-	    tokenMerge = isRootNode( $("#"+startnode.id) );	    
-	    maxindex = maxIndex( getTokenRoot($("#"+targetParent) ).attr("id") );	     
-	    movednode = $("#"+startnode.id);
-	    // alert(maxindex);
-	    // ZZZZZZZZZZ
-	    // alert( getTokenRoot( node(targetParent) ).attr("id") );
-		//alert( getTokenRoot($("#"+startnode.id) ).attr("id") );
-			
-		if( parseInt( startnode.id.substr(2) ) > parseInt( targetParent.substr(2) ) ){
-
-				stackTree();
-			       if( tokenMerge ){
-			       	   addToIndices( movednode, maxindex );
-			       	   $("#"+startnode.id).appendTo("#"+targetParent);			       	   				   	  
-				   	   resetIds();
-				   }						    
-				   else {
-				
-					$("#"+startnode.id).appendTo("#"+targetParent);
-				
-				
-					if( currentText() != textbefore ){undo();redostack.pop();}
-			      	else {
-				   		resetIds();
-				  	}				
-				}
-		}
-		else if( parseInt( startnode.id.substr(2) ) <  parseInt( targetParent.substr(2) ) ) {
-			stackTree();
-				   if( tokenMerge ){
-				   	   addToIndices( movednode, maxindex );
-				   }						    					   		
-			
-			$("#"+startnode.id).insertBefore( $("#"+targetParent).children().first() );	
-			if( currentText() != textbefore ){undo();redostack.pop();}
-			else {				
-				   resetIds();
-				  // if( tokenMerge ){
-				  // 	   addToIndices( movednode, maxindex );
-				  // }						    					   		
-				   
-				//   updateSelection();	
-			}
-			
-		}
-	}
-	
-	clearSelection();
-//	menuon=true;
+    }
+    clearSelection();
+    //	menuon=true;
 }
 
 function isRootNode( node ){	
@@ -506,120 +499,129 @@ function node(aid){
 	return $("#"+aid);
 }
 
-function moveNodes(targetParent){
-		textbefore = currentText();
-	destination=$("#"+targetParent);
-	stackTree();
-
-		if( parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2)) ){
-			// reverse them if wrong order
-			temp = startnode;	
-			startnode = endnode;
-			endnode = temp;
-		} 
-
-		// check if they are really sisters XXXXXXXXXXXXXXX
-		if( $("#"+startnode.id).siblings().is("#"+endnode.id) ){
-			// then, collect startnode and its sister up until endnode
-			oldtext = currentText();
-			//stackTree();
-			$("#"+startnode.id).add($("#"+startnode.id).nextUntil("#"+endnode.id)).add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">XP</div>');	
-			// undo if this messed up the text order
-			if( currentText() != oldtext ){	undo(); redostack.pop(); return; }
-		}
-		else {
-			return; // the are not sisters
-		}
-		
-	resetIds();
-	toselect = $(".snode[xxx=newnode]").first();	
-	// alert(toselect.attr("id"));
-
-	// BUG when making XP and then use context menu: todo XXX
-	clearSelection();
-	selectNode( toselect.attr("id") );
-	toselect.attr("xxx",null);
-	updateSelection();
-	resetIds();
-	//toselect.mousedown(handleNodeClick);
-
-	targetParent = destination.attr("id");		
-
-	if( ! isPossibleTarget(targetParent) ){
-		//alert("can't move under a tag node");
-		undo(); redostack.pop(); return;		
-	}
-	else if( $("#"+startnode.id).parent().children().length == 1 ){
-		 //alert("cant move an only child");
-		 undo(); redostack.pop(); return;
-	}
-	else if( $("#"+targetParent).parents().is( "#"+startnode.id ) ){ 
-		 //alert("can't move under one's own child");
-		 undo(); redostack.pop(); return;
-        } // move up if moving to a node that is already my parent	
-	else if( $("#"+startnode.id).parents().is( "#"+targetParent ) ){
-		// alert( startnode.id );
-		var firstchildId = $("#"+startnode.id).parent().children().first().closest("div").attr("id");
-		var lastchildId = $("#"+startnode.id).parent().children().last().closest("div").attr("id");
-		
-		if( startnode.id == firstchildId ){
-			//stackTree();
-			$("#"+startnode.id).insertBefore( $("#"+targetParent).children().filter( $("#"+startnode.id).parents() ) );	
-			//resetIds();	
-			//pruneNode();
-						
-			if( currentText() != textbefore ){undo();redostack.pop();return;}
-			
-			else {				
-				   resetIds();
-				//   updateSelection();	
-			}
-		}
-		else if( startnode.id == lastchildId ){
-			//stackTree();
- 			$("#"+startnode.id).insertAfter( $("#"+targetParent).children().filter( $("#"+startnode.id).parents() ) );		
-			if( currentText() != textbefore ){undo();redostack.pop();return;}
-			else {				
-				   resetIds();
-				//   updateSelection();	
-			}
-		}
-		else {
-			// alert("cannot move from this position");
-			undo(); redostack.pop(); return;
-		}
-	} // otherwise move under my sister
-	else {		
-//		if( parseInt( startnode.id.substr(2) ) >  parseInt( targetParent.substr(2) ) ){
-		if( parseInt( startnode.id.substr(2) ) > parseInt( targetParent.substr(2) ) ){
-			//if( $("#"+startnode.id).siblings().is("#"+startnode.id+"~.snode") ){
-				//stackTree();
-				$("#"+startnode.id).appendTo("#"+targetParent);	
-				if( currentText() != textbefore ){undo();redostack.pop();return;}
-				else {				
-				   resetIds();
-				//   updateSelection();	
-				}
-			//}
-		}
-		else if( parseInt( startnode.id.substr(2) ) <  parseInt( targetParent.substr(2) ) ) {
-			//stackTree();
-			$("#"+startnode.id).insertBefore( $("#"+targetParent).children().first() );	
-			if( currentText() != textbefore ){undo();redostack.pop();return;}
-			else {				
-				   resetIds();
-				//   updateSelection();	
-			}
-			
-		}
-	}
+function moveNodes(targetParent) {
+    var parent_ip = $("#" + startnode.id).parentsUntil(".ipnode", ".ipnode");
+    var textbefore = currentText(parent_ip);
+    var destination=$("#"+targetParent);
+    stackTree();
+    if (parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2))) {
+	// reverse them if wrong order
+	var temp = startnode;	
+	startnode = endnode;
+	endnode = temp;
+    } 
+    // check if they are really sisters XXXXXXXXXXXXXXX
+    if ($("#"+startnode.id).siblings().is("#"+endnode.id)) {
+	// then, collect startnode and its sister up until endnode
+	var oldtext = currentText(parent_ip);
+	//stackTree();
+	$("#"+startnode.id).add($("#"+startnode.id).nextUntil("#"+endnode.id)).add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">XP</div>');	
+	// undo if this messed up the text order
+	if (currentText(parent_ip) != oldtext) {
+            undo(); 
+            redostack.pop(); 
+            return; 
+        }
+    } else {
+	return; // the are not sisters
+    }
+    resetIds();
+    var toselect = $(".snode[xxx=newnode]").first();	
+    // alert(toselect.attr("id"));
+    
+    // BUG when making XP and then use context menu: todo XXX
+    clearSelection();
+    selectNode( toselect.attr("id") );
+    toselect.attr("xxx",null);
+    updateSelection();
+    resetIds();
+    //toselect.mousedown(handleNodeClick);
+    
+    targetParent = destination.attr("id");		
+    
+    if( ! isPossibleTarget(targetParent) ){
+	//alert("can't move under a tag node");
+	undo(); redostack.pop(); return;		
+    } else if ($("#"+startnode.id).parent().children().length == 1) {
+	//alert("cant move an only child");
+	undo(); 
+        redostack.pop(); 
+        return;
+    } else if ($("#"+targetParent).parents().is("#"+startnode.id)) { 
+	//alert("can't move under one's own child");
+	undo(); 
+        redostack.pop(); 
+        return;
+    } else if ($("#"+startnode.id).parents().is("#"+targetParent)) {
+        // move up if moving to a node that is already my parent
+	// alert( startnode.id );
+	var firstchildId = $("#"+startnode.id).parent().children().first().closest("div").attr("id");
+	var lastchildId = $("#"+startnode.id).parent().children().last().closest("div").attr("id");
 	
- 	toprune = $("#"+toselect.attr("id")+">*").first();
-	$("#"+startnode.id).replaceWith( $("#"+startnode.id+">*") );	
-
-		
-	clearSelection();	
-         
+	if (startnode.id == firstchildId) {
+	    //stackTree();
+	    $("#"+startnode.id).insertBefore( $("#"+targetParent).children().filter($("#"+startnode.id).parents()));
+	    //resetIds();	
+	    //pruneNode();
+	    
+	    if (currentText(parent_ip) != textbefore) {
+                undo();
+                redostack.pop();
+                return;
+            } else {				
+		resetIds();
+		//   updateSelection();	
+	    }
+	} else if (startnode.id == lastchildId) {
+	    //stackTree();
+ 	    $("#"+startnode.id).insertAfter($("#"+targetParent).children().filter($("#"+startnode.id).parents()));		
+	    if (currentText(parent_ip) != textbefore) {
+                undo();
+                redostack.pop();
+                return;
+            } else {				
+		resetIds();
+		//   updateSelection();	
+	    }
+	} else {
+	    // alert("cannot move from this position");
+	    undo();
+            redostack.pop();
+            return;
+	}
+    } else { 
+        // otherwise move under my sister
+        // if( parseInt( startnode.id.substr(2) ) >  parseInt( targetParent.substr(2) ) ){
+	if (parseInt( startnode.id.substr(2) ) > parseInt(targetParent.substr(2))) {
+	    //if( $("#"+startnode.id).siblings().is("#"+startnode.id+"~.snode") ){
+	    //stackTree();
+	    $("#"+startnode.id).appendTo("#"+targetParent);	
+	    if (currentText(parent_ip) != textbefore) {
+                undo();
+                redostack.pop();
+                return;
+            } else {				
+		resetIds();
+		//   updateSelection();	
+	    }
+	    //}
+	} else if (parseInt( startnode.id.substr(2) ) < parseInt(targetParent.substr(2))) {	       //stackTree();
+	    $("#"+startnode.id).insertBefore( $("#"+targetParent).children().first() );	
+	    if (currentText(parent_ip) != textbefore) {
+                undo();
+                redostack.pop();
+                return;
+            } else {				
+		resetIds();
+		//   updateSelection();	
+	    }
+	}
+    }
+    
+    // AWE: unused --> delete?
+    // var toprune = $("#"+toselect.attr("id")+">*").first();
+    $("#"+startnode.id).replaceWith($("#"+startnode.id+">*"));	
+    clearSelection();	
 }
 
 function trim( s ){
@@ -1043,59 +1045,62 @@ function setLabel(label){
 //  && $(this).is(":contains('Some Label ')"
 }
 
-function makeNode(label){
-	// check if something is selected
-	if( !startnode ){
-		return;
-	} 
-	// FIX, note one node situation
-	//if( (startnode.id == "sn0") || (endnode.id == "sn0") ){
-		// can't make node above root
-	//	return;
-	//}
-	// make end = start if only one node is selected
-	if( !endnode ){
-		// if only one node, wrap around that one
-		stackTree();
-		$("#"+startnode.id).wrapAll('<div xxx="newnode" class="snode">'+label+' </div>');
+function makeNode(label) {
+    // check if something is selected
+    var parent_ip = $("#" + startnode.id).parentsUntil(".ipnode", ".ipnode");
+    if (!startnode) {
+	return;
+    } 
+    // FIX, note one node situation
+    //if( (startnode.id == "sn0") || (endnode.id == "sn0") ){
+    // can't make node above root
+    //	return;
+    //}
+    // make end = start if only one node is selected
+    if (!endnode) {
+	// if only one node, wrap around that one
+	stackTree();
+	$("#"+startnode.id).wrapAll('<div xxx="newnode" class="snode">'+label+' </div>');
+    } else {
+	if (parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2))) {
+	    // reverse them if wrong order
+	    var temp = startnode;	
+	    startnode = endnode;
+	    endnode = temp;
 	}
-	else {
-		if( parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2)) ){
-			// reverse them if wrong order
-			temp = startnode;	
-			startnode = endnode;
-			endnode = temp;
-		} 
-
-		// check if they are really sisters XXXXXXXXXXXXXXX
-		if( $("#"+startnode.id).siblings().is("#"+endnode.id) ){
-			// then, collect startnode and its sister up until endnode
-			oldtext = currentText();
-			stackTree();
-			$("#"+startnode.id).add($("#"+startnode.id).nextUntil("#"+endnode.id)).add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">'+label+'</div>');	
-			// undo if this messed up the text order
-			if( currentText() != oldtext ){	undo(); redostack.pop(); }
-		}
+        
+	// check if they are really sisters XXXXXXXXXXXXXXX
+	if ($("#"+startnode.id).siblings().is("#"+endnode.id)) {
+	    // then, collect startnode and its sister up until endnode
+	    var oldtext = currentText(parent_ip);
+	    stackTree();
+	    $("#"+startnode.id).add($("#"+startnode.id).nextUntil("#"+endnode.id)).add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">'+label+'</div>');	
+	    // undo if this messed up the text order
+	    if( currentText(parent_ip) != oldtext) {
+                undo(); 
+                redostack.pop(); 
+            }
 	}
-
-	startnode=null; endnode=null;
-	
-	// toselect = $(".snode[xxx=newnode]").first();	
-//	alert(toselect.attr("xxx"));
-
-	resetIds();
-	toselect = $(".snode[xxx=newnode]").first();	
-	// alert(toselect.attr("id"));
-
-	// BUG when making XP and then use context menu: todo XXX
-	selectNode( toselect.attr("id") );
-	toselect.attr("xxx",null);
-	updateSelection();
-	resetIds();
-
-	toselect.mousedown(handleNodeClick);
-	// connectContextMenu( toselect );
-
+    }
+    
+    startnode = null;
+    endnode = null;
+    
+    // toselect = $(".snode[xxx=newnode]").first();	
+    //	alert(toselect.attr("xxx"));
+    
+    resetIds();
+    var toselect = $(".snode[xxx=newnode]").first();	
+    // alert(toselect.attr("id"));
+    
+    // BUG when making XP and then use context menu: todo XXX
+    selectNode(toselect.attr("id"));
+    toselect.attr("xxx",null);
+    updateSelection();
+    resetIds();
+    
+    toselect.mousedown(handleNodeClick);
+    // connectContextMenu( toselect );
 }
 
 
