@@ -20,8 +20,8 @@ import os.path
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 import re
-import sys
-import cherrypy
+import sys, subprocess
+import cherrypy, json
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -41,19 +41,34 @@ class Treedraw(object):
 
     @cherrypy.expose
     def doSave(self, trees = None):
-	os.system('mv ' + self.thefile + ' ' + self.thefile + '.bak')
-        # JB: using codecs here when in Mac OS X
-        if "Darwin" in os.uname():
-            f = codecs.open(self.thefile, 'w', 'utf-8')
-        else:
-            f = open(self.thefile, 'w')
-	tosave = trees.strip()[1:-1]
-	f.write(tosave)
-	f.close()
-	os.system('java -classpath ' + CURRENT_DIR + '/../CS_Tony_oct19.jar'
-                  ' csearch.CorpusSearch ' + CURRENT_DIR + '/nothing.q ' + \
-                      self.thefile)
-	os.system('mv ' + self.thefile + '.out ' + self.thefile)
+        try:
+            print "self.thefile is: ", self.thefile
+            os.rename(self.thefile, self.thefile + '.bak')
+            # JB: using codecs here when in Mac OS X
+            if "Darwin" in os.uname():
+                f = codecs.open(self.thefile, 'w', 'utf-8')
+            else:
+                f = open(self.thefile, 'w')
+            tosave = trees.strip()[1:-1]
+            f.write(tosave)
+            f.close()
+            cmdline = 'java -classpath ' + CURRENT_DIR + '/../CS_Tony_oct19.jar' + \
+                ' csearch.CorpusSearch ' + CURRENT_DIR + '/nothing.q ' + \
+                self.thefile
+            # check_call throws on child error exit
+            subprocess.check_call(cmdline.split(" "))
+            os.rename(self.thefile + '.out', self.thefile)
+            cherrypy.response.headers['Content-Type'] = 'application/json'
+            return json.dumps(dict(result = "success"))
+        except Exception as e:
+            print "something went wrong: %s" % e
+            cherrypy.response.headers['Content-Type'] = 'application/json'
+            return json.dumps(dict(result = "failure"))
+
+    @cherrypy.expose
+    def doExit(self):
+        print "Exit message received"
+        raise SystemExit(0)
 
     def loadPsd(self, fileName):
 	self.thefile = fileName
@@ -141,8 +156,10 @@ Editing: """+self.thefile+""" <br />
 <input class="menubutton" type="button" value="Save" id="butsave"><br />
 <input class="menubutton" type="button" value="Undo" id="butundo"><br />
 <input class="menubutton" type="button" value="Redo" id="butredo"><br />
+<input class="menubutton" type="button" value="Exit" id="butexit"><br />
 
 <div id="debugpane">x</div>
+<div id="saveresult"></div>
 </div>
 <div id="editpane">"""+currentTree+"""</div>
 

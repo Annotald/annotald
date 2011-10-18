@@ -44,34 +44,37 @@ Array.prototype.unique = function() {
 };
 
 
-$(document).ready(function() {
+$(document).ready(
+    function() {
         resetIds();
         assignEvents();
         $("#debugpane").empty();
 
-    // make menu float
-    menuYloc = parseInt($(name).css("top").substring(0,$(name).css("top").indexOf("px")));
+        // make menu float
+        menuYloc = parseInt($(name).css("top").substring(0, $(name).css("top").indexOf("px")));
 
-    $(window).scroll(function () {
-        var offset = menuYloc+$(document).scrollTop()+"px";
-        $(name).animate({top:offset},{duration:500,queue:false});
+        $(window).scroll(
+            function () {
+                var offset = menuYloc+$(document).scrollTop()+"px";
+                $(name).animate({top:offset},{duration:500,queue:false});
+            });
+
+        // inital highlight of IPs
+        var snodes = $(".snode");
+        for (var i=0; i<snodes.length; i++) {
+                var text = $("#"+snodes[i].id).contents().filter(
+                    function() {
+                        return this.nodeType == 3;
+                    }).first().text();
+            if (isIpNode(text)) {
+                $("#"+snodes[i].id).addClass('ipnode');
+            }
+        }
+
+        // setup context menu
+
+        lastsavedstate = $("#editpane").html();
     });
-
-    // inital highlight of IPs
-    var snodes = $(".snode");
-    for( i=0; i<snodes.length; i++ ){
-
-                text = $("#"+snodes[i].id).contents().filter(function() {
-                          return this.nodeType == 3;
-                }).first().text();
-                if( isIpNode(text) ){
-                        $("#"+snodes[i].id).addClass('ipnode');
-                }
-    }
-
-   // setup context menu
-
-});
 
 // menuon=true;
 // checks if the given node label is an ip node in the gui coloring sense
@@ -189,22 +192,34 @@ function undo() {
         }
 }
 
-function save(){
-        var tosave = toLabeledBrackets($("#editpane"));
-        $.post("/doSave", {trees: tosave});
+function saveHandler (data) {
+    if (data['result'] == "success") {
+        // TODO(AWE): ad time of alst successful save
+        $("#saveresult").html("<div style='color:green'>Save success</div>");
+    } else {
+        lastsavedstate = "";
+        $("#saveresult").html("<div style='color:red'>Save FAILED!!</div>");
+    }
 }
 
-function assignEvents(){
-        // load custom commands from user settings file
-    customCommands();
-        document.body.onkeydown = handleKeyDown;
-        $(".snode").mousedown(handleNodeClick);
-        $("#butsave").mousedown(save);
-        $("#butundo").mousedown(undo);
-        $("#butredo").mousedown(redo);
-        $("#editpane").mousedown(clearSelection);
-        $("#conMenu").mousedown(hideContextMenu);
+function save() {
+    $("#saveresult").html("");
+    var tosave = toLabeledBrackets($("#editpane"));
+    $.post("/doSave", {trees: tosave}, saveHandler);
+    lastsavedstate = $("#editpane").html();
+}
 
+function assignEvents() {
+    // load custom commands from user settings file
+    customCommands();
+    document.body.onkeydown = handleKeyDown;
+    $(".snode").mousedown(handleNodeClick);
+    $("#butsave").mousedown(save);
+    $("#butundo").mousedown(undo);
+    $("#butredo").mousedown(redo);
+    $("#butexit").mousedown(quitServer);
+    $("#editpane").mousedown(clearSelection);
+    $("#conMenu").mousedown(hideContextMenu);
 }
 
 
@@ -1513,4 +1528,19 @@ function toggleLemmata() {
     $('.lemma').toggleClass('lemmaShow');
     $('.lemma').toggleClass('lemmaHide');
     lemmaClass = lemmaClass == "lemmaHide" ? "lemmaShow" : "lemmaHide";
+}
+
+var lastsavedstate = $("#editpane").html();
+
+function quitServer() {
+    if ($("#editpane").html() != lastsavedstate) {
+        alert("Cannot exit, unsaved changes exist.");
+    } else {
+        $.post("/doExit");
+        setTimeout(function(res) {
+                       // I have no idea why this works, but it does
+                       window.open('', '_self', '');
+                       window.close();
+               }, 100);
+    }
 }
