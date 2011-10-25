@@ -226,69 +226,65 @@ function assignEvents() {
 }
 
 
-function handleKeyDown(e){
-
+function handleKeyDown(e) {
     // TODO(AWE): can we make this function dispatch on arbitrary code,
     // instead of a string argument?
-
     // TODO(AWE): allow specification of modifier keys
 
-                // alert(e.keyCode);
-                if( e.ctrlKey && e.keyCode == 83) {
-                        save();
-                        e.preventDefault();
-                }
-                else if( commands[e.keyCode] !=null ){
-                        type = commands[e.keyCode]["type"];
-                        label = commands[e.keyCode]["label"];
-                        if( type=="makenode") {
-                                if( e.shiftKey ){
-                                        setLabel( label );
-                                }
-                                else {
-                                        makeNode(label);
-                                }
-                        }
-                        else if( type=="toggleextension"){
-                                toggleExtension(label);
-                        }
-                        else if (type=="undo"){
-                                undo();
-                        }
-                        else if (type=="redo"){
-                                redo();
-                        }
-                        else if (type=="prunenode"){
-                                pruneNode();
-                        }
-                        else if (type=="coindex"){
-                                coIndex();
-                        }
-                        else if (type=="clearselection"){
-                                clearSelection();
-                        }
-                        else if (type=="rename"){
-                                //e.stopPropagation();
-                                displayRename();
-                                e.preventDefault();
-                                // e.stopPropagation();
-                        }
-                        else if (type=="setlabel"){
-                                setLabel(label);
-                        }
-                        else if (type=="leafbefore"){
-                                leafBefore();
-                        }
-                        else if (type=="leafafter"){
-                                leafAfter();
-                        } else if (type == "toggleLemmata") {
-                            toggleLemmata();
-                        } else if (type == "editLemma") {
-                            editLemma();
-                        }
-                }
-
+    if (e.ctrlKey && e.keyCode == 83) {
+        save();
+        e.preventDefault();
+    } else if (commands[e.keyCode] != null) {
+        var type = commands[e.keyCode]["type"];
+        var label = commands[e.keyCode]["label"];
+        switch (type) {
+        case "makenode":
+            if (e.shiftKey) {
+                setLabel(label);
+            } else {
+                makeNode(label);
+            }
+            break;
+        case "toggleextension":
+            toggleExtension(label);
+            break;
+        case "undo":
+            undo();
+            break;
+        case "redo":
+            redo();
+            break;
+        case "prunenode":
+            pruneNode();
+            break;
+        case "coindex":
+            coIndex();
+            break;
+        case "clearselection":
+            clearSelection();
+            break;
+        case "rename":
+            displayRename();
+            e.preventDefault();
+            break;
+        case "setlabel":
+            setLabel(label);
+            break;
+        case "leafbefore":
+            leafBefore();
+            break;
+        case "leafafter":
+            leafAfter();
+            break;
+        case  "toggleLemmata":
+            toggleLemmata();
+            break;
+        case  "editLemma":
+            editLemma();
+            break;
         }
+    }
+}
 
 function handleNodeClick(e){
                         // menuon=true;
