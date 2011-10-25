@@ -78,6 +78,9 @@ $(document).ready(
 
 // menuon=true;
 // checks if the given node label is an ip node in the gui coloring sense
+
+// TODO(AWE): now that the node label is in the CSS class, can this be
+// factored out?
 function isIpNode( text ){
 //        alert(ipnodes.length);
 /* TODO(AWE)

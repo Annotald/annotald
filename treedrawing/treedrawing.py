@@ -89,11 +89,11 @@ class Treedraw(object):
 		tree0 = re.sub('^\(','',tree0)
 		tree0 = re.sub('\)$','',tree0).strip()
 		tree0 = re.sub('\(([^ ]+) ([^ ]+)(-[^ ]+)\)',
-                               '<div class="snode">\\1'
+                               '<div class="snode \\1">\\1'
                                  '<span class="wnode">\\2'
                                  '<span class="lemma lemmaHide">\\3</span>'
                                  '</span></div>', tree0)
-		tree0 = re.sub('\(','<div class="snode">',tree0)
+		tree0 = re.sub('\(([^ ]+)','<div class="snode \\1">\\1',tree0)
 		tree0 = re.sub('\)','</div>',tree0)		
 		alltrees = alltrees + tree0
 
