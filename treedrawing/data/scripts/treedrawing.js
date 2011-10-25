@@ -318,35 +318,31 @@ function handleNodeClick(e) {
     e.stopPropagation();
 }
 
-function selectNode(nodeId){
-        // fix???
-        var node = document.getElementById(nodeId);
+function selectNode(nodeId) {
+    // fix???
+    var node = document.getElementById(nodeId);
 
-        if( nodeId == "sn0"){
-                clearSelection();
-                return;
-        }
+    if (nodeId == "sn0") {
+        clearSelection();
+        return;
+    }
 
-        if( node == startnode ){
-             startnode=null;
-             if(endnode){
-                startnode=endnode;
-                endnode=null;
-             }
+    if (node == startnode) {
+        startnode = null;
+        if (endnode) {
+            startnode = endnode;
+            endnode = null;
         }
-        else if (startnode == null ){
-             startnode=node;
+    } else if (startnode == null) {
+        startnode = node;
+    } else {
+        if (node == endnode) {
+            endnode = null;
+        } else {
+            endnode = node;
         }
-        else {
-                if( node==endnode){
-                     endnode=null;
-                }
-                else {
-                     endnode=node;
-                }
-        }
-
-        updateSelection();
+    }
+    updateSelection();
 }
 
 
