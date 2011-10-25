@@ -983,70 +983,53 @@ function toggleExtension(extension){
 
 }
 
-function setLabel(label){
-//        if( startnode && endnode )
-
-        if( !isPossibleTarget(startnode.id) && !isEmpty(  wnodeString( $("#"+startnode.id) )  ) ){
-                return;
+function setLabel(labels) {
+    if (!isPossibleTarget(startnode.id) &&
+        !isEmpty(wnodeString($("#"+startnode.id)))) {
+        return;
+    }
+    stackTree();
+    var textnode = $("#"+startnode.id).contents().filter(
+        function() {
+            return this.nodeType == 3;
+        }).first();
+    var oldlabel = trim(textnode.text());
+    var newlabel = null;
+    // TODO(AWE): make this more robust!
+    if (!(labels instanceof Array)) {
+        var prefix = oldlabel.indexOf("-") > 0 ?
+            oldlabel.substr(0,oldlabel.indexOf("-")) :
+            oldlabel;
+        var new_labels = labels[prefix];
+        if (!new_labels) {
+            for (i in labels) {
+                new_labels = labels[i];
+                break;          // TODO(AWE): this is ugly, but I can't
+                                // figure out how to get the zero-th
+                                // property of an object in JS... :-/
+            }
         }
-        //alert( wnodeString( $("#"+startnode.id) ) );
-
-        stackTree();
-        textnode = $("#"+startnode.id).contents().filter(function() {
-                          return this.nodeType == 3;
-                }).first();
-        oldlabel=trim(textnode.text());
-//        newlabel=label[0];
-        for( i=0; i<label.length; i++ ){
-                if( label[i] == parseLabel(oldlabel) ){
-                   if( i<label.length-1 ){
-                                                      
-                                                      
-                             newlabel = changeJustLabel( oldlabel, label[i+1] );
-                            // alert("u"+newlabel);                                     
-                      textnode.replaceWith(newlabel+" ");
-
-                          if( isIpNode(label[i+1]) ){
-                            $("#"+startnode.id).addClass("ipnode");
-                          }
-                          else {
-                                  $("#"+startnode.id).removeClass("ipnode");
-                          }
-                        
-                      return;
-                   }
-                   else {
-                
-                                                      
-                             newlabel = changeJustLabel( oldlabel, label[0] );
-                  //           alert("d"+newlabel);                                     
-                      textnode.replaceWith(newlabel+" ");                
-                      //textnode.replaceWith(label[0]+" ");
-
-                          if( isIpNode(label[0]) ){
-                            $("#"+startnode.id).addClass("ipnode");
-                          }
-                          else {
-                                  $("#"+startnode.id).removeClass("ipnode");
-                          }
-
-                      return;
-                   }
-                }
+        labels = new_labels;
+    }
+    for (var i = 0; i < labels.length; i++ ) {
+        if (labels[i] == parseLabel(oldlabel)) {
+            if (i < labels.length - 1) {
+                newlabel = labels[i + 1];
+            } else {
+                newlabel = labels[0];
+            }
         }
-            newlabel = changeJustLabel(oldlabel,label[0] );
-        textnode.replaceWith(newlabel+" ");
-                          if( isIpNode(label[0]) ){
-                            $("#"+startnode.id).addClass("ipnode");
-                          }
-                          else {
-                                  $("#"+startnode.id).removeClass("ipnode");
-                          }
-
-
-//         textnode.replaceWith(label[0]+" ");
-//        clearSelection();
-//  && $(this).is(":contains('Some Label ')"
+    }
+    if (!newlabel) {
+        newlabel = labels[0];
+    }
+    newlabel = changeJustLabel(oldlabel,newlabel);
+    textnode.replaceWith(newlabel + " ");
+    if (isIpNode(label[0])) {
+        $("#"+startnode.id).addClass("ipnode");
+    } else {
+        $("#"+startnode.id).removeClass("ipnode");
+    }
 }
 
 function makeNode(label) {
