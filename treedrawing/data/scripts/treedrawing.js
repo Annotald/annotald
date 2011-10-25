@@ -1245,6 +1245,7 @@ function parseIndex( label ){
         return index;
 }
 
+// TODO(AWE): make sure this interacts well with lemmata!
 function parseLabel( label ){
         index=parseIndex(label);
 
