@@ -286,51 +286,36 @@ function handleKeyDown(e) {
     }
 }
 
-function handleNodeClick(e){
-                        // menuon=true;
-                          e = e || window.event;
-                          var elementId = (e.target || e.srcElement).id;
-                        // alert(e.button);
-                                // $(".snode").enableContextMenu();
-                        if( e.button == 2 ){
-                                        // rightclick
-                                if(!elementId){return;} // stop this if clicking a trace, for now
-
-                                if (startnode && !endnode) {
-
-                                        if (startnode.id != elementId) {
-                                                // menuon=false;
-                                                e.stopPropagation();
-                                                moveNode(elementId);
-                                        }
-                                        else {
-                                                showContextMenu();
-                                        }
-                                }
-                                else if (startnode && endnode){
-                                           e.stopPropagation();
-                                           moveNodes(elementId);
-                                }
-                                else {
-                                        showContextMenu();
-                                }
-
-
-        //        ???                e.stopPropagation();
-                        }
-                        else {
-                                // leftclick
-                                hideContextMenu();
-                                selectNode(elementId);
-
-                                if (e.ctrlKey) {
-                                        makeNode("XP");
-                                //        displayRename();
-                                //        e.preventDefault();
-                                }
-
-                        }
-                        e.stopPropagation();
+function handleNodeClick(e) {
+    e = e || window.event;
+    var elementId = (e.target || e.srcElement).id;
+    if (e.button == 2) {
+        // rightclick
+        if (!elementId) {
+            return; // prevent this if clicking a trace, for now
+        }
+        if (startnode && !endnode) {
+            if (startnode.id != elementId) {
+                e.stopPropagation();
+                moveNode(elementId);
+            } else {
+                showContextMenu();
+            }
+        } else if (startnode && endnode) {
+            e.stopPropagation();
+            moveNodes(elementId);
+        } else {
+            showContextMenu();
+        }
+    } else {
+        // leftclick
+        hideContextMenu();
+        selectNode(elementId);
+        if (e.ctrlKey) {
+            makeNode("XP");
+        }
+    }
+    e.stopPropagation();
 }
 
 function selectNode(nodeId){
