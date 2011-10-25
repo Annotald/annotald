@@ -26,6 +26,8 @@ var commands=new Object();
 var name = "#floatMenu";
 var menuYloc = null;
 
+var last_event_was_mouse = false;
+
 String.prototype.startsWith = function(str){
     return (this.substr(0,str.length) === str);
 };
@@ -283,6 +285,7 @@ function handleKeyDown(e) {
             editLemma();
             break;
         }
+        last_event_was_mouse = false;
     }
 }
 
@@ -316,6 +319,7 @@ function handleNodeClick(e) {
         }
     }
     e.stopPropagation();
+    last_event_was_mouse = true;
 }
 
 function selectNode(nodeId) {
@@ -336,10 +340,15 @@ function selectNode(nodeId) {
     } else if (startnode == null) {
         startnode = node;
     } else {
-        if (node == endnode) {
-            endnode = null;
+        if (last_event_was_mouse) {
+            if (node == endnode) {
+                endnode = null;
+            } else {
+                endnode = node;
+            }
         } else {
-            endnode = node;
+            endnode = null;
+            startnode = node;
         }
     }
     updateSelection();
