@@ -16,33 +16,36 @@
 // License along with this program.  If not, see
 // <http://www.gnu.org/licenses/>.
 
-var startnode=null;
-var endnode=null;
-var mousenode=null;
-var undostack=new Array();
-var redostack=new Array();
-var commands=new Object();
+var startnode = null;
+var endnode = null;
+var mousenode = null;
+var undostack = new Array();
+var redostack = new Array();
+var commands = new Object();
 
 var name = "#floatMenu";
 var menuYloc = null;
 
 var last_event_was_mouse = false;
 
-String.prototype.startsWith = function(str){
+String.prototype.startsWith = function(str) {
     return (this.substr(0,str.length) === str);
 };
 
-String.prototype.endsWith = function(str){
-        // alert(this.substr(this.length-str.length));
+String.prototype.endsWith = function(str) {
     return (this.substr(this.length-str.length) === str);
 };
+
 
 /**
  * unique function by: Shamasis Bhattacharya
  * http://www.shamasis.net/2009/09/fast-algorithm-to-find-unique-items-in-javascript-array/
  */
 Array.prototype.unique = function() {
-                var o = {}, i, l = this.length, r = [];    for(i=0; i<l;i+=1) o[this[i]] = this[i];    for(i in o) r.push(o[i]);    return r;
+    var o = {}, i, l = this.length, r = [];
+    for(i=0; i<l;i+=1) o[this[i]] = this[i];
+    for(i in o) r.push(o[i]);
+    return r;
 };
 
 
@@ -51,25 +54,26 @@ Array.prototype.unique = function() {
 // supposition.  When I am confident of the behavior of the code, the
 // debugging branch will be optimized/removed.
 function resetLabelClasses(alertOnError) {
-    var nodes = $(".snode");
-    for (var i = 0; i < nodes.length; i++) {
-        var label = parseLabel(getLabel(nodes[i]));
-        if (alertOnError) { // TODO(AWE): optimize test inside loop
-            var classes = nodes[i].attr("class").split(" ");
-            // This incantation removes a value from an array.
-            classes.indexOf("snode") >= 0 &&
-                classes.splice(classes.indexOf("snode"), 1);
-            classes.indexOf("ipnode") >= 0 &&
-                classes.splice(classes.indexOf("ipnode"), 1);
-            classes.indexOf(label) >= 0 &&
-                classes.splice(classes.indexOf(label), 1);
-            if (classes.length > 0) {
-                alert("Spurious classes '" + classes.join() +
-                      "' detected on node id'" + nodes[i].attr("id") + "'");
+    var nodes = $(".snode").each(
+        function() {
+            var node = $(this);
+            var label = parseLabel(getLabel(node));
+            if (alertOnError) { // TODO(AWE): optimize test inside loop
+                var classes = node.attr("class").split(" ");
+                // This incantation removes a value from an array.
+                classes.indexOf("snode") >= 0 &&
+                    classes.splice(classes.indexOf("snode"), 1);
+                classes.indexOf("ipnode") >= 0 &&
+                    classes.splice(classes.indexOf("ipnode"), 1);
+                classes.indexOf(label) >= 0 &&
+                    classes.splice(classes.indexOf(label), 1);
+                if (classes.length > 0) {
+                    alert("Spurious classes '" + classes.join() +
+                          "' detected on node id'" + nodes[i].attr("id") + "'");
+                }
             }
-        }
-        nodes[i].attr("class", "snode " + label);
-    }
+        node.attr("class", "snode " + label);
+        });
 }
 
 
@@ -81,21 +85,22 @@ $(document).ready(
         $("#debugpane").empty();
 
         // make menu float
-        menuYloc = parseInt($(name).css("top").substring(0, $(name).css("top").indexOf("px")));
+        menuYloc = parseInt($(name).css("top").substring(
+                                0, $(name).css("top").indexOf("px")));
 
         $(window).scroll(
             function () {
                 var offset = menuYloc+$(document).scrollTop()+"px";
-                $(name).animate({top:offset},{duration:500,queue:false});
+                $(name).animate({top:offset},{duration: 0, queue: false});
             });
 
         // inital highlight of IPs
         var snodes = $(".snode");
         for (var i=0; i<snodes.length; i++) {
-                var text = $("#"+snodes[i].id).contents().filter(
-                    function() {
-                        return this.nodeType == 3;
-                    }).first().text();
+            var text = $("#"+snodes[i].id).contents().filter(
+                function() {
+                    return this.nodeType == 3;
+                }).first().text();
             if (isIpNode(text)) {
                 $("#"+snodes[i].id).addClass('ipnode');
             }
@@ -111,7 +116,7 @@ $(document).ready(
 
 // TODO(AWE): now that the node label is in the CSS class, can this be
 // factored out?
-function isIpNode( text ){
+function isIpNode (text) {
 //        alert(ipnodes.length);
 /* TODO(AWE)
         for( i=0; i<ipnodes.length; i++){
@@ -120,15 +125,18 @@ function isIpNode( text ){
                 }
         }
         */
-        return text.startsWith("IP-SUB") || text.startsWith("IP-MAT") || text.startsWith("IP-IMP") || text.startsWith("IP-INF");
+        return text.startsWith("IP-SUB") ||
+        text.startsWith("IP-MAT") ||
+        text.startsWith("IP-IMP") ||
+        text.startsWith("IP-INF");
 
 //        return contains( ipnodes, parseLabel(text) );
 }
 
 // returns true if array a contains object o
-function contains(a, obj){
-  for(var i = 0; i < a.length; i++) {
-    if(a[i] === obj ){
+function contains(a, obj) {
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] === obj) {
       return true;
     }
   }
@@ -136,93 +144,80 @@ function contains(a, obj){
 }
 
 
-function isEmpty( text ){
-         if( text.startsWith("*") ){
-            return true;
-         }
-         if( text.startsWith("{") ){
-                 return true;
-         }
-         if( text == 0 ){
-                 return true;
-         }
-
-         return false;
+function isEmpty (text) {
+    if (text.startsWith("*") || text.startsWith("{") || text == 0) {
+        return true;
+    }
+    return false;
 }
 
-function showContextMenu(){
+function showContextMenu() {
+    var e = window.event;
+    var elementId = (e.target || e.srcElement).id;
+    if (elementId == "sn0") {
+        clearSelection();
+        return;
+    }
 
-                  e = window.event;
-                  var elementId = (e.target || e.srcElement).id;
+    var left = $("#"+elementId).offset().left + 4;
+    var top = $("#"+elementId).offset().top + 17;
+    left = left + "px";
+    top = top + "px";
 
+    $("#conLeft").empty();
+    loadContextMenu(elementId);
 
-                if( elementId == "sn0" ){
-                        clearSelection();
-                        return;
-                }
+    // Make the columns equally high
+    $("#conLeft").height("auto");
+    $("#conRight").height("auto");
+    if ($("#conLeft").height() < $("#conRight").height()) {
+        $("#conLeft").height($("#conRight").height());
+    } else {
+        $("#conRight").height($("#conLeft").height());
+    }
 
-                left = $("#"+elementId).offset().left+4;
-                toppos = $("#"+elementId).offset().top+17;
-                left = left + "px";
-                top = top + "px";
-
-        $("#conLeft").empty();
-        loadContextMenu(elementId);
-
-        // Make the columns equally high
-        $("#conLeft").height( "auto" );
-        $("#conRight").height( "auto" );
-        if( $("#conLeft").height() < $("#conRight").height() ){
-                $("#conLeft").height( $("#conRight").height() );
-        }
-        else {
-                $("#conRight").height( $("#conLeft").height() );
-        }
-
-        $("#conMenu").css("left",left);
-        $("#conMenu").css("top",toppos);
-        $("#conMenu").css("visibility","visible");
+    $("#conMenu").css("left",left);
+    $("#conMenu").css("top",top);
+    $("#conMenu").css("visibility","visible");
 }
 
-function hideContextMenu(){
-        $("#conMenu").css("visibility","hidden");
+function hideContextMenu() {
+    $("#conMenu").css("visibility","hidden");
 }
 
-function addCommand( keycode, type, label ){
-        commands[keycode]=new function(){
-                this.type = type;
-                this.label=label;
-        };
+function addCommand(keycode, type, label) {
+    commands[keycode] = new function() {
+        this.type = type;
+        this.label=label;
+    };
 }
 
-function stackTree(){
-        undostack.push( $("#editpane").html() );
+function stackTree() {
+    undostack.push($("#editpane").html());
 }
 
-function redo(){
-        var nextstate = redostack.pop();
-        if( !(nextstate == undefined) ){
-                currentstate=$("#editpane").html();
-                undostack.push(currentstate);
-                $("#editpane").empty();
-                $("#editpane").append(nextstate);
-                clearSelection();
-                $(".snode").mousedown(handleNodeClick);
-        }
+function redo() {
+    var nextstate = redostack.pop();
+    if (!(nextstate == undefined)) {
+        var currentstate = $("#editpane").html();
+        undostack.push(currentstate);
+        $("#editpane").empty();
+        $("#editpane").append(nextstate);
+        clearSelection();
+        $(".snode").mousedown(handleNodeClick);
+    }
 }
 
 function undo() {
-        var prevstate = undostack.pop();
-
-        if( !(prevstate == undefined) ) {
-                currentstate=$("#editpane").html();
-                redostack.push(currentstate);
-
-                $("#editpane").empty();
-                $("#editpane").append(prevstate);
-                clearSelection();
-                $(".snode").mousedown(handleNodeClick);
-        }
+    var prevstate = undostack.pop();
+    if (!(prevstate == undefined)) {
+        var currentstate=$("#editpane").html();
+        redostack.push(currentstate);
+        $("#editpane").empty();
+        $("#editpane").append(prevstate);
+        clearSelection();
+        $(".snode").mousedown(handleNodeClick);
+    }
 }
 
 function saveHandler (data) {
@@ -383,58 +378,49 @@ function selectNode(nodeId) {
 }
 
 
-function clearSelection(){
-        window.event.preventDefault();
-        startnode=null; endnode=null;
-        resetIds();
-        updateSelection();
+function clearSelection() {
+    window.event.preventDefault();
+    startnode = endnode = null;
+    resetIds();
+    updateSelection();
     hideContextMenu();
 }
 
-function updateSelection(){
+function updateSelection() {
+    document.getElementById("labsel1").innerHTML = "null";
+    document.getElementById("labsel2").innerHTML = "null";
+    if (startnode) {
+        document.getElementById("labsel1").innerHTML = startnode.id;
+        //startnode.setAttribute('class','snodesel');
+    }
+    if (endnode) {
+        document.getElementById("labsel2").innerHTML=endnode.id;
+        //endnode.setAttribute('class','snodesel');
+    }
 
-        document.getElementById("labsel1").innerHTML="null";
-        document.getElementById("labsel2").innerHTML="null";
-        if( startnode ){
-                document.getElementById("labsel1").innerHTML=startnode.id;
-                //startnode.setAttribute('class','snodesel');
-        }
-        if( endnode ){
-                document.getElementById("labsel2").innerHTML=endnode.id;
-                //endnode.setAttribute('class','snodesel');
-        }
+    // update selection display
+    $('.snode').removeClass('snodesel');
 
-        // update selection display
-        $('.snode').removeClass('snodesel');
+    if (startnode) {
+        $("#"+startnode.id).addClass('snodesel');
+    }
 
-        //$("#conMenu").attr("style,","display:block");
-        if( startnode ){
-                $("#"+startnode.id).addClass('snodesel');
-        }
-
-        if( endnode ){
-                $("#"+endnode.id).addClass('snodesel');
-        }
-
-
+    if (endnode) {
+        $("#"+endnode.id).addClass('snodesel');
+    }
 }
 
-function isPossibleTarget(node){
-
-        // cannot move under a tag node
-        if( $("#"+node).children().first().is("span") ){
-                return false;
-        }
-/*
-        if(node == "s01"){
-                return false;
-        }
-*/
-        return true;
+function isPossibleTarget(node) {
+    // cannot move under a tag node
+    if ($("#"+node).children().first().is("span")) {
+        return false;
+    }
+    return true;
 }
 
+// TODO(AWE): remove
 function currentText(root){
-        return wnodeString(root);
+    return wnodeString(root);
 }
 
 function moveNode(targetParent){
@@ -480,10 +466,6 @@ function moveNode(targetParent){
         var tokenMerge = isRootNode( $("#"+startnode.id) );
         var maxindex = maxIndex( getTokenRoot($("#"+targetParent) ).attr("id") );
         var movednode = $("#"+startnode.id);
-        // alert(maxindex);
-        // ZZZZZZZZZZ
-        // alert( getTokenRoot( node(targetParent) ).attr("id") );
-        //alert( getTokenRoot($("#"+startnode.id) ).attr("id") );
         if (parseInt( startnode.id.substr(2) ) > parseInt(targetParent.substr(2))) {
             stackTree();
             if (tokenMerge) {
@@ -519,7 +501,6 @@ function moveNode(targetParent){
         }
     }
     clearSelection();
-    //        menuon=true;
 }
 
 function isRootNode( node ){
@@ -542,7 +523,7 @@ function moveNodes(targetParent) {
         startnode = endnode;
         endnode = temp;
     }
-    // check if they are really sisters XXXXXXXXXXXXXXX
+    // TODO: check if they are really sisters
     if ($("#"+startnode.id).siblings().is("#"+endnode.id)) {
         // then, collect startnode and its sister up until endnode
         var oldtext = currentText(parent_ip);
@@ -559,7 +540,6 @@ function moveNodes(targetParent) {
     }
     resetIds();
     var toselect = $(".snode[xxx=newnode]").first();
-    // alert(toselect.attr("id"));
 
     // BUG when making XP and then use context menu: todo XXX
     clearSelection();
@@ -586,7 +566,6 @@ function moveNodes(targetParent) {
         return;
     } else if ($("#"+startnode.id).parents().is("#"+targetParent)) {
         // move up if moving to a node that is already my parent
-        // alert( startnode.id );
         var firstchildId = $("#"+startnode.id).parent().children().first().closest("div").attr("id");
         var lastchildId = $("#"+startnode.id).parent().children().last().closest("div").attr("id");
 
@@ -660,12 +639,12 @@ function moveNodes(targetParent) {
  *  Making leafs
 */
 
-function leafBefore(){
-        makeLeaf(true);
+function leafBefore() {
+    makeLeaf(true);
 }
 
-function leafAfter(){
-        makeLeaf(false);
+function leafAfter() {
+    makeLeaf(false);
 }
 
 function makeLeaf(before, label, word, targetId, fixed) {
@@ -863,123 +842,94 @@ function changeJustLabel (oldlabel, newlabel) {
     return newlabel;
 }
 
-function toogleJustExtension( oldlabel, extension ){
-                //out = oldlabel;
-                index = parseIndex( oldlabel );
-                indextype="";
-                if( index > 0 ){
-                        indextype=parseIndexType(oldlabel);
-                }
-                extendedlabel = parseLabel(oldlabel);
+function toogleJustExtension (oldlabel, extension) {
+    var index = parseIndex(oldlabel);
+    var indextype = "";
+    if (index > 0) {
+        indextype = parseIndexType(oldlabel);
+    }
+    var extendedlabel = parseLabel(oldlabel);
 
-                currentextensions = new Array();
+    var currentextensions = new Array();
+    var textension = false;
+    for (var i = extensions.length-1; i>-1; i--) {
+        if (extension == extensions[i]) {
+            textension = true;
+        } else {
             textension = false;
-                for( i=extensions.length-1; i>-1; i--){
-                        if( extension == extensions[i] ){
-                                textension = true;
-                        }
-                        else {
-                                textension = false;
-                        }
-
-                        //alert( "'"+ extendedlabel+ "' '" +extensions[i] +"'"  );
-                        //alert( extendedlabel.endsWith( extensions[i] )  )
-                        if( extendedlabel.endsWith( extensions[i] ) ){
-                                //alert("y");
-
-                                if( !textension ){
-                                        currentextensions.push( extensions[i] );
-                                }
-                                extendedlabel = extendedlabel.substr(0,extendedlabel.length-extensions[i].length);
-                                //alert(extendedlabel);
-                        }
-                        else if (textension) {
-                                currentextensions.push( extensions[i] );
-                        }
-
-                        //alert( "'"+ extendedlabel+ "' '" +extensions[i] +"'"  );
-                }
-
-                out = extendedlabel;
-                count = currentextensions.length;
-                for( i=0; i<count; i++){
-                        out+=currentextensions.pop();
-                }
-                if( index > 0 ){
-                        out+=indextype;
-                        out+=index;
-                }
-
-                return out;
-}
-
-function parseExtensions( label ){
-        //alert("'"+label+"'");
-                        index = parseIndex( label );
-                indextype="";
-                if( index > 0 ){
-                        indextype=parseIndexType(label);
-                }
-                extendedlabel = parseLabel(label);
-                currentextensions = new Array();
-
-                for( i=extensions.length-1; i>-1; i--){
-
-                        //alert( "'"+ extendedlabel+ "' '" +extensions[i] +"'"  );
-                        //alert( extendedlabel.endsWith( extensions[i] )  )
-                        if( extendedlabel.endsWith( extensions[i] ) ){
-                                //alert("y");
-
-                                currentextensions.push( extensions[i] );
-
-                                extendedlabel = extendedlabel.substr(0,extendedlabel.length-extensions[i].length);
-                                //alert(extendedlabel);
-                        }
-                }
-
-                out = "";
-                count = currentextensions.length;
-                for( i=0; i<count; i++){
-                        out+=currentextensions.pop();
-                }
-                /*
-                if( index > 0 ){
-                        out+=indextype;
-                        out+=index;
-                }
-                        */
-                return out;
-}
-
-function toggleExtension(extension){
-
-        // there has to be a startnode
-        if( !startnode ){
-                return;
         }
 
+        if(extendedlabel.endsWith(extensions[i])) {
+            if (!textension) {
+                currentextensions.push(extensions[i]);
+            }
+            extendedlabel = extendedlabel.substr(
+                0,extendedlabel.length - extensions[i].length);
+        } else if (textension) {
+            currentextensions.push( extensions[i] );
+        }
+    }
+
+    var out = extendedlabel;
+    var count = currentextensions.length;
+    // TODO(AWE): out += currentextensions.join("")
+    for (i=0; i < count; i++) {
+        out += currentextensions.pop();
+    }
+    if (index > 0) {
+        out += indextype;
+        out += index;
+    }
+    return out;
+}
+
+function parseExtensions (label) {
+    var index = parseIndex( label );
+    var indextype = "";
+    if (index > 0) {
+        indextype = parseIndexType(label);
+    }
+    var extendedlabel = parseLabel(label);
+    var currentextensions = new Array();
+
+    for (var i = extensions.length-1; i>-1; i--) {
+        if (extendedlabel.endsWith(extensions[i])) {
+            currentextensions.push(extensions[i]);
+            extendedlabel = extendedlabel.substr(
+                0,extendedlabel.length-extensions[i].length);
+        }
+    }
+
+    var out = "";
+    var count = currentextensions.length;
+    // TODO(AWE): out += currentextensions.join("")
+    for (i = 0; i < count; i++) {
+        out += currentextensions.pop();
+    }
+    return out;
+}
+
+function toggleExtension(extension) {
+    // there has to be a startnode
+    if (!startnode) {
+        return;
+    }
     // there can't be an endnode
-        if( endnode ){
-                return;
-        }
+    if (endnode) {
+        return;
+    }
 
-        if( !isPossibleTarget(startnode.id) && !isEmpty(  wnodeString( $("#"+startnode.id) )  ) ){
-                return;
-        }
-
-
-        stackTree();
-        textnode = $("#"+startnode.id).contents().filter(function() {
-                          return this.nodeType == 3;
-                }).first();
-        oldlabel=$.trim(textnode.text());
-        newlabel =          toogleJustExtension(oldlabel,extension);
-        textnode.replaceWith(newlabel+" ");
-
-
-
-        //alert( "XXX: "+ toogleJustExtension(oldlabel,"-SPE") );
-
+    if (!isPossibleTarget(startnode.id) &&
+        !isEmpty(wnodeString($("#"+startnode.id)))) {
+        return;
+    }
+    stackTree();
+    var textnode = $("#"+startnode.id).contents().filter(function() {
+                                                         return this.nodeType == 3;
+                                                     }).first();
+    var oldlabel=$.trim(textnode.text());
+    var newlabel = toogleJustExtension(oldlabel, extension);
+    textnode.replaceWith(newlabel + " ");
 }
 
 function setLabel(labels) {
@@ -1111,70 +1061,46 @@ function makeTrace( before ){
 }
 */
 
-function pruneNode(){
-        if( startnode && !endnode ){
-
-                deltext = $("#"+startnode.id).children().first().text();
-
-                // if this is a leaf, todo XXX fix
-                if( deltext == "0" || deltext.charAt(0) == "*" || deltext.charAt(0) == "{" || deltext.charAt(0) == "<" ){
-                        // it is ok to delete leaf if is empty/trace
-                        stackTree();
-                        $("#"+startnode.id).remove();
-                        startnode=null;
-                        endnode=null;
-                        resetIds();
-                        updateSelection();
-                        return;
-                } // but other leafs are not deleted
-                else if( ! isPossibleTarget(startnode.id) ){
-                        return;
-                }
-                else if( startnode.id == "sn0" ){
-                        return;
-                }
-
-//                $("#"+startnode.id+">*:text").remove();
-                stackTree();
-
-                toselect = $("#"+startnode.id+">*").first();
-                $("#"+startnode.id).replaceWith( $("#"+startnode.id+">*") );
-                startnode=null;
-                endnode=null;
-                resetIds();
-                selectNode( toselect.attr("id") );
-                 updateSelection();
-
-/*
-                startnode.removeChild(startnode.firstChild);
-                while (startnode.firstChild)
-                {
-                    startnode.parentNode.insertBefore(startnode.firstChild, startnode);
-                }
-                startnode.parentNode.removeChild(startnode);
-
-                startnode=null;
-                endnode=null;
-                 updateSelection();
-                resetIds();
-*/
+function pruneNode() {
+    if (startnode && !endnode) {
+        var deltext = $("#"+startnode.id).children().first().text();
+        // if this is a leaf, todo XXX fix
+        if (deltext == "0" ||
+            deltext.charAt(0) == "*" ||
+            deltext.charAt(0) == "{" ||
+            deltext.charAt(0) == "<" ) {
+            // it is ok to delete leaf if is empty/trace
+            stackTree();
+            $("#"+startnode.id).remove();
+            startnode = endnode = null;
+            resetIds();
+            updateSelection();
+            return;
+        } else if (!isPossibleTarget(startnode.id)) {
+            // but other leaves are not deleted
+            return;
+        } else if (startnode.id == "sn0") {
+            return;
         }
+
+        stackTree();
+
+        var toselect = $("#"+startnode.id+">*").first();
+        $("#"+startnode.id).replaceWith($("#"+startnode.id+">*"));
+        startnode = endnode = null;
+        resetIds();
+        selectNode(toselect.attr("id"));
+        updateSelection();
+    }
 }
 
-function setNodeLabel(node, label, noUndo){
-        if (!noUndo) {
-                stackTree();
-        }
-        node.contents().filter(function() {
-                          return this.nodeType == 3;
-        }).first().replaceWith($.trim(label)+" ");
-
-                          if( isIpNode( $.trim(label) ) ){
-                            node.addClass("ipnode");
-                          }
-                          else {
-                                  node.removeClass("ipnode");
-                          }
+function setNodeLabel(node, label, noUndo) {
+    if (!noUndo) {
+        stackTree();
+    }
+    node.contents().filter(function() {
+                               return this.nodeType == 3;
+                           }).first().replaceWith($.trim(label)+" ");
 }
 
 function getLabel(node){
@@ -1183,69 +1109,62 @@ function getLabel(node){
                 }).first().text());
 }
 
-function appendExtension(node,extension,type){
-        if( !type ){ type="-";}
-
-        setNodeLabel(node,getLabel(node)+type+extension,true);
-/*
-        node.contents().filter(function() {
-                          return this.nodeType == 3;
-                }).first().replaceWith( $.trim(getLabel(node))+"-"+extension+" " );
-*/
+function appendExtension(node,extension,type) {
+    if(!type) {
+        type="-";
+    }
+    setNodeLabel(node, getLabel(node) + type + extension, true);
 }
 
-function getTokenRoot(node){
-        if( isRootNode(node) ){
-                return node;
-        }
-        //        return $("#sn0>.snode").filter($("#"+node.id).parents($("#sn0>.snode")));
-        return $("#sn0>.snode").filter($(node).parents($("#sn0>.snode")));
+function getTokenRoot(node) {
+    if(isRootNode(node)) {
+        return node;
+    }
+    return $("#sn0>.snode").filter($(node).parents($("#sn0>.snode")));
 }
 
 /*
  * returns value of lowest index if there are any indices, returns -1 otherwise
 */
-function minIndex( tokenRoot, offset ){
-                        allSNodes = $("#"+tokenRoot+" .snode,#"+tokenRoot+" .wnode");
-                        // temp="";
-                        highnumber=9000000;
-                        index=highnumber;
-                        for( i=0; i<allSNodes.length; i++){
-                                label=getLabel( $(allSNodes[i]) );
-                                lastpart=parseInt( label.substr(label.lastIndexOf("-")+1) );
-                                // lastpart=label.substr(label.lastIndexOf("-")+1);
-                                // temp+=" "+lastpart;
-                                if( ! isNaN( parseInt(lastpart) ) ){
-                                        if( lastpart != 0 && lastpart >=offset){
-                                                index = Math.min( lastpart, index );
-                                        }
-                                }
-                        }
-                        if( index == highnumber ){return -1;}
+function minIndex (tokenRoot, offset) {
+    var allSNodes = $("#" + tokenRoot + " .snode,#" + tokenRoot + " .wnode");
+    var highnumber = 9000000;
+    var index = highnumber;
+    var label, lastpart;
+    for (var i=0; i < allSNodes.length; i++){
+        label = getLabel($(allSNodes[i]));
+        lastpart = parseInt(label.substr(label.lastIndexOf("-")+1));
+        if (!isNaN(parseInt(lastpart))) {
+            if (lastpart != 0 && lastpart >=offset) {
+                index = Math.min(lastpart, index);
+            }
+        }
+    }
+    if (index == highnumber) {
+        return -1;
+    }
 
-                        if( index < offset){return -1;}
+    if (index < offset) {
+        return -1;
+    }
 
-                        // alert(temp);
-                        return index;
+    return index;
 }
 
-function parseIndex( label ){
-        index=-1;
-        lastindex=Math.max(label.lastIndexOf("-"),label.lastIndexOf("="));
-        if( lastindex == -1 ){
-                return -1;
-        }
-
-        lastpart=parseInt( label.substr(lastindex+1) );
-
-        if( ! isNaN( parseInt(lastpart) ) ){
-                index = Math.max( lastpart, index );
-        }
-        if( index == 0){
-                return -1;
-        }
-
-        return index;
+function parseIndex (label) {
+    var index = -1;
+    var lastindex = Math.max(label.lastIndexOf("-"),label.lastIndexOf("="));
+    if (lastindex == -1) {
+        return -1;
+    }
+    var lastpart = parseInt(label.substr(lastindex+1));
+    if(!isNaN(parseInt(lastpart))) {
+        index = Math.max(lastpart, index);
+    }
+    if (index == 0) {
+        return -1;
+    }
+    return index;
 }
 
 // TODO(AWE): make sure this interacts well with lemmata!
@@ -1261,36 +1180,34 @@ function parseLabel (label) {
 }
 
 
-function getIndex( node ){
-        // alert( "eee"+ getLabel( node ) );
-
-        label=getLabel( node );
-        return parseIndex( label );
+function getIndex(node) {
+    var label = getLabel(node);
+    return parseIndex(getLabel(label));
 }
 
 function parseIndexType(label){
-        lastindex=Math.max(label.lastIndexOf("-"),label.lastIndexOf("="));
-        lastpart=label.charAt(lastindex);
-        return lastpart;
+    var lastindex = Math.max(label.lastIndexOf("-"), label.lastIndexOf("="));
+    return label.charAt(lastindex);
 }
 
-function getIndexType( node ){
-        if( getIndex(node) < 0 ){
-                return -1;
-        }
+function getIndexType (node) {
+    if (getIndex(node) < 0) {
+        return -1;
+    }
 
-        label=getLabel( node );
-        lastpart = parseIndexType(label);
-        return lastpart;
+    var label = getLabel(node);
+    var lastpart = parseIndexType(label);
+    return lastpart;
 }
 
 
-function getNodesByIndex(tokenRoot, ind){
-        nodes = $("#"+tokenRoot+" .snode,#"+tokenRoot+" .wnode").filter(function(index) {
-          return getIndex( $(this) )==ind;
+function getNodesByIndex(tokenRoot, ind) {
+    var nodes = $("#" + tokenRoot + " .snode,#" + tokenRoot + " .wnode").filter(
+        function(index) {
+            // TODO(AWE): is this below correct?  optimal?
+            return getIndex($(this)) == ind;
         });
-        // alert("count "+nodes.size() );
-        return nodes;
+    return nodes;
 }
 
 /*
@@ -1318,143 +1235,109 @@ function updateIndices( tokenRoot ){
 }
 */
 
-function addToIndices( tokenRoot, numberToAdd ){
-
-        var ind = 1;
-
-
-        maxindex = maxIndex(tokenRoot.attr("id"));
-
-        nodes = tokenRoot.find(".snode,.wnode").andSelf();
-        nodes.each( function(index) {
-                nindex = getIndex($(this));
-                if( nindex>0){
-
-                      label=getLabel($(this)).substr(0,getLabel($(this)).length-1);
-                      label=label+(nindex+numberToAdd);
-                      setNodeLabel( $(this), label, true );
-                }
-        });
-
-
+function addToIndices(tokenRoot, numberToAdd) {
+    var ind = 1;
+    var maxindex = maxIndex(tokenRoot.attr("id"));
+    var nodes = tokenRoot.find(".snode,.wnode").andSelf();
+    nodes.each(function(index) {
+                   var nindex = getIndex($(this));
+                   if(nindex>0) {
+                       var label = getLabel($(this)).substr(
+                           0, getLabel($(this)).length - 1);
+                       label = label + (nindex + numberToAdd);
+                       setNodeLabel($(this), label, true);
+                   }
+               });
 }
 
-function maxIndex( tokenRoot ){
-                        //alert( "tr: "+tokenRoot );
-                        allSNodes = $("#"+tokenRoot+",#"+tokenRoot+" .snode,#"+tokenRoot+" .wnode");
-                         temp="";
-                        ind=0;
-                        /*
-                        for( i=0; i<allSNodes.length; i++){
-                                label=getLabel( $(allSNodes[i]) );
-                                lastpart=parseInt( label.substr(label.lastIndexOf("-")) );
-                                 lastpart=label.substr(label.lastIndexOf("-")+1);
-                                 temp+=" "+lastpart;
-                                if( ! isNaN( parseInt(lastpart) ) ){
-                                        index = Math.max( lastpart, index );
-                                }
-                        }
-                        */
-                        for( i=0; i<allSNodes.length; i++){
-                                label=getLabel( $(allSNodes[i]) );
-                                ind = Math.max( parseIndex(label), ind );
-                         }
-                        // alert(temp);
-                        // alert(ind);
-                        return ind;
+function maxIndex(tokenRoot) {
+    var allSNodes = $("#" + tokenRoot + ",#" + tokenRoot + " .snode,#" +
+                      tokenRoot + " .wnode");
+    var temp = "";
+    var ind = 0;
+    var label;
+
+    for (var i=0; i < allSNodes.length; i++) {
+        label = getLabel($(allSNodes[i]));
+        ind = Math.max(parseIndex(label), ind);
+    }
+    return ind;
 }
 
-function removeIndex( node ){
-        setNodeLabel( $(node), getLabel( $(node)).substr(0, getLabel( $(node)).length-2 ), true );
+function removeIndex(node) {
+        setNodeLabel($(node),
+                     getLabel($(node)).substr(0, getLabel($(node)).length - 2 ),
+                     true);
 }
 
-function coIndex(){
-
-        if( startnode && !endnode ){
-                if( getIndex($(startnode)) > 0 ){
-                        stackTree();
-                        removeIndex(startnode);
-                }
+function coIndex() {
+    if (startnode && !endnode) {
+        if (getIndex($(startnode)) > 0) {
+            stackTree();
+            removeIndex(startnode);
         }
-        else if( startnode && endnode ){
-
-            // don't do anything if different token roots
-                        startRoot = getTokenRoot($(startnode)).attr("id");
-                        endRoot = getTokenRoot($(endnode)).attr("id");
-                        if( startRoot != endRoot ){
-                                return;
-                        }
-
-
-                // if both nodes already have an index
-                if( getIndex($(startnode)) > 0 && getIndex($(endnode)) > 0 ){
-
-                        // and if it is the same index
-                        if( getIndex($(startnode)) == getIndex($(endnode)) ){
-                                theIndex=getIndex($(startnode));
-                                types = ""+getIndexType($(startnode))+""+getIndexType($(endnode));
-
-                                //alert(types);
-                                // remove it
-                                stackTree();
-
-                                //alert(types);
-
-                                if( types == "=-"){
-                                  removeIndex(startnode);
-                                  removeIndex(endnode);
-                                  appendExtension( $(startnode), theIndex,"=" );
-                                  appendExtension( $(endnode), theIndex,"=" );
-                                }
-                                else if( types == "--" ){
-                                  removeIndex(endnode);
-                                  appendExtension( $(endnode), getIndex($(startnode)),"=" );
-                                }
-                                else if( types == "-=" ){
-                                  removeIndex(startnode);
-                                  removeIndex(endnode);
-                                  appendExtension( $(startnode), theIndex,"=" );
-                                  appendExtension( $(endnode), theIndex,"-" );
-                                }
-                                else if( types == "==" ){
-                                  removeIndex(startnode);
-                                  removeIndex(endnode);
-                                }
-                        }
-
-                }
-                else if ( getIndex($(startnode)) > 0 && getIndex($(endnode)) == -1 ){
-                        stackTree();
-                        appendExtension( $(endnode), getIndex($(startnode)) );
-                }
-                else if ( getIndex($(startnode)) == -1 && getIndex($(endnode)) > 0 ){
-                        stackTree();
-                        appendExtension( $(startnode), getIndex($(endnode)) );
-                }
-                else { // no indices here, so make them
-
-                        startRoot = getTokenRoot($(startnode)).attr("id");
-                        endRoot = getTokenRoot($(endnode)).attr("id");
-                        // alert( lowestIndex(startRoot) );
-
-                        // if start and end are within the same token, do coindexing
-                        if( startRoot == endRoot ){
-                                index = maxIndex(startRoot)+1;
-                                stackTree();
-                                appendExtension($(startnode),index);
-                                appendExtension($(endnode),index);
-                        }
-                }
-                // updateIndices(startRoot);
+    } else if (startnode && endnode) {
+        // don't do anything if different token roots
+        var startRoot = getTokenRoot($(startnode)).attr("id");
+        var endRoot = getTokenRoot($(endnode)).attr("id");
+        if (startRoot != endRoot) {
+            return;
         }
+        // if both nodes already have an index
+        if (getIndex($(startnode)) > 0 && getIndex($(endnode)) > 0) {
+            // and if it is the same index
+            if (getIndex($(startnode)) == getIndex($(endnode))) {
+                var theIndex=getIndex($(startnode));
+                var types = "" + getIndexType($(startnode)) +
+                    "" + getIndexType($(endnode));
+                // remove it
+                stackTree();
+
+                if (types == "=-") {
+                    removeIndex(startnode);
+                    removeIndex(endnode);
+                    appendExtension($(startnode), theIndex, "=");
+                    appendExtension($(endnode), theIndex, "=");
+                } else if( types == "--" ){
+                    removeIndex(endnode);
+                    appendExtension($(endnode), getIndex($(startnode)),"=");
+                } else if (types == "-=") {
+                    removeIndex(startnode);
+                    removeIndex(endnode);
+                    appendExtension($(startnode), theIndex,"=");
+                    appendExtension($(endnode), theIndex,"-");
+                } else if (types == "==") {
+                    removeIndex(startnode);
+                    removeIndex(endnode);
+                }
+            }
+
+        } else if (getIndex($(startnode)) > 0 && getIndex($(endnode)) == -1) {
+            stackTree();
+            appendExtension($(endnode), getIndex($(startnode)));
+        } else if (getIndex($(startnode)) == -1 && getIndex($(endnode)) > 0) {
+            stackTree();
+            appendExtension( $(startnode), getIndex($(endnode)) );
+        } else { // no indices here, so make them
+            startRoot = getTokenRoot($(startnode)).attr("id");
+            endRoot = getTokenRoot($(endnode)).attr("id");
+            // if start and end are within the same token, do coindexing
+            if(startRoot == endRoot) {
+                var index = maxIndex(startRoot) + 1;
+                stackTree();
+                appendExtension($(startnode), index);
+                appendExtension($(endnode), index);
+            }
+        }
+    }
 }
 
 
-function resetIds(){
-        var snodes = $(".snode"); // document.getElementsByClassName("snode");
-        for (i = 0; i < snodes.length; i++) {
-                snodes[i].id = "sn" + i;
-        }
+function resetIds() {
+    var snodes = $(".snode");
+    for (var i = 0; i < snodes.length; i++) {
+        snodes[i].id = "sn" + i;
+    }
 }
 
 
@@ -1482,18 +1365,17 @@ function wnodeString(node) {
     return text;
 }
 
-function toLabeledBrackets( node ){
-        // return recurseNode(node,"");
-        out=node.clone();
-        out.find("#sn0>.snode").after("\n\n");
-        out.find("#sn0>.snode").before("( ");
-        out.find("#sn0>.snode").after(")");
+function toLabeledBrackets(node) {
+    var out = node.clone();
+    out.find("#sn0>.snode").after("\n\n");
+    out.find("#sn0>.snode").before("( ");
+    out.find("#sn0>.snode").after(")");
 
-        out.find(".snode").before("(");
-        out.find(".snode").after(")");
-        out.find(".wnode").before(" ");
+    out.find(".snode").before("(");
+    out.find(".snode").after(")");
+    out.find(".wnode").before(" ");
 
-        return out.text();
+    return out.text();
 }
 
 var lemmaClass = "lemmaHide";
