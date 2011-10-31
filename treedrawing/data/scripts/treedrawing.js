@@ -831,17 +831,15 @@ function editLemma() {
     }
 }
 
-function changeJustLabel( oldlabel, newlabel ){
-        label = oldlabel;
-        index = parseIndex(oldlabel);
-        //alert(index);
-        if( index > 0 ){
-                label = parseLabel(oldlabel);
-                indextype = parseIndexType(oldlabel);
-                return newlabel+indextype+index;
-        }
-        // alert(label);
-        return newlabel;
+function changeJustLabel (oldlabel, newlabel) {
+    var label = oldlabel;
+    var index = parseIndex(oldlabel);
+    if (index > 0) {
+        label = parseLabel(oldlabel);
+        var indextype = parseIndexType(oldlabel);
+        return newlabel+indextype+index;
+    }
+    return newlabel;
 }
 
 function toogleJustExtension( oldlabel, extension ){
