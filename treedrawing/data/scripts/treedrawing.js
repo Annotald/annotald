@@ -644,78 +644,65 @@ function leafAfter(){
         makeLeaf(false);
 }
 
-function makeLeaf(before, label, word, targetId, fixed){
+function makeLeaf(before, label, word, targetId, fixed) {
+    if (!label) {
+        label = "WADVP";
+    }
+    if (!word) {
+        word = "0";
+    }
+    if (!targetId) {
+        targetId = startnode.id;
+    }
 
-        if (!label) {
-                label = "WADVP";
+    var startRoot = null;
+    var endRoot = null;
+
+    if (endnode) {
+        startRoot = getTokenRoot($("#"+startnode.id)).attr("id");
+        endRoot = getTokenRoot($("#"+endnode.id)).attr("id");
+        stackTree();
+        if (startRoot == endRoot) {
+            word = "*ICH*";
+            label = getLabel($(endnode));
+            if (label.startsWith("W")) {
+                word = "*T*";
+                label = label.substr(1);
+            }
+            var toadd = maxIndex(startRoot) + 1;
+            word = word + "-" + toadd;
+            appendExtension($(endnode), toadd);
+        } else { // abort if selecting from different tokens
+            undo();
+            redostack.pop();
+            return;
         }
-        if (!word) {
-                word = "0";
-        }
-        if (!targetId) {
-                targetId = startnode.id;
-        }
-
-        startRoot = null;
-        endRoot = null;
-
-        if (endnode) {
-                startRoot = getTokenRoot( $("#"+startnode.id) ).attr("id");
-                endRoot = getTokenRoot( $("#"+endnode.id) ).attr("id");
-                // alert(startRoot + " - " + endRoot );
-
-                stackTree();
-                if (startRoot == endRoot) {
-
-                        word = "*ICH*";
-                        label = getLabel($(endnode));
-
-                        if (label.startsWith("W")) {
-                                word = "*T*";
-                                label = label.substr(1);
-                        }
-                        toadd = maxIndex(startRoot) + 1;
-                //        alert(toadd);
-                        word = word + "-" + toadd;
-                        appendExtension($(endnode), toadd);
-                }
-                else { // abort if selecting from different tokens
-                        undo(); redostack.pop(); return;
-                }
-        }
-
-
-        newleaf = $("<div class='snode'>" + label + " <span class='wnode'>" + word + "</span></div>");
-        if (before) {
-                //alert(word + " x " + targetId );
-                newleaf.insertBefore("#" + targetId);
-        }
-        else {
-                //alert(word + "y");
-                newleaf.insertAfter("#" + targetId);
-        }
-        startnode = null;
-        endnode = null;
-        resetIds();
-
-        selectNode( $(newleaf).attr("id") );
-        updateSelection();
-
-
+    }
+    var newleaf = $("<div class='snode'>" + label + " <span class='wnode'>" + word + "</span></div>");
+    if (before) {
+        newleaf.insertBefore("#" + targetId);
+    } else {
+        newleaf.insertAfter("#" + targetId);
+    }
+    startnode = null;
+    endnode = null;
+    resetIds();
+    selectNode($(newleaf).attr("id"));
+    updateSelection();
 }                        
 
 function isNonWord(word){
-                if( word.startsWith("*") ){
-                        return true;
-                }
-                if( word.startsWith("{") ){
-                        return true;
-                }
-                if( word == "0" ){
-                        return true;
-                }
+    if( word.startsWith("*") ){
+        return true;
+    }
+    if( word.startsWith("{") ){
+        return true;
+    }
+    if( word == "0" ){
+        return true;
+    }
 
-                return false;
+    return false;
 }
 
 function displayRename() {
