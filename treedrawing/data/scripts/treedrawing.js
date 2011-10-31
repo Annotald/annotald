@@ -691,17 +691,10 @@ function makeLeaf(before, label, word, targetId, fixed) {
     updateSelection();
 }                        
 
-function isNonWord(word){
-    if( word.startsWith("*") ){
+function isNonWord(word) {
+    if (word.startsWith("*") || word.startsWith("{") || word == "0") {
         return true;
     }
-    if( word.startsWith("{") ){
-        return true;
-    }
-    if( word == "0" ){
-        return true;
-    }
-
     return false;
 }
 
