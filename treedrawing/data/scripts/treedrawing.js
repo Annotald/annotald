@@ -46,9 +46,37 @@ Array.prototype.unique = function() {
 };
 
 
+// TODO(AWE): I think that updating labels on changing nodes works, but
+// this fn should be interactively called with debugging arg to test this
+// supposition.  When I am confident of the behavior of the code, the
+// debugging branch will be optimized/removed.
+function resetLabelClasses(alertOnError) {
+    var nodes = $(".snode");
+    for (var i = 0; i < nodes.length; i++) {
+        var label = parseLabel(getLabel(nodes[i]));
+        if (alertOnError) { // TODO(AWE): optimize test inside loop
+            var classes = nodes[i].attr("class").split(" ");
+            // This incantation removes a value from an array.
+            classes.indexOf("snode") >= 0 &&
+                classes.splice(classes.indexOf("snode"), 1);
+            classes.indexOf("ipnode") >= 0 &&
+                classes.splice(classes.indexOf("ipnode"), 1);
+            classes.indexOf(label) >= 0 &&
+                classes.splice(classes.indexOf(label), 1);
+            if (classes.length > 0) {
+                alert("Spurious classes '" + classes.join() +
+                      "' detected on node id'" + nodes[i].attr("id") + "'");
+            }
+        }
+        nodes[i].attr("class", "snode " + label);
+    }
+}
+
+
 $(document).ready(
     function() {
         resetIds();
+        resetLabelClasses(false);
         assignEvents();
         $("#debugpane").empty();
 
@@ -678,7 +706,8 @@ function makeLeaf(before, label, word, targetId, fixed) {
             return;
         }
     }
-    var newleaf = $("<div class='snode'>" + label + " <span class='wnode'>" + word + "</span></div>");
+    var newleaf = $("<div class='snode'>" + label + " <span class='wnode " + label +
+                    "'>" + word + "</span></div>");
     if (before) {
         newleaf.insertBefore("#" + targetId);
     } else {
@@ -713,10 +742,13 @@ function displayRename() {
             } else {
                 $("#theNewPhrase").removeClass("ipnode");
             }
+            $("#theNewPhrase").addClass($.trim(newphrase));
             startnode = null; endnode = null;
             resetIds();
             updateSelection();
             document.body.onkeydown = handleKeyDown;
+            // TODO(AWE): check that theNewPhrase id gets removed...it
+            // doesn't seem to?
         }
         var label = $("#"+startnode.id).contents().filter(
             function() {
@@ -1008,6 +1040,7 @@ function setLabel(labels) {
     } else {
         $("#"+startnode.id).removeClass("ipnode");
     }
+    $("#"+startnode.id).removeClass(parseLabel(oldlabel)).addClass(parseLabel(newlabel));
 }
 
 function makeNode(label) {
@@ -1025,7 +1058,8 @@ function makeNode(label) {
     if (!endnode) {
         // if only one node, wrap around that one
         stackTree();
-        $("#"+startnode.id).wrapAll('<div xxx="newnode" class="snode">'+label+' </div>');
+        $("#"+startnode.id).wrapAll('<div xxx="newnode" class="snode ' + label + '">'
+                                    + label +' </div>');
     } else {
         if (parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2))) {
             // reverse them if wrong order
@@ -1039,7 +1073,9 @@ function makeNode(label) {
             // then, collect startnode and its sister up until endnode
             var oldtext = currentText(parent_ip);
             stackTree();
-            $("#"+startnode.id).add($("#"+startnode.id).nextUntil("#"+endnode.id)).add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">'+label+'</div>');
+            $("#"+startnode.id).add($("#"+startnode.id).nextUntil("#"+endnode.id)).add(
+                "#"+endnode.id).wrapAll('<div xxx="newnode" class="snode ' +
+                                        label + '">' + label + '</div>');
             // undo if this messed up the text order
             if( currentText(parent_ip) != oldtext) {
                 undo();
