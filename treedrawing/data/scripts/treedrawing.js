@@ -97,10 +97,7 @@ $(document).ready(
         // inital highlight of IPs
         var snodes = $(".snode");
         for (var i=0; i<snodes.length; i++) {
-            var text = $("#"+snodes[i].id).contents().filter(
-                function() {
-                    return this.nodeType == 3;
-                }).first().text();
+            var text = getLabel($("#"+snodes[i].id));
             if (isIpNode(text)) {
                 $("#"+snodes[i].id).addClass('ipnode');
             }
@@ -718,10 +715,7 @@ function displayRename() {
             // TODO(AWE): check that theNewPhrase id gets removed...it
             // doesn't seem to?
         }
-        var label = $("#"+startnode.id).contents().filter(
-            function() {
-                  return this.nodeType == 3;
-            }).first().text();
+        var label = getLabel($("#"+startnode.id));
         label = $.trim(label);
         if ($("#"+startnode.id+">.wnode").size() > 0) {
             // this is a terminal
@@ -763,10 +757,7 @@ function displayRename() {
             // this is not a terminal
             var editor=$("<input id='labelbox' class='labeledit' type='text' value='" +
                          label + "' />");
-            $("#"+startnode.id).contents().filter(
-                function() {
-                      return this.nodeType == 3;
-                }).first().replaceWith(editor);
+            textNode($("#"+startnode.id)).replaceWith(editor);
             $("#labelbox").keydown(
                 function(event) {
                     if(event.keyCode == '9'){
@@ -924,9 +915,7 @@ function toggleExtension(extension) {
         return;
     }
     stackTree();
-    var textnode = $("#"+startnode.id).contents().filter(function() {
-                                                         return this.nodeType == 3;
-                                                     }).first();
+    var textnode = textNode($("#"+startnode.id));
     var oldlabel=$.trim(textnode.text());
     var newlabel = toogleJustExtension(oldlabel, extension);
     textnode.replaceWith(newlabel + " ");
@@ -938,10 +927,7 @@ function setLabel(labels) {
         return;
     }
     stackTree();
-    var textnode = $("#"+startnode.id).contents().filter(
-        function() {
-            return this.nodeType == 3;
-        }).first();
+    var textnode = textNode("#"+startnode.id);
     var oldlabel = $.trim(textnode.text());
     var newlabel = null;
     // TODO(AWE): make this more robust!
@@ -1098,15 +1084,7 @@ function setNodeLabel(node, label, noUndo) {
     if (!noUndo) {
         stackTree();
     }
-    node.contents().filter(function() {
-                               return this.nodeType == 3;
-                           }).first().replaceWith($.trim(label)+" ");
-}
-
-function getLabel(node){
-        return $.trim(node.contents().filter(function() {
-                          return this.nodeType == 3;
-                }).first().text());
+    textNode(node).replaceWith($.trim(label)+" ");
 }
 
 function appendExtension(node,extension,type) {
@@ -1399,4 +1377,16 @@ function quitServer() {
                        window.close();
                }, 100);
     }
+}
+
+function getLabel(node) {
+    return textNode(node).text();
+}
+
+// TODO(AWE): consistent calling convention -- do we pass a node or a
+// string?  Does JQuery care?
+function textNode (node) {
+    return $(node).contents().filter(function() {
+                                         return this.nodeType == 3;
+                                     }).first();
 }

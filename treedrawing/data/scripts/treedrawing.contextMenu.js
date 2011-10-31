@@ -95,9 +95,7 @@ function loadContextMenu(nodeId) {
     var nodeIndex = getIndex( $("#"+nodeId) );
     var indexSep = "", indexString = "";
     var node = $("#"+nodeId).clone();
-    var nodelabel = $.trim(node.contents().filter(function() {
-  			                              return this.nodeType == 3;
-		                                  }).first().text());
+    var nodelabel = $.trim(getLabel(node));
     function loadConMenuMousedown () {
         var e = window.event;
 	var elementId = (e.target || e.srcElement).id;
@@ -249,10 +247,7 @@ function doSetCase(nodeId, theCase) {
 	var daughters = $("#"+nodeId).children().each(
             function() {
 		var childId = $(this).attr("id");
-		var oldLabel=$.trim($(this).contents().filter(
-                                        function() {
-  				            return this.nodeType == 3;
-			                }).first().text());
+		var oldLabel=$.trim(getLabel($(this)));
                 // TODO(AWE): not portable
 		if(/-[NADG]$/.test(oldLabel)) {
 		    setNodeLabel($("#"+childId),
