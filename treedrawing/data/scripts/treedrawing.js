@@ -718,13 +718,6 @@ function makeLeaf(before, label, word, targetId, fixed) {
     resetIds();
     selectNode($(newleaf).attr("id"));
     updateSelection();
-}                        
-
-function isNonWord(word) {
-    if (word.startsWith("*") || word.startsWith("{") || word == "0") {
-        return true;
-    }
-    return false;
 }
 
 function displayRename() {
@@ -763,7 +756,7 @@ function displayRename() {
             var word = preword.join("-");
             var editor=$("<div id='leafeditor' class='snode'><input id='leafphrasebox' class='labeledit' type='text' value='"+label+"' /> <input id='leaftextbox' class='labeledit' type='text' value='"+word+"' /><input id='leaflemmabox' class='labeledit' type='text' value='" + lemma + "' /></div>");
             $("#"+startnode.id).replaceWith(editor);
-            if (!isNonWord(word)) {
+            if (!isEmpty(word)) {
                 $("#leaftextbox").attr("disabled", true);
             }
             $("#leafphrasebox,#leaftextbox,#leaflemmabox").keydown(
