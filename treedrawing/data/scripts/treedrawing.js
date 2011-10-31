@@ -719,11 +719,31 @@ function displayRename() {
         label = $.trim(label);
         if ($("#"+startnode.id+">.wnode").size() > 0) {
             // this is a terminal
-            var preword = $.trim($("#"+startnode.id).children().first().text());
-            preword = preword.split("-");
-            var lemma = preword.pop();
-            var word = preword.join("-");
-            var editor=$("<div id='leafeditor' class='snode'><input id='leafphrasebox' class='labeledit' type='text' value='"+label+"' /> <input id='leaftextbox' class='labeledit' type='text' value='"+word+"' /><input id='leaflemmabox' class='labeledit' type='text' value='" + lemma + "' /></div>");
+            var word, lemma, useLemma;
+            if ($("#" + startnode.id + ">.wnode>.lemma").size() > 0) {
+                var preword = $.trim($("#"+startnode.id).children().first().text());
+                preword = preword.split("-");
+                lemma = preword.pop();
+                word = preword.join("-");
+                useLemma = true;
+            } else {
+                word = $.trim($("#"+startnode.id).children().first().text());
+                useLemma = false;
+            }
+
+            var editorHtml = "<div id='leafeditor' class='snode'>" +
+                "<input id='leafphrasebox' class='labeledit' type='text' value='" +
+                label +
+                "' /><input id='leaftextbox' class='labeledit' type='text' value='" +
+                word +
+                "' />";
+            if (useLemma) {
+                editorHtml += "<input id='leaflemmabox' class='labeledit' " +
+                    "type='text' value='" + lemma + "' />";
+            }
+            editorHtml += "</div>";
+
+            var editor=$(editorHtml);
             $("#"+startnode.id).replaceWith(editor);
             if (!isEmpty(word)) {
                 $("#leaftextbox").attr("disabled", true);
@@ -739,16 +759,23 @@ function displayRename() {
                     if (event.keyCode == '13') {
                         var newphrase = $("#leafphrasebox").val().toUpperCase()+" ";
                         var newtext = $("#leaftextbox").val();
-                        var newlemma = $('#leaflemmabox').val();
+                        var newlemma;
+                        if (useLemma) {
+                            newlemma = $('#leaflemmabox').val();
+                            newlemma = newlemma.replace("<","&lt;");
+                            newlemma = newlemma.replace(">","&gt;");
+                        }
                         newtext = newtext.replace("<","&lt;");
                         newtext = newtext.replace(">","&gt;");
-                        newlemma = newlemma.replace("<","&lt;");
-                        newlemma = newlemma.replace(">","&gt;");
-                          $("#leafeditor").replaceWith(
-                            "<div id='theNewPhrase' class='snode'>" + newphrase +
-                                " <span class='wnode'>" + newtext +
-                                "<span class='lemma " + lemmaClass + "'>-" +
-                                newlemma + "</span></span></div>" );
+                        var replText = "<div id='theNewPhrase' class='snode'>" +
+                            newphrase +
+                            " <span class='wnode'>" + newtext;
+                        if (useLemma) {
+                            replText += "<span class='lemma " + lemmaClass + "'>-" +
+                                newlemma + "</span>";
+                        }
+                        replText += "</span></div>";
+                        $("#leafeditor").replaceWith(replText);
                         postChange(newphrase);
                     }
                 });

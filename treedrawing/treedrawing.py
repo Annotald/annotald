@@ -26,6 +26,11 @@ import cherrypy, json
 # JB: codecs necessary for Unicode Greek support
 import codecs
 
+# TODO: this will be much easier when we use nltk.tree...
+def queryVersionCookie(string, fmt):
+    versionRe = re.compile("\\(FORMAT " + fmt + "\\)")
+    return versionRe.search(string)
+
 class Treedraw(object):
 
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
@@ -49,6 +54,7 @@ class Treedraw(object):
                 f = codecs.open(self.thefile, 'w', 'utf-8')
             else:
                 f = open(self.thefile, 'w')
+            f.write(self.versionCookie + "\n\n")
             tosave = trees.strip()[1:-1]
             f.write(tosave)
             f.close()
@@ -78,6 +84,14 @@ class Treedraw(object):
             currentText = f.read().decode('utf-8')
         else:
             currentText = f.read()
+        # TODO(AWE): remove the one-line restriction
+        versionRe = re.compile('^\( \(VERSION.*$', re.M)
+        versionMatch = versionRe.search(currentText)
+        self.versionCookie = ""
+        if versionMatch:
+            self.versionCookie = versionMatch.group()
+        useLemmata = queryVersionCookie(self.versionCookie, fmt = "dash")
+        currentText = re.sub(versionRe, '', currentText)
 	currentText = currentText.replace("<","&lt;")
 	currentText = currentText.replace(">","&gt;")
 	trees = currentText.split("\n\n")	
@@ -88,13 +102,17 @@ class Treedraw(object):
 		tree0 = tree.strip()
 		tree0 = re.sub('^\(','',tree0)
 		tree0 = re.sub('\)$','',tree0).strip()
-		tree0 = re.sub('\(([^ ]+) ([^ ]+)(-[^ ]+)\)',
-                               '<div class="snode \\1">\\1'
-                                 '<span class="wnode">\\2'
-                                 '<span class="lemma lemmaHide">\\3</span>'
+		tree0 = re.sub('\(([^ ]+) ([^ ]+)\)',
+                               '<div class="snode \\1">\\1' +
+                                 '<span class="wnode">\\2' +
                                  '</span></div>', tree0)
 		tree0 = re.sub('\(([^ ]+)','<div class="snode \\1">\\1',tree0)
 		tree0 = re.sub('\)','</div>',tree0)		
+                if useLemmata:
+                    tree0 = re.sub('<span class="wnode">(.+)-(.+)</span>',
+                                   '<span class="wnode">\\1' +
+                                   '<span class="lemma lemmaHide">-\\2</span>' +
+                                   '</span>', tree0)
 		alltrees = alltrees + tree0
 
  	alltrees = alltrees + '</div>'
