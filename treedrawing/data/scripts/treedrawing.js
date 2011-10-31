@@ -1224,17 +1224,15 @@ function parseIndex( label ){
 }
 
 // TODO(AWE): make sure this interacts well with lemmata!
-function parseLabel( label ){
-        index=parseIndex(label);
-
-        if( index > 0 ){
-                lastindex=Math.max(label.lastIndexOf("-"),label.lastIndexOf("=") );
-
-                out = trim( ""+label.substr(0,lastindex) );
-                return out;
-        }
-
-        return label;
+function parseLabel (label) {
+    var index = parseIndex(label);
+    if (index > 0) {
+        var lastindex = Math.max(label.lastIndexOf("-"),
+                                 label.lastIndexOf("="));
+        var out = $.trim(""+label.substr(0,lastindex));
+        return out;
+    }
+    return label;
 }
 
 
