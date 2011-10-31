@@ -1265,10 +1265,10 @@ function parseLabel (label) {
     if (index > 0) {
         var lastindex = Math.max(label.lastIndexOf("-"),
                                  label.lastIndexOf("="));
-        var out = $.trim(""+label.substr(0,lastindex));
+        var out = $.trim("" + label.substr(0,lastindex));
         return out;
     }
-    return label;
+    return $.trim(label);
 }
 
 
