@@ -132,7 +132,7 @@ function loadContextMenu( nodeId ){
 	indexString="";
 	
 	node = $("#"+nodeId).clone();
-	nodelabel=trim(node.contents().filter(function() {
+	nodelabel=$.trim(node.contents().filter(function() {
   			return this.nodeType == 3;
 		}).first().text());
 	
@@ -308,7 +308,7 @@ function doSetCase( nodeId, theCase ){
 		daughters = $("#"+nodeId).children().each( function(){			
 			childId = $(this).attr("id");
 						
-			oldLabel=trim($(this).contents().filter(function() {
+			oldLabel=$.trim($(this).contents().filter(function() {
   				return this.nodeType == 3;
 			}).first().text());
 			if( /-[NADG]$/.test(oldLabel) ) {				

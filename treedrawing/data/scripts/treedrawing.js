@@ -656,10 +656,6 @@ function moveNodes(targetParent) {
     clearSelection();
 }
 
-function trim( s ){
-        return s.replace(/^\s*/, "").replace(/\s*$/, "");
-}
-
 /*
  *  Making leafs
 */
@@ -976,7 +972,7 @@ function toggleExtension(extension){
         textnode = $("#"+startnode.id).contents().filter(function() {
                           return this.nodeType == 3;
                 }).first();
-        oldlabel=trim(textnode.text());
+        oldlabel=$.trim(textnode.text());
         newlabel =          toogleJustExtension(oldlabel,extension);
         textnode.replaceWith(newlabel+" ");
 
@@ -996,7 +992,7 @@ function setLabel(labels) {
         function() {
             return this.nodeType == 3;
         }).first();
-    var oldlabel = trim(textnode.text());
+    var oldlabel = $.trim(textnode.text());
     var newlabel = null;
     // TODO(AWE): make this more robust!
     if (!(labels instanceof Array)) {
