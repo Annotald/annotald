@@ -1,4 +1,4 @@
-// Copyright (c) 2011 Anton Karl Ingason
+// Copyright (c) 2011 Anton Karl Ingason, Aaron Ecay
 
 // This file is part of the Annotald program for annotating
 // phrase-structure treebanks in the Penn Treebank style.
@@ -16,319 +16,257 @@
 // License along with this program.  If not, see
 // <http://www.gnu.org/licenses/>.
 
-var conmenus=new Object();
-var conleafs=new Array();
+var conmenus = new Object();
+var conleafs = new Array();
 
-function addConMenu( label, suggestions ){
-	conmenus[label]=new function(){
-		this.suggestions = suggestions;
-	}
+function addConMenu(label, suggestions) {
+    conmenus[label] = new function() {
+	this.suggestions = suggestions;
+    };
 }
 
+function addConLeaf(suggestion, before, label, word) {
+    var conleaf = new Object();
+    conleaf.suggestion=suggestion;
+    conleaf.before=before;
+    conleaf.label=label;
+    conleaf.word=word;
 
-function addConLeaf(suggestion,before,label,word){
-	conleaf=new Object();
-	conleaf.suggestion=suggestion;
-	conleaf.before=before;
-	conleaf.label=label;
-	conleaf.word=word;
-	
-	conleafs.push(conleaf);
+    conleafs.push(conleaf);
 }
 
-function addConMenuGroup( group ){
-   for(i=0; i<group.length; i++){
-      addConMenu(group[i],group);
-   }	
+function addConMenuGroup(group) {
+    for(var i = 0; i < group.length; i++){
+        addConMenu(group[i],group);
+    }
 }
 
 // Load the custom context menu groups from user settings file
 customConMenuGroups();
 
-function addConLeafBefore( phrase, terminal ){
-	addConLeaf("&lt; ("+phrase+" "+terminal+")",true,phrase,terminal);
+function addConLeafBefore(phrase, terminal) {
+    addConLeaf("&lt; (" + phrase + " " + terminal + ")",
+               true, phrase, terminal);
 }
 
 // Load the custom context menu "leaf before" items
-customConLeafBefore(); 
+customConLeafBefore();
 
-	
-defaultsPhrases=defaultConMenuGroup;
+var defaultsPhrases = defaultConMenuGroup;
 
-function isCasePhrase( nodeLabel ){
-	if( nodeLabel.startsWith("NP") ){
-		return true;			
-	}		
-	if( nodeLabel.startsWith("ADJP") ){
-		return true;			
-	}		
-	if( nodeLabel.startsWith("QP") ){
-		return true;			
-	}		
-		
-	return false;
+function isCasePhrase(nodeLabel) {
+    if (nodeLabel.startsWith("NP") ||
+        nodeLabel.startsWith("ADJP") ||
+        nodeLabel.startsWith("QP")) {
+	return true;
+    }
+    return false;
 }
 
-function getSuggestions( label ){
-	
-	indstr="";
-	indtype="";
-	extensionstring="";
-	
-	if( parseIndex(label)>0 ){		
-	    indstr=parseIndex(label);
-	    indtype=parseIndexType(label);
-	 }
-	 extensionstring=""; //parseExtensions(label);
-	 label = parseLabel(label); //.substr(0,label.length-extensionstring.length);	
-	
-	 //alert( extensionstring );
-	
-	// alert(extensionstring);
-		
-	var suggestions = new Array();		
-	var menuitems = defaultsPhrases;		
-	if( conmenus[label] != null ){
-		menuitems = conmenus[label].suggestions;
-	}		
-	
-	for( i=0; i<menuitems.length; i++ ){
-		var menuitem = menuitems[i];
-		suggestions.push( menuitem + extensionstring + indtype + indstr );
-		
-		if( conmenus[menuitem] != null ){
-			var iitems = conmenus[menuitem].suggestions;
-			for( j=0; j<iitems.length; j++){
-				suggestions.push(iitems[j]  + extensionstring + indtype + indstr );
-			}
-			
-		}				
-	}
-	
-	
-	
-	/*
-	for( i=0; i<suggestions.length; i++){
-			var suggestion = suggestions[i];
-			
-			if( conmenus[suggestion[i]] != null ){
-				moremenus = conmenus[suggestion[i]];
-				for( j=0; j<moremenus.length; j++ ){
-					suggestions
-				}				
-			}
+function getSuggestions(label) {
+    var indstr = "", indtype = "", extensionstring = "";
+    if (parseIndex(label)>0) {
+	indstr = parseIndex(label);
+	indtype = parseIndexType(label);
+    }
+    label = parseLabel(label);
 
+    var suggestions = new Array();
+    var menuitems = defaultsPhrases;
+    if (conmenus[label] != null) {
+	menuitems = conmenus[label].suggestions;
+    }
+
+    for (var i=0; i < menuitems.length; i++){
+	var menuitem = menuitems[i];
+	suggestions.push(menuitem + extensionstring + indtype + indstr);
+
+	if (conmenus[menuitem] != null) {
+	    var iitems = conmenus[menuitem].suggestions;
+	    for (var j=0; j < iitems.length; j++) {
+		suggestions.push(iitems[j] + extensionstring + indtype + indstr);
+	    }
 	}
-	*/
-	
-	return suggestions.unique();		
+    }
+    return suggestions.unique();
 }
 
+function loadContextMenu(nodeId) {
+    var nodeIndex = getIndex( $("#"+nodeId) );
+    var indexSep = "", indexString = "";
+    var node = $("#"+nodeId).clone();
+    var nodelabel = $.trim(node.contents().filter(function() {
+  			                              return this.nodeType == 3;
+		                                  }).first().text());
+    function loadConMenuMousedown () {
+        var e = window.event;
+	var elementId = (e.target || e.srcElement).id;
+	var suggestion = "" + $(this).text();
+	setNodeLabel($("#" + nodeId), suggestion);
+	hideContextMenu();
+    }
 
-function loadContextMenu( nodeId ){
+    if (nodeIndex > -1) {
+	var lastindex = Math.max(nodelabel.lastIndexOf("-"),
+                                 nodelabel.lastIndexOf("="));
+	indexSep = nodelabel.charAt(lastindex);
+	nodelabel = nodelabel.substr(0, getLabel($(node)).length - 2);
+	indexString = indexSep + "" + nodeIndex;
+    }
+    $("#conLeft").empty();
+    $("#conLeft").append($("<div class='conMenuHeading'>Label</div>"));
 
-	nodeIndex = getIndex( $("#"+nodeId) );
-	indexSep="";
-	indexString="";
-	
-	node = $("#"+nodeId).clone();
-	nodelabel=$.trim(node.contents().filter(function() {
-  			return this.nodeType == 3;
-		}).first().text());
-	
-	if( nodeIndex > -1 ){
-		lastindex=Math.max(nodelabel.lastIndexOf("-"),nodelabel.lastIndexOf("="));
-		indexSep = nodelabel.charAt(lastindex);
-		nodelabel = nodelabel.substr(0, getLabel( $(node)).length-2 );									
-		indexString = indexSep+""+nodeIndex;
+    // TODO(AWE): not portable
+    if (/-[NADG]$/.test(nodelabel)) {
+	for (var i = 0; i < caseTags.length; i++) {
+	    var theCase=nodelabel.substr(nodelabel.length - 1);
+	    var suggestion = caseTags[i] + "-" + theCase;
+	    if (suggestion != nodelabel) {
+		var newnode = $("<div class='conMenuItem'><a href='#'>" +
+                                suggestion + "</a></div>");
+		$(newnode).mousedown(loadConMenuMousedown);
+		$("#conLeft").append(newnode);
+	    }
 	}
 
-	$("#conLeft").empty();	
-	$("#conLeft").append($("<div class='conMenuHeading'>Label</div>"));	
-	
-
-			
-	
-	if (/-[NADG]$/.test( nodelabel )) {				
-		//alert(nodelabel);		
-		
-		for (i = 0; i < caseTags.length; i++) {
-
-			theCase=nodelabel.substr(nodelabel.length-1);
-			suggestion = caseTags[i]+"-"+theCase;
-			
-			if (suggestion != nodelabel) {
-				newnode = $("<div class='conMenuItem'><a href='#'>" + suggestion + "</a></div>");
-				$(newnode).mousedown(function(){
-					e = window.event;
-					var elementId = (e.target || e.srcElement).id;
-					suggestion = "" + $(this).text();
-					setNodeLabel($("#" + nodeId), suggestion);
-					hideContextMenu();
-				});
-				$("#conLeft").append(newnode);
-			}
-		}
-		
-		extraNominalSuggestions=["ADV","ES"];		
-	    for (i = 0; i < extraNominalSuggestions.length; i++) {
-			suggestion = extraNominalSuggestions[i];
-			// suggest ADV 
-			newnode = $("<div class='conMenuItem'><a href='#'>" + suggestion + "</a></div>");
-			$(newnode).mousedown(function(){
-				e = window.event;
-				var elementId = (e.target || e.srcElement).id;
-				suggestion = "" + $(this).text();
-				// alert(nodeId + " " + suggestion);
-				setNodeLabel($("#" + nodeId), suggestion);
-				hideContextMenu();
-			});
-			$("#conLeft").append(newnode);
-		}
-		//setNodeLabel($("#" + childId), oldLabel.substr(0, oldLabel.length - 2) + "-" + theCase, true);
+	var extraNominalSuggestions=["ADV","ES"];
+	for (i = 0; i < extraNominalSuggestions.length; i++) {
+	    var suggestion = extraNominalSuggestions[i];
+	    // suggest ADV
+	    var newnode = $("<div class='conMenuItem'><a href='#'>" +
+                            suggestion + "</a></div>");
+	    $(newnode).mousedown(loadConMenuMousedown);
+	    $("#conLeft").append(newnode);
 	}
-	else {
-	
-	
-	suggestions = getSuggestions(nodelabel);
-		for (i = 0; i < suggestions.length; i++) {
-			if (suggestions[i] != nodelabel) {
-				newnode = $("<div class='conMenuItem'><a href='#'>" + suggestions[i]+indexString+"</a></div>");
-				$(newnode).mousedown(function(){
-					e = window.event;
-					var elementId = (e.target || e.srcElement).id;
-					suggestion = "" + $(this).text();
-					// alert(nodeId + " " + suggestion);
-					setNodeLabel($("#" + nodeId), suggestion);
-					hideContextMenu();
-				});
-				$("#conLeft").append(newnode);
-			}
-		}
-		
-}
-	
-// do the right side context menu	
-	$("#conRight").empty();	
-	
-// Set in user settings file
-if( displayCaseMenu ){
-			if (  /-[NADG]$/.test(nodelabel) ){
-				// alert("x"+nodelabel+"x");
-				
-				    $("#conRight").append($("<div class='conMenuHeading'>Case</div>"));
-					
-					newnode = $("<div class='conMenuItem'><a href='#'>-N</a></div>");
-					$(newnode).mousedown(setCaseOnTag(nodeId,nodelabel,"N"));
-					$("#conRight").append(newnode);	
-				    
-					newnode = $("<div class='conMenuItem'><a href='#'>-A</a></div>");
-					$(newnode).mousedown(setCaseOnTag(nodeId,nodelabel,"A"));
-					$("#conRight").append(newnode);	
-					    	
-					newnode = $("<div class='conMenuItem'><a href='#'>-D</a></div>");
-					$(newnode).mousedown(setCaseOnTag(nodeId,nodelabel,"D"));
-					$("#conRight").append(newnode);	
-					
-					newnode = $("<div class='conMenuItem'><a href='#'>-G</a></div>");
-					$(newnode).mousedown(setCaseOnTag(nodeId,nodelabel,"G"));
-					$("#conRight").append(newnode);			
-			}		
-			else if( isCasePhrase(nodelabel) ){
-				    $("#conRight").append($("<div class='conMenuHeading'>Case</div>"));
-					
-					newnode = $("<div class='conMenuItem'><a href='#'>-N</a></div>");
-					$(newnode).mousedown(doSetCase(nodeId,"N"));
-					$("#conRight").append(newnode);	
-				    
-					newnode = $("<div class='conMenuItem'><a href='#'>-A</a></div>");
-					$(newnode).mousedown(doSetCase(nodeId,"A"));
-					$("#conRight").append(newnode);	
-					    	
-					newnode = $("<div class='conMenuItem'><a href='#'>-D</a></div>");
-					$(newnode).mousedown(doSetCase(nodeId,"D"));
-					$("#conRight").append(newnode);	
-					
-					newnode = $("<div class='conMenuItem'><a href='#'>-G</a></div>");
-					$(newnode).mousedown(doSetCase(nodeId,"G"));
-					$("#conRight").append(newnode);			
-			}	
+    } else {
+	var suggestions = getSuggestions(nodelabel);
+	for (var i = 0; i < suggestions.length; i++) {
+	    if (suggestions[i] != nodelabel) {
+		var newnode = $("<div class='conMenuItem'><a href='#'>" +
+                                suggestions[i]+indexString+"</a></div>");
+		$(newnode).mousedown(loadConMenuMousedown);
+		$("#conLeft").append(newnode);
+	    }
+	}
+    }
+
+    // do the right side context menu
+    $("#conRight").empty();
+
+    // Set in user settings file
+    if (displayCaseMenu) {
+        // TODO(AWE): not portable
+	if (/-[NADG]$/.test(nodelabel)) {
+	    $("#conRight").append($("<div class='conMenuHeading'>Case</div>"));
+	    var newnode = $("<div class='conMenuItem'><a href='#'>-N</a></div>");
+	    $(newnode).mousedown(setCaseOnTag(nodeId,nodelabel,"N"));
+	    $("#conRight").append(newnode);
+
+	    newnode = $("<div class='conMenuItem'><a href='#'>-A</a></div>");
+	    $(newnode).mousedown(setCaseOnTag(nodeId,nodelabel,"A"));
+	    $("#conRight").append(newnode);
+
+	    newnode = $("<div class='conMenuItem'><a href='#'>-D</a></div>");
+	    $(newnode).mousedown(setCaseOnTag(nodeId,nodelabel,"D"));
+	    $("#conRight").append(newnode);
+
+	    newnode = $("<div class='conMenuItem'><a href='#'>-G</a></div>");
+	    $(newnode).mousedown(setCaseOnTag(nodeId,nodelabel,"G"));
+	    $("#conRight").append(newnode);
+	} else if(isCasePhrase(nodelabel)) {
+            // TODO(AWE): this is almost-but-not-quite dupe of above.  Unify.
+	    $("#conRight").append($("<div class='conMenuHeading'>Case</div>"));
+
+	    var newnode = $("<div class='conMenuItem'><a href='#'>-N</a></div>");
+	    $(newnode).mousedown(doSetCase(nodeId,"N"));
+	    $("#conRight").append(newnode);
+
+	    newnode = $("<div class='conMenuItem'><a href='#'>-A</a></div>");
+	    $(newnode).mousedown(doSetCase(nodeId,"A"));
+	    $("#conRight").append(newnode);
+
+	    newnode = $("<div class='conMenuItem'><a href='#'>-D</a></div>");
+	    $(newnode).mousedown(doSetCase(nodeId,"D"));
+	    $("#conRight").append(newnode);
+
+	    newnode = $("<div class='conMenuItem'><a href='#'>-G</a></div>");
+	    $(newnode).mousedown(doSetCase(nodeId,"G"));
+	    $("#conRight").append(newnode);
+	}
+    }
+
+    // do addleafbefore
+    $("#conRight").append($("<div class='conMenuHeading'>Leaf before</div>"));
+    for (var i = 0; i < conleafs.length; i++) {
+	stackTree();
+	var newnode = $("<div class='conMenuItem'><a href='#'>" +
+                        conleafs[i].suggestion + "</a></div>");
+	$(newnode).mousedown(doConLeaf(i,conleafs[i],nodeId));
+	$("#conRight").append(newnode);
+    }
+
+    $("#conRightest").empty();
+    $("#conRightest").append($("<div class='conMenuHeading'>Toggle ext.</div>"));
+
+    for (i = 0; i < extensions.length; i++) {
+	// do the right side context menu
+	var newnode = $("<div class='conMenuItem'><a href='#'>" +
+                        extensions[i] + "</a></div>");
+	$(newnode).mousedown(doToggleExtension(nodeId, extensions[i]));
+	$("#conRightest").append(newnode);
+    }
 }
 
-	// do addleafbefore
-	$("#conRight").append($("<div class='conMenuHeading'>Leaf before</div>"));
-	for (i = 0; i < conleafs.length; i++) {
-		stackTree();	    			
-		newnode = $("<div class='conMenuItem'><a href='#'>"+conleafs[i].suggestion+"</a></div>");
-		$(newnode).mousedown(doConLeaf(i,conleafs[i],nodeId));
-		$("#conRight").append(newnode);
-	}
-	
-	
-	$("#conRightest").empty();	
-	$("#conRightest").append($("<div class='conMenuHeading'>Toggle ext.</div>"));
-			
-	for( i=0; i<extensions.length; i++){	
-		// do the right side context menu					
-		newnode = $("<div class='conMenuItem'><a href='#'>"+extensions[i]+"</a></div>");
-		$(newnode).mousedown( doToggleExtension( nodeId, extensions[i] )  );		
-		$("#conRightest").append(newnode);	
-	}
-}
-
-function doToggleExtension( nodeId, extension ){
-	return function(){
-		stackTree();		
-		clearSelection();
-		selectNode(nodeId);		
-		//alert(nodeId + " " + extension);
-		toggleExtension(extension);
-		hideContextMenu();
-		clearSelection();
-	}	
+function doToggleExtension(nodeId, extension) {
+    return function() {
+	stackTree();
+	clearSelection();
+	selectNode(nodeId);
+	toggleExtension(extension);
+	hideContextMenu();
+	clearSelection();
+    };
 }
 
 /*
- * set case just on this one tag 
+ * set case just on this one tag
  */
-function setCaseOnTag( nodeId, oldLabel, theCase ){
-	return function(){
-		stackTree();		
-		setNodeLabel($("#"+nodeId), oldLabel.substr(0,oldLabel.length-2)+"-"+theCase,true);			
-	}	
+function setCaseOnTag(nodeId, oldLabel, theCase) {
+    return function() {
+	stackTree();
+	setNodeLabel($("#"+nodeId),
+                     oldLabel.substr(0, oldLabel.length - 2) + "-" + theCase,
+                     true);
+    };
 }
 
 /*
  * set case on all case elements that are daughters of this phrase node
  */
-function doSetCase( nodeId, theCase ){
-	return function(){
-		stackTree();
-		//alert(nodeId + " " + theCase);
-		daughters = $("#"+nodeId).children().each( function(){			
-			childId = $(this).attr("id");
-						
-			oldLabel=$.trim($(this).contents().filter(function() {
-  				return this.nodeType == 3;
-			}).first().text());
-			if( /-[NADG]$/.test(oldLabel) ) {				
-				setNodeLabel($("#"+childId), oldLabel.substr(0,oldLabel.length-2)+"-"+theCase,true);					
-			}
-																			
-				
-		} );
-		
-				
-	}
-
+function doSetCase(nodeId, theCase) {
+    return function() {
+	stackTree();
+	var daughters = $("#"+nodeId).children().each(
+            function() {
+		var childId = $(this).attr("id");
+		var oldLabel=$.trim($(this).contents().filter(
+                                        function() {
+  				            return this.nodeType == 3;
+			                }).first().text());
+                // TODO(AWE): not portable
+		if(/-[NADG]$/.test(oldLabel)) {
+		    setNodeLabel($("#"+childId),
+                                 oldLabel.substr(0, oldLabel.length - 2) +
+                                 "-" + theCase,
+                                 true);
+		}
+	    });
+    };
 }
 
-
-
-
-function doConLeaf(idx,conleaf,nodeId){
-		return function(){
-			makeLeaf(conleaf.before, conleaf.label, conleaf.word, nodeId, true);
-			hideContextMenu();
-		}
+function doConLeaf(idx,conleaf,nodeId) {
+    return function() {
+	makeLeaf(conleaf.before, conleaf.label, conleaf.word, nodeId, true);
+	hideContextMenu();
+    };
 }
