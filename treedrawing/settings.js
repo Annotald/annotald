@@ -64,8 +64,8 @@ function customCommands(){
     addCommand({ keycode: 90 }, undo); // z
     addCommand({ keycode: 76 }, editLemma); // l
     addCommand({ keycode: 32 }, clearSelection); // spacebar
-    addCommand({ keycode: 192 }, toggleLemmata);
-    addCommand({ keycode: 76, ctrl: true }, doRename);
+    addCommand({ keycode: 192 }, toggleLemmata); // `
+    addCommand({ keycode: 76, ctrl: true }, doRename); // ctrl + l
 
 // addCommand(51,"makenode","NP","NP-PRD","NP-POS"); // 3
 // addCommand(188,"clearselection"); // <
