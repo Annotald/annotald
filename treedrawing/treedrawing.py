@@ -145,18 +145,23 @@ class Treedraw(object):
             print("Usage: annotald [settingsFile.js] file.psd")
 
         currentTree = self.loadPsd(filename)
-        
+
+        # Chicken and egg: treedrawing.js must go before the
+        # currentSettings, so that the functions there are defined for
+        # currentSettings.  But currentSettings in turn must define some
+        # functions for treedrawing.contextMenu.js.
         return """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
 <html>
 <head>  <title>Annotald</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="stylesheet" type="text/css" href="css/treedrawing.css"
           type="text/css"></link>
-    <script type= "application/javascript"/>""" + currentSettings + """</script>
-	<script type= "application/javascript" src="scripts/jquery.js"/></script>		
-	<script type= "application/javascript" src="scripts/treedrawing.js"/></script>		
-	<script type= "application/javascript"
+        <script type= "application/javascript" src="scripts/jquery.js"/></script>
+	<script type= "application/javascript" src="scripts/treedrawing.js"/></script>
+        <script type= "application/javascript"/>""" + currentSettings + """</script>
+        <script type= "application/javascript"
           src="scripts/treedrawing.contextMenu.js"/></script>
+	
 
 </head>
 <body oncontextmenu="return false;">
