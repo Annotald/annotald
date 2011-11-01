@@ -102,14 +102,14 @@ class Treedraw(object):
 		tree0 = tree.strip()
 		tree0 = re.sub('^\(','',tree0)
 		tree0 = re.sub('\)$','',tree0).strip()
-		tree0 = re.sub('\(([^ ]+) ([^ ]+)\)',
+		tree0 = re.sub('\(([^ ()]+) ([^ ()]+)\)',
                                '<div class="snode \\1">\\1' +
                                  '<span class="wnode">\\2' +
                                  '</span></div>', tree0)
 		tree0 = re.sub('\(([^ ]+)','<div class="snode \\1">\\1',tree0)
-		tree0 = re.sub('\)','</div>',tree0)		
+		tree0 = re.sub('\)','</div>',tree0)
                 if useLemmata:
-                    tree0 = re.sub('<span class="wnode">(.+)-(.+)</span>',
+                    tree0 = re.sub('<span class="wnode">([^<>]+)-([^<>]+)</span>',
                                    '<span class="wnode">\\1' +
                                    '<span class="lemma lemmaHide">-\\2</span>' +
                                    '</span>', tree0)
