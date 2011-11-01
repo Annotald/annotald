@@ -21,7 +21,9 @@ var endnode = null;
 var mousenode = null;
 var undostack = new Array();
 var redostack = new Array();
-var commands = new Object();
+var ctrlKeyMap = new Object();
+var shiftKeyMap = new Object();
+var regularKeyMap = new Object();
 
 var name = "#floatMenu";
 var menuYloc = null;
@@ -187,10 +189,18 @@ function hideContextMenu() {
     $("#conMenu").css("visibility","hidden");
 }
 
-function addCommand(keycode, type, label) {
-    commands[keycode] = new function() {
-        this.type = type;
-        this.label=label;
+function addCommand(dict, fn, arg) {
+    var commandMap;
+    if (dict.ctrl) {
+        commandMap = ctrlKeyMap;
+    } else if (dict.shift) {
+        commandMap = shiftKeyMap;
+    } else {
+        commandMap = regularKeyMap;
+    }
+    commandMap[dict.keycode] = {
+        func: fn,
+        args: [arg]
     };
 }
 
@@ -252,67 +262,35 @@ function assignEvents() {
     $("#conMenu").mousedown(hideContextMenu);
 }
 
+function doRename() {
+    displayRename();
+    // TODO(AWE): does this work??
+    window.event.preventDefault();
+}
+
 
 function handleKeyDown(e) {
     // TODO(AWE): can we make this function dispatch on arbitrary code,
     // instead of a string argument?
     // TODO(AWE): allow specification of modifier keys
 
-    if (e.ctrlKey && e.keyCode == 83) {
-        save();
-        e.preventDefault();
-    } else if (commands[e.keyCode] != null) {
-        var type = commands[e.keyCode]["type"];
-        var label = commands[e.keyCode]["label"];
-        switch (type) {
-        case "makenode":
-            if (e.shiftKey) {
-                setLabel(label);
-            } else {
-                makeNode(label);
-            }
-            break;
-        case "toggleextension":
-            toggleExtension(label);
-            break;
-        case "undo":
-            undo();
-            break;
-        case "redo":
-            redo();
-            break;
-        case "prunenode":
-            pruneNode();
-            break;
-        case "coindex":
-            coIndex();
-            break;
-        case "clearselection":
-            clearSelection();
-            break;
-        case "rename":
-            displayRename();
-            e.preventDefault();
-            break;
-        case "setlabel":
-            setLabel(label);
-            break;
-        case "leafbefore":
-            leafBefore();
-            break;
-        case "leafafter":
-            leafAfter();
-            break;
-        case  "toggleLemmata":
-            toggleLemmata();
-            break;
-        case  "editLemma":
-            editLemma();
-            break;
-        }
-        last_event_was_mouse = false;
+    var commandMap;
+    if (e.ctrlKey) {
+        commandMap = ctrlKeyMap;
+    } else if (e.shiftKey) {
+        commandMap = shiftKeyMap;
+    } else {
+        commandMap = regularKeyMap;
     }
+    last_event_was_mouse = false;
+    if (!commandMap[e.keyCode]) {
+        return;
+    }
+    var theFn = commandMap[e.keyCode].func;
+    var theArgs = commandMap[e.keyCode].args;
+    theFn.apply(undefined, theArgs);
 }
+
 
 function handleNodeClick(e) {
     e = e || window.event;
