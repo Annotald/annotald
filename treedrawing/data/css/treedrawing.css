@@ -76,8 +76,8 @@ body {
 }
 
 #floatMenu {
-    position: absolute;
-    top: 50px;
+    position: fixed;
+    top: 5%;
     left: 0px;
     margin-left: 5px;
     width: 200px;

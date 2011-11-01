@@ -84,16 +84,6 @@ $(document).ready(
         assignEvents();
         $("#debugpane").empty();
 
-        // make menu float
-        menuYloc = parseInt($(name).css("top").substring(
-                                0, $(name).css("top").indexOf("px")));
-
-        $(window).scroll(
-            function () {
-                var offset = menuYloc+$(document).scrollTop()+"px";
-                $(name).animate({top:offset},{duration: 0, queue: false});
-            });
-
         // inital highlight of IPs
         var snodes = $(".snode");
         for (var i=0; i<snodes.length; i++) {
