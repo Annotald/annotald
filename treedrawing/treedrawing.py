@@ -181,7 +181,7 @@ Editing: """+self.thefile+""" <br />
 <input class="menubutton" type="button" value="Redo" id="butredo"><br />
 <input class="menubutton" type="button" value="Exit" id="butexit"><br />
 
-<div id="debugpane">x</div>
+<div id="debugpane"></div>
 <div id="saveresult"></div>
 </div>
 <div id="editpane">"""+currentTree+"""</div>
