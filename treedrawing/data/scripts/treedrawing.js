@@ -28,6 +28,8 @@ var menuYloc = null;
 
 var last_event_was_mouse = false;
 
+var globalStyle = $('<style type="text/css"></style>');
+
 String.prototype.startsWith = function(str) {
     return (this.substr(0,str.length) === str);
 };
@@ -93,13 +95,26 @@ $(document).ready(
             }
         }
 
-        // setup context menu
+        globalStyle.appendTo("head");
 
         lastsavedstate = $("#editpane").html();
     });
 
 // menuon=true;
 // checks if the given node label is an ip node in the gui coloring sense
+
+function addStyle(string) {
+    var style = globalStyle.text() + "\n" + string;
+    globalStyle.text(style);
+}
+
+function styleTag(tagName, css) {
+    // TODO(AWE): this is a really baroque selector.  The alternative
+    // (faster?) way to do it is to keep track of the node name as a
+    // separate div-level property
+    addStyle('*[class*=" ' + tagName + '-"],*[class*=" ' + tagName +
+             ' "],*[class$=" ' + tagName + '"] { ' + css + ' }');
+}
 
 // TODO(AWE): now that the node label is in the CSS class, can this be
 // factored out?

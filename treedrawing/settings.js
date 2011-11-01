@@ -114,3 +114,5 @@ function customConLeafBefore(){
 	addConLeafBefore( "CODE", "*TTT*");
 	addConLeafBefore( "CODE", "*SSS*");	
 }
+
+// styleTag("NP", "color: red");
