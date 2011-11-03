@@ -972,7 +972,7 @@ function setLabel(labels) {
     }
     newlabel = changeJustLabel(oldlabel,newlabel);
     textnode.replaceWith(newlabel + " ");
-    if (isIpNode(label[0])) {
+    if (isIpNode(newlabel)) {
         $("#"+startnode.id).addClass("ipnode");
     } else {
         $("#"+startnode.id).removeClass("ipnode");
@@ -1172,7 +1172,7 @@ function parseLabel (label) {
 
 function getIndex(node) {
     var label = getLabel(node);
-    return parseIndex(getLabel(label));
+    return parseIndex(label);
 }
 
 function parseIndexType(label){
