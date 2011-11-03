@@ -262,12 +262,13 @@ function assignEvents() {
     $("#conMenu").mousedown(hideContextMenu);
 }
 
-function doRename() {
-    displayRename();
-    // TODO(AWE): does this work??
-    window.event.preventDefault();
+function editLemmaOrLabel() {
+    if (isLeafNode(startnode)) {
+        editLemma();
+    } else {
+        displayRename();
+    }
 }
-
 
 function handleKeyDown(e) {
     // TODO(AWE): can we make this function dispatch on arbitrary code,
@@ -1399,4 +1400,8 @@ function textNode (node) {
     return $(node).contents().filter(function() {
                                          return this.nodeType == 3;
                                      }).first();
+}
+
+function isLeafNode (node) {
+    return $("#" + node.id + ">.wnode").size() > 0;
 }
