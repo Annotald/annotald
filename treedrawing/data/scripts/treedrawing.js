@@ -658,6 +658,7 @@ function makeLeaf(before, label, word, targetId) {
         stackTree();
         if (startRoot == endRoot) {
             word = "*ICH*";
+            lemma = "*ICH*";
             label = getLabel($(endnode));
             if (label.startsWith("W")) {
                 word = "*T*";
@@ -673,7 +674,7 @@ function makeLeaf(before, label, word, targetId) {
         }
     }
 
-    var newleaf = "<div class='snode" + label + "'>" + label +
+    var newleaf = "<div class='snode " + label + "'>" + label +
         " <span class='wnode'>" + word;
     if (lemma) {
         newleaf += "<span class='lemma " + lemmaClass + "'>-" + lemma + "</span>";
