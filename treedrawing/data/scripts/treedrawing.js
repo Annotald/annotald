@@ -686,14 +686,14 @@ function displayRename() {
             $("#"+elementId).val( $("#"+elementId).val() );
             event.preventDefault();
         }
-        function postChange(newphrase) {
-            if(isIpNode(newphrase)) {
-                $("#theNewPhrase").addClass("ipnode");
+        function postChange(newNode) {
+            if(isIpNode(getLabel(newNode))) {
+                newNode.addClass("ipnode");
             } else {
-                $("#theNewPhrase").removeClass("ipnode");
+                newNode.removeClass("ipnode");
             }
-            $("#theNewPhrase").addClass($.trim(newphrase));
-            startnode = null; endnode = null;
+            newNode.addClass(getLabel(newNode));
+            startnode = endnode = null;
             resetIds();
             updateSelection();
             document.body.onkeydown = handleKeyDown;
@@ -701,7 +701,6 @@ function displayRename() {
             // doesn't seem to?
         }
         var label = getLabel($("#"+startnode.id));
-        label = $.trim(label);
         if ($("#"+startnode.id+">.wnode").size() > 0) {
             // this is a terminal
             var word, lemma, useLemma;
@@ -752,16 +751,16 @@ function displayRename() {
                         }
                         newtext = newtext.replace("<","&lt;");
                         newtext = newtext.replace(">","&gt;");
-                        var replText = "<div id='theNewPhrase' class='snode'>" +
-                            newphrase +
-                            " <span class='wnode'>" + newtext;
+                        var replText = "<div class='snode'>" +
+                            newphrase + " <span class='wnode'>" + newtext;
                         if (useLemma) {
                             replText += "<span class='lemma " + lemmaClass + "'>-" +
                                 newlemma + "</span>";
                         }
                         replText += "</span></div>";
-                        $("#leafeditor").replaceWith(replText);
-                        postChange(newphrase);
+                        var replNode = $(replText);
+                        $("#leafeditor").replaceWith(replNode);
+                        postChange(replNode);
                     }
                 });
             setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
@@ -769,20 +768,21 @@ function displayRename() {
             // this is not a terminal
             var editor=$("<input id='labelbox' class='labeledit' type='text' value='" +
                          label + "' />");
-            textNode($("#"+startnode.id)).replaceWith(editor);
+            var origNode = $("#"+startnode.id);
+            textNode(origNode).replaceWith(editor);
             $("#labelbox").keydown(
                 function(event) {
-                    if(event.keyCode == '9'){
+                    if (event.keyCode == '9') {
                         // tab, do nothing
                           var elementId = (event.target || event.srcElement).id;
                     }
-                    if(event.keyCode == '32'){
+                    if (event.keyCode == '32') {
                         space(event);
                     }
-                    if(event.keyCode == '13'){
-                        var newphrase = $("#labelbox").val().toUpperCase()+" ";
-                          $("#labelbox").replaceWith(newphrase);
-                        postChange(newphrase);
+                    if (event.keyCode == '13') {
+                        var newphrase = $("#labelbox").val().toUpperCase();
+                        $("#labelbox").replaceWith(newphrase + " ");
+                        postChange(origNode);
                     }
                 });
             setTimeout(function(){ $("#labelbox").focus(); }, 10);
@@ -1392,7 +1392,7 @@ function quitServer() {
 }
 
 function getLabel(node) {
-    return textNode(node).text();
+    return $.trim(textNode(node).text());
 }
 
 // TODO(AWE): consistent calling convention -- do we pass a node or a
