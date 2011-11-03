@@ -287,6 +287,7 @@ function handleKeyDown(e) {
     if (!commandMap[e.keyCode]) {
         return;
     }
+    e.preventDefault()
     var theFn = commandMap[e.keyCode].func;
     var theArgs = commandMap[e.keyCode].args;
     theFn.apply(undefined, theArgs);
