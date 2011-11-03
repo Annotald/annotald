@@ -949,6 +949,9 @@ function toggleExtension(extension) {
 }
 
 function setLabel(labels) {
+    if (!startnode) {
+        return;
+    }
     if (!isPossibleTarget(startnode.id) &&
         !isEmpty(wnodeString($("#"+startnode.id)))) {
         return;
