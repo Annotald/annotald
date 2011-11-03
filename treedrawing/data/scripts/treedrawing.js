@@ -73,7 +73,7 @@ function resetLabelClasses(alertOnError) {
                     classes.splice(classes.indexOf(label), 1);
                 if (classes.length > 0) {
                     alert("Spurious classes '" + classes.join() +
-                          "' detected on node id'" + nodes[i].attr("id") + "'");
+                          "' detected on node id'" + node.attr("id") + "'");
                 }
             }
         node.attr("class", "snode " + label);
