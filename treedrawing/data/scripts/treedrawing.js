@@ -210,6 +210,8 @@ function addCommand(dict, fn, arg) {
 
 function stackTree() {
     undostack.push($("#editpane").html());
+    // Keep this small, for memory reasons
+    undostack = undostack.slice(-15);
 }
 
 function redo() {
