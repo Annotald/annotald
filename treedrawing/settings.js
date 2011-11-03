@@ -67,6 +67,12 @@ function customCommands(){
     addCommand({ keycode: 192 }, toggleLemmata); // `
     addCommand({ keycode: 76, ctrl: true }, doRename); // ctrl + l
 
+    // An example of a context-sensitive label switching command.  If
+    // neither NP or PP is the POS, the NP value (first in the dictionary)
+    // is chosen by default.
+    // addCommand({ keycode: 123 } , setLabel, { NP: ["NP-SBJ", "NP-OB1", "NP-OB2"],
+    //                                           PP: ["PP-SBJ", "PP-OB1", "PP-OB2"]});
+
 // addCommand(51,"makenode","NP","NP-PRD","NP-POS"); // 3
 // addCommand(188,"clearselection"); // <
 // addCommand(78, "makenode","XP"); // n
@@ -115,4 +121,10 @@ function customConLeafBefore(){
 	addConLeafBefore( "CODE", "*SSS*");	
 }
 
+// An example of a CSS rule for coloring a POS tag.  The styleTag
+// function takes care of setting up a (somewhat complex) CSS rule that
+// applies the given style to any node that has the given label.  Dash tags
+// are accounted for, i.e. NP also matches NP-FOO (but not NPR).  The
+// lower-level addStyle() function adds its argument as CSS code to the
+// document.
 // styleTag("NP", "color: red");
