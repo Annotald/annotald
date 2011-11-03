@@ -16,6 +16,9 @@
 // License along with this program.  If not, see
 // <http://www.gnu.org/licenses/>.
 
+// Global TODOs:
+// - (AWE) push ipnode bookkeeping/formatting into CSS
+
 var startnode = null;
 var endnode = null;
 var mousenode = null;
@@ -190,6 +193,7 @@ function hideContextMenu() {
 }
 
 function addCommand(dict, fn, arg) {
+    // TODO(AWE): allow multiple arguments, via surgery on arguments array.
     var commandMap;
     if (dict.ctrl) {
         commandMap = ctrlKeyMap;
@@ -271,10 +275,6 @@ function editLemmaOrLabel() {
 }
 
 function handleKeyDown(e) {
-    // TODO(AWE): can we make this function dispatch on arbitrary code,
-    // instead of a string argument?
-    // TODO(AWE): allow specification of modifier keys
-
     var commandMap;
     if (e.ctrlKey) {
         commandMap = ctrlKeyMap;
@@ -295,6 +295,8 @@ function handleKeyDown(e) {
 
 
 function handleNodeClick(e) {
+    // TODO(AWE): allow a non-contiguous mouse click to extend the
+    // selection if shift is held.
     e = e || window.event;
     var elementId = (e.target || e.srcElement).id;
     if (e.button == 2) {
