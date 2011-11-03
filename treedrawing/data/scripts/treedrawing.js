@@ -287,7 +287,7 @@ function handleKeyDown(e) {
     if (!commandMap[e.keyCode]) {
         return;
     }
-    e.preventDefault()
+    e.preventDefault();
     var theFn = commandMap[e.keyCode].func;
     var theArgs = commandMap[e.keyCode].args;
     theFn.apply(undefined, theArgs);
@@ -1399,12 +1399,12 @@ function getLabel(node) {
 
 // TODO(AWE): consistent calling convention -- do we pass a node or a
 // string?  Does JQuery care?
-function textNode (node) {
+function textNode(node) {
     return $(node).contents().filter(function() {
                                          return this.nodeType == 3;
                                      }).first();
 }
 
-function isLeafNode (node) {
+function isLeafNode(node) {
     return $("#" + node.id + ">.wnode").size() > 0;
 }
