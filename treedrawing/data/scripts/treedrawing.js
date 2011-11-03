@@ -631,7 +631,7 @@ function leafAfter() {
     makeLeaf(false);
 }
 
-function makeLeaf(before, label, word, targetId, fixed) {
+function makeLeaf(before, label, word, targetId) {
     if (!label) {
         label = "WADVP";
     }
@@ -640,6 +640,13 @@ function makeLeaf(before, label, word, targetId, fixed) {
     }
     if (!targetId) {
         targetId = startnode.id;
+    }
+
+    var lemma = false;
+    var temp = word.split("-");
+    if (temp.length > 1) {
+        lemma = temp.pop();
+        word = temp.join("-");
     }
 
     var startRoot = null;
@@ -665,8 +672,14 @@ function makeLeaf(before, label, word, targetId, fixed) {
             return;
         }
     }
-    var newleaf = $("<div class='snode'>" + label + " <span class='wnode " + label +
-                    "'>" + word + "</span></div>");
+
+    var newleaf = "<div class='snode" + label + "'>" + label +
+        " <span class='wnode'>" + word;
+    if (lemma) {
+        newleaf += "<span class='lemma " + lemmaClass + "'>-" + lemma + "</span>";
+    }
+    newleaf += "</span></div>";
+    newleaf = $(newleaf);
     if (before) {
         newleaf.insertBefore("#" + targetId);
     } else {
