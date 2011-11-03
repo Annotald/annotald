@@ -264,6 +264,7 @@ function assignEvents() {
     $("#butexit").mousedown(quitServer);
     $("#editpane").mousedown(clearSelection);
     $("#conMenu").mousedown(hideContextMenu);
+    $(document).mousewheel(handleMouseWheel);
 }
 
 function editLemmaOrLabel() {
@@ -274,7 +275,26 @@ function editLemmaOrLabel() {
     }
 }
 
+function handleMouseWheel(e, delta) {
+    if (e.shiftKey && startnode) {
+        var nextNode;
+        if (delta < 0) { // negative means scroll down, counterintuitively
+             nextNode = $("#" + startnode.id).next().get(0);
+        } else {
+            nextNode = $("#" + startnode.id).prev().get(0);
+        }
+        if (nextNode) {
+            selectNode(nextNode.id);
+            scrollToShowSel();
+        }
+    }
+}
+
 function handleKeyDown(e) {
+    if ((e.ctrlKey && e.shiftKey) || e.metaKey || e.altKey) {
+        // unsupported modifier combinations
+        return;
+    }
     var commandMap;
     if (e.ctrlKey) {
         commandMap = ctrlKeyMap;
@@ -391,6 +411,19 @@ function updateSelection() {
 
     if (endnode) {
         $("#"+endnode.id).addClass('snodesel');
+    }
+}
+
+function scrollToShowSel() {
+    function isTopVisible(elem) {
+        var docViewTop = $(window).scrollTop();
+        var docViewBottom = docViewTop + $(window).height();
+        var elemTop = $(elem).offset().top;
+
+        return ((elemTop <= docViewBottom) && (elemTop >= docViewTop));
+    }
+    if (!isTopVisible(startnode)) {
+        window.scroll(0, $(startnode).offset().top - $(window).height() * 0.25);
     }
 }
 

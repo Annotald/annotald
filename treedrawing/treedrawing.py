@@ -157,6 +157,8 @@ class Treedraw(object):
         <link rel="stylesheet" type="text/css" href="css/treedrawing.css"
           type="text/css"></link>
         <script type= "application/javascript" src="scripts/jquery.js"/></script>
+        <script type= "application/javascript" src="scripts/jquery.mousewheel.min.js"/>
+        </script>
 	<script type= "application/javascript" src="scripts/treedrawing.js"/></script>
         <script type= "application/javascript"/>""" + currentSettings + """</script>
         <script type= "application/javascript"
