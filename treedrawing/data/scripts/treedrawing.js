@@ -635,7 +635,9 @@ function moveNodes(targetParent) {
                 //   updateSelection();
             }
             //}
-        } else if (parseInt( startnode.id.substr(2) ) < parseInt(targetParent.substr(2))) {               //stackTree();
+        } else if (parseInt( startnode.id.substr(2) ) <
+                   parseInt(targetParent.substr(2))) {
+            //stackTree();
             $("#"+startnode.id).insertBefore( $("#"+targetParent).children().first() );
             if (currentText(parent_ip) != textbefore) {
                 undo();
