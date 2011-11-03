@@ -14,7 +14,7 @@ PURPOSE. See the GNU Lesser General Public License for more details.
 @contact: jana.eliz.beck@gmail.com
 """
 
-VERSION = "0.3"
+VERSION = "11.11"
 
 import os.path
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -1,0 +1,31 @@
+Release 11.11:
+- Proper Unicode support on OS X and Linux
+- Remove dependency on a particular charset in parsed files
+- Code cleanup (see hacking.txt for instructions/style guide)
+- Add support for lemmata in (POS word-lemma) format
+- Speed up the moving of nodes in some cases
+- Add a notification message when save completes successfully
+- Add an “exit” button, which kills the Annotald server and closes the
+  browser window.  Exit will fail if there are unsaved changes
+- Change behavior of mouse click selection.  Previously, the following
+  behavior was extant:
+  1) Click a node
+  2) Change the node’s label with a keybaord command
+  3) Click another node to select it
+  Result: the just-clicked node is made the selection endpoint
+  This can be surprising.  Now, in order to make a secondary selection,
+  the two mouseclicks must immediately follow each other, without any
+  intervening keystrokes.
+- Allow context-sensitive label switching commands.  See the included
+  settings.js file for an example
+- (Experimental) Add a CSS class to each node in the tree corresponding
+  to its syntactic label.  This facilitates the specification of
+  additional CSS rules (for an example, see the settings file)
+- Keybindings can now be specified with control and shift modifier keys
+  (though not both together).  The second argument (action to be taken)
+  for a binding can now be an arbitrary javascript function; the third
+  argument is the argument (singular for now) to be passed to the
+  function.
+
+IcePaHC version:
+- Initial version
