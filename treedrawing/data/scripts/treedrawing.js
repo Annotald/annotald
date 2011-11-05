@@ -439,8 +439,12 @@ function isPossibleTarget(node) {
 }
 
 // TODO(AWE): remove
-function currentText(root){
-    return wnodeString(root);
+function currentText(root) {
+    var text = $(node).find('.wnode').filter(
+        function() {
+            return !isEmpty(this.textContent);
+        }).text();
+    return text;
 }
 
 function moveNode(targetParent){
