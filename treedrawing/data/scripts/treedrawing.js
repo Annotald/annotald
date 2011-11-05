@@ -18,6 +18,7 @@
 
 // Global TODOs:
 // - (AWE) push ipnode bookkeeping/formatting into CSS
+// - (AWE) is $("#" + foo.id) the same as $(foo), and is the latter faster?
 
 var startnode = null;
 var endnode = null;
