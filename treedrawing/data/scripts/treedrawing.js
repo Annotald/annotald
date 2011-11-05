@@ -153,7 +153,8 @@ function contains(a, obj) {
 
 
 function isEmpty (text) {
-    if (text.startsWith("*") || text.startsWith("{") || text == 0) {
+    if (text.startsWith("*") || text.startsWith("{") ||
+        text.split("-")[0] == "0") {
         return true;
     }
     return false;
