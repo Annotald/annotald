@@ -443,7 +443,7 @@ function currentText(root){
 }
 
 function moveNode(targetParent){
-    var parent_ip = $("#" + startnode.id).parents(".ipnode,#sn0").first();
+    var parent_ip = $("#" + startnode.id).parents("#sn0>.ipnode,#sn0").first();
     var textbefore = currentText(parent_ip);
     if (!isPossibleTarget(targetParent)) {
         // can't move under a tag node
@@ -532,7 +532,7 @@ function node(aid){
 }
 
 function moveNodes(targetParent) {
-    var parent_ip = $("#" + startnode.id).parents(".ipnode,#sn0").first();
+    var parent_ip = $("#" + startnode.id).parents("#sn0>.ipnode,#sn0").first();
     var textbefore = currentText(parent_ip);
     var destination=$("#"+targetParent);
     stackTree();
