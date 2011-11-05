@@ -1119,10 +1119,7 @@ function pruneNode() {
     if (startnode && !endnode) {
         var deltext = $("#"+startnode.id).children().first().text();
         // if this is a leaf, todo XXX fix
-        if (deltext == "0" ||
-            deltext.charAt(0) == "*" ||
-            deltext.charAt(0) == "{" ||
-            deltext.charAt(0) == "<" ) {
+        if (isEmpty(deltext)) {
             // it is ok to delete leaf if is empty/trace
             stackTree();
             $("#"+startnode.id).remove();
