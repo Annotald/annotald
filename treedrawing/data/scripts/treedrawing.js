@@ -998,7 +998,7 @@ function setLabel(labels) {
         return;
     }
     stackTree();
-    var textnode = textNode("#"+startnode.id);
+    var textnode = textNode($("#"+startnode.id));
     var oldlabel = $.trim(textnode.text());
     var newlabel = null;
     // TODO(AWE): make this more robust!
@@ -1450,10 +1450,8 @@ function getLabel(node) {
     return $.trim(textNode(node).text());
 }
 
-// TODO(AWE): consistent calling convention -- do we pass a node or a
-// string?  Does JQuery care?
 function textNode(node) {
-    return $(node).contents().filter(function() {
+    return node.contents().filter(function() {
                                          return this.nodeType == 3;
                                      }).first();
 }
