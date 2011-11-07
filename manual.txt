@@ -1,3 +1,10 @@
+SUPPORT
+
+Annotald should run on all Unix-ish platforms, including Mac OS X.  It
+may run on Windows, but it is not known if it can cope with
+Unicode-encoded files on that OS.  Annotald’s current maintainers have
+no intention of working to support Windows.
+
 RUNNING
 
 To begin using Annotald, execute the following command at the shell:
