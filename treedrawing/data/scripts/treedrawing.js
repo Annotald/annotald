@@ -125,14 +125,6 @@ function styleTag(tagName, css) {
 // TODO(AWE): now that the node label is in the CSS class, can this be
 // factored out?
 function isIpNode (text) {
-//        alert(ipnodes.length);
-/* TODO(AWE)
-        for( i=0; i<ipnodes.length; i++){
-                if( ipnodes[i].startsWith(text) ){
-                        return true;
-                }
-        }
-        */
         return text.startsWith("IP-SUB") ||
         text.startsWith("IP-MAT") ||
         text.startsWith("IP-IMP") ||
