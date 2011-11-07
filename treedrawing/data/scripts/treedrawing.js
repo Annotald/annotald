@@ -311,16 +311,13 @@ function handleKeyDown(e) {
 
 
 function handleNodeClick(e) {
-    // TODO(AWE): allow a non-contiguous mouse click to extend the
-    // selection if shift is held.
     e = e || window.event;
     var elementId = (e.target || e.srcElement).id;
     if (e.button == 2) {
         // rightclick
         if (!elementId) {
             return; // prevent this if clicking a trace, for now
-        }
-        if (startnode && !endnode) {
+        } if (startnode && !endnode) {
             if (startnode.id != elementId) {
                 e.stopPropagation();
                 moveNode(elementId);
@@ -336,9 +333,17 @@ function handleNodeClick(e) {
     } else {
         // leftclick
         hideContextMenu();
-        selectNode(elementId);
-        if (e.ctrlKey) {
-            makeNode("XP");
+        if (e.shiftKey && startnode) {
+            var node = document.getElementById(elementId);
+            endnode = node;
+            updateSelection();
+            e.preventDefault(); // Otherwise, this sets the text
+                                // selection in the browser...
+        } else {
+            selectNode(elementId);
+            if (e.ctrlKey) {
+                makeNode("XP");
+            }
         }
     }
     e.stopPropagation();
