@@ -97,7 +97,7 @@ $(document).ready(
         for (var i=0; i<snodes.length; i++) {
             var text = getLabel($("#"+snodes[i].id));
             if (isIpNode(text)) {
-                $("#"+snodes[i].id).addClass('ipnode');
+                $(snodes[i]).addClass('ipnode');
             }
         }
 
@@ -154,32 +154,37 @@ function isEmpty (text) {
 
 function showContextMenu() {
     var e = window.event;
-    var elementId = (e.target || e.srcElement).id;
+    var element = e.target || e.srcElement;
+    var elementId = element.id;
     if (elementId == "sn0") {
         clearSelection();
         return;
     }
 
-    var left = $("#"+elementId).offset().left + 4;
-    var top = $("#"+elementId).offset().top + 17;
+    var left = $(element).offset().left + 4;
+    var top = $(element).offset().top + 17;
     left = left + "px";
     top = top + "px";
 
-    $("#conLeft").empty();
+    var conl = $("#conLeft"),
+        conr = $("#conRight"),
+        conm = $("#conMenu");
+
+    conl.empty();
     loadContextMenu(elementId);
 
     // Make the columns equally high
-    $("#conLeft").height("auto");
-    $("#conRight").height("auto");
-    if ($("#conLeft").height() < $("#conRight").height()) {
-        $("#conLeft").height($("#conRight").height());
+    conl.height("auto");
+    conr.height("auto");
+    if (conl.height() < conr.height()) {
+        conl.height(conr.height());
     } else {
-        $("#conRight").height($("#conLeft").height());
+        conr.height(conl.height());
     }
 
-    $("#conMenu").css("left",left);
-    $("#conMenu").css("top",top);
-    $("#conMenu").css("visibility","visible");
+    conm.css("left",left);
+    conmcss("top",top);
+    conm.css("visibility","visible");
 }
 
 function hideContextMenu() {
@@ -211,10 +216,11 @@ function stackTree() {
 function redo() {
     var nextstate = redostack.pop();
     if (!(nextstate == undefined)) {
-        var currentstate = $("#editpane").html();
+        var editPane = $("#editpane");
+        var currentstate = editPane.html();
         undostack.push(currentstate);
-        $("#editpane").empty();
-        $("#editpane").append(nextstate);
+        editPane.empty();
+        editPane.append(nextstate);
         clearSelection();
         $(".snode").mousedown(handleNodeClick);
     }
@@ -223,10 +229,11 @@ function redo() {
 function undo() {
     var prevstate = undostack.pop();
     if (!(prevstate == undefined)) {
+        var editPane = $("#editpane");
         var currentstate=$("#editpane").html();
         redostack.push(currentstate);
-        $("#editpane").empty();
-        $("#editpane").append(prevstate);
+        editPane.empty();
+        editPane.append(prevstate);
         clearSelection();
         $(".snode").mousedown(handleNodeClick);
     }
@@ -275,9 +282,9 @@ function handleMouseWheel(e, delta) {
     if (e.shiftKey && startnode) {
         var nextNode;
         if (delta < 0) { // negative means scroll down, counterintuitively
-             nextNode = $("#" + startnode.id).next().get(0);
+             nextNode = $(startnode).next().get(0);
         } else {
-            nextNode = $("#" + startnode.id).prev().get(0);
+            nextNode = $(startnode).prev().get(0);
         }
         if (nextNode) {
             selectNode(nextNode.id);
@@ -407,11 +414,11 @@ function updateSelection() {
     $('.snode').removeClass('snodesel');
 
     if (startnode) {
-        $("#"+startnode.id).addClass('snodesel');
+        $(startnode).addClass('snodesel');
     }
 
     if (endnode) {
-        $("#"+endnode.id).addClass('snodesel');
+        $(endnode).addClass('snodesel');
     }
 }
 
@@ -446,23 +453,25 @@ function currentText(root) {
 }
 
 function moveNode(targetParent){
-    var parent_ip = $("#" + startnode.id).parents("#sn0>.ipnode,#sn0").first();
+    var parent_ip = $(startnode).parents("#sn0>.ipnode,#sn0").first();
     var textbefore = currentText(parent_ip);
     if (!isPossibleTarget(targetParent)) {
         // can't move under a tag node
-    } else if ($("#"+startnode.id).parent().children().length == 1) {
+    } else if ($(startnode).parent().children().length == 1) {
         // alert("cant move an only child");
     } else if ($("#"+targetParent).parents().is("#"+startnode.id)) {
         // alert("can't move under one's own child");
-    } else if ($("#"+startnode.id).parents().is("#"+targetParent)) {
+    } else if ($(startnode).parents().is("#"+targetParent)) {
         // move up if moving to a node that is already my parent
         // alert( startnode.id );
-        var firstchildId = $("#"+startnode.id).parent().children().first().closest("div").attr("id");
-        var lastchildId = $("#"+startnode.id).parent().children().last().closest("div").attr("id");
+        var firstchildId = $(startnode).parent().children().first().
+            closest("div").attr("id");
+        var lastchildId = $(startnode).parent().children().last().
+            closest("div").attr("id");
         if (startnode.id == firstchildId) {
             stackTree();
-            $("#"+startnode.id).insertBefore($("#"+targetParent).children().filter(
-                                                 $("#"+startnode.id).parents()));
+            $(startnode).insertBefore($("#"+targetParent).children().filter(
+                                                 $(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
@@ -472,7 +481,8 @@ function moveNode(targetParent){
             }
         } else if (startnode.id == lastchildId) {
             stackTree();
-             $("#"+startnode.id).insertAfter($("#"+targetParent).children().filter($("#"+startnode.id).parents()));
+             $(startnode).insertAfter($("#"+targetParent).children().
+                                      filter($(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
@@ -485,17 +495,17 @@ function moveNode(targetParent){
         }
     } else { // otherwise move under my sister
         // if( parseInt( startnode.id.substr(2) ) >  parseInt( targetParent.substr(2) ) ){
-        var tokenMerge = isRootNode( $("#"+startnode.id) );
+        var tokenMerge = isRootNode( $(startnode) );
         var maxindex = maxIndex( getTokenRoot($("#"+targetParent) ).attr("id") );
-        var movednode = $("#"+startnode.id);
+        var movednode = $(startnode);
         if (parseInt( startnode.id.substr(2) ) > parseInt(targetParent.substr(2))) {
             stackTree();
             if (tokenMerge) {
                 addToIndices( movednode, maxindex );
-                $("#"+startnode.id).appendTo("#"+targetParent);
+                movednode.appendTo("#"+targetParent);
                 resetIds();
             } else {
-                $("#"+startnode.id).appendTo("#"+targetParent);
+                movednode.appendTo("#"+targetParent);
                 if (currentText(parent_ip) != textbefore)  {
                     undo();
                     redostack.pop();
@@ -509,7 +519,7 @@ function moveNode(targetParent){
             if (tokenMerge) {
                 addToIndices( movednode, maxindex );
             }
-            $("#"+startnode.id).insertBefore( $("#"+targetParent).children().first() );
+            movednode.insertBefore($("#"+targetParent).children().first());
             if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
@@ -525,17 +535,17 @@ function moveNode(targetParent){
     clearSelection();
 }
 
-function isRootNode( node ){
+function isRootNode(node) {
         return node.filter("#sn0>.snode").size() > 0;
 }
 
 // return jquery node based on annotald id
-function node(aid){
+function node(aid) {
         return $("#"+aid);
 }
 
 function moveNodes(targetParent) {
-    var parent_ip = $("#" + startnode.id).parents("#sn0>.ipnode,#sn0").first();
+    var parent_ip = $(startnode).parents("#sn0>.ipnode,#sn0").first();
     var textbefore = currentText(parent_ip);
     var destination=$("#"+targetParent);
     stackTree();
@@ -546,11 +556,12 @@ function moveNodes(targetParent) {
         endnode = temp;
     }
     // TODO: check if they are really sisters
-    if ($("#"+startnode.id).siblings().is("#"+endnode.id)) {
+    if ($(startnode).siblings().is("#"+endnode.id)) {
         // then, collect startnode and its sister up until endnode
         var oldtext = currentText(parent_ip);
         //stackTree();
-        $("#"+startnode.id).add($("#"+startnode.id).nextUntil("#"+endnode.id)).add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">XP</div>');
+        $(startnode).add($(startnode).nextUntil("#"+endnode.id)).
+            add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">XP</div>');
         // undo if this messed up the text order
         if (currentText(parent_ip) != oldtext) {
             undo();
@@ -576,7 +587,7 @@ function moveNodes(targetParent) {
     if( ! isPossibleTarget(targetParent) ){
         //alert("can't move under a tag node");
         undo(); redostack.pop(); return;
-    } else if ($("#"+startnode.id).parent().children().length == 1) {
+    } else if ($(startnode).parent().children().length == 1) {
         //alert("cant move an only child");
         undo();
         redostack.pop();
@@ -586,14 +597,17 @@ function moveNodes(targetParent) {
         undo();
         redostack.pop();
         return;
-    } else if ($("#"+startnode.id).parents().is("#"+targetParent)) {
+    } else if ($(startnode).parents().is("#"+targetParent)) {
         // move up if moving to a node that is already my parent
-        var firstchildId = $("#"+startnode.id).parent().children().first().closest("div").attr("id");
-        var lastchildId = $("#"+startnode.id).parent().children().last().closest("div").attr("id");
+        var firstchildId = $(startnode).parent().children().first().
+            closest("div").attr("id");
+        var lastchildId = $(startnode).parent().children().last().
+            closest("div").attr("id");
 
         if (startnode.id == firstchildId) {
             //stackTree();
-            $("#"+startnode.id).insertBefore( $("#"+targetParent).children().filter($("#"+startnode.id).parents()));
+            $(startnode).insertBefore($("#"+targetParent).children().
+                                      filter($(startnode).parents()));
             //resetIds();
             //pruneNode();
 
@@ -607,7 +621,8 @@ function moveNodes(targetParent) {
             }
         } else if (startnode.id == lastchildId) {
             //stackTree();
-             $("#"+startnode.id).insertAfter($("#"+targetParent).children().filter($("#"+startnode.id).parents()));
+             $(startnode.id).insertAfter($("#"+targetParent).children().
+                                         filter($(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
@@ -628,7 +643,7 @@ function moveNodes(targetParent) {
         if (parseInt( startnode.id.substr(2) ) > parseInt(targetParent.substr(2))) {
             //if( $("#"+startnode.id).siblings().is("#"+startnode.id+"~.snode") ){
             //stackTree();
-            $("#"+startnode.id).appendTo("#"+targetParent);
+            $(startnode).appendTo("#"+targetParent);
             if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
@@ -641,7 +656,7 @@ function moveNodes(targetParent) {
         } else if (parseInt( startnode.id.substr(2) ) <
                    parseInt(targetParent.substr(2))) {
             //stackTree();
-            $("#"+startnode.id).insertBefore( $("#"+targetParent).children().first() );
+            $(startnode).insertBefore($("#"+targetParent).children().first());
             if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
@@ -653,9 +668,7 @@ function moveNodes(targetParent) {
         }
     }
 
-    // AWE: unused --> delete?
-    // var toprune = $("#"+toselect.attr("id")+">*").first();
-    $("#"+startnode.id).replaceWith($("#"+startnode.id+">*"));
+    $(startnode).replaceWith($("#"+startnode.id+">*"));
     clearSelection();
 }
 
@@ -693,8 +706,8 @@ function makeLeaf(before, label, word, targetId) {
     var endRoot = null;
 
     if (endnode) {
-        startRoot = getTokenRoot($("#"+startnode.id)).attr("id");
-        endRoot = getTokenRoot($("#"+endnode.id)).attr("id");
+        startRoot = getTokenRoot($(startnode)).attr("id");
+        endRoot = getTokenRoot($(endnode)).attr("id");
         stackTree();
         if (startRoot == endRoot) {
             word = "*ICH*";
@@ -729,7 +742,7 @@ function makeLeaf(before, label, word, targetId) {
     startnode = null;
     endnode = null;
     resetIds();
-    selectNode($(newleaf).attr("id"));
+    selectNode(newleaf.attr("id"));
     updateSelection();
 }
 
@@ -756,18 +769,18 @@ function displayRename() {
             // TODO(AWE): check that theNewPhrase id gets removed...it
             // doesn't seem to?
         }
-        var label = getLabel($("#"+startnode.id));
+        var label = getLabel($(startnode));
         if ($("#"+startnode.id+">.wnode").size() > 0) {
             // this is a terminal
             var word, lemma, useLemma;
             if ($("#" + startnode.id + ">.wnode>.lemma").size() > 0) {
-                var preword = $.trim($("#"+startnode.id).children().first().text());
+                var preword = $.trim($(startnode).children().first().text());
                 preword = preword.split("-");
                 lemma = preword.pop();
                 word = preword.join("-");
                 useLemma = true;
             } else {
-                word = $.trim($("#"+startnode.id).children().first().text());
+                word = $.trim($(startnode).children().first().text());
                 useLemma = false;
             }
 
@@ -784,7 +797,7 @@ function displayRename() {
             editorHtml += "</div>";
 
             var editor=$(editorHtml);
-            $("#"+startnode.id).replaceWith(editor);
+            $(startnode).replaceWith(editor);
             if (!isEmpty(word)) {
                 $("#leaftextbox").attr("disabled", true);
             }
@@ -824,7 +837,7 @@ function displayRename() {
             // this is not a terminal
             var editor=$("<input id='labelbox' class='labeledit' type='text' value='" +
                          label + "' />");
-            var origNode = $("#"+startnode.id);
+            var origNode = $(startnode);
             textNode(origNode).replaceWith(editor);
             $("#labelbox").keydown(
                 function(event) {
@@ -979,11 +992,11 @@ function toggleExtension(extension) {
     }
 
     if (!isPossibleTarget(startnode.id) &&
-        !isEmpty(wnodeString($("#"+startnode.id)))) {
+        !isEmpty(wnodeString($(startnode)))) {
         return;
     }
     stackTree();
-    var textnode = textNode($("#"+startnode.id));
+    var textnode = textNode($(startnode));
     var oldlabel=$.trim(textnode.text());
     var newlabel = toogleJustExtension(oldlabel, extension);
     textnode.replaceWith(newlabel + " ");
@@ -994,11 +1007,11 @@ function setLabel(labels) {
         return;
     }
     if (!isPossibleTarget(startnode.id) &&
-        !isEmpty(wnodeString($("#"+startnode.id)))) {
+        !isEmpty(wnodeString($(startnode)))) {
         return;
     }
     stackTree();
-    var textnode = textNode($("#"+startnode.id));
+    var textnode = textNode($(startnode));
     var oldlabel = $.trim(textnode.text());
     var newlabel = null;
     // TODO(AWE): make this more robust!
@@ -1032,16 +1045,16 @@ function setLabel(labels) {
     newlabel = changeJustLabel(oldlabel,newlabel);
     textnode.replaceWith(newlabel + " ");
     if (isIpNode(newlabel)) {
-        $("#"+startnode.id).addClass("ipnode");
+        $(startnode).addClass("ipnode");
     } else {
-        $("#"+startnode.id).removeClass("ipnode");
+        $(startnode).removeClass("ipnode");
     }
-    $("#"+startnode.id).removeClass(parseLabel(oldlabel)).addClass(parseLabel(newlabel));
+    $(startnode).removeClass(parseLabel(oldlabel)).addClass(parseLabel(newlabel));
 }
 
 function makeNode(label) {
     // check if something is selected
-    var parent_ip = $("#" + startnode.id).parentsUntil(".ipnode", ".ipnode");
+    var parent_ip = $(startnode).parentsUntil(".ipnode", ".ipnode");
     if (!startnode) {
         return;
     }
@@ -1054,8 +1067,8 @@ function makeNode(label) {
     if (!endnode) {
         // if only one node, wrap around that one
         stackTree();
-        $("#"+startnode.id).wrapAll('<div xxx="newnode" class="snode ' + label + '">'
-                                    + label +' </div>');
+        $(startnode).wrapAll('<div xxx="newnode" class="snode ' + label + '">'
+                             + label +' </div>');
     } else {
         if (parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2))) {
             // reverse them if wrong order
@@ -1065,11 +1078,11 @@ function makeNode(label) {
         }
 
         // check if they are really sisters XXXXXXXXXXXXXXX
-        if ($("#"+startnode.id).siblings().is("#"+endnode.id)) {
+        if ($(startnode).siblings().is("#"+endnode.id)) {
             // then, collect startnode and its sister up until endnode
             var oldtext = currentText(parent_ip);
             stackTree();
-            $("#"+startnode.id).add($("#"+startnode.id).nextUntil("#"+endnode.id)).add(
+            $(startnode).add($(startnode).nextUntil("#"+endnode.id)).add(
                 "#"+endnode.id).wrapAll('<div xxx="newnode" class="snode ' +
                                         label + '">' + label + '</div>');
             // undo if this messed up the text order
@@ -1120,12 +1133,12 @@ function makeTrace( before ){
 
 function pruneNode() {
     if (startnode && !endnode) {
-        var deltext = $("#"+startnode.id).children().first().text();
+        var deltext = $(startnode).children().first().text();
         // if this is a leaf, todo XXX fix
         if (isEmpty(deltext)) {
             // it is ok to delete leaf if is empty/trace
             stackTree();
-            $("#"+startnode.id).remove();
+            $(startnode).remove();
             startnode = endnode = null;
             resetIds();
             updateSelection();
@@ -1140,7 +1153,7 @@ function pruneNode() {
         stackTree();
 
         var toselect = $("#"+startnode.id+">*").first();
-        $("#"+startnode.id).replaceWith($("#"+startnode.id+">*"));
+        $(startnode).replaceWith($("#"+startnode.id+">*"));
         startnode = endnode = null;
         resetIds();
         selectNode(toselect.attr("id"));
