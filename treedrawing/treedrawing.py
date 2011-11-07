@@ -215,4 +215,10 @@ Editing: """+self.thefile+""" <br />
 
 
 #index.exposed = True
+
+if sys.argv[1] == "-p":
+    sys.argv.pop(1)
+    port = sys.argv.pop(1)
+    cherrypy.config.update({'server.socket_port': int(port)})
+
 cherrypy.quickstart(Treedraw())
