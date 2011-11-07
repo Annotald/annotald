@@ -539,11 +539,6 @@ function isRootNode(node) {
         return node.filter("#sn0>.snode").size() > 0;
 }
 
-// return jquery node based on annotald id
-function node(aid) {
-        return $("#"+aid);
-}
-
 function moveNodes(targetParent) {
     var parent_ip = $(startnode).parents("#sn0>.ipnode,#sn0").first();
     var textbefore = currentText(parent_ip);
