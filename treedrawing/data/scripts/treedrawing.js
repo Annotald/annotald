@@ -437,6 +437,7 @@ function scrollToShowSel() {
 
 function isPossibleTarget(node) {
     // cannot move under a tag node
+    // TODO(AWE): what is the calling convention?  can we optimize this jquery call?
     if ($("#"+node).children().first().is("span")) {
         return false;
     }
