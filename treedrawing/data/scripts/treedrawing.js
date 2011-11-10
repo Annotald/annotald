@@ -183,7 +183,7 @@ function showContextMenu() {
     }
 
     conm.css("left",left);
-    conmcss("top",top);
+    conm.css("top",top);
     conm.css("visibility","visible");
 }
 
