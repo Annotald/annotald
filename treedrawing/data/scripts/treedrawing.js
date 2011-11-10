@@ -1099,6 +1099,8 @@ function makeNode(label) {
     // alert(toselect.attr("id"));
 
     // BUG when making XP and then use context menu: todo XXX
+
+    // TODO(AWE): the ipnodes thing isn't updated here
     selectNode(toselect.attr("id"));
     toselect.attr("xxx",null);
     updateSelection();
