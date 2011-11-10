@@ -723,11 +723,11 @@ function makeLeaf(before, label, word, targetId) {
     }
 
     var newleaf = "<div class='snode " + label + "'>" + label +
-        " <span class='wnode'>" + word;
+        "<span class='wnode'>" + word;
     if (lemma) {
         newleaf += "<span class='lemma " + lemmaClass + "'>-" + lemma + "</span>";
     }
-    newleaf += "</span></div>";
+    newleaf += "</span></div>\n";
     newleaf = $(newleaf);
     if (before) {
         newleaf.insertBefore("#" + targetId);
@@ -1063,7 +1063,7 @@ function makeNode(label) {
         // if only one node, wrap around that one
         stackTree();
         $(startnode).wrapAll('<div xxx="newnode" class="snode ' + label + '">'
-                             + label +' </div>');
+                             + label + ' </div>\n');
     } else {
         if (parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2))) {
             // reverse them if wrong order
@@ -1079,7 +1079,7 @@ function makeNode(label) {
             stackTree();
             $(startnode).add($(startnode).nextUntil("#"+endnode.id)).add(
                 "#"+endnode.id).wrapAll('<div xxx="newnode" class="snode ' +
-                                        label + '">' + label + '</div>');
+                                        label + '">' + label + ' </div>\n');
             // undo if this messed up the text order
             if( currentText(parent_ip) != oldtext) {
                 undo();
