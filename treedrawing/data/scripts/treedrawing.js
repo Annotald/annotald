@@ -453,7 +453,7 @@ function currentText(root) {
 }
 
 function moveNode(targetParent){
-    var parent_ip = $(startnode).parents("#sn0>.ipnode,#sn0").first();
+    var parent_ip = $(startnode).parents("#sn0>.tree_root>.ipnode,#sn0").first();
     var textbefore = currentText(parent_ip);
     if (!isPossibleTarget(targetParent)) {
         // can't move under a tag node
@@ -536,11 +536,11 @@ function moveNode(targetParent){
 }
 
 function isRootNode(node) {
-        return node.filter("#sn0>.snode").size() > 0;
+        return node.filter("#sn0>.tree_root>.snode").size() > 0;
 }
 
 function moveNodes(targetParent) {
-    var parent_ip = $(startnode).parents("#sn0>.ipnode,#sn0").first();
+    var parent_ip = $(startnode).parents("#sn0>.tree_root>.ipnode,#sn0").first();
     var textbefore = currentText(parent_ip);
     var destination=$("#"+targetParent);
     stackTree();
@@ -1176,7 +1176,8 @@ function getTokenRoot(node) {
     if(isRootNode(node)) {
         return node;
     }
-    return $("#sn0>.snode").filter($(node).parents($("#sn0>.snode")));
+    return $("#sn0>.tree_root>.snode").filter(
+        $(node).parents($("#sn0>.tree_root>.snode")));
 }
 
 /*
