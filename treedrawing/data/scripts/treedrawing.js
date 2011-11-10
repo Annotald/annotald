@@ -444,9 +444,8 @@ function isPossibleTarget(node) {
     return true;
 }
 
-// TODO(AWE): remove
 function currentText(root) {
-    var text = $(node).find('.wnode').filter(
+    var text = $(root).find('.wnode').filter(
         function() {
             return !isEmpty(this.textContent);
         }).text();
