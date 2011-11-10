@@ -22,6 +22,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 import re
 import sys, subprocess
 import cherrypy, json
+import nltk.tree as T
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -29,7 +30,32 @@ import codecs
 # TODO: this will be much easier when we use nltk.tree...
 def queryVersionCookie(string, fmt):
     versionRe = re.compile("\\(FORMAT " + fmt + "\\)")
-    return versionRe.search(string)
+    return versionRe.search(string).group()
+
+def treeToHtml(tree, version):
+    if isinstance(tree[0], str) or \
+            isinstance(tree[0], unicode):
+        # Leaf node
+        if len(tree) > 1:
+            raise Error("Leaf node with more than one daughter!")
+        res = '<div class="snode">' + tree.node + '<span class="wnode">'
+        if version == "dash":
+            temp = tree[0].split("-")
+            lemma = temp.pop()
+            word = "-".join(temp)
+            res += word + '<span class="lemma lemmaHide">-' + lemma + '</span>'
+        else:
+            res += tree[0]
+        res += '</span></div>'
+        return res
+    else:
+        the_class = "snode"
+        if tree.node == "":
+            the_class = " tree_root"
+        res = '<div class="' + the_class + '">' + tree.node + ' '
+        res += "\n".join(map(lambda x: treeToHtml(x, version), tree))
+        res += "</div>"
+        return res
 
 class Treedraw(object):
 
@@ -99,21 +125,9 @@ class Treedraw(object):
 	alltrees = '<div class="snode">'
         # TODO(AWE): convert to use nltk.tree
 	for tree in trees:
-		tree0 = tree.strip()
-		tree0 = re.sub('^\(','',tree0)
-		tree0 = re.sub('\)$','',tree0).strip()
-		tree0 = re.sub('\(([^ ()]+) ([^ ()]+)\)',
-                               '<div class="snode \\1">\\1' +
-                                 '<span class="wnode">\\2' +
-                                 '</span></div>', tree0)
-		tree0 = re.sub('\(([^ ]+)','<div class="snode \\1">\\1',tree0)
-		tree0 = re.sub('\)','</div>',tree0)
-                if useLemmata:
-                    tree0 = re.sub('<span class="wnode">([^<>]+)-([^<>]+)</span>',
-                                   '<span class="wnode">\\1' +
-                                   '<span class="lemma lemmaHide">-\\2</span>' +
-                                   '</span>', tree0)
-		alltrees = alltrees + tree0
+            if not tree == "":
+                nltk_tree = T.Tree(tree)
+                alltrees = alltrees + treeToHtml(nltk_tree, useLemmata)
 
  	alltrees = alltrees + '</div>'
 	return alltrees

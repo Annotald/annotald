@@ -57,7 +57,7 @@ body {
     margin-right: 25px;
 }
 
-#sn0 > .snode {
+#sn0 > .tree_root > .snode {
 /*  background-color: silver;*/
     border: 2px solid black;
 }
@@ -67,6 +67,16 @@ body {
     border-top: 1px solid black;
     border-bottom: 1px solid black;
     background-color: #D2B48C;
+}
+
+.tree_root {
+    border: 0px !important;
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+.ID {
+    display: none;
 }
 
 .snodesel {

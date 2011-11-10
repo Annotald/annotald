@@ -1422,12 +1422,11 @@ function wnodeString(node) {
 
 function toLabeledBrackets(node) {
     var out = node.clone();
-    out.find("#sn0>.snode").after("\n\n");
-    out.find("#sn0>.snode").before("( ");
-    out.find("#sn0>.snode").after(")");
-
+    out.find(".tree_root").before("(");
+    out.find(".tree_root").after(")\n\n");
     out.find(".snode").before("(");
     out.find(".snode").after(")");
+
     out.find(".wnode").before(" ");
 
     return out.text();
