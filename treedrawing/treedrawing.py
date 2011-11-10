@@ -29,8 +29,8 @@ import codecs
 
 # TODO: this will be much easier when we use nltk.tree...
 def queryVersionCookie(string, fmt):
-    versionRe = re.compile("\\(FORMAT " + fmt + "\\)")
-    return versionRe.search(string).group()
+    versionRe = re.compile("\\(FORMAT (" + fmt + ")\\)")
+    return versionRe.search(string).group(1)
 
 def treeToHtml(tree, version):
     if isinstance(tree[0], str) or \
