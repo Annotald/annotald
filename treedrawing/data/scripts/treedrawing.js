@@ -1165,11 +1165,20 @@ function setNodeLabel(node, label, noUndo) {
     textNode(node).replaceWith($.trim(label)+" ");
 }
 
-function appendExtension(node,extension,type) {
-    if(!type) {
+function appendExtension(node, extension, type) {
+    if (!type) {
         type="-";
     }
-    setNodeLabel(node, getLabel(node) + type + extension, true);
+    if (isEmpty(wnodeString(node)) && !isNaN(extension) &&
+        getLabel(node)[0] != "W") {
+        // Adding an index to an empty category, and the EC is not an
+        // empty operator.  The final proviso is needed because of
+        // things like the empty WADJP in comparatives.
+        var theTextNode = textNode(node.children(".wnode").first());
+        theTextNode.replaceWith(theTextNode.text() + "-" + extension);
+    } else {
+        setNodeLabel(node, getLabel(node) + type + extension, true);
+    }
 }
 
 function getTokenRoot(node) {
