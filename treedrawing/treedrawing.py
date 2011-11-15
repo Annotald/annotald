@@ -39,7 +39,8 @@ def treeToHtml(tree, version):
         if len(tree) > 1:
             raise Error("Leaf node with more than one daughter!")
         res = '<div class="snode">' + tree.node + '<span class="wnode">'
-        if version == "dash":
+        temp = tree[0].split("-")
+        if version == "dash" and len(temp) > 1:
             temp = tree[0].split("-")
             lemma = temp.pop()
             word = "-".join(temp)
