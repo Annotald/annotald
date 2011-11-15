@@ -65,7 +65,7 @@ function customCommands(){
     addCommand({ keycode: 76 }, editLemma); // l
     addCommand({ keycode: 32 }, clearSelection); // spacebar
     addCommand({ keycode: 192 }, toggleLemmata); // `
-    addCommand({ keycode: 76, ctrl: true }, doRename); // ctrl + l
+    addCommand({ keycode: 76, ctrl: true }, editLemmaOrLabel); // ctrl + l
 
     // An example of a context-sensitive label switching command.  If
     // neither NP or PP is the POS, the NP value (first in the dictionary)
