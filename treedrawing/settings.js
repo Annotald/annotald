@@ -38,7 +38,17 @@ var extensions = ["-SPE","-PRN","-SBJ","-LFD","-RSP","-XXX","-ZZZ"];
  * extensions) get a different background color so that the annotator can
  * see the "floor" of the current clause
  */
-var ipnodes=["IP-SUB","IP-MAT","IP-IMP","IP-INF","IP-PPL","RRC"];
+var ipnodes = ["IP-SUB","IP-MAT","IP-IMP","IP-INF","IP-PPL","RRC"];
+
+// Add a custom style to IP nodes.  Wrap in a function to avoid leaking
+// var i into the global namespace.
+(function () {
+    for (var i = 0; i < ipnodes.length; i++) {
+        styleTag(ipnodes[i], "border-top: 1px solid black;" +
+                 "border-bottom: 1px solid black;" +
+                 "background-color: #D2B48C;");
+    }
+})();
 
 /*
  * Keycode is from onKeyDown event.
