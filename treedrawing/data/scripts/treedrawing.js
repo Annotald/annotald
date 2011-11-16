@@ -19,6 +19,8 @@
 // Global TODOs:
 // - (AWE) push ipnode bookkeeping/formatting into CSS
 // - (AWE) is $("#" + foo.id) the same as $(foo), and is the latter faster?
+// - (AWE) the tree_root thing may have messed up splitting tokens by
+//   moving things to sn0...fix before release.
 
 var startnode = null;
 var endnode = null;
