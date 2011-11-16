@@ -50,6 +50,10 @@ var ipnodes = ["IP-SUB","IP-MAT","IP-IMP","IP-INF","IP-PPL","RRC"];
     }
 })();
 
+var invisibleRootCategories = ["ID", "METADATA"];
+var invisibleCategories = ["META"];
+hideCategories();
+
 /*
  * Keycode is from onKeyDown event.
  * This can for example be tested here:

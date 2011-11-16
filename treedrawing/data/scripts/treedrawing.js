@@ -86,6 +86,18 @@ function resetLabelClasses(alertOnError) {
         });
 }
 
+// Declare global variables from settings.js
+var invisibleCategories, invisibleRootCategories;
+
+function hideCategories() {
+    var i;
+    for (i = 0; i < invisibleRootCategories.length; i++) {
+        addStyle(".tree_root>." + invisibleRootCategories[i] + "{display:none;}");
+    }
+    for (i = 0; i < invisibleCategories.length; i++) {
+        addStyle("." + invisibleCategories[i] + "{display:none;}");
+    }
+}
 
 $(document).ready(
     function() {
