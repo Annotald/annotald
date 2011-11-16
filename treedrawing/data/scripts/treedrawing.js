@@ -128,7 +128,11 @@ function isIpNode (text) {
         return text.startsWith("IP-SUB") ||
         text.startsWith("IP-MAT") ||
         text.startsWith("IP-IMP") ||
-        text.startsWith("IP-INF");
+        text.startsWith("IP-INF") ||
+        text.startsWith("IP-PPL") ||
+        text.startsWith("FRAG") ||
+        text.startsWith("QTP") ||
+        text.startsWith("RRC");
 
 //        return contains( ipnodes, parseLabel(text) );
 }
