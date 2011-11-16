@@ -87,7 +87,7 @@ function resetLabelClasses(alertOnError) {
 }
 
 // Declare global variables from settings.js
-var invisibleCategories, invisibleRootCategories;
+var invisibleCategories, invisibleRootCategories, ipnodes;
 
 function hideCategories() {
     var i;
@@ -96,6 +96,14 @@ function hideCategories() {
     }
     for (i = 0; i < invisibleCategories.length; i++) {
         addStyle("." + invisibleCategories[i] + "{display:none;}");
+    }
+}
+
+function styleIpNodes() {
+    for (var i = 0; i < ipnodes.length; i++) {
+        styleTag(ipnodes[i], "border-top: 1px solid black;" +
+                 "border-bottom: 1px solid black;" +
+                 "background-color: #D2B48C;");
     }
 }
 
