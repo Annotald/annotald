@@ -125,4 +125,5 @@ function customConLeafBefore(){
 // are accounted for, i.e. NP also matches NP-FOO (but not NPR).  The
 // lower-level addStyle() function adds its argument as CSS code to the
 // document.
-// styleTag("NP", "color: red");
+
+styleTag("CODE", "color: grey");
