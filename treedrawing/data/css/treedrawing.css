@@ -63,13 +63,17 @@ body {
 }
 
 .tree_root {
+    /* Blow away any other formatting; we really want this to be invisible. */
     border: 0px !important;
     margin: 0px !important;
     padding: 0px !important;
 }
 
 .snodesel {
-    background-color: #4682B4;
+    /* This needs to override any user-supplied background colors, since
+     * selection is more important.
+     */
+    background-color: #4682B4 !important;
 }
 
 .menubutton {
