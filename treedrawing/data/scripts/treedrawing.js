@@ -638,7 +638,7 @@ function moveNodes(targetParent) {
             }
         } else if (startnode.id == lastchildId) {
             //stackTree();
-             $(startnode.id).insertAfter($("#"+targetParent).children().
+             $(startnode).insertAfter($("#"+targetParent).children().
                                          filter($(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 undo();
