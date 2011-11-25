@@ -67,6 +67,10 @@ function resetLabelClasses(alertOnError) {
     var nodes = $(".snode").each(
         function() {
             var node = $(this);
+            var newClass = "snode ";
+            if (node.hasClass("tree_root")) {
+                newClass += "tree_root ";
+            }
             var label = parseLabel(getLabel(node));
             if (alertOnError) { // TODO(AWE): optimize test inside loop
                 var classes = node.attr("class").split(" ");
@@ -82,7 +86,7 @@ function resetLabelClasses(alertOnError) {
                           "' detected on node id'" + node.attr("id") + "'");
                 }
             }
-        node.attr("class", "snode " + label);
+        node.attr("class", newClass + label);
         });
 }
 
@@ -346,7 +350,14 @@ function handleNodeClick(e) {
         // rightclick
         if (!elementId) {
             return; // prevent this if clicking a trace, for now
-        } if (startnode && !endnode) {
+        }
+        if ($("#" + elementId).hasClass("tree_root")) {
+            // The invisible tree root wrapper gets in the way ... hack
+            // around for now. TODO(AWE): there must be a better way to
+            // do this.
+            elementId = "sn0";
+        }
+        if (startnode && !endnode) {
             if (startnode.id != elementId) {
                 e.stopPropagation();
                 moveNode(elementId);
@@ -476,7 +487,11 @@ function currentText(root) {
 
 function moveNode(targetParent){
     var parent_ip = $(startnode).parents("#sn0>.tree_root>.ipnode,#sn0").first();
+    if (targetParent == "sn0") {
+        parent_ip = $("#sn0");
+    }
     var textbefore = currentText(parent_ip);
+    var nodeMoved, didMove = false;
     if (!isPossibleTarget(targetParent)) {
         // can't move under a tag node
     } else if ($(startnode).parent().children().length == 1) {
@@ -499,6 +514,7 @@ function moveNode(targetParent){
                 redostack.pop();
             } else {
                 resetIds();
+                didMove = true;
                 //   updateSelection();
             }
         } else if (startnode.id == lastchildId) {
@@ -510,6 +526,7 @@ function moveNode(targetParent){
                 redostack.pop();
             } else {
                 resetIds();
+                didMove = true;
                 //   updateSelection();
             }
         } else {
@@ -526,6 +543,7 @@ function moveNode(targetParent){
                 addToIndices( movednode, maxindex );
                 movednode.appendTo("#"+targetParent);
                 resetIds();
+                didMove = true;
             } else {
                 movednode.appendTo("#"+targetParent);
                 if (currentText(parent_ip) != textbefore)  {
@@ -533,10 +551,11 @@ function moveNode(targetParent){
                     redostack.pop();
                 } else {
                     resetIds();
+                    didMove = true;
                 }
             }
-        } else if( parseInt( startnode.id.substr(2) ) <
-                   parseInt( targetParent.substr(2) ) ) {
+        } else if (parseInt(startnode.id.substr(2)) <
+                   parseInt(targetParent.substr(2)) ) {
             stackTree();
             if (tokenMerge) {
                 addToIndices( movednode, maxindex );
@@ -547,12 +566,20 @@ function moveNode(targetParent){
                 redostack.pop();
             } else {
                 resetIds();
+                didMove = true;
                 // if( tokenMerge ){
                 //            addToIndices( movednode, maxindex );
                 // }
                 //   updateSelection();
             }
         }
+    }
+    if (didMove && targetParent == "sn0") {
+        // We have created a new top-level tree by movement, so we need
+        // to add its wrapper node.  It won't have an
+        // ID/METADATA/etc. node, sadly.
+        $(startnode).wrap("<div class='snode tree_root' />");
+        resetIds();
     }
     clearSelection();
 }
@@ -561,10 +588,18 @@ function isRootNode(node) {
         return node.filter("#sn0>.tree_root>.snode").size() > 0;
 }
 
+// TODO(AWE): does Jquery clone() method do copy-on-write?  If so, then
+// use editpanel.clone() here to implement undo, instead of the interactive
+// undo system.  This might also be an option of rht einteractive undo
+// system in general.
 function moveNodes(targetParent) {
     var parent_ip = $(startnode).parents("#sn0>.tree_root>.ipnode,#sn0").first();
+    if (targetParent == "sn0") {
+        parent_ip = $("#sn0");
+    }
     var textbefore = currentText(parent_ip);
-    var destination=$("#"+targetParent);
+    var destination = $("#"+targetParent);
+    var didMove = false;
     stackTree();
     if (parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2))) {
         // reverse them if wrong order
@@ -634,6 +669,7 @@ function moveNodes(targetParent) {
                 return;
             } else {
                 resetIds();
+                didMove = true;
                 //   updateSelection();
             }
         } else if (startnode.id == lastchildId) {
@@ -645,6 +681,7 @@ function moveNodes(targetParent) {
                 redostack.pop();
                 return;
             } else {
+                didMove = true;
                 resetIds();
                 //   updateSelection();
             }
@@ -666,6 +703,7 @@ function moveNodes(targetParent) {
                 redostack.pop();
                 return;
             } else {
+                didMove = true;
                 resetIds();
                 //   updateSelection();
             }
@@ -679,13 +717,21 @@ function moveNodes(targetParent) {
                 redostack.pop();
                 return;
             } else {
+                didMove = true;
                 resetIds();
                 //   updateSelection();
             }
         }
     }
-
-    $(startnode).replaceWith($("#"+startnode.id+">*"));
+    var movedNodes = $("#"+startnode.id+">*");
+    $(startnode).replaceWith(movedNodes);
+    if (didMove && targetParent == "sn0") {
+        // We have created several new top-level trees by movement, so
+        // we need to add its wrapper node.  It won't have an
+        // ID/METADATA/etc. node, sadly.
+        movedNodes.wrap("<div class='snode tree_root' />");
+        resetIds();
+    }
     clearSelection();
 }
 
@@ -1454,14 +1500,21 @@ function wnodeString(node) {
 
 function toLabeledBrackets(node) {
     var out = node.clone();
-    out.find(".tree_root").before("(");
-    out.find(".tree_root").after(")\n\n");
+    out.find(".tree_root").after("ZZZZZZZZZZ"); // Ten 'Z's
     out.find(".snode").before("(");
     out.find(".snode").after(")");
 
     out.find(".wnode").before(" ");
 
-    return out.text();
+    out = out.text();
+    // Must use rx for string replace bc using a string doesn't get a
+    // global replace.
+    out = out.replace(/\)\(/g, ")\n(");
+    out = out.replace(/  +/g, " ");
+    out = out.replace(/\n\n+/g,"\n");
+    out = out.replace(/ZZZZZZZZZZ/g, "\n\n");
+
+    return out;
 }
 
 var lemmaClass = "lemmaHide";
