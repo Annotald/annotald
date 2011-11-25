@@ -1251,8 +1251,7 @@ function appendExtension(node, extension, type) {
     if (!type) {
         type="-";
     }
-    if (isEmpty(wnodeString(node)) && !isNaN(extension) &&
-        getLabel(node)[0] != "W") {
+    if (shouldIndexLeaf(node) && !isNaN(extension)) {
         // Adding an index to an empty category, and the EC is not an
         // empty operator.  The final proviso is needed because of
         // things like the empty WADJP in comparatives.
@@ -1326,10 +1325,18 @@ function parseLabel (label) {
     return $.trim(label);
 }
 
+function shouldIndexLeaf(node) {
+    // The "W" thing is because we should index the label, not leaf, of
+    // things like (WADJP 0) in comparatives.
+    return isEmpty(wnodeString(node)) && !(getLabel(node)[0] == "W");
+}
 
 function getIndex(node) {
-    var label = getLabel(node);
-    return parseIndex(label);
+    if (shouldIndexLeaf(node)) {
+        return parseIndex(textNode(node.children(".wnode").first()).text());
+    } else {
+        return parseIndex(getLabel(node));
+    }
 }
 
 function parseIndexType(label){
