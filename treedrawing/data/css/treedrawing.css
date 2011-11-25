@@ -67,6 +67,7 @@ body {
     border: 0px !important;
     margin: 0px !important;
     padding: 0px !important;
+    background-color: inherit;
 }
 
 .snodesel {
@@ -92,7 +93,7 @@ body {
     text-align: center;
 }
 
-#editpane{
+#editpane {
     position: absolute;
     top: 0px;
     left: 210px;
