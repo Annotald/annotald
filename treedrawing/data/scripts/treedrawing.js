@@ -20,7 +20,12 @@
 // - (AWE) push ipnode bookkeeping/formatting into CSS
 // - (AWE) is $("#" + foo.id) the same as $(foo), and is the latter faster?
 // - (AWE) the tree_root thing may have messed up splitting tokens by
-//   moving things to sn0...fix before release.
+//   moving things to sn0...fix before release.  update: fixed?
+// - (AWE) make the dash-tags modular, so that ctrl x -> set XXX, w ->
+//   set NP-SBJ doesn't blow away the XXX
+// - (AWE) what happens when you delete e.g. an NP node w metadata?
+//   Does the metadata get blown away? pro/demoted? Does deletion fail, or
+//   raise a prompt?
 
 var startnode = null;
 var endnode = null;
@@ -625,6 +630,15 @@ function moveNodes(targetParent) {
     }
     resetIds();
     var toselect = $(".snode[xxx=newnode]").first();
+
+    // TODO(AWE): what it seems this fn is doing is:
+    // 1) create a dummy parent node over the nodes to move
+    // 2) move this as a single node to the destination
+    // 3) delete the dummy node
+    // If this is true, then step (2) should be accomplisehd by calling
+    // moveNode().  It also may be a good idea to factor out moveNode into
+    // an error-checking part and a movement part, so this fn can do its
+    // own error checking, w/o having to duplicate
 
     // BUG when making XP and then use context menu: todo XXX
     clearSelection();
@@ -1420,7 +1434,7 @@ function coIndex() {
         if (getIndex($(startnode)) > 0 && getIndex($(endnode)) > 0) {
             // and if it is the same index
             if (getIndex($(startnode)) == getIndex($(endnode))) {
-                var theIndex=getIndex($(startnode));
+                var theIndex = getIndex($(startnode));
                 var types = "" + getIndexType($(startnode)) +
                     "" + getIndexType($(endnode));
                 // remove it
@@ -1553,3 +1567,7 @@ function textNode(node) {
 function isLeafNode(node) {
     return $("#" + node.id + ">.wnode").size() > 0;
 }
+
+// Local Variables:
+// js2-additional-externs: ("$")
+// End:
