@@ -28,7 +28,7 @@ var caseTags=["N","NS","NPR","NPRS","PRO","D","NUM","ADJ","ADJR","ADJS","Q","QR"
 /* extensions are treated as not part of the label for various purposes, 
  * they are all binary, and they show up in the toggle extension menu  
  */
-var extensions=["-SPE","-PRN","-SBJ","-LFD","-RSP","-XXX","-ZZZ"];
+var extensions=["-SPE","-PRN","-SBJ","-LFD","-RSP","-PASS","-XXX","-ZZZ"];
 
 /*
  * Phrase labels in this list (including the same ones with indices and
@@ -84,7 +84,7 @@ function customCommands(){
 /*
  * Default phrase label suggestions in context menu 
  */
-var defaultConMenuGroup = ["VBPI","VBPS","VBDI","VBDS","VBI","VAN","VBN","VB"];
+var defaultConMenuGroup = ["VBP","VBPP","VBD","VBDP","VBN","VBNP","VBS","VBSP","VBO","VBOP","VBI","VBIP"];
 
 /**
  * Phrase labels that are suggested in context menu when one of the other ones is set
@@ -92,11 +92,17 @@ var defaultConMenuGroup = ["VBPI","VBPS","VBDI","VBDS","VBI","VAN","VBN","VB"];
 function customConMenuGroups(){
 	addConMenuGroup( ["IP-SUB","IP-MAT","IP-INF","IP-IMP","CP-QUE","QTP","FRAG"] );
 	addConMenuGroup( ["ADJP","ADJX","NP-MSR","QP","NP","ADVP","IP-PPL"] );
-        addConMenuGroup( ["NP-SBJ","NP-OB1","NP-OB2","NP-OBP","NP-OBQ","NP-PRD","NP-ATR","NP-PAR","NP-COM","NP-PRN","NP","NX","NP-MSR","NP-TMP","NP-LOC","NP-ADV","NP-MSR","NP-CMP","NP-DIR","NP-ADT","NP-VOC","QP"] );
+        addConMenuGroup( ["NP-SBJ","NP-OB1","NP-OB2","NP-OBP","NP-OBQ","NP-PRD"] );
+        addConMenuGroup( ["NP-ATR","NP-PAR","NP-COM","NP-PRN"] );
+        addConMenuGroup( ["NP","NX","NP-MSR","NP-TMP","NP-LOC","NP-ADV","NP-MSR","NP-CMP","NP-DIR","NP-ADT","NP-VOC","QP"] );
 	addConMenuGroup( ["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR","NP-MSR","NP-ADV"] );	
 	addConMenuGroup( ["P","ADV","ADVR","ADVS","ADJ","ADJR","ADJS","C","CONJ"] );
 	addConMenuGroup( ["WADVP","WNP","WPP","WQP","WADJP"] );
         addConMenuGroup( ["CP-THT","CP-QUE","CP-REL","CP-DEG","CP-ADV","CP-CMP","CP-COM"] );
+        addConMenuGroup( ["N","N$","NA","ND","NS","NS$","NSA","NSD"] );
+        addConMenuGroup( ["ADJ","ADJ$","ADJA","ADJD","Q","Q$","QA","QD"] );
+        addConMenuGroup( ["PRO","PRO$","PROA","PROD","CLPRO$","CLPROA","CLPROD"] );
+        addConMenuGroup( ["VPR","VPRP","VPR$","VPRP$","VPRA","VPRPA","VPRD","VPRPD"] );
 }
 
 /*
@@ -113,7 +119,6 @@ function customConLeafBefore(){
 	addConLeafBefore( "WADJP", "0");
 	addConLeafBefore( "WPP", "0");
 	addConLeafBefore( "C", "0");
-	addConLeafBefore( "P", "0");
 	addConLeafBefore( "CODE", "{COM:}");	
 	addConLeafBefore( "CODE", "{TODO:}");
 	addConLeafBefore( "CODE", "{MAN:}");	
