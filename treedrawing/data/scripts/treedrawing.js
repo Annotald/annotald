@@ -914,7 +914,7 @@ function changeJustLabel (oldlabel, newlabel) {
     return newlabel;
 }
 
-function toogleJustExtension (oldlabel, extension) {
+function toggleJustExtension (oldlabel, extension) {
     var index = parseIndex(oldlabel);
     var indextype = "";
     if (index > 0) {
@@ -938,16 +938,17 @@ function toogleJustExtension (oldlabel, extension) {
             extendedlabel = extendedlabel.substr(
                 0,extendedlabel.length - extensions[i].length);
         } else if (textension) {
-            currentextensions.push( extensions[i] );
+            currentextensions.push(extensions[i]);
         }
     }
 
     var out = extendedlabel;
-    var count = currentextensions.length;
+//    var count = currentextensions.length;
     // TODO(AWE): out += currentextensions.join("")
-    for (i=0; i < count; i++) {
-        out += currentextensions.pop();
-    }
+    out += currentextensions.join("")
+//    for (i=0; i < count; i++) {
+//        out += currentextensions.pop();
+//    }
     if (index > 0) {
         out += indextype;
         out += index;
@@ -998,10 +999,12 @@ function toggleExtension(extension) {
     stackTree();
     var textnode = textNode($(startnode));
     var oldlabel=$.trim(textnode.text());
-    var newlabel = toogleJustExtension(oldlabel, extension);
+    var newlabel = toggleJustExtension(oldlabel, extension);
     textnode.replaceWith(newlabel + " ");
 }
 
+// added by JEB
+// TODO: make it so that dash tags are properly ordered or at least ordered 
 function toggleVerbExtension (oldlabel, extension) {
     var index = parseIndex(oldlabel);
     var indextype = "";
@@ -1020,22 +1023,24 @@ function toggleVerbExtension (oldlabel, extension) {
         }
 
         if(extendedlabel.endsWith(vextensions[i])) {
-            if (!vextension) {
-                currentextensions.push(vextensions[i]);
-            }
-            extendedlabel = extendedlabel.substr(
-                0,extendedlabel.length - vextensions[i].length);
-        } else if (vextension) {
-            currentextensions.push( vextensions[i] );
+	    if (!vextension) {
+		currentextensions.push(vextensions[i]);
+		extendedlabel = extendedlabel.substr(
+		    0,(extendedlabel.length - vextensions[i].length));
+	    }
+	}
+        else if (vextension) {
+		currentextensions.push(vextensions[i]);
         }
     }
 
     var out = extendedlabel;
-    var count = currentextensions.length;
+//    var count = currentextensions.length;
     // TODO(AWE): out += currentextensions.join("")
-    for (i=0; i < count; i++) {
-        out += currentextensions.pop();
-    }
+    out += currentextensions.join("")
+//    for (i=0; i < count; i++) {
+//        out += currentextensions.pop();
+//    }
     if (index > 0) {
         out += indextype;
         out += index;

@@ -28,12 +28,12 @@ var caseTags=["N","NS","NPR","NPRS","PRO","D","NUM","ADJ","ADJR","ADJS","Q","QR"
 /* extensions are treated as not part of the label for various purposes, 
  * they are all binary, and they show up in the toggle extension menu  
  */
-var extensions=["-SPE","-PRN","-SBJ","-LFD","-RSP","-XXX","-ZZZ","-PASS"];
+var extensions=["-XXX","-ZZZ","-SPE","-PRN","-RSP","-LFD","-SBJ"]
 
 /* verbal extensions are treated as not part of the label for various purposes,
  * they are all binary, and they show up in the verbal extension menu (TODO)
  */ 
-var vextensions=["-PASS","-IMPF","-AOR","-PRF","-FUT","-IND","-KJV"];
+var vextensions=["-PASS","-IND","-KJV","-FUT","-IMPF","-AOR","-PRF"];
 
 /*
  * Phrase labels in this list (including the same ones with indices and
@@ -49,29 +49,55 @@ var ipnodes=["IP-SUB","IP-MAT","IP-IMP","IP-INF","IP-PPL","RRC"];
  * http://www.asquare.net/javascript/tests/KeyCode.html
  */
 function customCommands(){
-    addCommand({ keycode: 65 }, leafAfter ); // a
-    addCommand({ keycode: 66 }, leafBefore); // b
-    addCommand({ keycode: 69 }, toggleVerbalExtension, "-PASS"); //e
-    addCommand({ keycode: 88 }, makeNode, "XP"); // x
-    addCommand({ keycode: 88, shift: true }, setLabel, ["XP"]);
+    // left hand commands
+    addCommand({ keycode: 65 }, toggleVerbalExtension, "-AOR"); // a
+    addCommand({ keycode: 66 }, setLabel, ["ADVP", "ADVP-TMP", "ADVP-LOC", "ADVP-DIR"]); // b
     addCommand({ keycode: 67 }, coIndex); // c
+    addCommand({ keycode: 68 }, pruneNode); // d
+    //addCommand({ keycode: 69 }, ); // e
+    addCommand({ keycode: 70 }, setLabel, ["PP"]); // f
+    addCommand({ keycode: 70, shift: true }, toggleVerbalExtension, "-FUT"); // shift + f
+    addCommand({ keycode: 71 }, setLabel, ["ADJP","ADJP-PRD","ADJP-SPR"]); // g
+
+    addCommand({ keycode: 81 }, setLabel, ["CONJP"]); // q
     addCommand({ keycode: 82 }, setLabel, ["CP-REL","CP-FRL","CP-CAR","CP-EOP"]); // r
     addCommand({ keycode: 83 }, setLabel, ["IP-SUB","IP-MAT","IP-IMP"]); // s
-    addCommand({ keycode: 86 }, setLabel, ["IP-INF","IP-INF-COM","IP-SMC","IP-INF-THT","IP-INF-PRP"]); // v
     addCommand({ keycode: 84 }, setLabel, ["CP-THT","CP-ADV","CP-CMP","CP-DEG"]); // t
-    addCommand({ keycode: 71 }, setLabel, ["ADJP","ADJP-PRD","ADJP-SPR","NP-TMP","NP-LOC","NP-MSR","QP"]); // g
-    addCommand({ keycode: 70 }, setLabel, ["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR"]); // f
-    addCommand({ keycode: 50 }, setLabel, ["NP","NP-ATR","NP-PRN","NP-COM","NP-PAR"]); // 2
+
+    addCommand({ keycode: 86 }, setLabel, ["IP-INF","IP-INF-COM","IP-SMC","IP-INF-THT","IP-INF-PRP"]); // v
+    addCommand({ keycode: 87 }, setLabel, ["NP-SBJ","NP-OB1","NP-OB2","NP-PRD","NP-OBP","NP-OBQ"]); // w
+    addCommand({ keycode: 88 }, makeNode, "XP"); // x
+    addCommand({ keycode: 88, shift: true }, setLabel, ["XP"]); // shift + x
+
+    addCommand({ keycode: 90 }, undo); // z
+
+    // left hand number commands
+    //addCommand({ keycode: 49 }, ); // 1
+    addCommand({ keycode: 50 }, setLabel, ["NP-PRN","NP-PAR","NP","NP-COM","NP-ATR"]); // 2
+    //addCommand({ keycode: 51 }, ); // 3
     addCommand({ keycode: 52 }, toggleExtension, "-PRN"); // 4
     addCommand({ keycode: 53 }, toggleExtension, "-SPE"); // 5
-    addCommand({ keycode: 81 }, setLabel, ["CONJP"]); // q
-    addCommand({ keycode: 87 }, setLabel, ["NP-SBJ","NP-OB1","NP-OB2","NP-PRD","NP-OBP","NP-OBQ"]); // w
-    addCommand({ keycode: 68 }, pruneNode); // d
-    addCommand({ keycode: 90 }, undo); // z
+
+    // right hand commands
+    //addCommand({ keycode: 72 }, ); // h
+    addCommand({ keycode: 73 }, toggleVerbalExtension, "-IMPF"); // i
+    addCommand({ keycode: 73, shift: true }, toggleVerbalExtension, "-IND"); // shift + i
+    //addCommand({ keycode: 74 }, ); // j
+    addCommand({ keycode: 75 }, toggleVerbalExtension, "-KJV"); // k
     addCommand({ keycode: 76 }, editLemmaOrLabel); // l
+    addCommand({ keycode: 76, shift: true }, displayRename); // shift + l
+    //addCommand({ keycode: 77 }, ); // m
+    //addCommand({ keycode: 78 }, ); // n
+    //addCommand({ keycode: 79 }, ); // o
+    addCommand({ keycode: 80 }, toggleVerbalExtension, "-PASS"); // p
+    addCommand({ keycode: 80, shift: true }, toggleVerbalExtension, "-PRF"); // shift + p
+
+    //addCommand({ keycode: 85 }, ); // u
+
+    //addCommand({ keycode: 89 }, ); // y
+
     addCommand({ keycode: 32 }, clearSelection); // spacebar
     addCommand({ keycode: 192 }, toggleLemmata); // `
-    addCommand({ keycode: 76, ctrl: true }, displayRename); // ctrl + l
 
     // An example of a context-sensitive label switching command.  If
     // neither NP or PP is the POS, the NP value (first in the dictionary)
