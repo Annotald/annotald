@@ -1002,6 +1002,47 @@ function toggleExtension(extension) {
     textnode.replaceWith(newlabel + " ");
 }
 
+function toggleVerbExtension (oldlabel, extension) {
+    var index = parseIndex(oldlabel);
+    var indextype = "";
+    if (index > 0) {
+        indextype = parseIndexType(oldlabel);
+    }
+    var extendedlabel = parseLabel(oldlabel);
+
+    var currentextensions = new Array();
+    var vextension = false;
+    for (var i = vextensions.length-1; i>-1; i--) {
+        if (extension == vextensions[i]) {
+            vextension = true;
+        } else {
+            vextension = false;
+        }
+
+        if(extendedlabel.endsWith(vextensions[i])) {
+            if (!vextension) {
+                currentextensions.push(vextensions[i]);
+            }
+            extendedlabel = extendedlabel.substr(
+                0,extendedlabel.length - vextensions[i].length);
+        } else if (vextension) {
+            currentextensions.push( vextensions[i] );
+        }
+    }
+
+    var out = extendedlabel;
+    var count = currentextensions.length;
+    // TODO(AWE): out += currentextensions.join("")
+    for (i=0; i < count; i++) {
+        out += currentextensions.pop();
+    }
+    if (index > 0) {
+        out += indextype;
+        out += index;
+    }
+    return out;
+}
+
 // added by JEB
 function toggleVerbalExtension(extension) {
     // there has to be a startnode
@@ -1013,10 +1054,14 @@ function toggleVerbalExtension(extension) {
         return;
     }
 
+    if (!isEmpty(wnodeString($(startnode)))) {
+        return;
+    }
+
     stackTree();
     var textnode = textNode($(startnode));
     var oldlabel=$.trim(textnode.text());
-    var newlabel = toogleJustExtension(oldlabel, extension);
+    var newlabel = toggleVerbExtension(oldlabel, extension);
     textnode.replaceWith(newlabel + " ");
 }
 

@@ -30,6 +30,11 @@ var caseTags=["N","NS","NPR","NPRS","PRO","D","NUM","ADJ","ADJR","ADJS","Q","QR"
  */
 var extensions=["-SPE","-PRN","-SBJ","-LFD","-RSP","-XXX","-ZZZ","-PASS"];
 
+/* verbal extensions are treated as not part of the label for various purposes,
+ * they are all binary, and they show up in the verbal extension menu (TODO)
+ */ 
+var vextensions=["-PASS","-IMPF","-AOR","-PRF","-FUT","-IND","-KJV"];
+
 /*
  * Phrase labels in this list (including the same ones with indices and
  * extensions) get a different background color so that the annotator can
