@@ -1054,10 +1054,6 @@ function toggleVerbalExtension(extension) {
         return;
     }
 
-    if (!isEmpty(wnodeString($(startnode)))) {
-        return;
-    }
-
     stackTree();
     var textnode = textNode($(startnode));
     var oldlabel=$.trim(textnode.text());
