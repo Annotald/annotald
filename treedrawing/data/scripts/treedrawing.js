@@ -130,6 +130,7 @@ function isIpNode (text) {
         text.startsWith("IP-IMP") ||
         text.startsWith("IP-INF") ||
         text.startsWith("IP-PPL") ||
+        text.startsWith("IP-ABS") ||
         text.startsWith("FRAG") ||
         text.startsWith("QTP") ||
         text.startsWith("RRC");
@@ -992,6 +993,27 @@ function toggleExtension(extension) {
 
     if (!isPossibleTarget(startnode.id) &&
         !isEmpty(wnodeString($(startnode)))) {
+        return;
+    }
+    stackTree();
+    var textnode = textNode($(startnode));
+    var oldlabel=$.trim(textnode.text());
+    var newlabel = toogleJustExtension(oldlabel, extension);
+    textnode.replaceWith(newlabel + " ");
+}
+
+// added by JEB
+function toggleVerbalExtension(extension) {
+    // there has to be a startnode
+    if (!startnode) {
+        return;
+    }
+    // there can't be an endnode
+    if (endnode) {
+        return;
+    }
+
+    if (!isEmpty(wnodeString($(startnode)))) {
         return;
     }
     stackTree();

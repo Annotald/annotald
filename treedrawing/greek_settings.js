@@ -28,7 +28,7 @@ var caseTags=["N","NS","NPR","NPRS","PRO","D","NUM","ADJ","ADJR","ADJS","Q","QR"
 /* extensions are treated as not part of the label for various purposes, 
  * they are all binary, and they show up in the toggle extension menu  
  */
-var extensions=["-SPE","-PRN","-SBJ","-LFD","-RSP","-PASS","-XXX","-ZZZ"];
+var extensions=["-SPE","-PRN","-SBJ","-LFD","-RSP","-XXX","-ZZZ"];
 
 /*
  * Phrase labels in this list (including the same ones with indices and
@@ -46,14 +46,14 @@ var ipnodes=["IP-SUB","IP-MAT","IP-IMP","IP-INF","IP-PPL","RRC"];
 function customCommands(){
     addCommand({ keycode: 65 }, leafAfter ); // a
     addCommand({ keycode: 66 }, leafBefore); // b
-    addCommand({ keycode: 69 }, setLabel, ["CP-ADV","CP-CMP"]); //e
+    addCommand({ keycode: 69 }, toggleVerbalExtension, "-PASS"); //e
     addCommand({ keycode: 88 }, makeNode, "XP"); // x
     addCommand({ keycode: 88, shift: true }, setLabel, ["XP"]);
     addCommand({ keycode: 67 }, coIndex); // c
     addCommand({ keycode: 82 }, setLabel, ["CP-REL","CP-FRL","CP-CAR","CP-EOP"]); // r
     addCommand({ keycode: 83 }, setLabel, ["IP-SUB","IP-MAT","IP-IMP"]); // s
     addCommand({ keycode: 86 }, setLabel, ["IP-INF","IP-INF-COM","IP-SMC","IP-INF-THT","IP-INF-PRP"]); // v
-    addCommand({ keycode: 84 }, setLabel, ["CP-THT","CP-DEG","CP-QUE","CP-THT-PRN"]); // t
+    addCommand({ keycode: 84 }, setLabel, ["CP-THT","CP-ADV","CP-CMP","CP-DEG"]); // t
     addCommand({ keycode: 71 }, setLabel, ["ADJP","ADJP-PRD","ADJP-SPR","NP-TMP","NP-LOC","NP-MSR","QP"]); // g
     addCommand({ keycode: 70 }, setLabel, ["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR"]); // f
     addCommand({ keycode: 50 }, setLabel, ["NP","NP-ATR","NP-PRN","NP-COM","NP-PAR"]); // 2
@@ -94,7 +94,7 @@ function customConMenuGroups(){
 	addConMenuGroup( ["ADJP","ADJX","NP-MSR","QP","NP","ADVP","IP-PPL"] );
         addConMenuGroup( ["NP-SBJ","NP-OB1","NP-OB2","NP-OBP","NP-OBQ","NP-PRD"] );
         addConMenuGroup( ["NP-ATR","NP-PAR","NP-COM","NP-PRN"] );
-        addConMenuGroup( ["NP","NX","NP-MSR","NP-TMP","NP-LOC","NP-ADV","NP-MSR","NP-CMP","NP-DIR","NP-ADT","NP-VOC","QP"] );
+        addConMenuGroup( ["NP","NX","NP-MSR","NP-TMP","NP-LOC","NP-ADV","NP-MSR","NP-AGT","NP-CMP","NP-DIR","NP-ADT","NP-VOC","QP"] );
 	addConMenuGroup( ["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR","NP-MSR","NP-ADV"] );	
 	addConMenuGroup( ["P","ADV","ADVR","ADVS","ADJ","ADJR","ADJS","C","CONJ"] );
 	addConMenuGroup( ["WADVP","WNP","WPP","WQP","WADJP"] );
