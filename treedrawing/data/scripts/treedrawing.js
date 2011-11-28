@@ -686,10 +686,10 @@ function leafAfter() {
 
 function makeLeaf(before, label, word, targetId) {
     if (!label) {
-        label = "WADVP";
+        label = "NP-SBJ";
     }
     if (!word) {
-        word = "0";
+        word = "*con*";
     }
     if (!targetId) {
         targetId = startnode.id;
