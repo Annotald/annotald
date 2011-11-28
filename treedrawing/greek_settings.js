@@ -159,6 +159,7 @@ function customConMenuGroups(){
     addConMenuGroup( ["CP","CP-ADV","CP-CAR","CP-COM","CP-CMP","CP-DEG","CP-EOP","CP-EXL","CP-FRL","CP-PRP","CP-QUE","CP-REL","CP-RES","CP-THT"] );
     addConMenuGroup( ["IP","IY","RRC","IP-ABS","IP-IMP","IP-INF","IP-INF-COM","IP-INF-PRP","IP-INF-SBJ","IP-MAT","IP-PPL","IP-PPL-COM","IP-SMC","IP-SUB"] );
     addConMenuGroup( ["QP","QX","QY"] );
+    addConMenuGroup( ["OTHER","OTHER$","OTHERA","OTHERD"] );
     //addConMenuGroup( [] );
 }
 
