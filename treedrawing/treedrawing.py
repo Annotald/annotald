@@ -108,7 +108,15 @@ class Treedraw(object):
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
     # object has no attribute 'thefile'
     def __init__(self):
-        self.thefile = ""
+        # We have to do this here, because if you change the python
+        # source file, the server respawns but then will not know where
+        # to put the file upon save.  This partially duplicates things
+        # that happen elsewhere; someone should carefully go through and
+        # reduce that duplication (TODO)
+        if len(sys.argv) == 2:
+            self.thefile = sys.argv[1]
+        elif len(sys.argv) == 3:
+            self.thefile = sys.argv[2]
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
