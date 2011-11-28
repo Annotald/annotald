@@ -711,11 +711,9 @@ function makeLeaf(before, label, word, targetId) {
         stackTree();
         if (startRoot == endRoot) {
             word = "*ICH*";
-            lemma = "*ICH*";
             label = getLabel($(endnode));
             if (label.startsWith("W")) {
                 word = "*T*";
-		lemma = "*T*";
                 label = label.substr(1);
             }
             var toadd = maxIndex(startRoot) + 1;
