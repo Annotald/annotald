@@ -23,9 +23,31 @@ import re
 import sys, subprocess
 import cherrypy, json
 import nltk.tree as T
+import string as STR
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
+
+# Ripped from NLTK.tree and fixed to not do stupid things with Unicode
+# NLTK is distributed under the Apache License 2.0, which looks (to AWE)
+# to be compatible with redistribution under the LGPL3.
+def unicode_pprint_flat(tree, nodesep, parens, quotes):
+    childstrs = []
+    for child in tree:
+        if isinstance(child, T.Tree):
+            childstrs.append(unicode_pprint_flat(child, nodesep, parens, quotes))
+        elif isinstance(child, tuple):
+            childstrs.append(u"/".join(child))
+        elif isinstance(child, basestring) and not quotes:
+            childstrs.append(u'%s' % child)
+        else:
+            childstrs.append(u'%r' % child)
+    if isinstance(tree.node, basestring):
+        return u'%s%s%s %s%s' % (parens[0], tree.node, nodesep,
+                                 STR.join(childstrs), parens[1])
+    else:
+        return u'%s%r%s %s%s' % (parens[0], tree.node, nodesep,
+                                 STR.join(childstrs), parens[1])
 
 # TODO: this will be much easier when we use nltk.tree...
 def queryVersionCookie(string, fmt):
@@ -36,7 +58,7 @@ def queryVersionCookie(string, fmt):
     else:
         return None
 
-def treeToHtml(tree, version):
+def treeToHtml(tree, version, extra_data = None):
     if isinstance(tree[0], str) or \
             isinstance(tree[0], unicode):
         # Leaf node
@@ -53,11 +75,30 @@ def treeToHtml(tree, version):
             res += tree[0]
         res += '</span></div>'
         return res
+    elif tree.node == "":
+        # Root node
+        sisters = []
+        real_root = None
+        for daughter in tree:
+            if daughter.node == "ID" or daughter.node == "METADATA":
+                # TODO(AWE): conditional is non-portable
+                sisters.append(daughter)
+            else:
+                if real_root:
+                    raise Error("root tree has too many/unknown daughters!")
+                else:
+                    real_root = daughter
+        xtra_data = " ".join(map(lambda x: unicode_pprint_flat(x,'','()',False),
+                                 sisters))
+        return treeToHtml(real_root, version, xtra_data)
     else:
-        the_class = "snode"
-        if tree.node == "":
-            the_class = " tree_root"
-        res = '<div class="' + the_class + '">' + tree.node + ' '
+        res = '<div class="snode"'
+        if extra_data:
+            if "\"" in extra_data:
+                # TODO: relax this restriction
+                raise Error("can't cope with ID/METADATA containing double-quote yet!")
+            res += ' title="' + extra_data + '"' # blatant abuse of HTML...
+        res += '>' + tree.node + ' '
         res += "\n".join(map(lambda x: treeToHtml(x, version), tree))
         res += "</div>"
         return res

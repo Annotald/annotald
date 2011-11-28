@@ -57,17 +57,9 @@ body {
     margin-right: 25px;
 }
 
-#sn0 > .tree_root > .snode {
+#sn0 > .snode {
 /*  background-color: silver;*/
     border: 2px solid black;
-}
-
-.tree_root {
-    /* Blow away any other formatting; we really want this to be invisible. */
-    border: 0px !important;
-    margin: 0px !important;
-    padding: 0px !important;
-    background-color: inherit;
 }
 
 .snodesel {
