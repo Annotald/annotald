@@ -59,6 +59,7 @@ function customCommands(){
     addCommand({ keycode: 70 }, setLabel, ["PP"]); // f
     addCommand({ keycode: 70, shift: true }, toggleVerbalExtension, "-FUT"); // shift + f
     addCommand({ keycode: 71 }, setLabel, ["ADJP","ADJP-PRD","ADJP-SPR"]); // g
+    addCommand({ keycode: 71, shift: true }, setLabel, ["NP-AGT"]); // shift + g
 
     addCommand({ keycode: 81 }, setLabel, ["CONJP"]); // q
     addCommand({ keycode: 82 }, setLabel, ["CP-REL","CP-FRL","CP-CAR","CP-EOP"]); // r
@@ -66,7 +67,7 @@ function customCommands(){
     addCommand({ keycode: 83, shift: true}, setLabel, ["IP"]); // shift + s
     addCommand({ keycode: 84 }, setLabel, ["CP-THT","CP-ADV","CP-CMP","CP-DEG"]); // t
 
-    addCommand({ keycode: 86 }, setLabel, ["IP-INF","IP-INF-COM","IP-SMC","IP-INF-THT","IP-INF-PRP"]); // v
+    addCommand({ keycode: 86 }, setLabel, ["IP-INF","IP-INF-COM","IP-SMC","IP-PPL","IP-INF-THT","IP-INF-PRP"]); // v
     addCommand({ keycode: 87 }, setLabel, ["NP-SBJ","NP-OB1","NP-OB2","NP-PRD","NP-OBP","NP-OBQ","NP"]); // w
     addCommand({ keycode: 88 }, makeNode, "XP"); // x
     addCommand({ keycode: 88, shift: true }, setLabel, ["XP"]); // shift + x
@@ -76,7 +77,7 @@ function customCommands(){
     // left hand number commands
     addCommand({ keycode: 49 }, leafBefore); // 1
     addCommand({ keycode: 50 }, leafAfter); // 2
-    //addCommand({ keycode: 51 }, ); // 3
+    addCommand({ keycode: 51 }, setLabel, ["NP-INS","NP-TMP","NP-LOC","NP-ADV","NP-MSR","NP-AGT","NP-CMP","NP-DIR","NP-ADT","NP-VOC","NP"]); // 3
     addCommand({ keycode: 52 }, toggleExtension, "-PRN"); // 4
     addCommand({ keycode: 53 }, toggleExtension, "-SPE"); // 5
 
@@ -124,9 +125,10 @@ var defaultConMenuGroup = ["VBP","VBPP","VBD","VBDP","VBN","VBNP","VBS","VBSP","
  */
 function customConMenuGroups(){
 	addConMenuGroup( ["IP-SUB","IP-MAT","IP-INF","IP-IMP","CP-QUE","QTP","FRAG"] );
+// add context menu group for IP-PPLs and IP-INFs
 	addConMenuGroup( ["ADJP","ADJX","NP-MSR","QP","NP","ADVP","IP-PPL"] );
-        addConMenuGroup( ["NP-SBJ","NP-OB1","NP-OB2","NP-OBP","NP-OBQ","NP-PRD","NP-ATR","NP-PAR","NP-COM","NP-PRN"] );
-        addConMenuGroup( ["NP","NX","NP-MSR","NP-TMP","NP-LOC","NP-ADV","NP-MSR","NP-AGT","NP-CMP","NP-DIR","NP-ADT","NP-VOC","QP"] );
+        addConMenuGroup( ["NP","NX","NP-SBJ","NP-OB1","NP-OB2","NP-OBP","NP-OBQ","NP-PRD","NP-ATR","NP-PAR","NP-COM","NP-PRN", "NP-SPR"] );
+        addConMenuGroup( ["NP-INS","NP-TMP","NP-LOC","NP-ADV","NP-MSR","NP-AGT","NP-CMP","NP-DIR","NP-ADT","NP-VOC","QP"] );
 	addConMenuGroup( ["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR","NP-MSR","NP-ADV"] );	
 	addConMenuGroup( ["P","ADV","ADVR","ADVS","ADJ","ADJR","ADJS","C","CONJ"] );
 	addConMenuGroup( ["WADVP","WNP","WPP","WQP","WADJP"] );
@@ -143,13 +145,12 @@ function customConMenuGroups(){
 function customConLeafBefore(){
 	addConLeafBefore( "NP-SBJ", "*con*");
 	addConLeafBefore( "NP-SBJ", "*pro*");
+        addConLeafBefore( "NP-SBJ", "*");
 	addConLeafBefore( "BEP-IMPF", "*");
 	addConLeafBefore( "BED-IMPF", "*");
 	addConLeafBefore( "WADVP", "0");
 	addConLeafBefore( "WNP", "0");
-	addConLeafBefore( "WQP", "0");
 	addConLeafBefore( "WADJP", "0");
-	addConLeafBefore( "WPP", "0");
 	addConLeafBefore( "C", "0");
         addConLeafBefore( "CODE", "{BKMK}");
 	addConLeafBefore( "CODE", "{COM:");	
