@@ -72,7 +72,7 @@ class Treedraw(object):
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
                    'tools.staticdir.index' : 'index.html',
-  	           'tools.caching.on'      : False
+                   'tools.caching.on'      : False
                    }
 
     @cherrypy.expose
@@ -108,7 +108,7 @@ class Treedraw(object):
         raise SystemExit(0)
 
     def loadPsd(self, fileName):
-	self.thefile = fileName
+        self.thefile = fileName
         f = open(fileName, 'r')
         # no longer using codecs to open the file, using .decode('utf-8') instead when in Mac OS X
         if "Darwin" in os.uname():
@@ -123,35 +123,35 @@ class Treedraw(object):
             self.versionCookie = versionMatch.group()
         useLemmata = queryVersionCookie(self.versionCookie, fmt = "dash")
         currentText = re.sub(versionRe, '', currentText)
-	currentText = currentText.replace("<","&lt;")
-	currentText = currentText.replace(">","&gt;")
-	trees = currentText.split("\n\n")	
+        currentText = currentText.replace("<","&lt;")
+        currentText = currentText.replace(">","&gt;")
+        trees = currentText.split("\n\n")
 
-	alltrees = '<div class="snode">'
+        alltrees = '<div class="snode">'
         # TODO(AWE): convert to use nltk.tree
-	for tree in trees:
+        for tree in trees:
             if not tree == "":
                 nltk_tree = T.Tree(tree)
                 alltrees = alltrees + treeToHtml(nltk_tree, useLemmata)
 
- 	alltrees = alltrees + '</div>'
-	return alltrees
+        alltrees = alltrees + '</div>'
+        return alltrees
 
     def loadTxt(self, fileName):
-	f = open(fileName)
-	currentText = f.read()
-	trees = currentText.split("\n\n")
-	tree0 = trees[1].strip();
-	words = tree0.split('\n');
-	thetree = '<div class="snode">IP-MAT'
-	wordnr = 0
-	for word in words:
-		thetree = thetree + '<div class="snode">X<span class="wnode">' + \
+        f = open(fileName)
+        currentText = f.read()
+        trees = currentText.split("\n\n")
+        tree0 = trees[1].strip();
+        words = tree0.split('\n');
+        thetree = '<div class="snode">IP-MAT'
+        wordnr = 0
+        for word in words:
+                thetree = thetree + '<div class="snode">X<span class="wnode">' + \
                     word + '</span></div>'
 
-	thetree = thetree + "</div>"
-	return thetree	
-    
+        thetree = thetree + "</div>"
+        return thetree
+
     @cherrypy.expose
     def index(self):
         if len(sys.argv) == 2:
@@ -169,20 +169,20 @@ class Treedraw(object):
         # currentSettings, so that the functions there are defined for
         # currentSettings.  But currentSettings in turn must define some
         # functions for treedrawing.contextMenu.js.
-        return """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+        return """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>  <title>Annotald</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="stylesheet" type="text/css" href="css/treedrawing.css"
           type="text/css"></link>
         <script type= "application/javascript" src="scripts/jquery.js"/></script>
         <script type= "application/javascript" src="scripts/jquery.mousewheel.min.js"/>
         </script>
-	<script type= "application/javascript" src="scripts/treedrawing.js"/></script>
+        <script type= "application/javascript" src="scripts/treedrawing.js"/></script>
         <script type= "application/javascript"/>""" + currentSettings + """</script>
         <script type= "application/javascript"
           src="scripts/treedrawing.contextMenu.js"/></script>
-	
+
 
 </head>
 <body oncontextmenu="return false;">
@@ -208,26 +208,26 @@ Editing: """+self.thefile+""" <br />
 <div id="editpane">"""+currentTree+"""</div>
 
 
-		<div id="conMenu">		
-		  <div id="conLeft" class="conMenuColumn">			
-			<div class="conMenuItem"><a href="#edit">IP-SUB</a></div>
-			<div class="conMenuItem"><a href="#cut">IP-INF</a></div>
-			<div class="conMenuItem"><a href="#copy">IP-SMC</a></div>
-			<div class="conMenuItem"><a href="#paste">-SPE</a></div>
-			<div class="conMenuItem"><a href="#delete">-PRN</a></div>
-			<div class="conMenuItem"><a href="#quit">-XXX</a></div>
- 		  </div>
+                <div id="conMenu">
+                  <div id="conLeft" class="conMenuColumn">
+                        <div class="conMenuItem"><a href="#edit">IP-SUB</a></div>
+                        <div class="conMenuItem"><a href="#cut">IP-INF</a></div>
+                        <div class="conMenuItem"><a href="#copy">IP-SMC</a></div>
+                        <div class="conMenuItem"><a href="#paste">-SPE</a></div>
+                        <div class="conMenuItem"><a href="#delete">-PRN</a></div>
+                        <div class="conMenuItem"><a href="#quit">-XXX</a></div>
+                  </div>
 
-		  <div id="conRight" class="conMenuColumn">			
-			<div class="conMenuItem"><a href="#edit">XXX</a></div>
-			<div class="conMenuItem"><a href="#cut">XXX</a></div>
- 		  </div>
- 		  
-          <div id="conRightest" class="conMenuColumn">            
+                  <div id="conRight" class="conMenuColumn">
+                        <div class="conMenuItem"><a href="#edit">XXX</a></div>
+                        <div class="conMenuItem"><a href="#cut">XXX</a></div>
+                  </div>
+
+          <div id="conRightest" class="conMenuColumn">
             <div class="conMenuItem"><a href="#edit">XXX</a></div>
             <div class="conMenuItem"><a href="#cut">XXX</a></div>
-           </div> 		  
-		</div>
+           </div>
+                </div>
 
 </body>
 </html>"""
