@@ -54,7 +54,8 @@ function customCommands(){
     addCommand({ keycode: 66 }, setLabel, ["ADVP", "ADVP-TMP", "ADVP-LOC", "ADVP-DIR"]); // b
     addCommand({ keycode: 67 }, coIndex); // c
     addCommand({ keycode: 68 }, pruneNode); // d
-    //addCommand({ keycode: 69 }, ); // e
+    addCommand({ keycode: 69 }, setLabel, ["NP-PRN","NP-PAR","NP","NP-COM","NP-ATR"]); // e
+    addCommand({ keycode: 69, shift: true }, setLabel, ["NP"]); // shift + e
     addCommand({ keycode: 70 }, setLabel, ["PP"]); // f
     addCommand({ keycode: 70, shift: true }, toggleVerbalExtension, "-FUT"); // shift + f
     addCommand({ keycode: 71 }, setLabel, ["ADJP","ADJP-PRD","ADJP-SPR"]); // g
@@ -62,18 +63,19 @@ function customCommands(){
     addCommand({ keycode: 81 }, setLabel, ["CONJP"]); // q
     addCommand({ keycode: 82 }, setLabel, ["CP-REL","CP-FRL","CP-CAR","CP-EOP"]); // r
     addCommand({ keycode: 83 }, setLabel, ["IP-SUB","IP-MAT","IP-IMP"]); // s
+    addCommand({ keycode: 83, shift: true}, setLabel, ["IP"]); // shift + s
     addCommand({ keycode: 84 }, setLabel, ["CP-THT","CP-ADV","CP-CMP","CP-DEG"]); // t
 
     addCommand({ keycode: 86 }, setLabel, ["IP-INF","IP-INF-COM","IP-SMC","IP-INF-THT","IP-INF-PRP"]); // v
-    addCommand({ keycode: 87 }, setLabel, ["NP-SBJ","NP-OB1","NP-OB2","NP-PRD","NP-OBP","NP-OBQ"]); // w
+    addCommand({ keycode: 87 }, setLabel, ["NP-SBJ","NP-OB1","NP-OB2","NP-PRD","NP-OBP","NP-OBQ","NP"]); // w
     addCommand({ keycode: 88 }, makeNode, "XP"); // x
     addCommand({ keycode: 88, shift: true }, setLabel, ["XP"]); // shift + x
 
     addCommand({ keycode: 90 }, undo); // z
 
     // left hand number commands
-    //addCommand({ keycode: 49 }, ); // 1
-    addCommand({ keycode: 50 }, setLabel, ["NP-PRN","NP-PAR","NP","NP-COM","NP-ATR"]); // 2
+    addCommand({ keycode: 49 }, leafBefore); // 1
+    addCommand({ keycode: 50 }, leafAfter); // 2
     //addCommand({ keycode: 51 }, ); // 3
     addCommand({ keycode: 52 }, toggleExtension, "-PRN"); // 4
     addCommand({ keycode: 53 }, toggleExtension, "-SPE"); // 5
@@ -123,8 +125,7 @@ var defaultConMenuGroup = ["VBP","VBPP","VBD","VBDP","VBN","VBNP","VBS","VBSP","
 function customConMenuGroups(){
 	addConMenuGroup( ["IP-SUB","IP-MAT","IP-INF","IP-IMP","CP-QUE","QTP","FRAG"] );
 	addConMenuGroup( ["ADJP","ADJX","NP-MSR","QP","NP","ADVP","IP-PPL"] );
-        addConMenuGroup( ["NP-SBJ","NP-OB1","NP-OB2","NP-OBP","NP-OBQ","NP-PRD"] );
-        addConMenuGroup( ["NP-ATR","NP-PAR","NP-COM","NP-PRN"] );
+        addConMenuGroup( ["NP-SBJ","NP-OB1","NP-OB2","NP-OBP","NP-OBQ","NP-PRD","NP-ATR","NP-PAR","NP-COM","NP-PRN"] );
         addConMenuGroup( ["NP","NX","NP-MSR","NP-TMP","NP-LOC","NP-ADV","NP-MSR","NP-AGT","NP-CMP","NP-DIR","NP-ADT","NP-VOC","QP"] );
 	addConMenuGroup( ["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR","NP-MSR","NP-ADV"] );	
 	addConMenuGroup( ["P","ADV","ADVR","ADVS","ADJ","ADJR","ADJS","C","CONJ"] );
@@ -150,9 +151,10 @@ function customConLeafBefore(){
 	addConLeafBefore( "WADJP", "0");
 	addConLeafBefore( "WPP", "0");
 	addConLeafBefore( "C", "0");
-	addConLeafBefore( "CODE", "{COM:}");	
-	addConLeafBefore( "CODE", "{TODO:}");
-	addConLeafBefore( "CODE", "{MAN:}");	
+        addConLeafBefore( "CODE", "{BKMK}");
+	addConLeafBefore( "CODE", "{COM:");	
+	addConLeafBefore( "CODE", "{TODO:");
+	addConLeafBefore( "CODE", "{MAN:");	
 }
 
 // An example of a CSS rule for coloring a POS tag.  The styleTag
