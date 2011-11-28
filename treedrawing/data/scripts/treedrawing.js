@@ -725,6 +725,9 @@ function leafAfter() {
     makeLeaf(false);
 }
 
+// TODO: the hardcoding of defaults in this function is ugly.  We should
+// supply a default heuristic fn to try to guess these, then allow
+// settings.js to override it.
 function makeLeaf(before, label, word, targetId) {
     if (!label) {
         label = "WADVP";
