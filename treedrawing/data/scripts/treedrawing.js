@@ -1589,5 +1589,6 @@ function isLeafNode(node) {
 }
 
 // Local Variables:
-// js2-additional-externs: ("$")
+// js2-additional-externs: ("$" "setTimeout" "customCommands" "customConLeafBefore\
+// " "customConMenuGroups")
 // End:
