@@ -1003,7 +1003,7 @@ function toggleExtension(extension) {
 }
 
 // added by JEB
-// TODO: make it so that dash tags are properly ordered or at least ordered 
+// DONE?: make it so that dash tags are properly ordered or at least ordered 
 function toggleVerbExtension (oldlabel, extension) {
     var index = parseIndex(oldlabel);
     var indextype = "";
@@ -1022,14 +1022,14 @@ function toggleVerbExtension (oldlabel, extension) {
         }
 
         if(extendedlabel.endsWith(vextensions[i])) {
-	    if (!vextension) {
-		currentextensions.push(vextensions[i]);
-		extendedlabel = extendedlabel.substr(
-		    0,(extendedlabel.length - vextensions[i].length));
-	    }
-	}
+            if (!vextension) {
+                currentextensions.push(vextensions[i]);
+                extendedlabel = extendedlabel.substr(
+                    0,(extendedlabel.length - vextensions[i].length));
+            }
+        }
         else if (vextension) {
-		currentextensions.push(vextensions[i]);
+                currentextensions.push(vextensions[i]);
         }
     }
 
