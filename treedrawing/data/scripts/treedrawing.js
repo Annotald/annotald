@@ -19,6 +19,11 @@
 // Global TODOs:
 // - (AWE) push ipnode bookkeeping/formatting into CSS
 // - (AWE) is $("#" + foo.id) the same as $(foo), and is the latter faster?
+// - (AWE) make the dash-tags modular, so that ctrl x -> set XXX, w ->
+//   set NP-SBJ doesn't blow away the XXX
+// - (AWE) what happens when you delete e.g. an NP node w metadata?
+//   Does the metadata get blown away? pro/demoted? Does deletion fail, or
+//   raise a prompt?
 
 var startnode = null;
 var endnode = null;
@@ -84,6 +89,26 @@ function resetLabelClasses(alertOnError) {
         });
 }
 
+// Declare global variables from settings.js
+var invisibleCategories, invisibleRootCategories, ipnodes;
+
+function hideCategories() {
+    var i;
+    for (i = 0; i < invisibleRootCategories.length; i++) {
+        addStyle("#sn0>." + invisibleRootCategories[i] + "{display:none;}");
+    }
+    for (i = 0; i < invisibleCategories.length; i++) {
+        addStyle("." + invisibleCategories[i] + "{display:none;}");
+    }
+}
+
+function styleIpNodes() {
+    for (var i = 0; i < ipnodes.length; i++) {
+        styleTag(ipnodes[i], "border-top: 1px solid black;" +
+                 "border-bottom: 1px solid black;" +
+                 "background-color: #D2B48C;");
+    }
+}
 
 $(document).ready(
     function() {
@@ -329,7 +354,8 @@ function handleNodeClick(e) {
         // rightclick
         if (!elementId) {
             return; // prevent this if clicking a trace, for now
-        } if (startnode && !endnode) {
+        }
+        if (startnode && !endnode) {
             if (startnode.id != elementId) {
                 e.stopPropagation();
                 moveNode(elementId);
@@ -458,8 +484,12 @@ function currentText(root) {
 }
 
 function moveNode(targetParent){
-    var parent_ip = $(startnode).parents("#sn0>.ipnode,#sn0").first();
+    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
+    if (targetParent == "sn0") {
+        parent_ip = $("#sn0");
+    }
     var textbefore = currentText(parent_ip);
+    var nodeMoved;
     if (!isPossibleTarget(targetParent)) {
         // can't move under a tag node
     } else if ($(startnode).parent().children().length == 1) {
@@ -518,8 +548,8 @@ function moveNode(targetParent){
                     resetIds();
                 }
             }
-        } else if( parseInt( startnode.id.substr(2) ) <
-                   parseInt( targetParent.substr(2) ) ) {
+        } else if (parseInt(startnode.id.substr(2)) <
+                   parseInt(targetParent.substr(2)) ) {
             stackTree();
             if (tokenMerge) {
                 addToIndices( movednode, maxindex );
@@ -544,10 +574,17 @@ function isRootNode(node) {
         return node.filter("#sn0>.snode").size() > 0;
 }
 
+// TODO(AWE): does Jquery clone() method do copy-on-write?  If so, then
+// use editpanel.clone() here to implement undo, instead of the interactive
+// undo system.  This might also be an option of rht einteractive undo
+// system in general.
 function moveNodes(targetParent) {
-    var parent_ip = $(startnode).parents("#sn0>.ipnode,#sn0").first();
+    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
+    if (targetParent == "sn0") {
+        parent_ip = $("#sn0");
+    }
     var textbefore = currentText(parent_ip);
-    var destination=$("#"+targetParent);
+    var destination = $("#"+targetParent);
     stackTree();
     if (parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2))) {
         // reverse them if wrong order
@@ -573,6 +610,15 @@ function moveNodes(targetParent) {
     }
     resetIds();
     var toselect = $(".snode[xxx=newnode]").first();
+
+    // TODO(AWE): what it seems this fn is doing is:
+    // 1) create a dummy parent node over the nodes to move
+    // 2) move this as a single node to the destination
+    // 3) delete the dummy node
+    // If this is true, then step (2) should be accomplisehd by calling
+    // moveNode().  It also may be a good idea to factor out moveNode into
+    // an error-checking part and a movement part, so this fn can do its
+    // own error checking, w/o having to duplicate
 
     // BUG when making XP and then use context menu: todo XXX
     clearSelection();
@@ -621,7 +667,7 @@ function moveNodes(targetParent) {
             }
         } else if (startnode.id == lastchildId) {
             //stackTree();
-             $(startnode.id).insertAfter($("#"+targetParent).children().
+             $(startnode).insertAfter($("#"+targetParent).children().
                                          filter($(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 undo();
@@ -667,8 +713,8 @@ function moveNodes(targetParent) {
             }
         }
     }
-
-    $(startnode).replaceWith($("#"+startnode.id+">*"));
+    var movedNodes = $("#"+startnode.id+">*");
+    $(startnode).replaceWith(movedNodes);
     clearSelection();
 }
 
@@ -1207,6 +1253,8 @@ function makeNode(label) {
     // alert(toselect.attr("id"));
 
     // BUG when making XP and then use context menu: todo XXX
+
+    // TODO(AWE): the ipnodes thing isn't updated here
     selectNode(toselect.attr("id"));
     toselect.attr("xxx",null);
     updateSelection();
@@ -1271,18 +1319,27 @@ function setNodeLabel(node, label, noUndo) {
     textNode(node).replaceWith($.trim(label)+" ");
 }
 
-function appendExtension(node,extension,type) {
-    if(!type) {
+function appendExtension(node, extension, type) {
+    if (!type) {
         type="-";
     }
-    setNodeLabel(node, getLabel(node) + type + extension, true);
+    if (shouldIndexLeaf(node) && !isNaN(extension)) {
+        // Adding an index to an empty category, and the EC is not an
+        // empty operator.  The final proviso is needed because of
+        // things like the empty WADJP in comparatives.
+        var theTextNode = textNode(node.children(".wnode").first());
+        theTextNode.replaceWith(theTextNode.text() + "-" + extension);
+    } else {
+        setNodeLabel(node, getLabel(node) + type + extension, true);
+    }
 }
 
 function getTokenRoot(node) {
     if(isRootNode(node)) {
         return node;
     }
-    return $("#sn0>.snode").filter($(node).parents($("#sn0>.snode")));
+    return $("#sn0>.snode").filter(
+        $(node).parents($("#sn0>.snode")));
 }
 
 /*
@@ -1340,10 +1397,18 @@ function parseLabel (label) {
     return $.trim(label);
 }
 
+function shouldIndexLeaf(node) {
+    // The "W" thing is because we should index the label, not leaf, of
+    // things like (WADJP 0) in comparatives.
+    return isEmpty(wnodeString(node)) && !(getLabel(node)[0] == "W");
+}
 
 function getIndex(node) {
-    var label = getLabel(node);
-    return parseIndex(label);
+    if (shouldIndexLeaf(node)) {
+        return parseIndex(textNode(node.children(".wnode").first()).text());
+    } else {
+        return parseIndex(getLabel(node));
+    }
 }
 
 function parseIndexType(label){
@@ -1448,7 +1513,7 @@ function coIndex() {
         if (getIndex($(startnode)) > 0 && getIndex($(endnode)) > 0) {
             // and if it is the same index
             if (getIndex($(startnode)) == getIndex($(endnode))) {
-                var theIndex=getIndex($(startnode));
+                var theIndex = getIndex($(startnode));
                 var types = "" + getIndexType($(startnode)) +
                     "" + getIndexType($(endnode));
                 // remove it
@@ -1528,15 +1593,30 @@ function wnodeString(node) {
 
 function toLabeledBrackets(node) {
     var out = node.clone();
-    out.find("#sn0>.snode").after("\n\n");
-    out.find("#sn0>.snode").before("( ");
-    out.find("#sn0>.snode").after(")");
 
-    out.find(".snode").before("(");
-    out.find(".snode").after(")");
+    out.find("#sn0>.snode").before("( ");
+    // The ZZZZZ is a placeholder; first we want to clean any
+    // double-linebreaks from the output (which will be spurious), then we
+    // will turn the Z's into double-linebreaks
+    out.find("#sn0>.snode").after(")ZZZZZ");
+    out.find("#sn0>.snode").map(function () {
+        $(this).after(this.title);
+    });
+
+    out.find(".snode").not("#sn0").before("(");
+    out.find(".snode").not("#sn0").after(")");
+
     out.find(".wnode").before(" ");
 
-    return out.text();
+    out = out.text();
+    // Must use rx for string replace bc using a string doesn't get a
+    // global replace.
+    out = out.replace(/\)\(/g, ") (");
+    out = out.replace(/  +/g, " ");
+    out = out.replace(/\n\n+/g,"\n");
+    out = out.replace(/ZZZZZ/g, "\n\n");
+
+    return out;
 }
 
 var lemmaClass = "lemmaHide";
@@ -1575,3 +1655,8 @@ function textNode(node) {
 function isLeafNode(node) {
     return $("#" + node.id + ">.wnode").size() > 0;
 }
+
+// Local Variables:
+// js2-additional-externs: ("$" "setTimeout" "customCommands" "customConLeafBefore\
+// " "customConMenuGroups")
+// End:

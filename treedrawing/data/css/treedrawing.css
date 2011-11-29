@@ -62,15 +62,11 @@ body {
     border: 2px solid black;
 }
 
-.ipnode {
-/*  border-left: 3px solid navy; */
-    border-top: 1px solid black;
-    border-bottom: 1px solid black;
-    background-color: #D2B48C;
-}
-
 .snodesel {
-    background-color: #4682B4;
+    /* This needs to override any user-supplied background colors, since
+     * selection is more important.
+     */
+    background-color: #4682B4 !important;
 }
 
 .menubutton {
@@ -89,7 +85,7 @@ body {
     text-align: center;
 }
 
-#editpane{
+#editpane {
     position: absolute;
     top: 0px;
     left: 210px;

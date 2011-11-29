@@ -22,14 +22,86 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 import re
 import sys, subprocess
 import cherrypy, json
+import nltk.tree as T
+import string as STR
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
 
+# Ripped from NLTK.tree and fixed to not do stupid things with Unicode
+# NLTK is distributed under the Apache License 2.0, which looks (to AWE)
+# to be compatible with redistribution under the LGPL3.
+def unicode_pprint_flat(tree, nodesep, parens, quotes):
+    childstrs = []
+    for child in tree:
+        if isinstance(child, T.Tree):
+            childstrs.append(unicode_pprint_flat(child, nodesep, parens, quotes))
+        elif isinstance(child, tuple):
+            childstrs.append(u"/".join(child))
+        elif isinstance(child, basestring) and not quotes:
+            childstrs.append(u'%s' % child)
+        else:
+            childstrs.append(u'%r' % child)
+    if isinstance(tree.node, basestring):
+        return u'%s%s%s %s%s' % (parens[0], tree.node, nodesep,
+                                 STR.join(childstrs), parens[1])
+    else:
+        return u'%s%r%s %s%s' % (parens[0], tree.node, nodesep,
+                                 STR.join(childstrs), parens[1])
+
 # TODO: this will be much easier when we use nltk.tree...
 def queryVersionCookie(string, fmt):
-    versionRe = re.compile("\\(FORMAT " + fmt + "\\)")
-    return versionRe.search(string)
+    versionRe = re.compile("\\(FORMAT (" + fmt + ")\\)")
+    temp = versionRe.search(string)
+    if temp:
+        return temp.group(1)
+    else:
+        return None
+
+def treeToHtml(tree, version, extra_data = None):
+    if isinstance(tree[0], str) or \
+            isinstance(tree[0], unicode):
+        # Leaf node
+        if len(tree) > 1:
+            raise Error("Leaf node with more than one daughter!")
+        res = '<div class="snode">' + tree.node + '<span class="wnode">'
+        temp = tree[0].split("-")
+        if version == "dash" and len(temp) > 1:
+            temp = tree[0].split("-")
+            lemma = temp.pop()
+            word = "-".join(temp)
+            res += word + '<span class="lemma lemmaHide">-' + lemma + '</span>'
+        else:
+            res += tree[0]
+        res += '</span></div>'
+        return res
+    elif tree.node == "":
+        # Root node
+        sisters = []
+        real_root = None
+        for daughter in tree:
+            if daughter.node == "ID" or daughter.node == "METADATA":
+                # TODO(AWE): conditional is non-portable
+                sisters.append(daughter)
+            else:
+                if real_root:
+                    raise Error("root tree has too many/unknown daughters!")
+                else:
+                    real_root = daughter
+        xtra_data = " ".join(map(lambda x: unicode_pprint_flat(x,'','()',False),
+                                 sisters))
+        return treeToHtml(real_root, version, xtra_data)
+    else:
+        res = '<div class="snode"'
+        if extra_data:
+            if "\"" in extra_data:
+                # TODO: relax this restriction
+                raise Error("can't cope with ID/METADATA containing double-quote yet!")
+            res += ' title="' + extra_data + '"' # blatant abuse of HTML...
+        res += '>' + tree.node + ' '
+        res += "\n".join(map(lambda x: treeToHtml(x, version), tree))
+        res += "</div>"
+        return res
 
 class Treedraw(object):
 
@@ -42,7 +114,7 @@ class Treedraw(object):
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
                    'tools.staticdir.index' : 'index.html',
-  	           'tools.caching.on'      : False
+                   'tools.caching.on'      : False
                    }
 
     @cherrypy.expose
@@ -56,7 +128,7 @@ class Treedraw(object):
             else:
                 f = open(self.thefile, 'w')
             f.write(self.versionCookie + "\n\n")
-            tosave = trees.strip()[1:-1]
+            tosave = trees.strip()
             f.write(tosave)
             f.close()
             cmdline = 'java -classpath ' + CURRENT_DIR + '/../CS_Tony_oct19.jar' + \
@@ -80,7 +152,7 @@ class Treedraw(object):
     def loadPsd(self, fileName):
 	self.thefile = fileName
         fileMatch = re.search("^.*?([A-Za-z\.]*)$", fileName)
-        self.shortfile = fileMatch.group(1)    
+        self.shortfile = fileMatch.group(1)
         f = open(fileName, 'r')
         # no longer using codecs to open the file, using .decode('utf-8') instead when in Mac OS X
         if "Darwin" in os.uname():
@@ -95,47 +167,35 @@ class Treedraw(object):
             self.versionCookie = versionMatch.group()
         useLemmata = queryVersionCookie(self.versionCookie, fmt = "dash")
         currentText = re.sub(versionRe, '', currentText)
-	currentText = currentText.replace("<","&lt;")
-	currentText = currentText.replace(">","&gt;")
-	trees = currentText.split("\n\n")	
+        currentText = currentText.replace("<","&lt;")
+        currentText = currentText.replace(">","&gt;")
+        trees = currentText.split("\n\n")
 
-	alltrees = '<div class="snode">'
+        alltrees = '<div class="snode">'
         # TODO(AWE): convert to use nltk.tree
-	for tree in trees:
-		tree0 = tree.strip()
-		tree0 = re.sub('^\(','',tree0)
-		tree0 = re.sub('\)$','',tree0).strip()
-		tree0 = re.sub('\(([^ ()]+) ([^ ()]+)\)',
-                               '<div class="snode \\1">\\1' +
-                                 '<span class="wnode">\\2' +
-                                 '</span></div>', tree0)
-		tree0 = re.sub('\(([^ ]+)','<div class="snode \\1">\\1',tree0)
-		tree0 = re.sub('\)','</div>',tree0)
-                if useLemmata:
-                    tree0 = re.sub('<span class="wnode">([^<>]+)-([^<>]+)</span>',
-                                   '<span class="wnode">\\1' +
-                                   '<span class="lemma lemmaHide">-\\2</span>' +
-                                   '</span>', tree0)
-		alltrees = alltrees + tree0
+        for tree in trees:
+            if not tree == "":
+                nltk_tree = T.Tree(tree)
+                alltrees = alltrees + treeToHtml(nltk_tree, useLemmata)
 
- 	alltrees = alltrees + '</div>'
-	return alltrees
+        alltrees = alltrees + '</div>'
+        return alltrees
 
     def loadTxt(self, fileName):
-	f = open(fileName)
-	currentText = f.read()
-	trees = currentText.split("\n\n")
-	tree0 = trees[1].strip();
-	words = tree0.split('\n');
-	thetree = '<div class="snode">IP-MAT'
-	wordnr = 0
-	for word in words:
-		thetree = thetree + '<div class="snode">X<span class="wnode">' + \
+        f = open(fileName)
+        currentText = f.read()
+        trees = currentText.split("\n\n")
+        tree0 = trees[1].strip();
+        words = tree0.split('\n');
+        thetree = '<div class="snode">IP-MAT'
+        wordnr = 0
+        for word in words:
+                thetree = thetree + '<div class="snode">X<span class="wnode">' + \
                     word + '</span></div>'
 
-	thetree = thetree + "</div>"
-	return thetree	
-    
+        thetree = thetree + "</div>"
+        return thetree
+
     @cherrypy.expose
     def index(self):
         if len(sys.argv) == 2:
@@ -153,20 +213,20 @@ class Treedraw(object):
         # currentSettings, so that the functions there are defined for
         # currentSettings.  But currentSettings in turn must define some
         # functions for treedrawing.contextMenu.js.
-        return """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+        return """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <head>  <title>Annotald</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="stylesheet" type="text/css" href="css/treedrawing.css"
           type="text/css"></link>
         <script type= "application/javascript" src="scripts/jquery.js"/></script>
         <script type= "application/javascript" src="scripts/jquery.mousewheel.min.js"/>
         </script>
-	<script type= "application/javascript" src="scripts/treedrawing.js"/></script>
+        <script type= "application/javascript" src="scripts/treedrawing.js"/></script>
         <script type= "application/javascript"/>""" + currentSettings + """</script>
         <script type= "application/javascript"
           src="scripts/treedrawing.contextMenu.js"/></script>
-	
+
 
 </head>
 <body oncontextmenu="return false;">
@@ -192,26 +252,26 @@ Editing: """+self.shortfile+""" <br />
 <div id="editpane">"""+currentTree+"""</div>
 
 
-		<div id="conMenu">		
-		  <div id="conLeft" class="conMenuColumn">			
-			<div class="conMenuItem"><a href="#edit">IP-SUB</a></div>
-			<div class="conMenuItem"><a href="#cut">IP-INF</a></div>
-			<div class="conMenuItem"><a href="#copy">IP-SMC</a></div>
-			<div class="conMenuItem"><a href="#paste">-SPE</a></div>
-			<div class="conMenuItem"><a href="#delete">-PRN</a></div>
-			<div class="conMenuItem"><a href="#quit">-XXX</a></div>
- 		  </div>
+                <div id="conMenu">
+                  <div id="conLeft" class="conMenuColumn">
+                        <div class="conMenuItem"><a href="#edit">IP-SUB</a></div>
+                        <div class="conMenuItem"><a href="#cut">IP-INF</a></div>
+                        <div class="conMenuItem"><a href="#copy">IP-SMC</a></div>
+                        <div class="conMenuItem"><a href="#paste">-SPE</a></div>
+                        <div class="conMenuItem"><a href="#delete">-PRN</a></div>
+                        <div class="conMenuItem"><a href="#quit">-XXX</a></div>
+                  </div>
 
-		  <div id="conRight" class="conMenuColumn">			
-			<div class="conMenuItem"><a href="#edit">XXX</a></div>
-			<div class="conMenuItem"><a href="#cut">XXX</a></div>
- 		  </div>
- 		  
-          <div id="conRightest" class="conMenuColumn">            
+                  <div id="conRight" class="conMenuColumn">
+                        <div class="conMenuItem"><a href="#edit">XXX</a></div>
+                        <div class="conMenuItem"><a href="#cut">XXX</a></div>
+                  </div>
+
+          <div id="conRightest" class="conMenuColumn">
             <div class="conMenuItem"><a href="#edit">XXX</a></div>
             <div class="conMenuItem"><a href="#cut">XXX</a></div>
-           </div> 		  
-		</div>
+           </div>
+                </div>
 
 </body>
 </html>"""

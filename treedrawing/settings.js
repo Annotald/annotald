@@ -22,20 +22,28 @@
  *  caseTags indicates which tags should be interpreted as case tags
  *  for this purpose
  */ 
-var displayCaseMenu = true;
-var caseTags=["N","NS","NPR","NPRS","PRO","D","NUM","ADJ","ADJR","ADJS","Q","QR","QS"];
+var displayCaseMenu = false; // This feature is inoperative, pending modularization
+var caseTags=["N","NS","NPR","NPRS",
+              "PRO","D","NUM",
+              "ADJ","ADJR","ADJS",
+              "Q","QR","QS"];
 
 /* extensions are treated as not part of the label for various purposes, 
  * they are all binary, and they show up in the toggle extension menu  
  */
-var extensions=["-SPE","-PRN","-SBJ","-LFD","-RSP","-XXX","-ZZZ"];
+var extensions = ["-SPE","-PRN","-SBJ","-LFD","-RSP","-XXX","-ZZZ"];
 
 /*
  * Phrase labels in this list (including the same ones with indices and
  * extensions) get a different background color so that the annotator can
  * see the "floor" of the current clause
  */
-var ipnodes=["IP-SUB","IP-MAT","IP-IMP","IP-INF","IP-PPL","RRC"];
+var ipnodes = ["IP-SUB","IP-MAT","IP-IMP","IP-INF","IP-PPL","RRC"];
+styleIpNodes();
+
+var invisibleRootCategories = ["ID", "METADATA"];
+var invisibleCategories = ["META"];
+hideCategories();
 
 /*
  * Keycode is from onKeyDown event.
@@ -91,7 +99,9 @@ var defaultConMenuGroup = ["VBPI","VBPS","VBDI","VBDS","VBI","VAN","VBN","VB"];
 function customConMenuGroups(){
 	addConMenuGroup( ["IP-SUB","IP-MAT","IP-INF","IP-IMP","CP-QUE","QTP","FRAG"] );
 	addConMenuGroup( ["ADJP","ADJX","NP-MSR","QP","NP","ADVP","IP-PPL"] );
-	addConMenuGroup( ["NP-SBJ","NP-OB1","NP-OB2","NP-PRD","NP-POS","NP-PRN","NP","NX","NP-MSR","NP-TMP","NP-ADV","NP-COM","NP-CMP","NP-DIR","NP-ADT","NP-VOC","QP"] );
+	addConMenuGroup( ["NP-SBJ","NP-OB1","NP-OB2","NP-PRD","NP-POS","NP-PRN",
+                          "NP","NX","NP-MSR","NP-TMP","NP-ADV","NP-COM","NP-CMP",
+                          "NP-DIR","NP-ADT","NP-VOC","QP"] );
 	addConMenuGroup( ["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR","NP-MSR","NP-ADV"] );
 	addConMenuGroup( ["VBPI","VBPS","VBDI","VBDS","VBI","VAN","VBN","VB","HV"] );
 	addConMenuGroup( ["HVPI","HVPS","HVDI","HVDS","HVI","HV"] );	
@@ -111,14 +121,11 @@ function customConLeafBefore(){
 	addConLeafBefore( "TO", "*");
 	addConLeafBefore( "WADVP", "0");
 	addConLeafBefore( "WNP", "0");
-	addConLeafBefore( "WQP", "0");
 	addConLeafBefore( "WADJP", "0");
 	addConLeafBefore( "WPP", "0");
 	addConLeafBefore( "C", "0");
 	addConLeafBefore( "P", "0");
-	addConLeafBefore( "CODE", "*XXX*");	
-	addConLeafBefore( "CODE", "*TTT*");
-	addConLeafBefore( "CODE", "*SSS*");	
+	addConLeafBefore( "CODE", "*XXX*");
 }
 
 // An example of a CSS rule for coloring a POS tag.  The styleTag
