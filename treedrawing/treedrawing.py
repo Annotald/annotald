@@ -151,7 +151,7 @@ class Treedraw(object):
 
     def loadPsd(self, fileName):
 	self.thefile = fileName
-        fileMatch = re.search("^.*?([A-Za-z\.]*)$", fileName)
+        fileMatch = re.search("^.*?([0-9A-Za-z\.]*)$", fileName)
         self.shortfile = fileMatch.group(1)
         f = open(fileName, 'r')
         # no longer using codecs to open the file, using .decode('utf-8') instead when in Mac OS X
