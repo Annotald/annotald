@@ -18,7 +18,6 @@
 
 // Global TODOs:
 // - (AWE) push ipnode bookkeeping/formatting into CSS
-// - (AWE) is $("#" + foo.id) the same as $(foo), and is the latter faster?
 // - (AWE) make the dash-tags modular, so that ctrl x -> set XXX, w ->
 //   set NP-SBJ doesn't blow away the XXX
 // - (AWE) what happens when you delete e.g. an NP node w metadata?
@@ -27,15 +26,11 @@
 
 var startnode = null;
 var endnode = null;
-var mousenode = null;
 var undostack = new Array();
 var redostack = new Array();
 var ctrlKeyMap = new Object();
 var shiftKeyMap = new Object();
 var regularKeyMap = new Object();
-
-var name = "#floatMenu";
-var menuYloc = null;
 
 var last_event_was_mouse = false;
 
@@ -1595,4 +1590,5 @@ function isLeafNode(node) {
 // Local Variables:
 // js2-additional-externs: ("$" "setTimeout" "customCommands" "customConLeafBefore\
 // " "customConMenuGroups")
+// indent-tabs-mode: nil
 // End:
