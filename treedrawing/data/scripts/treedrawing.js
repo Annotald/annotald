@@ -277,6 +277,7 @@ function saveHandler (data) {
 function save() {
     $("#saveresult").html("");
     var tosave = toLabeledBrackets($("#editpane"));
+    $("#saveresult").html("<div style='color:red'>Saving...</div>");
     $.post("/doSave", {trees: tosave}, saveHandler);
     lastsavedstate = $("#editpane").html();
 }
