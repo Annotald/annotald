@@ -142,6 +142,12 @@ function styleTag(tagName, css) {
              ' "],*[class$=" ' + tagName + '"] { ' + css + ' }');
 }
 
+function styleTags(tagNames, css) {
+    for (var i = 0; i < tagNames.length; i++) {
+        styleTag(tagNames[i], css);
+    }
+}
+
 // TODO(AWE): now that the node label is in the CSS class, can this be
 // factored out?
 function isIpNode (text) {
