@@ -117,6 +117,7 @@ class Treedraw(object):
             self.thefile = sys.argv[1]
         elif len(sys.argv) == 3:
             self.thefile = sys.argv[2]
+        self.shortfile = ""
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
@@ -157,7 +158,9 @@ class Treedraw(object):
         raise SystemExit(0)
 
     def loadPsd(self, fileName):
-        self.thefile = fileName
+	self.thefile = fileName
+        fileMatch = re.search("^.*?([0-9A-Za-z\.]*)$", fileName)
+        self.shortfile = fileMatch.group(1)
         f = open(fileName, 'r')
         # no longer using codecs to open the file, using .decode('utf-8') instead when in Mac OS X
         if "Darwin" in os.uname():
@@ -245,7 +248,7 @@ class Treedraw(object):
   Annotald """ + VERSION + """
 </div>
 
-Editing: """+self.thefile+""" <br />
+Editing: """+self.shortfile+""" <br />
 <input class="menubutton" type="button" value="Save" id="butsave"><br />
 <input class="menubutton" type="button" value="Undo" id="butundo"><br />
 <input class="menubutton" type="button" value="Redo" id="butredo"><br />

@@ -154,7 +154,12 @@ function isIpNode (text) {
         return text.startsWith("IP-SUB") ||
         text.startsWith("IP-MAT") ||
         text.startsWith("IP-IMP") ||
-        text.startsWith("IP-INF");
+        text.startsWith("IP-INF") ||
+        text.startsWith("IP-PPL") ||
+        text.startsWith("IP-ABS") ||
+        text.startsWith("FRAG") ||
+        text.startsWith("QTP") ||
+        text.startsWith("RRC");
 
 //        return contains( ipnodes, parseLabel(text) );
 }
@@ -732,10 +737,10 @@ function leafAfter() {
 // settings.js to override it.
 function makeLeaf(before, label, word, targetId) {
     if (!label) {
-        label = "WADVP";
+        label = "NP-SBJ";
     }
     if (!word) {
-        word = "0";
+        word = "*con*";
     }
     if (!targetId) {
         targetId = startnode.id;
@@ -757,7 +762,6 @@ function makeLeaf(before, label, word, targetId) {
         stackTree();
         if (startRoot == endRoot) {
             word = "*ICH*";
-            lemma = "*ICH*";
             label = getLabel($(endnode));
             if (label.startsWith("W")) {
                 word = "*T*";
@@ -1000,7 +1004,7 @@ function changeJustLabel (oldlabel, newlabel) {
     return newlabel;
 }
 
-function toogleJustExtension (oldlabel, extension) {
+function toggleJustExtension (oldlabel, extension) {
     var index = parseIndex(oldlabel);
     var indextype = "";
     if (index > 0) {
@@ -1024,16 +1028,17 @@ function toogleJustExtension (oldlabel, extension) {
             extendedlabel = extendedlabel.substr(
                 0,extendedlabel.length - extensions[i].length);
         } else if (textension) {
-            currentextensions.push( extensions[i] );
+            currentextensions.push(extensions[i]);
         }
     }
 
     var out = extendedlabel;
-    var count = currentextensions.length;
+//    var count = currentextensions.length;
     // TODO(AWE): out += currentextensions.join("")
-    for (i=0; i < count; i++) {
-        out += currentextensions.pop();
-    }
+    out += currentextensions.join("")
+//    for (i=0; i < count; i++) {
+//        out += currentextensions.pop();
+//    }
     if (index > 0) {
         out += indextype;
         out += index;
@@ -1084,7 +1089,70 @@ function toggleExtension(extension) {
     stackTree();
     var textnode = textNode($(startnode));
     var oldlabel=$.trim(textnode.text());
-    var newlabel = toogleJustExtension(oldlabel, extension);
+    var newlabel = toggleJustExtension(oldlabel, extension);
+    textnode.replaceWith(newlabel + " ");
+}
+
+// added by JEB
+// DONE?: make it so that dash tags are properly ordered or at least ordered 
+function toggleVerbExtension (oldlabel, extension) {
+    var index = parseIndex(oldlabel);
+    var indextype = "";
+    if (index > 0) {
+        indextype = parseIndexType(oldlabel);
+    }
+    var extendedlabel = parseLabel(oldlabel);
+
+    var currentextensions = new Array();
+    var vextension = false;
+    for (var i = vextensions.length-1; i>-1; i--) {
+        if (extension == vextensions[i]) {
+            vextension = true;
+        } else {
+            vextension = false;
+        }
+
+        if(extendedlabel.endsWith(vextensions[i])) {
+            if (!vextension) {
+                currentextensions.push(vextensions[i]);
+                extendedlabel = extendedlabel.substr(
+                    0,(extendedlabel.length - vextensions[i].length));
+            }
+        }
+        else if (vextension) {
+                currentextensions.push(vextensions[i]);
+        }
+    }
+
+    var out = extendedlabel;
+//    var count = currentextensions.length;
+    // TODO(AWE): out += currentextensions.join("")
+    out += currentextensions.join("")
+//    for (i=0; i < count; i++) {
+//        out += currentextensions.pop();
+//    }
+    if (index > 0) {
+        out += indextype;
+        out += index;
+    }
+    return out;
+}
+
+// added by JEB
+function toggleVerbalExtension(extension) {
+    // there has to be a startnode
+    if (!startnode) {
+        return;
+    }
+    // there can't be an endnode
+    if (endnode) {
+        return;
+    }
+
+    stackTree();
+    var textnode = textNode($(startnode));
+    var oldlabel=$.trim(textnode.text());
+    var newlabel = toggleVerbExtension(oldlabel, extension);
     textnode.replaceWith(newlabel + " ");
 }
 
