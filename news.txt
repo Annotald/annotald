@@ -1,3 +1,20 @@
+Release 11.12:
+- Various bugs fixed
+- Support for ID and METADATA nodes, as sisters of the clause root.
+  (Currently, nodes other than ID and METADATA will not work.)
+- Change how the coloring is applied to clause roots.  Call
+  styleIpNodes() in settings.js after setting the ipnodes variable.
+- Add mechanism to hide certain tags from view; see settings.js for
+  details.
+- Added mousewheel support; use shift+wheel-up/-down to move through the
+  tree, sisterwise
+– Limit undo history to 15 steps.  This limits how much memory is used
+  by Annotald, which could be very high.
+- Allow (optional) specification of port on the commandline:
+  annotald -p <number> <optional settings file> <.psd file>
+  This allows multiple instances of Annotald ot be running at once (each
+  on a different port)
+
 Release 11.11:
 - Proper Unicode support on OS X and Linux
 - Remove dependency on a particular charset in parsed files
