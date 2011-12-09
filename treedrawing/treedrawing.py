@@ -151,20 +151,54 @@ class Treedraw(object):
             return json.dumps(dict(result = "failure"))
 
     @cherrypy.expose
+    def doValidate(self, trees = None):
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        if not self.options.validator:
+            return json.dumps(dict(result = "no-validator"))
+
+        try:
+            tovalidate = trees.strip()
+            validator = subprocess.Popen(self.options.validator,
+                                         stdin = subprocess.PIPE,
+                                         stdout = subprocess.PIPE)
+            if "Darwin" in os.uname():
+                utf8_writer = codecs.getwriter("utf-8")
+                stream = utf8_writer(validator.stdin)
+                stream.write(self.versionCookie + "\n\n")
+                stream.write(tovalidate)
+            else:
+                validator.stdin.write(self.versionCookie + "\n\n")
+                validator.stdin.write(tovalidate)
+            validator.stdin.close()
+            validated = validator.stdout.read()
+            validatedHtml = self.loadPsd(None, text = validated)
+
+            return json.dumps(dict(result = "success",
+                                   html = validatedHtml))
+        except Exception as e:
+            print "something went wrong: %s" % e
+            return json.dumps(dict(result = "failure"))
+
+    @cherrypy.expose
     def doExit(self):
         print "Exit message received"
         raise SystemExit(0)
 
-    def loadPsd(self, fileName):
-	self.thefile = fileName
-        fileMatch = re.search("^.*?([0-9A-Za-z\.]*)$", fileName)
-        self.shortfile = fileMatch.group(1)
-        f = open(fileName, 'r')
-        # no longer using codecs to open the file, using .decode('utf-8') instead when in Mac OS X
-        if "Darwin" in os.uname():
-            currentText = f.read().decode('utf-8')
+    def loadPsd(self, fileName, text = None):
+        # TODO(AWE): remove
+        # self.thefile = fileName
+
+        if text:
+            currentText = text
         else:
-            currentText = f.read()
+            f = open(fileName, 'r')
+            # no longer using codecs to open the file, using .decode('utf-8')
+            # instead when in Mac OS X
+            if "Darwin" in os.uname():
+                currentText = f.read().decode('utf-8')
+            else:
+                currentText = f.read()
+
         # TODO(AWE): remove the one-line restriction
         versionRe = re.compile('^\( \(VERSION.*$', re.M)
         versionMatch = versionRe.search(currentText)
@@ -179,6 +213,7 @@ class Treedraw(object):
 
         alltrees = '<div class="snode">'
         for tree in trees:
+            tree = tree.strip()
             if not tree == "":
                 nltk_tree = T.Tree(tree)
                 alltrees = alltrees + treeToHtml(nltk_tree, useLemmata)
@@ -245,6 +280,17 @@ Editing: """+self.shortfile+""" <br />
 
 <div id="debugpane"></div>
 <div id="saveresult"></div>
+</div>
+
+<div id="rightMenu">
+<div id="toolsMenu">
+<div class="menuTitle">Tools</div>
+<input class="menubutton" type="button" value="Validate"
+  id="butvalidate"><br />
+<input class="menubutton" type="button" value="Next Error"
+  id="butnexterr"><br />
+<div id="toolsMsg"></div>
+</div>
 </div>
 <div id="editpane">"""+currentTree+"""</div>
 

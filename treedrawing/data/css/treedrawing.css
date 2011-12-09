@@ -76,6 +76,10 @@ body {
     width: 80%;
 }
 
+#toolsMenu {
+    text-align: center;
+}
+
 #floatMenu {
     position: fixed;
     top: 5%;
@@ -99,6 +103,15 @@ body {
     background-color: #FEEDD5;
 }
 
+#rightMenu {
+    position: fixed;
+    top: 5%;
+    right: 5px;
+    width: 23%;
+    background: #FEF6EA;
+    border: 1px solid #857259;
+}
+
 .labeledit {
     font-family: sans;
     font-size: 12px;
@@ -106,6 +119,13 @@ body {
     margin: 0px;
     border: 0px;
     width: 32%;
+}
+
+.menuTitle {
+    background-color: #2E2E2E;
+    color: white;
+    font-weight: bold;
+    text-align: center;
 }
 
 #conMenu {
