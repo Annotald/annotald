@@ -145,6 +145,14 @@ function styleTag(tagName, css) {
              ' "],*[class$=" ' + tagName + '"] { ' + css + ' }');
 }
 
+function styleDashTag(tagName, css) {
+    // TODO(AWE): this is a really baroque selector.  The alternative
+    // (faster?) way to do it is to keep track of the node name as a
+    // separate div-level property
+    addStyle('*[class*="-' + tagName + '-"],*[class$="-' + tagName +
+             '"] { ' + css + ' }');
+}
+
 function styleTags(tagNames, css) {
     for (var i = 0; i < tagNames.length; i++) {
         styleTag(tagNames[i], css);
