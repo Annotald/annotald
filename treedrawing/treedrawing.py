@@ -59,8 +59,7 @@ def queryVersionCookie(string, fmt):
         return None
 
 def treeToHtml(tree, version, extra_data = None):
-    if isinstance(tree[0], str) or \
-            isinstance(tree[0], unicode):
+    if isinstance(tree[0], str) or isinstance(tree[0], unicode):
         # Leaf node
         if len(tree) > 1:
             raise Error("Leaf node with more than one daughter!")
@@ -95,7 +94,7 @@ def treeToHtml(tree, version, extra_data = None):
         res = '<div class="snode"'
         if extra_data:
             if "\"" in extra_data:
-                # TODO: relax this restriction
+                # TODO(AWE): relax this restriction
                 raise Error("can't cope with ID/METADATA containing double-quote yet!")
             res += ' title="' + extra_data + '"' # blatant abuse of HTML...
         res += '>' + tree.node + ' '

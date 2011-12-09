@@ -1405,6 +1405,7 @@ function parseLabel (label) {
 function shouldIndexLeaf(node) {
     // The "W" thing is because we should index the label, not leaf, of
     // things like (WADJP 0) in comparatives.
+    // TODO(AWE): this may be as simple as wnodeString(node)[0] == "*"
     return isEmpty(wnodeString(node)) && !(getLabel(node)[0] == "W");
 }
 
