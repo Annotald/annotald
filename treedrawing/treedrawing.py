@@ -24,6 +24,8 @@ import sys, subprocess
 import cherrypy, json
 import nltk.tree as T
 import string as STR
+import optparse
+import subprocess
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -106,17 +108,14 @@ class Treedraw(object):
 
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
     # object has no attribute 'thefile'
-    def __init__(self):
-        # We have to do this here, because if you change the python
-        # source file, the server respawns but then will not know where
-        # to put the file upon save.  This partially duplicates things
-        # that happen elsewhere; someone should carefully go through and
-        # reduce that duplication (TODO)
-        if len(sys.argv) == 2:
-            self.thefile = sys.argv[1]
-        elif len(sys.argv) == 3:
-            self.thefile = sys.argv[2]
-        self.shortfile = ""
+    def __init__(self, options, args):
+        if len(args) == 1:
+            self.thefile = args[0]
+        else:
+            raise Error("Annotald requires exactly one .psd file argument")
+        fileMatch = re.search("^.*?([0-9A-Za-z\.]*)$", self.thefile)
+        self.shortfile = fileMatch.group(1)
+        self.options = options
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
@@ -205,16 +204,8 @@ class Treedraw(object):
 
     @cherrypy.expose
     def index(self):
-        if len(sys.argv) == 2:
-            currentSettings = open(sys.path[0] + "/settings.js").read()
-            filename = sys.argv[1]
-        elif len(sys.argv) == 3:
-            currentSettings = open(sys.argv[1]).read()
-            filename = sys.argv[2]
-        else:
-            print("Usage: annotald [settingsFile.js] file.psd")
-
-        currentTree = self.loadPsd(filename)
+        currentSettings = open(self.options.settings).read()
+        currentTree = self.loadPsd(self.thefile)
 
         # Chicken and egg: treedrawing.js must go before the
         # currentSettings, so that the functions there are defined for
@@ -285,10 +276,21 @@ Editing: """+self.shortfile+""" <br />
 
 
 #index.exposed = True
+parser = optparse.OptionParser(usage = "%prog [options] file.psd",
+                                version = "Annotald " + VERSION)
+parser.add_option("-s", "--settings", action = "store",
+                  type = "string", dest = "settings",
+                  help = "path to settings.js file")
+parser.add_option("-v", "--validator", action = "store",
+                  type = "string", dest = "validator",
+                  help = "path to a validation script")
+parser.add_option("-p", "--port", action = "store",
+                  type = "int", dest = "port",
+                  help = "port to run server on")
+parser.set_defaults(port = 8080,
+                    settings = sys.path[0] + "/settings.js")
+(options, args) = parser.parse_args()
 
-if sys.argv[1] == "-p":
-    sys.argv.pop(1)
-    port = sys.argv.pop(1)
-    cherrypy.config.update({'server.socket_port': int(port)})
+cherrypy.config.update({'server.socket_port': options.port})
 
-cherrypy.quickstart(Treedraw())
+cherrypy.quickstart(Treedraw(options, args))
