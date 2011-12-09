@@ -178,7 +178,6 @@ class Treedraw(object):
         trees = currentText.split("\n\n")
 
         alltrees = '<div class="snode">'
-        # TODO(AWE): convert to use nltk.tree
         for tree in trees:
             if not tree == "":
                 nltk_tree = T.Tree(tree)
