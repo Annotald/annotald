@@ -56,8 +56,8 @@ body {
 #sn0 {
     background-color: #D2B48C;
     border: 1px solid black;
-    margin-left: 75px;
-    margin-right: 25px;
+    margin-left: 10%;
+    margin-right: 5%;
 }
 
 #sn0 > .snode {
@@ -81,7 +81,7 @@ body {
     top: 5%;
     left: 0px;
     margin-left: 5px;
-    width: 200px;
+    width: 15%;
     background: #FEF6EA;
     padding-bottom: 4px;
     border: 1px solid #857259;
@@ -91,11 +91,10 @@ body {
 #editpane {
     position: absolute;
     top: 0px;
-    left: 210px;
+    left: 16%;
     margin: 0px;
     padding: 0px;
-    padding-right: 20px;
-/*  width: 800px; */
+    width: 60%;
     border: 1px solid #857259;
     background-color: #FEEDD5;
 }
