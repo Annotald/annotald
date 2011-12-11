@@ -1471,14 +1471,22 @@ function addToIndices(tokenRoot, numberToAdd) {
     var maxindex = maxIndex(tokenRoot.attr("id"));
     var nodes = tokenRoot.find(".snode,.wnode").andSelf();
     nodes.each(function(index) {
-                   var nindex = getIndex($(this));
-                   if(nindex>0) {
-                       var label = getLabel($(this)).substr(
-                           0, getLabel($(this)).length - 1);
-                       label = label + (nindex + numberToAdd);
-                       setNodeLabel($(this), label, true);
-                   }
-               });
+        var curNode = $(this);
+        var nindex = getIndex(curNode);
+        if (nindex > 0) {
+            if (shouldIndexLeaf(curNode)) {
+                var leafText = wnodeString(curNode);
+                leafText = leafText.substr(0, leafText.length - 1);
+                textNode(curNode.children(".wnode").first()).text(
+                    leafText + (nindex + numberToAdd));
+            } else {
+                var label = getLabel(curNode).substr(
+                    0, getLabel(curNode).length - 1);
+                label = label + (nindex + numberToAdd);
+                setNodeLabel(curNode, label, true);
+            }
+        }
+    });
 }
 
 function maxIndex(tokenRoot) {
