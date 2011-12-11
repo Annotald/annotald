@@ -322,7 +322,7 @@ Editing: """+self.shortfile+""" <br />
 
 #index.exposed = True
 parser = optparse.OptionParser(usage = "%prog [options] file.psd",
-                                version = "Annotald " + VERSION)
+                               version = "Annotald " + VERSION)
 parser.add_option("-s", "--settings", action = "store",
                   type = "string", dest = "settings",
                   help = "path to settings.js file")
