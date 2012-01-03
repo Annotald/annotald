@@ -24,6 +24,8 @@ import sys, subprocess
 import cherrypy, json
 import nltk.tree as T
 import string as STR
+import optparse
+import subprocess
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -59,8 +61,7 @@ def queryVersionCookie(string, fmt):
         return None
 
 def treeToHtml(tree, version, extra_data = None):
-    if isinstance(tree[0], str) or \
-            isinstance(tree[0], unicode):
+    if isinstance(tree[0], str) or isinstance(tree[0], unicode):
         # Leaf node
         if len(tree) > 1:
             raise Error("Leaf node with more than one daughter!")
@@ -95,7 +96,7 @@ def treeToHtml(tree, version, extra_data = None):
         res = '<div class="snode"'
         if extra_data:
             if "\"" in extra_data:
-                # TODO: relax this restriction
+                # TODO(AWE): relax this restriction
                 raise Error("can't cope with ID/METADATA containing double-quote yet!")
             res += ' title="' + extra_data + '"' # blatant abuse of HTML...
         res += '>' + tree.node + ' '
@@ -107,17 +108,14 @@ class Treedraw(object):
 
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
     # object has no attribute 'thefile'
-    def __init__(self):
-        # We have to do this here, because if you change the python
-        # source file, the server respawns but then will not know where
-        # to put the file upon save.  This partially duplicates things
-        # that happen elsewhere; someone should carefully go through and
-        # reduce that duplication (TODO)
-        if len(sys.argv) == 2:
-            self.thefile = sys.argv[1]
-        elif len(sys.argv) == 3:
-            self.thefile = sys.argv[2]
-        self.shortfile = ""
+    def __init__(self, options, args):
+        if len(args) == 1:
+            self.thefile = args[0]
+        else:
+            raise Error("Annotald requires exactly one .psd file argument")
+        fileMatch = re.search("^.*?([0-9A-Za-z\.]*)$", self.thefile)
+        self.shortfile = fileMatch.group(1)
+        self.options = options
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
@@ -153,20 +151,54 @@ class Treedraw(object):
             return json.dumps(dict(result = "failure"))
 
     @cherrypy.expose
+    def doValidate(self, trees = None):
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        if not self.options.validator:
+            return json.dumps(dict(result = "no-validator"))
+
+        try:
+            tovalidate = trees.strip()
+            validator = subprocess.Popen(self.options.validator,
+                                         stdin = subprocess.PIPE,
+                                         stdout = subprocess.PIPE)
+            if "Darwin" in os.uname():
+                utf8_writer = codecs.getwriter("utf-8")
+                stream = utf8_writer(validator.stdin)
+                stream.write(self.versionCookie + "\n\n")
+                stream.write(tovalidate)
+            else:
+                validator.stdin.write(self.versionCookie + "\n\n")
+                validator.stdin.write(tovalidate)
+            validator.stdin.close()
+            validated = validator.stdout.read()
+            validatedHtml = self.loadPsd(None, text = validated)
+
+            return json.dumps(dict(result = "success",
+                                   html = validatedHtml))
+        except Exception as e:
+            print "something went wrong: %s" % e
+            return json.dumps(dict(result = "failure"))
+
+    @cherrypy.expose
     def doExit(self):
         print "Exit message received"
         raise SystemExit(0)
 
-    def loadPsd(self, fileName):
-	self.thefile = fileName
-        fileMatch = re.search("^.*?([0-9A-Za-z\.]*)$", fileName)
-        self.shortfile = fileMatch.group(1)
-        f = open(fileName, 'r')
-        # no longer using codecs to open the file, using .decode('utf-8') instead when in Mac OS X
-        if "Darwin" in os.uname():
-            currentText = f.read().decode('utf-8')
+    def loadPsd(self, fileName, text = None):
+        # TODO(AWE): remove
+        # self.thefile = fileName
+
+        if text:
+            currentText = text
         else:
-            currentText = f.read()
+            f = open(fileName, 'r')
+            # no longer using codecs to open the file, using .decode('utf-8')
+            # instead when in Mac OS X
+            if "Darwin" in os.uname():
+                currentText = f.read().decode('utf-8')
+            else:
+                currentText = f.read()
+
         # TODO(AWE): remove the one-line restriction
         versionRe = re.compile('^\( \(VERSION.*$', re.M)
         versionMatch = versionRe.search(currentText)
@@ -180,8 +212,8 @@ class Treedraw(object):
         trees = currentText.split("\n\n")
 
         alltrees = '<div class="snode">'
-        # TODO(AWE): convert to use nltk.tree
         for tree in trees:
+            tree = tree.strip()
             if not tree == "":
                 nltk_tree = T.Tree(tree)
                 alltrees = alltrees + treeToHtml(nltk_tree, useLemmata)
@@ -206,16 +238,8 @@ class Treedraw(object):
 
     @cherrypy.expose
     def index(self):
-        if len(sys.argv) == 2:
-            currentSettings = open(sys.path[0] + "/settings.js").read()
-            filename = sys.argv[1]
-        elif len(sys.argv) == 3:
-            currentSettings = open(sys.argv[1]).read()
-            filename = sys.argv[2]
-        else:
-            print("Usage: annotald [settingsFile.js] file.psd")
-
-        currentTree = self.loadPsd(filename)
+        currentSettings = open(self.options.settings).read()
+        currentTree = self.loadPsd(self.thefile)
 
         # Chicken and egg: treedrawing.js must go before the
         # currentSettings, so that the functions there are defined for
@@ -257,6 +281,17 @@ Editing: """+self.shortfile+""" <br />
 <div id="debugpane"></div>
 <div id="saveresult"></div>
 </div>
+
+<div id="rightMenu">
+<div id="toolsMenu">
+<div class="menuTitle">Tools</div>
+<input class="menubutton" type="button" value="Validate"
+  id="butvalidate"><br />
+<input class="menubutton" type="button" value="Next Error"
+  id="butnexterr"><br />
+<div id="toolsMsg"></div>
+</div>
+</div>
 <div id="editpane">"""+currentTree+"""</div>
 
 
@@ -286,10 +321,21 @@ Editing: """+self.shortfile+""" <br />
 
 
 #index.exposed = True
+parser = optparse.OptionParser(usage = "%prog [options] file.psd",
+                               version = "Annotald " + VERSION)
+parser.add_option("-s", "--settings", action = "store",
+                  type = "string", dest = "settings",
+                  help = "path to settings.js file")
+parser.add_option("-v", "--validator", action = "store",
+                  type = "string", dest = "validator",
+                  help = "path to a validation script")
+parser.add_option("-p", "--port", action = "store",
+                  type = "int", dest = "port",
+                  help = "port to run server on")
+parser.set_defaults(port = 8080,
+                    settings = sys.path[0] + "/settings.js")
+(options, args) = parser.parse_args()
 
-if sys.argv[1] == "-p":
-    sys.argv.pop(1)
-    port = sys.argv.pop(1)
-    cherrypy.config.update({'server.socket_port': int(port)})
+cherrypy.config.update({'server.socket_port': options.port})
 
-cherrypy.quickstart(Treedraw())
+cherrypy.quickstart(Treedraw(options, args))

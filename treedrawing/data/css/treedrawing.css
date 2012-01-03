@@ -16,6 +16,9 @@
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/>. */
 
+
+/* TODO(AWE): organize this beast. */
+
 body {
     font-family: sans;
     font-size: 12px;
@@ -53,8 +56,8 @@ body {
 #sn0 {
     background-color: #D2B48C;
     border: 1px solid black;
-    margin-left: 75px;
-    margin-right: 25px;
+    margin-left: 10%;
+    margin-right: 5%;
 }
 
 #sn0 > .snode {
@@ -73,12 +76,16 @@ body {
     width: 80%;
 }
 
+#toolsMenu {
+    text-align: center;
+}
+
 #floatMenu {
     position: fixed;
     top: 5%;
     left: 0px;
     margin-left: 5px;
-    width: 200px;
+    width: 15%;
     background: #FEF6EA;
     padding-bottom: 4px;
     border: 1px solid #857259;
@@ -88,13 +95,21 @@ body {
 #editpane {
     position: absolute;
     top: 0px;
-    left: 210px;
+    left: 16%;
     margin: 0px;
     padding: 0px;
-    padding-right: 20px;
-/*  width: 800px; */
+    width: 60%;
     border: 1px solid #857259;
     background-color: #FEEDD5;
+}
+
+#rightMenu {
+    position: fixed;
+    top: 5%;
+    right: 5px;
+    width: 23%;
+    background: #FEF6EA;
+    border: 1px solid #857259;
 }
 
 .labeledit {
@@ -104,6 +119,13 @@ body {
     margin: 0px;
     border: 0px;
     width: 32%;
+}
+
+.menuTitle {
+    background-color: #2E2E2E;
+    color: white;
+    font-weight: bold;
+    text-align: center;
 }
 
 #conMenu {

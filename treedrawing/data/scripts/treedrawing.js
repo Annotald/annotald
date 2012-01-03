@@ -105,26 +105,29 @@ function styleIpNodes() {
     }
 }
 
-$(document).ready(
-    function() {
-        resetIds();
-        resetLabelClasses(false);
-        assignEvents();
-        $("#debugpane").empty();
+function documentReadyHandler() {
+    resetIds();
+    resetLabelClasses(false);
+    assignEvents();
+    $("#debugpane").empty();
 
-        // inital highlight of IPs
-        var snodes = $(".snode");
-        for (var i=0; i<snodes.length; i++) {
-            var text = getLabel($("#"+snodes[i].id));
-            if (isIpNode(text)) {
-                $(snodes[i]).addClass('ipnode');
-            }
+    // inital highlight of IPs
+    // TODO(AWE): remove
+    var snodes = $(".snode");
+    for (var i=0; i<snodes.length; i++) {
+        var text = getLabel($("#"+snodes[i].id));
+        if (isIpNode(text)) {
+            $(snodes[i]).addClass('ipnode');
         }
+    }
 
-        globalStyle.appendTo("head");
+    lastsavedstate = $("#editpane").html();
+}
 
-        lastsavedstate = $("#editpane").html();
-    });
+$(document).ready(function () {
+    documentReadyHandler();
+    globalStyle.appendTo("head");
+});
 
 // menuon=true;
 // checks if the given node label is an ip node in the gui coloring sense
@@ -140,6 +143,14 @@ function styleTag(tagName, css) {
     // separate div-level property
     addStyle('*[class*=" ' + tagName + '-"],*[class*=" ' + tagName +
              ' "],*[class$=" ' + tagName + '"] { ' + css + ' }');
+}
+
+function styleDashTag(tagName, css) {
+    // TODO(AWE): this is a really baroque selector.  The alternative
+    // (faster?) way to do it is to keep track of the node name as a
+    // separate div-level property
+    addStyle('*[class*="-' + tagName + '-"],*[class$="-' + tagName +
+             '"] { ' + css + ' }');
 }
 
 function styleTags(tagNames, css) {
@@ -297,6 +308,8 @@ function assignEvents() {
     $("#butundo").mousedown(undo);
     $("#butredo").mousedown(redo);
     $("#butexit").mousedown(quitServer);
+    $("#butvalidate").mousedown(validateTrees);
+    $("#butnexterr").mousedown(nextValidationError);
     $("#editpane").mousedown(clearSelection);
     $("#conMenu").mousedown(hideContextMenu);
     $(document).mousewheel(handleMouseWheel);
@@ -1405,6 +1418,7 @@ function parseLabel (label) {
 function shouldIndexLeaf(node) {
     // The "W" thing is because we should index the label, not leaf, of
     // things like (WADJP 0) in comparatives.
+    // TODO(AWE): this may be as simple as wnodeString(node)[0] == "*"
     return isEmpty(wnodeString(node)) && !(getLabel(node)[0] == "W");
 }
 
@@ -1667,6 +1681,43 @@ function textNode(node) {
 
 function isLeafNode(node) {
     return $("#" + node.id + ">.wnode").size() > 0;
+}
+
+function validateTrees() {
+    $("#toolsMsg").html("");
+    var toValidate = toLabeledBrackets($("#editpane"));
+    $("#toolsMsg").html("<div style='color:red'>Validating...</div>");
+    $.post("/doValidate", {trees: toValidate}, validateHandler);
+}
+
+function validateHandler(data) {
+    if (data['result'] == "success") {
+        $("#toolsMsg").html("<div style='color:green'>Validate success</div>");
+        $("#editpane").html(data['html']);
+        documentReadyHandler();
+    } else if (data['result'] == "no-validator") {
+        $("#toolsMsg").html("<div style='color:red'>No validator script!!</div>");
+    } else {
+        $("#toolsMsg").html("<div style='color:red'>Validate FAILED!!</div>");
+    }
+    // TODO(AWE): more nuanced distinction between validation found errors and
+    // validation script itself contains errors
+}
+
+function nextValidationError() {
+    var docViewTop = $(window).scrollTop();
+    var docViewMiddle = docViewTop + $(window).height() / 2;
+    var nextError = $(".snode[class*=\"FLAG\"]").filter(function () {
+        return $(this).offset().top > docViewMiddle;
+    }).get(0);
+    window.scroll(0, $(nextError).offset().top - $(window).height() * 0.25);
+}
+
+function fixError() {
+    var label = getLabel($(startnode));
+    if (label.substring(label.length - 5) == "-FLAG") {
+        toggleExtension("FLAG");
+    }
 }
 
 // Local Variables:
