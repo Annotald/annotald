@@ -332,7 +332,6 @@ Editing: """+self.shortfile+""" <br />
 <div id="saveresult"></div>
 </div>
 
-<div id="rightMenu">
 <div id="toolsMenu">
 <div class="menuTitle">Tools</div>
 <input class="menubutton" type="button" value="Validate"
