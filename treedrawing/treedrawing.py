@@ -242,8 +242,9 @@ class Treedraw(object):
 
         currentText = ""
 
+        comment = False
+
         for line in tmp:
-            print line
             if line.startswith("/*") or line.startswith("/~*"):
                 comment = True
             elif not comment:
