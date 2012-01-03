@@ -222,8 +222,21 @@ class Treedraw(object):
         return alltrees
 
     def loadTxt(self, fileName):
-        f = open(fileName)
-        currentText = f.read()
+        if self.options.bool:
+            f = open(fileName, "rU")
+            currentText = ""
+            for line in f:
+                if line.startswith("/*") or line.startswith("/~*"):
+                    comment = True
+                elif not comment:
+                    currentText = currentText + line
+                elif line.startswith("*/") or line.startswith("*~/"):
+                    comment = False
+                else:
+                    pass
+        else:
+            f = open(fileName)
+            currentText = f.read()
         trees = currentText.split("\n\n")
         tree0 = trees[1].strip();
         words = tree0.split('\n');
@@ -332,6 +345,9 @@ parser.add_option("-v", "--validator", action = "store",
 parser.add_option("-p", "--port", action = "store",
                   type = "int", dest = "port",
                   help = "port to run server on")
+parser.add_option("-o", "--out", dest = "bool",
+                  default = False, action = "store_true",
+                  help = "boolean for identifying CorpusSearch output files")
 parser.set_defaults(port = 8080,
                     settings = sys.path[0] + "/settings.js")
 (options, args) = parser.parse_args()
