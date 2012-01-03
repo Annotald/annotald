@@ -222,6 +222,9 @@ class Treedraw(object):
         return alltrees
 
     def loadTxt(self, fileName):
+        print
+        print "I'm here!"
+        print
         if self.options.bool:
             f = open(fileName, "rU")
             currentText = ""
