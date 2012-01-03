@@ -77,6 +77,14 @@ body {
 }
 
 #toolsMenu {
+    position: fixed;
+    bottom: 5%;
+    left: 0px;
+    margin-left: 5px;
+    width: 15%;
+    background: #FEF6EA;
+    padding-top: 4px;
+    border: 1px solid #857259;
     text-align: center;
 }
 
@@ -98,18 +106,9 @@ body {
     left: 16%;
     margin: 0px;
     padding: 0px;
-    width: 60%;
+    width: 85%;
     border: 1px solid #857259;
     background-color: #FEEDD5;
-}
-
-#rightMenu {
-    position: fixed;
-    top: 5%;
-    right: 5px;
-    width: 23%;
-    background: #FEF6EA;
-    border: 1px solid #857259;
 }
 
 .labeledit {
