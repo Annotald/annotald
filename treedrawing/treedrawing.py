@@ -17,6 +17,7 @@ PURPOSE. See the GNU Lesser General Public License for more details.
 VERSION = "11.12"
 
 import os.path
+import os
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 import re
@@ -159,6 +160,7 @@ class Treedraw(object):
         try:
             tovalidate = trees.strip()
             print "validator is %s" % self.options.validator
+            print "pwd is: %s" % os.getcwd()
             validator = subprocess.Popen(self.options.validator,
                                          stdin = subprocess.PIPE,
                                          stdout = subprocess.PIPE)
