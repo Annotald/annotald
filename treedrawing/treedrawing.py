@@ -174,7 +174,12 @@ class Treedraw(object):
                 validator.stdin.write(self.versionCookie + "\n\n")
                 validator.stdin.write(tovalidate)
             validator.stdin.close()
-            validated = validator.stdout.read()
+            if "Darwin" in os.uname():
+                utf8_reader = codecs.getreader("utf-8")
+                stream = utf8_reader(validator.stdout)
+                validated = stream.read()
+            else:
+                validated = validator.stdout.read()
             validatedHtml = self.loadPsd(None, text = validated)
 
             return json.dumps(dict(result = "success",
