@@ -17,7 +17,6 @@ PURPOSE. See the GNU Lesser General Public License for more details.
 VERSION = "11.12"
 
 import os.path
-import os
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 import re
@@ -159,12 +158,13 @@ class Treedraw(object):
 
         try:
             tovalidate = trees.strip()
-            print "validator is %s" % self.options.validator
-            print "pwd is: %s" % os.getcwd()
-            validator = subprocess.Popen(self.options.validator,
+            # If the validator script is inside the cwd, then it looks like an
+            # unqualified path and it gets searched for in $PATH, instead of
+            # in the cwd.  So here we make an absolute pathname to fix that.
+            abs_validator = os.path.abspath(self.options.validator)
+            validator = subprocess.Popen(abs_validator,
                                          stdin = subprocess.PIPE,
                                          stdout = subprocess.PIPE)
-            print "spawned successfully"
             if "Darwin" in os.uname():
                 utf8_writer = codecs.getwriter("utf-8")
                 stream = utf8_writer(validator.stdin)
