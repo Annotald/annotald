@@ -158,9 +158,11 @@ class Treedraw(object):
 
         try:
             tovalidate = trees.strip()
+            print "validator is %s" % self.options.validator
             validator = subprocess.Popen(self.options.validator,
                                          stdin = subprocess.PIPE,
                                          stdout = subprocess.PIPE)
+            print "spawned successfully"
             if "Darwin" in os.uname():
                 utf8_writer = codecs.getwriter("utf-8")
                 stream = utf8_writer(validator.stdin)
@@ -176,7 +178,7 @@ class Treedraw(object):
             return json.dumps(dict(result = "success",
                                    html = validatedHtml))
         except Exception as e:
-            print "something went wrong: %s" % e
+            print "something went wrong: %s, %s" % (type(e), e)
             return json.dumps(dict(result = "failure"))
 
     @cherrypy.expose
