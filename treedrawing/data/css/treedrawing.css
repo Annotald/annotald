@@ -25,23 +25,16 @@ body {
     margin: 0px;
     padding: 0px;
     background-color: #D2B48C;
-/*  height: 2000px;
-    width: 100%; */
 }
 
 .snode {
     margin-left: 20px;
     border: 1px solid silver;
     border-left: 4px solid #4682B4;
-    background-color: #efefef;
+    background-color: #EFEFEF;
     padding: 2px;
     cursor: pointer;
     color: black;
-/*  -webkit-user-select: none; */
-}
-
-.tnode {
-
 }
 
 .wnode {
@@ -77,20 +70,20 @@ body {
     width: 80%;
 }
 
-#toolsMenu {
-    text-align: center;
-}
-
-#floatMenu {
+#menus {
     position: fixed;
     top: 5%;
     left: 0px;
     margin-left: 5px;
     width: 15%;
+}
+
+.menuPane {
     background: #FEF6EA;
     padding-bottom: 4px;
     border: 1px solid #857259;
     text-align: center;
+    margin-bottom: 6px;
 }
 
 #editpane {
@@ -102,15 +95,6 @@ body {
     width: 83%;
     border: 1px solid #857259;
     background-color: #FEEDD5;
-}
-
-#rightMenu {
-    position: fixed;
-    top: 5%;
-    right: 5px;
-    width: 23%;
-    background: #FEF6EA;
-    border: 1px solid #857259;
 }
 
 .labeledit {
@@ -127,6 +111,8 @@ body {
     color: white;
     font-weight: bold;
     text-align: center;
+    width: 100%;
+    height: 16px;
 }
 
 #conMenu {
