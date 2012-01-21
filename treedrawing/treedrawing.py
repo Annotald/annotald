@@ -121,6 +121,14 @@ class Treedraw(object):
         fileMatch = re.search("^.*?([0-9A-Za-z\.]*)$", self.thefile)
         self.shortfile = fileMatch.group(1)
         self.options = options
+        line = "" # TODO(AWE): does with introduce a new scope or not?
+        with open(self.thefile) as f:
+            line = f.readline()
+        versionRe = re.compile('^\( \(VERSION.*$', re.M)
+        versionMatch = versionRe.search(line)
+        self.versionCookie = ""
+        if versionMatch:
+            self.versionCookie = versionMatch.group()
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
