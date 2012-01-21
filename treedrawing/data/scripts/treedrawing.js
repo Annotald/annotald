@@ -281,6 +281,8 @@ function undo() {
     }
 }
 
+var saveInProgress = false;
+
 function saveHandler (data) {
     if (data['result'] == "success") {
         // TODO(AWE): ad time of alst successful save
@@ -289,14 +291,18 @@ function saveHandler (data) {
         lastsavedstate = "";
         $("#saveresult").html("<div style='color:red'>Save FAILED!!</div>");
     }
+    saveInProgress = false;
 }
 
 function save() {
-    $("#saveresult").html("");
-    var tosave = toLabeledBrackets($("#editpane"));
-    $("#saveresult").html("<div style='color:red'>Saving...</div>");
-    $.post("/doSave", {trees: tosave}, saveHandler);
-    lastsavedstate = $("#editpane").html();
+    if (!saveInProgress) {
+        $("#saveresult").html("");
+        var tosave = toLabeledBrackets($("#editpane"));
+        $("#saveresult").html("<div style='color:red'>Saving...</div>");
+        $.post("/doSave", {trees: tosave}, saveHandler);
+        lastsavedstate = $("#editpane").html();
+        saveInProgress = true;
+    }
 }
 
 function assignEvents() {
