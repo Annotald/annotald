@@ -147,7 +147,7 @@ class Treedraw(object):
             else:
                 f = open(self.thefile, 'w')
             f.write(self.versionCookie + "\n\n")
-            tosave = trees.strip()
+            tosave = trees.strip().replace("-FLAG", "")
             f.write(tosave)
             f.close()
             cmdline = 'java -classpath ' + CURRENT_DIR + '/../CS_Tony_oct19.jar' + \
