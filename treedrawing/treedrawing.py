@@ -284,31 +284,31 @@ class Treedraw(object):
 
 <br />
 
-<div id="floatMenu">
-<div style="background-color: #2E2E2E; color: white; font-weight: bold;">
-  Annotald """ + VERSION + """
+<div id="menus">
+  <div id="floatMenu" class="menuPane">
+    <div style="background-color: #2E2E2E; color: white; font-weight: bold;">
+      Annotald """ + VERSION + """
+    </div>
+    
+    Editing: """+self.shortfile+""" <br />
+    <input class="menubutton" type="button" value="Save" id="butsave"><br />
+    <input class="menubutton" type="button" value="Undo" id="butundo"><br />
+    <input class="menubutton" type="button" value="Redo" id="butredo"><br />
+    <input class="menubutton" type="button" value="Exit" id="butexit"><br />
+    
+    <div id="saveresult"></div>
+  </div>
+
+  <div id="toolsMenu" class="menuPane">
+    <div class="menuTitle">Tools</div>
+    <input class="menubutton" type="button" value="Validate"
+      id="butvalidate"><br />
+    <input class="menubutton" type="button" value="Next Error"
+      id="butnexterr"><br />
+    <div id="toolsMsg"></div>
+  </div>
 </div>
 
-Editing: """+self.shortfile+""" <br />
-<input class="menubutton" type="button" value="Save" id="butsave"><br />
-<input class="menubutton" type="button" value="Undo" id="butundo"><br />
-<input class="menubutton" type="button" value="Redo" id="butredo"><br />
-<input class="menubutton" type="button" value="Exit" id="butexit"><br />
-
-<div id="debugpane"></div>
-<div id="saveresult"></div>
-</div>
-
-<div id="rightMenu">
-<div id="toolsMenu">
-<div class="menuTitle">Tools</div>
-<input class="menubutton" type="button" value="Validate"
-  id="butvalidate"><br />
-<input class="menubutton" type="button" value="Next Error"
-  id="butnexterr"><br />
-<div id="toolsMsg"></div>
-</div>
-</div>
 <div id="editpane">"""+currentTree+"""</div>
 
 

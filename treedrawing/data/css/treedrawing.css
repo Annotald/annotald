@@ -58,6 +58,7 @@ body {
     border: 1px solid black;
     margin-left: 10%;
     margin-right: 5%;
+    display: inline-block;
 }
 
 #sn0 > .snode {
@@ -98,7 +99,7 @@ body {
     left: 16%;
     margin: 0px;
     padding: 0px;
-    width: 60%;
+    width: 83%;
     border: 1px solid #857259;
     background-color: #FEEDD5;
 }
