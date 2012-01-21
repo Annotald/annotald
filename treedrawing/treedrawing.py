@@ -67,11 +67,16 @@ def treeToHtml(tree, version, extra_data = None):
             raise Error("Leaf node with more than one daughter!")
         res = '<div class="snode">' + tree.node + '<span class="wnode">'
         temp = tree[0].split("-")
-        if version == "dash" and len(temp) > 1:
+        if version == "dash" and len(temp) > 1 and tree.node != "CODE":
             temp = tree[0].split("-")
             lemma = temp.pop()
             word = "-".join(temp)
-            res += word + '<span class="lemma lemmaHide">-' + lemma + '</span>'
+            if lemma.isdigit():
+                # If the lemma is all numbers, it is probably a trace index.
+                # Do nothing special with it.
+                res += word + "-" + lemma
+            else:
+                res += word + '<span class="lemma lemmaHide">-' + lemma + '</span>'
         else:
             res += tree[0]
         res += '</span></div>'
