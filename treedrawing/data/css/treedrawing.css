@@ -197,3 +197,45 @@ body {
 .lemmaHide {
     display: none;
 }
+
+#dialogBackground {
+    z-index: 998;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background-color: rgba(1, 1, 1, 0.25);
+    visibility: hidden;
+    top: 0%;
+    left: 0%;
+}
+
+#dialogBox {
+    position: fixed;
+    top: 25%;
+    left: 25%;
+    width: 50%;
+    height: 50%;
+    opacity: 0.85;
+    visibility: hidden;
+    z-index: 999;
+    /* override the lighter menuPane color */
+    background-color: #D2B48C;
+
+}
+
+#commentEditBox {
+    position: absolute;
+    width: 75%;
+    left: 12.5%;
+    /* add the 16 from the title */
+    top: 18px;
+    /* TODO: how to get the height working? */
+}
+
+#commentEditButton {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+}
+
+

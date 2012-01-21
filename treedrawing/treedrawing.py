@@ -320,6 +320,11 @@ Editing: """+self.shortfile+""" <br />
            </div>
                 </div>
 
+<div id="dialogBox" class="menuPane">
+</div>
+
+<div id="dialogBackground"></div>
+
 </body>
 </html>"""
 

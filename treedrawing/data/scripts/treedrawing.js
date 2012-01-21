@@ -316,7 +316,12 @@ function assignEvents() {
 }
 
 function editLemmaOrLabel() {
-    if (isLeafNode(startnode)) {
+    
+    if (getLabel($(startnode)) == "CODE" &&
+        // TODO: robustify this test, make configurable
+        wnodeString($(startnode)).substring(0,4) == "{COM") {
+        editComment();
+    } else if (isLeafNode(startnode)) {
         editLemma();
     } else {
         displayRename();
@@ -847,6 +852,64 @@ function emergencyExitEdit() {
     var replNode = $(replText);
     $("#leafeditor").replaceWith(replNode);
     postChange(replNode);
+}
+
+function showDialogBox(html) {
+    document.body.onkeydown = undefined;
+    $("#dialogBox").html(html).get(0).style.visibility = "visible";
+    $("#dialogBackground").get(0).style.visibility = "visible";
+}
+
+function hideDialogBox() {
+    $("#dialogBox").get(0).style.visibility = "hidden";
+    $("#dialogBackground").get(0).style.visibility = "hidden";
+    document.body.onkeydown = handleKeyDown;
+}
+
+function editComment() {
+    if (!startnode || endnode) return;
+    var commentRaw = $.trim(wnodeString($(startnode)));
+    var commentType = commentRaw.split(":")[0];
+    // remove the {
+    commentType = commentType.substring(1);
+    var commentText = commentRaw.split(":")[1];
+    commentText = commentText.substring(0, commentText.length - 1);
+    // regex because string does not give global search.
+    commentText = commentText.replace(/_/g, " ");
+    showDialogBox('<div class="menuTitle">Edit Comment</div>' +
+                  '<div id="dialogBody"><textarea id="commentEditBox">' +
+                  commentText + '</textarea><input type="button"' +
+                  'id="commentEditButton" value="Save" /></div>');
+    $("#commentEditBox").focus().get(0).setSelectionRange(commentText.length,
+                                                          commentText.length);
+    function editCommentDone (change) {
+        if (change) {
+            var newText = $.trim($("#commentEditBox").val());
+            if (/_|\n|:|\}|\{/.test(newText)) {
+                // TODO(AWE): slicker way of indicating errors...
+                alert("illegal characters in comment");
+                hideDialogBox();
+                return;
+            }
+            newText = newText.replace(/ /g, "_");
+            setLabelLL($(startnode).children(".wnode"),
+                       "{" + commentType + ":" + newText + "}");
+        }
+        hideDialogBox();
+    }
+    $("#commentEditButton").click(editCommentDone);
+    $("#commentEditBox").keydown(function (e) {
+        if (e.keyCode == 13) {
+            // return
+            editCommentDone(true);
+            return false;
+        } else if (e.keyCode == 27) {
+            editCommentDone(false);
+            return false;
+        } else {
+            return true;
+        }
+    });    
 }
 
 function displayRename() {
@@ -1671,6 +1734,17 @@ function quitServer() {
 
 function getLabel(node) {
     return $.trim(textNode(node).text());
+}
+
+// A low-level (LL) version of setLabel.  It is only responsible for changing
+// the label; not doing any kind of matching/changing/other crap.
+function setLabelLL(node, label) {
+    if (label[label.length - 1] != " ") {
+        // Some other spots in the code depend on the label ending with a
+        // space...
+        label += " ";
+    }
+    textNode(node).replaceWith(label);
 }
 
 function textNode(node) {
