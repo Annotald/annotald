@@ -1795,11 +1795,29 @@ function nextValidationError() {
     window.scroll(0, $(nextError).offset().top - $(window).height() * 0.25);
 }
 
+function hasDashTag(node, tag) {
+    var label = getLabel(node);
+    return (label.indexOf("-" + tag + "-") != -1) ||
+        /* The following gross hack is needed because the label often ends
+         * with " ", but sometimes might not. */
+    ((label + " ").indexOf("-" + tag + " ") != -1);
+}
+
 function fixError() {
-    var label = getLabel($(startnode));
-    if (label.substring(label.length - 5) == "-FLAG") {
-        toggleExtension("FLAG");
+    if (!startnode || endnode) return;
+    var sn = $(startnode);
+    if (hasDashTag($(startnode), "FLAG")) {
+        toggleExtension("-FLAG");
+        // This should be done in a not-ad-hoc-way.
+        var ipn = sn.hasClass("ipnode");
+        startnode.className = "";
+        sn.addClass("snode");
+        sn.addClass(getLabel(sn));
+        if (ipn) {
+            sn.addClass("ipnode");
+        }
     }
+    updateSelection();
 }
 
 // Local Variables:
