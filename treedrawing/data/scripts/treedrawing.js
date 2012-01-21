@@ -922,6 +922,7 @@ function displayRename() {
     if (startnode && !endnode) {
         stackTree();
         document.body.onkeydown = null;
+        var oldClass = getLabel($(startnode));
         function space(event) {
             var elementId = (event.target || event.srcElement).id;
             $("#"+elementId).val( $("#"+elementId).val() );
@@ -933,6 +934,7 @@ function displayRename() {
             } else {
                 newNode.removeClass("ipnode");
             }
+            newNode.removeClass(oldClass);
             newNode.addClass(getLabel(newNode));
             startnode = endnode = null;
             resetIds();
