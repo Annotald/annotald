@@ -1241,7 +1241,7 @@ function toggleVerbalExtension(extension) {
 }
 
 function setLabel(labels) {
-    if (!startnode) {
+    if (!startnode || endnode) {
         return;
     }
     if (!isPossibleTarget(startnode.id) &&
