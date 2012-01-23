@@ -101,7 +101,7 @@ function styleIpNodes() {
     for (var i = 0; i < ipnodes.length; i++) {
         styleTag(ipnodes[i], "border-top: 1px solid black;" +
                  "border-bottom: 1px solid black;" +
-                 "background-color: #D2B48C;");
+                 "background-color: #C5908E;");
     }
 }
 

@@ -187,7 +187,12 @@ class Treedraw(object):
                 validator.stdin.write(self.versionCookie + "\n\n")
                 validator.stdin.write(tovalidate)
             validator.stdin.close()
-            validated = validator.stdout.read()
+            if "Darwin" in os.uname():
+                utf8_reader = codecs.getreader("utf-8")
+                stream = utf8_reader(validator.stdout)
+                validated = stream.read()
+            else:
+                validated = validator.stdout.read()
             validatedHtml = self.loadPsd(None, text = validated)
 
             return json.dumps(dict(result = "success",
@@ -205,6 +210,8 @@ class Treedraw(object):
         # TODO(AWE): remove
         # self.thefile = fileName
 
+        mac = False
+
         if text:
             currentText = text
         else:
@@ -212,9 +219,16 @@ class Treedraw(object):
             # no longer using codecs to open the file, using .decode('utf-8')
             # instead when in Mac OS X
             if "Darwin" in os.uname():
-                currentText = f.read().decode('utf-8')
+                mac = True
+                if self.options.bool:
+                    currentText = self.scrubOutput(f, mac)
+                else:
+                    currentText = f.read().decode('utf-8')
             else:
-                currentText = f.read()
+                if self.options.bool:
+                    currentText = self.scrubOutput(f, mac)
+                else:
+                    currentText = f.read()
 
         # TODO(AWE): remove the one-line restriction
         versionRe = re.compile('^\( \(VERSION.*$', re.M)
@@ -238,20 +252,62 @@ class Treedraw(object):
         alltrees = alltrees + '</div>'
         return alltrees
 
-    def loadTxt(self, fileName):
-        f = open(fileName)
-        currentText = f.read()
-        trees = currentText.split("\n\n")
-        tree0 = trees[1].strip();
-        words = tree0.split('\n');
-        thetree = '<div class="snode">IP-MAT'
-        wordnr = 0
-        for word in words:
-                thetree = thetree + '<div class="snode">X<span class="wnode">' + \
-                    word + '</span></div>'
+    def scrubOutput(self, f, mac):
 
-        thetree = thetree + "</div>"
-        return thetree
+        if mac:
+            tmp2 = f.readlines()
+            tmp = []
+            for line in tmp2:
+                tmp.append(line.decode('utf-8'))
+        else:
+            tmp = f.readlines()
+
+        currentText = ""
+
+        comment = False
+
+        for line in tmp:
+            if line.startswith("/*") or line.startswith("/~*"):
+                comment = True
+            elif not comment:
+                currentText = currentText + line
+            elif line.startswith("*/") or line.startswith("*~/"):
+                comment = False
+            else:
+                pass
+
+        return currentText
+
+    ## def loadTxt(self, fileName):
+    ##     print
+    ##     print "I'm here!"
+    ##     print
+    ##     if self.options.bool:
+    ##         f = open(fileName, "rU")
+    ##         currentText = ""
+    ##         for line in f:
+    ##             if line.startswith("/*") or line.startswith("/~*"):
+    ##                 comment = True
+    ##             elif not comment:
+    ##                 currentText = currentText + line
+    ##             elif line.startswith("*/") or line.startswith("*~/"):
+    ##                 comment = False
+    ##             else:
+    ##                 pass
+    ##     else:
+    ##         f = open(fileName)
+    ##         currentText = f.read()
+    ##     trees = currentText.split("\n\n")
+    ##     tree0 = trees[1].strip();
+    ##     words = tree0.split('\n');
+    ##     thetree = '<div class="snode">IP-MAT'
+    ##     wordnr = 0
+    ##     for word in words:
+    ##             thetree = thetree + '<div class="snode">X<span class="wnode">' + \
+    ##                 word + '</span></div>'
+
+    ##     thetree = thetree + "</div>"
+    ##     return thetree
 
     @cherrypy.expose
     def index(self):
@@ -354,6 +410,9 @@ parser.add_option("-v", "--validator", action = "store",
 parser.add_option("-p", "--port", action = "store",
                   type = "int", dest = "port",
                   help = "port to run server on")
+parser.add_option("-o", "--out", dest = "bool",
+                  default = False, action = "store_true",
+                  help = "boolean for identifying CorpusSearch output files")
 parser.set_defaults(port = 8080,
                     settings = sys.path[0] + "/settings.js")
 (options, args) = parser.parse_args()
