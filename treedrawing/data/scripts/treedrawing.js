@@ -1713,6 +1713,9 @@ function toLabeledBrackets(node) {
     out = out.replace(/  +/g, " ");
     out = out.replace(/\n\n+/g,"\n");
     out = out.replace(/ZZZZZ/g, "\n\n");
+    // If there is a space after the word but before the closing paren, it
+    // will make CorpusSearch unhappy.
+    out = out.replace(/ +)/g, ")");
 
     return out;
 }
@@ -1747,10 +1750,17 @@ function getLabel(node) {
 // A low-level (LL) version of setLabel.  It is only responsible for changing
 // the label; not doing any kind of matching/changing/other crap.
 function setLabelLL(node, label) {
-    if (label[label.length - 1] != " ") {
-        // Some other spots in the code depend on the label ending with a
-        // space...
-        label += " ";
+    if (node.hasClass("snode")) {
+        if (label[label.length - 1] != " ") {
+            // Some other spots in the code depend on the label ending with a
+            // space...
+            label += " ";
+        }
+    } else if (node.hasClass("wnode")) {
+        // Words cannot have a trailing space, or CS barfs on save.
+        label = $.trim(label);
+    } else {
+        return;
     }
     textNode(node).replaceWith(label);
 }
