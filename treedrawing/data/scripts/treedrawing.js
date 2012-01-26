@@ -1715,7 +1715,7 @@ function toLabeledBrackets(node) {
     out = out.replace(/ZZZZZ/g, "\n\n");
     // If there is a space after the word but before the closing paren, it
     // will make CorpusSearch unhappy.
-    out = out.replace(/ +)/g, ")");
+    out = out.replace(/ +\)/g, ")");
 
     return out;
 }
