@@ -1426,11 +1426,7 @@ function appendExtension(node, extension, type) {
 }
 
 function getTokenRoot(node) {
-    if(isRootNode(node)) {
-        return node;
-    }
-    return $("#sn0>.snode").filter(
-        $(node).parents($("#sn0>.snode")));
+    return $(node).parents().andSelf().filter("#sn0>.snode").eq(0);
 }
 
 /*
