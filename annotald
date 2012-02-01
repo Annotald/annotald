@@ -4,5 +4,12 @@ import os.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 import sys, os
 
-os.system("python " + current_dir + "/treedrawing/treedrawing.py " +
-          ' '.join(sys.argv[1:]))
+python_program = "python2"
+
+try:
+    os.system("python2 --version &> /dev/null")
+except OSError:
+    python_program = "python"   # And hope it is the right version
+
+os.system(python_program + " " + current_dir +
+          "/treedrawing/treedrawing.py " + ' '.join(sys.argv[1:]))
