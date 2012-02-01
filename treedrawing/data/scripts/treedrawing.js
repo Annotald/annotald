@@ -760,6 +760,8 @@ function leafAfter() {
 // supply a default heuristic fn to try to guess these, then allow
 // settings.js to override it.
 function makeLeaf(before, label, word, targetId) {
+    if (!(targetId || startnode)) return;
+
     if (!label) {
         label = "NP-SBJ";
     }
