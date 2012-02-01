@@ -1485,6 +1485,11 @@ function parseLabel (label) {
 }
 
 function shouldIndexLeaf(node) {
+    // The below check bogusly returns true if the leftmost node in a tree is
+    // a comment/trace/etc., even if it is not a direct daughter.  Only do the
+    // most complicated check if we are at a POS label, otherwise short circuit
+    if (node.children(".wnode").size() == 0) return false;
+
     // The "W" thing is because we should index the label, not leaf, of
     // things like (WADJP 0) in comparatives.
     // TODO(AWE): this may be as simple as wnodeString(node)[0] == "*"
