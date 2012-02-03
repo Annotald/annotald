@@ -1843,6 +1843,6 @@ function fixError() {
 
 // Local Variables:
 // js2-additional-externs: ("$" "setTimeout" "customCommands" "customConLeafBefore\
-// " "customConMenuGroups")
+// " "customConMenuGroups" "extensions")
 // indent-tabs-mode: nil
 // End:
