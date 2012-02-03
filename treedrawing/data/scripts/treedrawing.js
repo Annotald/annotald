@@ -326,10 +326,10 @@ function assignEvents() {
 }
 
 function editLemmaOrLabel() {
-
     if (getLabel($(startnode)) == "CODE" &&
-        // TODO: robustify this test, make configurable
-        wnodeString($(startnode)).substring(0,4) == "{COM") {
+        (wnodeString($(startnode)).substring(0,4) == "{COM" ||
+         wnodeString($(startnode)).substring(0,5) == "{TODO" ||
+         wnodeString($(startnode)).substring(0,4) == "{MAN")) {
         editComment();
     } else if (isLeafNode(startnode)) {
         editLemma();
@@ -898,7 +898,7 @@ function editComment() {
     function editCommentDone (change) {
         if (change) {
             var newText = $.trim($("#commentEditBox").val());
-            if (/_|\n|:|\}|\{/.test(newText)) {
+            if (/_|\n|:|\}|\{|\(|\)/.test(newText)) {
                 // TODO(AWE): slicker way of indicating errors...
                 alert("illegal characters in comment");
                 hideDialogBox();
