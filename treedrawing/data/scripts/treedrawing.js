@@ -319,7 +319,7 @@ function assignEvents() {
     $("#butredo").mousedown(redo);
     $("#butexit").mousedown(quitServer);
     $("#butvalidate").mousedown(validateTrees);
-    $("#butnexterr").mousedown(nextValidationError);
+    $("#butnexterr").unbind("click").click(nextValidationError);
     $("#editpane").mousedown(clearSelection);
     $("#conMenu").mousedown(hideContextMenu);
     $(document).mousewheel(handleMouseWheel);
@@ -1807,10 +1807,13 @@ function validateHandler(data) {
 function nextValidationError() {
     var docViewTop = $(window).scrollTop();
     var docViewMiddle = docViewTop + $(window).height() / 2;
-    var nextError = $(".snode[class*=\"FLAG\"]").filter(function () {
-        return $(this).offset().top > docViewMiddle;
-    }).get(0);
-    window.scroll(0, $(nextError).offset().top - $(window).height() * 0.25);
+    var nextError = $(".snode[class*=\"FLAG\"],.snode[class$=\"FLAG\"]").filter(
+        function () {
+            return $(this).offset().top > docViewMiddle;
+        }).first();
+    if (nextError) {
+        window.scroll(0, nextError.offset().top - $(window).height() * 0.25);
+    }
 }
 
 function hasDashTag(node, tag) {
