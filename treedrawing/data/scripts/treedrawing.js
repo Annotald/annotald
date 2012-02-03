@@ -326,7 +326,7 @@ function assignEvents() {
 }
 
 function editLemmaOrLabel() {
-    
+
     if (getLabel($(startnode)) == "CODE" &&
         // TODO: robustify this test, make configurable
         wnodeString($(startnode)).substring(0,4) == "{COM") {
@@ -922,7 +922,7 @@ function editComment() {
         } else {
             return true;
         }
-    });    
+    });
 }
 
 function displayRename() {
@@ -1182,13 +1182,13 @@ function toggleExtension(extension) {
     }
     stackTree();
     var textnode = textNode($(startnode));
-    var oldlabel=$.trim(textnode.text());
+    var oldlabel = $.trim(textnode.text());
     var newlabel = toggleJustExtension(oldlabel, extension);
     textnode.replaceWith(newlabel + " ");
 }
 
 // added by JEB
-// DONE?: make it so that dash tags are properly ordered or at least ordered 
+// DONE?: make it so that dash tags are properly ordered or at least ordered
 function toggleVerbExtension (oldlabel, extension) {
     var index = parseIndex(oldlabel);
     var indextype = "";
