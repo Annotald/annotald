@@ -352,7 +352,7 @@ function handleMouseWheel(e, delta) {
 function handleKeyDown(e) {
     if ((e.ctrlKey && e.shiftKey) || e.metaKey || e.altKey) {
         // unsupported modifier combinations
-        return;
+        return true;
     }
     var commandMap;
     if (e.ctrlKey) {
@@ -364,12 +364,13 @@ function handleKeyDown(e) {
     }
     last_event_was_mouse = false;
     if (!commandMap[e.keyCode]) {
-        return;
+        return true;
     }
     e.preventDefault();
     var theFn = commandMap[e.keyCode].func;
     var theArgs = commandMap[e.keyCode].args;
     theFn.apply(undefined, theArgs);
+    return false;
 }
 
 
