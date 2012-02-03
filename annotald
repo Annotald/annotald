@@ -5,7 +5,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 import sys, os
 
 python_program = "python2"
-if os.system("which " + python_program + "&>/dev/null") == 1:
+if os.system("which " + python_program + " &>/dev/null") == 1:
     python_program = "python"
 
 os.system(python_program + " " + current_dir +
