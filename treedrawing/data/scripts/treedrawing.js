@@ -1096,40 +1096,43 @@ function changeJustLabel (oldlabel, newlabel) {
 }
 
 function toggleJustExtension (oldlabel, extension) {
+    // TODO: next time we break the API, change these to not have dashes to
+    // begin with.
+    var extensionsWithoutDashes = extensions.map(function(l) {
+        return l.substring(1);
+    });
+    var extNoDash = extension.substring(1);
+
     var index = parseIndex(oldlabel);
     var indextype = "";
     if (index > 0) {
         indextype = parseIndexType(oldlabel);
     }
-    var extendedlabel = parseLabel(oldlabel);
 
-    var currentextensions = new Array();
-    var textension = false;
-    for (var i = extensions.length-1; i>-1; i--) {
-        if (extension == extensions[i]) {
-            textension = true;
-        } else {
-            textension = false;
-        }
+    var currentLabel = parseLabel(oldlabel);
+    currentLabel = currentLabel.split("-");
+    var idx = currentLabel.indexOf(extNoDash);
 
-        if(extendedlabel.endsWith(extensions[i])) {
-            if (!textension) {
-                currentextensions.push(extensions[i]);
+    if (idx > -1) {
+        // currentLabel contains extension, remove it
+        currentLabel.splice(idx, 1);
+    } else {
+        idx = extensionsWithoutDashes.indexOf(extension);
+        if (idx > -1) {
+            // extension is something we know about, put it in its spot
+            var idx2 = extensionsWithoutDashes.indexOf(extNoDash),
+                i = 0;
+            while (extensionsWithoutDashes.indexOf(currentLabel[i]) < idx2) {
+                ++i;
             }
-            extendedlabel = extendedlabel.substr(
-                0,extendedlabel.length - extensions[i].length);
-        } else if (textension) {
-            currentextensions.push(extensions[i]);
+            currentLabel.splice(i, 0, extNoDash);
+        } else {
+            // we don't know what this is, stick on the end
+            currentLabel.push(extNoDash);
         }
     }
 
-    var out = extendedlabel;
-//    var count = currentextensions.length;
-    // TODO(AWE): out += currentextensions.join("")
-    out += currentextensions.join("")
-//    for (i=0; i < count; i++) {
-//        out += currentextensions.pop();
-//    }
+    var out = currentLabel.join("-");
     if (index > 0) {
         out += indextype;
         out += index;
