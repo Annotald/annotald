@@ -187,6 +187,10 @@ function contains(a, obj) {
 
 
 function isEmpty (text) {
+    // TODO(AWE): should this be passed a node instead of a string, and then
+    // test whether the node is a leaf or not before giving a return value?  This
+    // would simplify the check I had to put in shouldIndexLeafNode, and prevent
+    // future such errors.
     if (text.startsWith("*") || text.startsWith("{") ||
         text.split("-")[0] == "0") {
         return true;
