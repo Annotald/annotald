@@ -1830,7 +1830,7 @@ function hasDashTag(node, tag) {
 function fixError() {
     if (!startnode || endnode) return;
     var sn = $(startnode);
-    if (hasDashTag($(startnode), "FLAG")) {
+    if (hasDashTag(sn, "FLAG")) {
         toggleExtension("-FLAG");
         // This should be done in a not-ad-hoc-way.
         var ipn = sn.hasClass("ipnode");
