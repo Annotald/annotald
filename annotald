@@ -2,10 +2,14 @@
 
 import os.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-import sys, os
+import sys
+import subprocess
 
 python_program = "python2"
-if os.system("which " + python_program + " &>/dev/null") == 1:
+try:
+    with open("/dev/null","w") as sink:
+        subprocess.check_call(["which", python_program], stdout = sink)
+except CalledProcessError:
     python_program = "python"
 
 os.system(python_program + " " + current_dir +
