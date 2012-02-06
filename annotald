@@ -9,7 +9,7 @@ python_program = "python2"
 try:
     with open("/dev/null","w") as sink:
         subprocess.check_call(["which", python_program], stdout = sink)
-except CalledProcessError:
+except subprocess.CalledProcessError:
     python_program = "python"
 
 os.system(python_program + " " + current_dir +
