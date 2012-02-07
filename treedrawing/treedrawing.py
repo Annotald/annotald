@@ -60,6 +60,7 @@ def queryVersionCookie(string, fmt):
     else:
         return None
 
+# TODO: calculate the class in here
 def treeToHtml(tree, version, extra_data = None):
     if isinstance(tree[0], str) or isinstance(tree[0], unicode):
         # Leaf node

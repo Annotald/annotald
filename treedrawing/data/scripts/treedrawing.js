@@ -187,6 +187,10 @@ function contains(a, obj) {
 
 
 function isEmpty (text) {
+    // TODO(AWE): should this be passed a node instead of a string, and then
+    // test whether the node is a leaf or not before giving a return value?  This
+    // would simplify the check I had to put in shouldIndexLeafNode, and prevent
+    // future such errors.
     if (text.startsWith("*") || text.startsWith("{") ||
         text.split("-")[0] == "0") {
         return true;
@@ -315,17 +319,17 @@ function assignEvents() {
     $("#butredo").mousedown(redo);
     $("#butexit").mousedown(quitServer);
     $("#butvalidate").mousedown(validateTrees);
-    $("#butnexterr").mousedown(nextValidationError);
+    $("#butnexterr").unbind("click").click(nextValidationError);
     $("#editpane").mousedown(clearSelection);
     $("#conMenu").mousedown(hideContextMenu);
     $(document).mousewheel(handleMouseWheel);
 }
 
 function editLemmaOrLabel() {
-    
     if (getLabel($(startnode)) == "CODE" &&
-        // TODO: robustify this test, make configurable
-        wnodeString($(startnode)).substring(0,4) == "{COM") {
+        (wnodeString($(startnode)).substring(0,4) == "{COM" ||
+         wnodeString($(startnode)).substring(0,5) == "{TODO" ||
+         wnodeString($(startnode)).substring(0,4) == "{MAN")) {
         editComment();
     } else if (isLeafNode(startnode)) {
         editLemma();
@@ -352,7 +356,7 @@ function handleMouseWheel(e, delta) {
 function handleKeyDown(e) {
     if ((e.ctrlKey && e.shiftKey) || e.metaKey || e.altKey) {
         // unsupported modifier combinations
-        return;
+        return true;
     }
     var commandMap;
     if (e.ctrlKey) {
@@ -364,12 +368,13 @@ function handleKeyDown(e) {
     }
     last_event_was_mouse = false;
     if (!commandMap[e.keyCode]) {
-        return;
+        return true;
     }
     e.preventDefault();
     var theFn = commandMap[e.keyCode].func;
     var theArgs = commandMap[e.keyCode].args;
     theFn.apply(undefined, theArgs);
+    return false;
 }
 
 
@@ -760,6 +765,8 @@ function leafAfter() {
 // supply a default heuristic fn to try to guess these, then allow
 // settings.js to override it.
 function makeLeaf(before, label, word, targetId) {
+    if (!(targetId || startnode)) return;
+
     if (!label) {
         label = "NP-SBJ";
     }
@@ -891,7 +898,7 @@ function editComment() {
     function editCommentDone (change) {
         if (change) {
             var newText = $.trim($("#commentEditBox").val());
-            if (/_|\n|:|\}|\{/.test(newText)) {
+            if (/_|\n|:|\}|\{|\(|\)/.test(newText)) {
                 // TODO(AWE): slicker way of indicating errors...
                 alert("illegal characters in comment");
                 hideDialogBox();
@@ -915,7 +922,7 @@ function editComment() {
         } else {
             return true;
         }
-    });    
+    });
 }
 
 function displayRename() {
@@ -1089,40 +1096,43 @@ function changeJustLabel (oldlabel, newlabel) {
 }
 
 function toggleJustExtension (oldlabel, extension) {
+    // TODO: next time we break the API, change these to not have dashes to
+    // begin with.
+    var extensionsWithoutDashes = extensions.map(function(l) {
+        return l.substring(1);
+    });
+    var extNoDash = extension.substring(1);
+
     var index = parseIndex(oldlabel);
     var indextype = "";
     if (index > 0) {
         indextype = parseIndexType(oldlabel);
     }
-    var extendedlabel = parseLabel(oldlabel);
 
-    var currentextensions = new Array();
-    var textension = false;
-    for (var i = extensions.length-1; i>-1; i--) {
-        if (extension == extensions[i]) {
-            textension = true;
-        } else {
-            textension = false;
-        }
+    var currentLabel = parseLabel(oldlabel);
+    currentLabel = currentLabel.split("-");
+    var idx = currentLabel.indexOf(extNoDash);
 
-        if(extendedlabel.endsWith(extensions[i])) {
-            if (!textension) {
-                currentextensions.push(extensions[i]);
+    if (idx > -1) {
+        // currentLabel contains extension, remove it
+        currentLabel.splice(idx, 1);
+    } else {
+        idx = extensionsWithoutDashes.indexOf(extension);
+        if (idx > -1) {
+            // extension is something we know about, put it in its spot
+            var idx2 = extensionsWithoutDashes.indexOf(extNoDash),
+                i = 0;
+            while (extensionsWithoutDashes.indexOf(currentLabel[i]) < idx2) {
+                ++i;
             }
-            extendedlabel = extendedlabel.substr(
-                0,extendedlabel.length - extensions[i].length);
-        } else if (textension) {
-            currentextensions.push(extensions[i]);
+            currentLabel.splice(i, 0, extNoDash);
+        } else {
+            // we don't know what this is, stick on the end
+            currentLabel.push(extNoDash);
         }
     }
 
-    var out = extendedlabel;
-//    var count = currentextensions.length;
-    // TODO(AWE): out += currentextensions.join("")
-    out += currentextensions.join("")
-//    for (i=0; i < count; i++) {
-//        out += currentextensions.pop();
-//    }
+    var out = currentLabel.join("-");
     if (index > 0) {
         out += indextype;
         out += index;
@@ -1172,13 +1182,13 @@ function toggleExtension(extension) {
     }
     stackTree();
     var textnode = textNode($(startnode));
-    var oldlabel=$.trim(textnode.text());
+    var oldlabel = $.trim(textnode.text());
     var newlabel = toggleJustExtension(oldlabel, extension);
     textnode.replaceWith(newlabel + " ");
 }
 
 // added by JEB
-// DONE?: make it so that dash tags are properly ordered or at least ordered 
+// DONE?: make it so that dash tags are properly ordered or at least ordered
 function toggleVerbExtension (oldlabel, extension) {
     var index = parseIndex(oldlabel);
     var indextype = "";
@@ -1483,15 +1493,15 @@ function parseLabel (label) {
 }
 
 function shouldIndexLeaf(node) {
-   // The below check bogusly returns true if the leftmost node in a tree is
-   // a comment/trace/etc., even if it is not a direct daughter.  Only do the
-   // most complicated check if we are at a POS label, otherwise short circuit
-   if (node.children(".wnode").size() == 0) return false;
+    // The below check bogusly returns true if the leftmost node in a tree is
+    // a comment/trace/etc., even if it is not a direct daughter.  Only do the
+    // most complicated check if we are at a POS label, otherwise short circuit
+    if (node.children(".wnode").size() == 0) return false;
 
-   // The "W" thing is because we should index the label, not leaf, of
-   // things like (WADJP 0) in comparatives.
-   // TODO(AWE): this may be as simple as wnodeString(node)[0] == "*"
-   return isEmpty(wnodeString(node)) && !(getLabel(node)[0] == "W");
+    // The "W" thing is because we should index the label, not leaf, of
+    // things like (WADJP 0) in comparatives.
+    // TODO(AWE): this may be as simple as wnodeString(node)[0] == "*"
+    return isEmpty(wnodeString(node)) && !(getLabel(node)[0] == "W");
 }
 
 function getIndex(node) {
@@ -1800,10 +1810,13 @@ function validateHandler(data) {
 function nextValidationError() {
     var docViewTop = $(window).scrollTop();
     var docViewMiddle = docViewTop + $(window).height() / 2;
-    var nextError = $(".snode[class*=\"FLAG\"]").filter(function () {
-        return $(this).offset().top > docViewMiddle;
-    }).get(0);
-    window.scroll(0, $(nextError).offset().top - $(window).height() * 0.25);
+    var nextError = $(".snode[class*=\"FLAG\"],.snode[class$=\"FLAG\"]").filter(
+        function () {
+            return $(this).offset().top > docViewMiddle;
+        }).first();
+    if (nextError) {
+        window.scroll(0, nextError.offset().top - $(window).height() * 0.25);
+    }
 }
 
 function hasDashTag(node, tag) {
@@ -1817,7 +1830,7 @@ function hasDashTag(node, tag) {
 function fixError() {
     if (!startnode || endnode) return;
     var sn = $(startnode);
-    if (hasDashTag($(startnode), "FLAG")) {
+    if (hasDashTag(sn, "FLAG")) {
         toggleExtension("-FLAG");
         // This should be done in a not-ad-hoc-way.
         var ipn = sn.hasClass("ipnode");
@@ -1833,6 +1846,6 @@ function fixError() {
 
 // Local Variables:
 // js2-additional-externs: ("$" "setTimeout" "customCommands" "customConLeafBefore\
-// " "customConMenuGroups")
+// " "customConMenuGroups" "extensions")
 // indent-tabs-mode: nil
 // End:

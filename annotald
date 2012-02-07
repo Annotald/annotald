@@ -2,7 +2,15 @@
 
 import os.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-import sys, os
+import sys
+import subprocess
 
-os.system("python " + current_dir + "/treedrawing/treedrawing.py " +
-          ' '.join(sys.argv[1:]))
+python_program = "python2"
+try:
+    with open("/dev/null","w") as sink:
+        subprocess.check_call(["which", python_program], stdout = sink)
+except subprocess.CalledProcessError:
+    python_program = "python"
+
+os.system(python_program + " " + current_dir +
+          "/treedrawing/treedrawing.py " + ' '.join(sys.argv[1:]))
