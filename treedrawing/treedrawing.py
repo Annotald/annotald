@@ -249,37 +249,6 @@ class Treedraw(object):
 
         return output
 
-    ## def loadTxt(self, fileName):
-    ##     print
-    ##     print "I'm here!"
-    ##     print
-    ##     if self.options.bool:
-    ##         f = open(fileName, "rU")
-    ##         currentText = ""
-    ##         for line in f:
-    ##             if line.startswith("/*") or line.startswith("/~*"):
-    ##                 comment = True
-    ##             elif not comment:
-    ##                 currentText = currentText + line
-    ##             elif line.startswith("*/") or line.startswith("*~/"):
-    ##                 comment = False
-    ##             else:
-    ##                 pass
-    ##     else:
-    ##         f = open(fileName)
-    ##         currentText = f.read()
-    ##     trees = currentText.split("\n\n")
-    ##     tree0 = trees[1].strip();
-    ##     words = tree0.split('\n');
-    ##     thetree = '<div class="snode">IP-MAT'
-    ##     wordnr = 0
-    ##     for word in words:
-    ##             thetree = thetree + '<div class="snode">X<span class="wnode">' + \
-    ##                 word + '</span></div>'
-
-    ##     thetree = thetree + "</div>"
-    ##     return thetree
-
     @cherrypy.expose
     def index(self):
         currentSettings = open(self.options.settings).read()
