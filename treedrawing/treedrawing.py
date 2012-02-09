@@ -237,11 +237,11 @@ class Treedraw(object):
     def scrubText(self, text):
         output = ""
         comment = False
-        for line in text:
+        for line in text.split("\n"):
             if line.startswith("/*") or line.startswith("/~*"):
                 comment = True
             elif not comment:
-                output = output + line
+                output = output + line + "\n"
             elif line.startswith("*/") or line.startswith("*~/"):
                 comment = False
             else:
