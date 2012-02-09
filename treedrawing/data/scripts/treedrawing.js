@@ -65,7 +65,7 @@ function resetLabelClasses(alertOnError) {
     var nodes = $(".snode").each(
         function() {
             var node = $(this);
-            var label = parseLabel(getLabel(node));
+            var label = $.trim(getLabel(node));
             if (alertOnError) { // TODO(AWE): optimize test inside loop
                 var classes = node.attr("class").split(" ");
                 // This incantation removes a value from an array.
