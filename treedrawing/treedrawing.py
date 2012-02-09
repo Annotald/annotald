@@ -143,10 +143,7 @@ class Treedraw(object):
             print "self.thefile is: ", self.thefile
             os.rename(self.thefile, self.thefile + '.bak')
             # JB: using codecs here when in Mac OS X
-            if "Darwin" in os.uname():
-                f = codecs.open(self.thefile, 'w', 'utf-8')
-            else:
-                f = open(self.thefile, 'w')
+            f = codecs.open(self.thefile, 'w', 'utf-8')
             f.write(self.versionCookie + "\n\n")
             tosave = trees.strip().replace("-FLAG", "")
             f.write(tosave)
@@ -179,21 +176,14 @@ class Treedraw(object):
             validator = subprocess.Popen(abs_validator,
                                          stdin = subprocess.PIPE,
                                          stdout = subprocess.PIPE)
-            if "Darwin" in os.uname():
-                utf8_writer = codecs.getwriter("utf-8")
-                stream = utf8_writer(validator.stdin)
-                stream.write(self.versionCookie + "\n\n")
-                stream.write(tovalidate)
-            else:
-                validator.stdin.write(self.versionCookie + "\n\n")
-                validator.stdin.write(tovalidate)
+            utf8_writer = codecs.getwriter("utf-8")
+            stream = utf8_writer(validator.stdin)
+            stream.write(self.versionCookie + "\n\n")
+            stream.write(tovalidate)
             validator.stdin.close()
-            if "Darwin" in os.uname():
-                utf8_reader = codecs.getreader("utf-8")
-                stream = utf8_reader(validator.stdout)
-                validated = stream.read()
-            else:
-                validated = validator.stdout.read()
+            utf8_reader = codecs.getreader("utf-8")
+            stream = utf8_reader(validator.stdout)
+            validated = stream.read()
             validatedHtml = self.loadPsd(None, text = validated)
 
             return json.dumps(dict(result = "success",
@@ -211,25 +201,16 @@ class Treedraw(object):
         # TODO(AWE): remove
         # self.thefile = fileName
 
-        mac = False
-
         if text:
             currentText = text
         else:
             f = open(fileName, 'r')
             # no longer using codecs to open the file, using .decode('utf-8')
             # instead when in Mac OS X
-            if "Darwin" in os.uname():
-                mac = True
-                if self.options.bool:
-                    currentText = self.scrubOutput(f, mac)
-                else:
-                    currentText = f.read().decode('utf-8')
-            else:
-                if self.options.bool:
-                    currentText = self.scrubOutput(f, mac)
-                else:
-                    currentText = f.read()
+            currentText = f.read().decode('utf-8')
+
+            if self.options.bool:
+                currentText = self.scrubText(currentText)
 
         # TODO(AWE): remove the one-line restriction
         versionRe = re.compile('^\( \(VERSION.*$', re.M)
@@ -253,62 +234,20 @@ class Treedraw(object):
         alltrees = alltrees + '</div>'
         return alltrees
 
-    def scrubOutput(self, f, mac):
-
-        if mac:
-            tmp2 = f.readlines()
-            tmp = []
-            for line in tmp2:
-                tmp.append(line.decode('utf-8'))
-        else:
-            tmp = f.readlines()
-
-        currentText = ""
-
+    def scrubText(self, text):
+        output = ""
         comment = False
-
-        for line in tmp:
+        for line in text:
             if line.startswith("/*") or line.startswith("/~*"):
                 comment = True
             elif not comment:
-                currentText = currentText + line
+                output = output + line
             elif line.startswith("*/") or line.startswith("*~/"):
                 comment = False
             else:
                 pass
 
-        return currentText
-
-    ## def loadTxt(self, fileName):
-    ##     print
-    ##     print "I'm here!"
-    ##     print
-    ##     if self.options.bool:
-    ##         f = open(fileName, "rU")
-    ##         currentText = ""
-    ##         for line in f:
-    ##             if line.startswith("/*") or line.startswith("/~*"):
-    ##                 comment = True
-    ##             elif not comment:
-    ##                 currentText = currentText + line
-    ##             elif line.startswith("*/") or line.startswith("*~/"):
-    ##                 comment = False
-    ##             else:
-    ##                 pass
-    ##     else:
-    ##         f = open(fileName)
-    ##         currentText = f.read()
-    ##     trees = currentText.split("\n\n")
-    ##     tree0 = trees[1].strip();
-    ##     words = tree0.split('\n');
-    ##     thetree = '<div class="snode">IP-MAT'
-    ##     wordnr = 0
-    ##     for word in words:
-    ##             thetree = thetree + '<div class="snode">X<span class="wnode">' + \
-    ##                 word + '</span></div>'
-
-    ##     thetree = thetree + "</div>"
-    ##     return thetree
+        return output
 
     @cherrypy.expose
     def index(self):
