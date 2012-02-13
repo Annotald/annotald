@@ -237,15 +237,22 @@ class Treedraw(object):
     def scrubText(self, text):
         output = ""
         comment = False
-        for line in text:
+        for line in text.split("\n"):
             if line.startswith("/*") or line.startswith("/~*"):
                 comment = True
+            elif line.startswith("<+"):
+                # Ignore parser-mode comments
+                pass
             elif not comment:
-                output = output + line
+                output = output + line + "\n"
             elif line.startswith("*/") or line.startswith("*~/"):
                 comment = False
             else:
+                # Should never happen!
                 pass
+
+        if comment:
+            raise Error("Unterminated comment in input file!")
 
         return output
 
