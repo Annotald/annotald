@@ -965,6 +965,11 @@ function displayRename() {
                 useLemma = false;
             }
 
+            // Single quotes mess up the HTML code.
+            if (lemma) lemma = lemma.replace(/'/g, "&#39;");
+            label = label.replace(/'/g, "&#39;");
+            word = word.replace(/'/g, "&#39;");
+
             var editorHtml = "<div id='leafeditor' class='snode'>" +
                 "<input id='leafphrasebox' class='labeledit' type='text' value='" +
                 label +
