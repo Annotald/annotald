@@ -28,10 +28,16 @@ var caseTags=["N","NS","NPR","NPRS",
               "ADJ","ADJR","ADJS",
               "Q","QR","QS"];
 
-/* extensions are treated as not part of the label for various purposes, 
- * they are all binary, and they show up in the toggle extension menu  
+/*
+ * Extensions are treated as not part of the label for various purposes, they
+ * are all binary, and they show up in the toggle extension menu.  There are 3
+ * classes of extensions: those that apply to leaf nodes, those that apply to
+ * clausal nodes (IP and CP), and those that apply to non-leaf, non-clause
+ * nodes.
  */
-var extensions = ["-SPE","-PRN","-SBJ","-LFD","-RSP","-XXX","-ZZZ"];
+var extensions        = ["SBJ","RSP","LFD","PRN","SPE","XXX"];
+var clause_extensions = ["RSP","LFD","SBJ","PRN","SPE","XXX"];
+var vextensions       = [];
 
 /*
  * Phrase labels in this list (including the same ones with indices and
@@ -65,8 +71,8 @@ function customCommands(){
     addCommand({ keycode: 71 }, setLabel, ["ADJP","ADJP-SPR","NP-MSR","QP"]); // g
     addCommand({ keycode: 70 }, setLabel, ["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR"]); // f
     addCommand({ keycode: 50 }, setLabel, ["NP","NP-PRN","NP-POS","NP-COM"]); // 2
-    addCommand({ keycode: 52 }, toggleExtension, "-PRN"); // 4
-    addCommand({ keycode: 53 }, toggleExtension, "-SPE"); // 5
+    addCommand({ keycode: 52 }, toggleExtension, "PRN"); // 4
+    addCommand({ keycode: 53 }, toggleExtension, "SPE"); // 5
     addCommand({ keycode: 81 }, setLabel, ["CONJP","ALSO","FP"]); // q
     addCommand({ keycode: 87 }, setLabel, ["NP-SBJ","NP-OB1","NP-OB2","NP-PRD"]); // w
     addCommand({ keycode: 68 }, pruneNode); // d

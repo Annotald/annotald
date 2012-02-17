@@ -1104,44 +1104,50 @@ function changeJustLabel (oldlabel, newlabel) {
     return newlabel;
 }
 
-function toggleJustExtension (oldlabel, extension) {
-    // TODO: next time we break the API, change these to not have dashes to
-    // begin with.
-    var extensionsWithoutDashes = extensions.map(function(l) {
-        return l.substring(1);
-    });
-    var extNoDash = extension.substring(1);
-
+// This function takes 3 arguments: a node label with dash tags and possibly
+// indices, a dash tag to toggle (no dash), and a list of possible extensions
+// (in L-to-R order).  It returns a string, which is the label with
+// transformations applied
+function toggleStringExtension (oldlabel, extension, extensionList) {
+    if (extension[0] == "-") {
+        // temporary compatibility hack for old configs
+        extension = extension.substring(1);
+        extensionList = extensionList.map(function(s) { return s.substring(1); });
+    }
     var index = parseIndex(oldlabel);
     var indextype = "";
     if (index > 0) {
         indextype = parseIndexType(oldlabel);
     }
-
     var currentLabel = parseLabel(oldlabel);
+
+    // The strategy here is as follows:
+    // - split the label into an array of dash tags
+    // - operate on the array
+    // - reform the array into a string
     currentLabel = currentLabel.split("-");
-    var idx = currentLabel.indexOf(extNoDash);
+    var labelBase = currentLabel.shift();
+    var idx = currentLabel.indexOf(extension);
 
     if (idx > -1) {
         // currentLabel contains extension, remove it
         currentLabel.splice(idx, 1);
     } else {
-        idx = extensionsWithoutDashes.indexOf(extNoDash);
+        idx = extensionList.indexOf(extension);
         if (idx > -1) {
-            // extension is something we know about, put it in its spot
-            var idx2 = extensionsWithoutDashes.indexOf(extNoDash),
-                i = 0;
-            while (extensionsWithoutDashes.indexOf(currentLabel[i]) < idx2) {
-                ++i;
+            // Loop through the list, stop when we pass the right spot
+            for (var i = 0; i < currentLabel.length; i++) {
+                if (idx < extensionList.indexOf(currentLabel[i])) {
+                    break;
+                }
             }
-            currentLabel.splice(i, 0, extNoDash);
+            currentLabel.splice(i, 0, extension);
         } else {
-            // we don't know what this is, stick on the end
-            currentLabel.push(extNoDash);
+            currentLabel.push(extension);
         }
     }
 
-    var out = currentLabel.join("-");
+    var out = labelBase + "-" + currentLabel.join("-");
     if (index > 0) {
         out += indextype;
         out += index;
@@ -1150,87 +1156,42 @@ function toggleJustExtension (oldlabel, extension) {
 }
 
 function toggleExtension(extension) {
-    // there has to be a startnode
-    if (!startnode) {
-        return;
-    }
-    // there can't be an endnode
-    if (endnode) {
-        return;
-    }
+    if (!startnode || endnode) return;
 
     if (!isPossibleTarget(startnode.id) &&
         !isEmpty(wnodeString($(startnode)))) {
         return;
     }
+
+    var extensionList;
+    if (isLeafNode(startnode)) {
+        extensionList = vextensions;
+    } else if (getLabel($(startnode)).split("-")[0] == "IP" ||
+               getLabel($(startnode)).split("-")[0] == "CP") {
+        // TODO: should FRAG be a clause?
+        extensionList = clause_extensions;
+    } else {
+        extensionList = extensions;
+    }
+
+    // Tried to toggle an extension on an inapplicable node.
+    if (extensionList.indexOf(extension) < 0) {
+        return;
+    }
+
     stackTree();
     var textnode = textNode($(startnode));
     var oldlabel = $.trim(textnode.text());
-    var newlabel = toggleJustExtension(oldlabel, extension);
+    // Extension is not de-dashed here.  toggleStringExtension handles it.
+    // The new config format however requires a dash-less extension.
+    var newlabel = toggleStringExtension(oldlabel, extension, extensionList);
     textnode.replaceWith(newlabel + " ");
 }
 
 // added by JEB
-// DONE?: make it so that dash tags are properly ordered or at least ordered
-function toggleVerbExtension (oldlabel, extension) {
-    var index = parseIndex(oldlabel);
-    var indextype = "";
-    if (index > 0) {
-        indextype = parseIndexType(oldlabel);
-    }
-    var extendedlabel = parseLabel(oldlabel);
-
-    var currentextensions = new Array();
-    var vextension = false;
-    for (var i = vextensions.length-1; i>-1; i--) {
-        if (extension == vextensions[i]) {
-            vextension = true;
-        } else {
-            vextension = false;
-        }
-
-        if(extendedlabel.endsWith(vextensions[i])) {
-            if (!vextension) {
-                currentextensions.push(vextensions[i]);
-                extendedlabel = extendedlabel.substr(
-                    0,(extendedlabel.length - vextensions[i].length));
-            }
-        }
-        else if (vextension) {
-                currentextensions.push(vextensions[i]);
-        }
-    }
-
-    var out = extendedlabel;
-//    var count = currentextensions.length;
-    // TODO(AWE): out += currentextensions.join("")
-    out += currentextensions.join("")
-//    for (i=0; i < count; i++) {
-//        out += currentextensions.pop();
-//    }
-    if (index > 0) {
-        out += indextype;
-        out += index;
-    }
-    return out;
-}
-
-// added by JEB
+// alias for compatibility
 function toggleVerbalExtension(extension) {
-    // there has to be a startnode
-    if (!startnode) {
-        return;
-    }
-    // there can't be an endnode
-    if (endnode) {
-        return;
-    }
-
-    stackTree();
-    var textnode = textNode($(startnode));
-    var oldlabel=$.trim(textnode.text());
-    var newlabel = toggleVerbExtension(oldlabel, extension);
-    textnode.replaceWith(newlabel + " ");
+    toggleExtension(extension);
 }
 
 function setLabel(labels) {
@@ -1764,6 +1725,9 @@ function textNode(node) {
 }
 
 function isLeafNode(node) {
+    // TODO (AWE): for certain purposes, it would be desirable to treat leaf
+    // nodes as non-leaves.  e.g. for dash tag toggling, a trace should be
+    // "not a leaf"
     return $("#" + node.id + ">.wnode").size() > 0;
 }
 
@@ -1827,6 +1791,6 @@ function fixError() {
 
 // Local Variables:
 // js2-additional-externs: ("$" "setTimeout" "customCommands" "customConLeafBefore\
-// " "customConMenuGroups" "extensions")
+// " "customConMenuGroups" "extensions" "vextensions" "clause_extensions")
 // indent-tabs-mode: nil
 // End:
