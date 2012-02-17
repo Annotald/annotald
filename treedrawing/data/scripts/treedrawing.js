@@ -951,6 +951,7 @@ function displayRename() {
             // doesn't seem to?
         }
         var label = getLabel($(startnode));
+        label = label.replace(/'/g, "&#39;");
         if ($("#"+startnode.id+">.wnode").size() > 0) {
             // this is a terminal
             var word, lemma, useLemma;
@@ -967,7 +968,6 @@ function displayRename() {
 
             // Single quotes mess up the HTML code.
             if (lemma) lemma = lemma.replace(/'/g, "&#39;");
-            label = label.replace(/'/g, "&#39;");
             word = word.replace(/'/g, "&#39;");
 
             var editorHtml = "<div id='leafeditor' class='snode'>" +
@@ -1001,11 +1001,13 @@ function displayRename() {
                         var newlemma;
                         if (useLemma) {
                             newlemma = $('#leaflemmabox').val();
-                            newlemma = newlemma.replace("<","&lt;");
-                            newlemma = newlemma.replace(">","&gt;");
+                            newlemma = newlemma.replace(/</g,"&lt;");
+                            newlemma = newlemma.replace(/>/g,"&gt;");
+                            newlemma = newlemma.replace(/'/g,"&#39;");
                         }
-                        newtext = newtext.replace("<","&lt;");
-                        newtext = newtext.replace(">","&gt;");
+                        newtext = newtext.replace(/</g,"&lt;");
+                        newtext = newtext.replace(/>/g,"&gt;");
+                        newtext = newtext.replace(/'/g,"&#39;");
                         var replText = "<div class='snode'>" +
                             newphrase + " <span class='wnode'>" + newtext;
                         if (useLemma) {
@@ -1079,6 +1081,8 @@ function editLemma() {
                     var newlemma = $('#leaflemmabox').val();
                     newlemma = newlemma.replace("<","&lt;");
                     newlemma = newlemma.replace(">","&gt;");
+                    newlemma = newlemma.replace(/'/g,"&#39;");
+
                     $("#leafeditor").replaceWith("<span class='lemma " +
                                                  lemmaClass + "'>-" +
                                                  newlemma + "</span>");
@@ -1122,7 +1126,7 @@ function toggleJustExtension (oldlabel, extension) {
         // currentLabel contains extension, remove it
         currentLabel.splice(idx, 1);
     } else {
-        idx = extensionsWithoutDashes.indexOf(extension);
+        idx = extensionsWithoutDashes.indexOf(extNoDash);
         if (idx > -1) {
             // extension is something we know about, put it in its spot
             var idx2 = extensionsWithoutDashes.indexOf(extNoDash),
