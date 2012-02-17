@@ -1126,7 +1126,7 @@ function toggleJustExtension (oldlabel, extension) {
         // currentLabel contains extension, remove it
         currentLabel.splice(idx, 1);
     } else {
-        idx = extensionsWithoutDashes.indexOf(extension);
+        idx = extensionsWithoutDashes.indexOf(extNoDash);
         if (idx > -1) {
             // extension is something we know about, put it in its spot
             var idx2 = extensionsWithoutDashes.indexOf(extNoDash),
