@@ -1147,7 +1147,10 @@ function toggleStringExtension (oldlabel, extension, extensionList) {
         }
     }
 
-    var out = labelBase + "-" + currentLabel.join("-");
+    var out = labelBase;
+    if (currentLabel.length > 0) {
+        out += "-" + currentLabel.join("-");
+    }
     if (index > 0) {
         out += indextype;
         out += index;
