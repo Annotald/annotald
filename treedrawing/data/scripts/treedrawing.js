@@ -1203,25 +1203,33 @@ function toggleVerbExtension (oldlabel, extension) {
     var extendedlabel = parseLabel(oldlabel);
 
     var currentextensions = new Array();
-    var vextension = false;
-    for (var i = vextensions.length-1; i>-1; i--) {
-        if (extension == vextensions[i]) {
-            vextension = true;
-        } else {
-            vextension = false;
-        }
+    
+    var extgroups = new Array();
 
-        if(extendedlabel.endsWith(vextensions[i])) {
-            if (!vextension) {
-                currentextensions.push(vextensions[i]);
+    for (var i = 0; i < vextensions.length; i++) {
+        extgroups.push(vextensions[i]);
+    }
+
+    for (var i = 0; i < extgroups.length; i++) {
+        var group = extgroups[i];
+        for (var j = 0; j < group.length; j++) {
+            var tag = group[j];
+            if (extendedlabel.search(tag) != -1 && tag == extension) {
                 extendedlabel = extendedlabel.substr(
-                    0,(extendedlabel.length - vextensions[i].length));
+                    0,extendedlabel.length - tag.length);
+            }
+            else if (extendedlabel.search(tag) != -1 && tag != extension) {
+                currentextensions.push(tag);
+                extendedlabel = extendedlabel.substr(
+                    0,extendedlabel.length - tag.length);
+            }
+            else if (extendedlabel.search(tag) == -1 && tag == extension) {
+                currentextensions.push(tag);
             }
         }
-        else if (vextension) {
-                currentextensions.push(vextensions[i]);
-        }
     }
+    
+    console.log(currentextensions.reverse());
 
     var out = extendedlabel;
 //    var count = currentextensions.length;
