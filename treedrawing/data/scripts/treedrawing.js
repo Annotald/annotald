@@ -1203,15 +1203,9 @@ function toggleVerbExtension (oldlabel, extension) {
     var extendedlabel = parseLabel(oldlabel);
 
     var currentextensions = new Array();
-    
-    var extgroups = new Array();
 
     for (var i = 0; i < vextensions.length; i++) {
-        extgroups.push(vextensions[i]);
-    }
-
-    for (var i = 0; i < extgroups.length; i++) {
-        var group = extgroups[i];
+        var group = vextensions[i];
         for (var j = 0; j < group.length; j++) {
             var tag = group[j];
             if (extendedlabel.search(tag) != -1 && tag == extension) {
