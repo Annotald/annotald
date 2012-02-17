@@ -602,7 +602,7 @@ function moveNode(targetParent){
 }
 
 function isRootNode(node) {
-        return node.filter("#sn0>.snode").size() > 0;
+    return node.filter("#sn0>.snode").size() > 0;
 }
 
 // TODO(AWE): does Jquery clone() method do copy-on-write?  If so, then
