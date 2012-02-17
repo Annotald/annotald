@@ -1149,32 +1149,6 @@ function toggleJustExtension (oldlabel, extension) {
     return out;
 }
 
-function parseExtensions (label) {
-    var index = parseIndex( label );
-    var indextype = "";
-    if (index > 0) {
-        indextype = parseIndexType(label);
-    }
-    var extendedlabel = parseLabel(label);
-    var currentextensions = new Array();
-
-    for (var i = extensions.length-1; i>-1; i--) {
-        if (extendedlabel.endsWith(extensions[i])) {
-            currentextensions.push(extensions[i]);
-            extendedlabel = extendedlabel.substr(
-                0,extendedlabel.length-extensions[i].length);
-        }
-    }
-
-    var out = "";
-    var count = currentextensions.length;
-    // TODO(AWE): out += currentextensions.join("")
-    for (i = 0; i < count; i++) {
-        out += currentextensions.pop();
-    }
-    return out;
-}
-
 function toggleExtension(extension) {
     // there has to be a startnode
     if (!startnode) {
