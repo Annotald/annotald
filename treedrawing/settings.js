@@ -41,6 +41,7 @@ var extensions = ["-SPE","-PRN","-SBJ","-LFD","-RSP","-XXX","-ZZZ"];
 var ipnodes = ["IP-SUB","IP-MAT","IP-IMP","IP-INF","IP-PPL","RRC"];
 styleIpNodes();
 
+// TODO: document this
 var invisibleRootCategories = ["ID", "METADATA"];
 var invisibleCategories = ["META"];
 hideCategories();
@@ -115,17 +116,9 @@ function customConMenuGroups(){
  */
 function customConLeafBefore(){
 	addConLeafBefore( "NP-SBJ", "*con*");
-	addConLeafBefore( "NP-SBJ", "*exp*");
-	addConLeafBefore( "NP-SBJ", "*arb*");
 	addConLeafBefore( "NP-SBJ", "*pro*");
-	addConLeafBefore( "TO", "*");
-	addConLeafBefore( "WADVP", "0");
-	addConLeafBefore( "WNP", "0");
-	addConLeafBefore( "WADJP", "0");
-	addConLeafBefore( "WPP", "0");
 	addConLeafBefore( "C", "0");
-	addConLeafBefore( "P", "0");
-	addConLeafBefore( "CODE", "*XXX*");
+	addConLeafBefore( "CODE", "{COM:XXX}");
 }
 
 // An example of a CSS rule for coloring a POS tag.  The styleTag
