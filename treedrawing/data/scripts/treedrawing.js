@@ -1158,11 +1158,6 @@ function toggleStringExtension (oldlabel, extension, extensionList) {
 function toggleExtension(extension) {
     if (!startnode || endnode) return;
 
-    if (!isPossibleTarget(startnode.id) &&
-        !isEmpty(wnodeString($(startnode)))) {
-        return;
-    }
-
     var extensionList;
     if (isLeafNode(startnode)) {
         extensionList = vextensions;
