@@ -142,7 +142,8 @@ function styleTag(tagName, css) {
     // (faster?) way to do it is to keep track of the node name as a
     // separate div-level property
     addStyle('*[class*=" ' + tagName + '-"],*[class*=" ' + tagName +
-             ' "],*[class$=" ' + tagName + '"] { ' + css + ' }');
+             ' "],*[class$=" ' + tagName + '"],[class*=" ' + tagName +
+             '="] { ' + css + ' }');
 }
 
 function styleDashTag(tagName, css) {
@@ -150,7 +151,8 @@ function styleDashTag(tagName, css) {
     // (faster?) way to do it is to keep track of the node name as a
     // separate div-level property
     addStyle('*[class*="-' + tagName + '-"],*[class*="-' + tagName +
-             ' "],*[class$="-' + tagName + '"] { ' + css + ' }');
+             ' "],*[class$="-' + tagName + '"],[class*="-' + tagName +
+             '="] { ' + css + ' }');
 }
 
 function styleTags(tagNames, css) {
