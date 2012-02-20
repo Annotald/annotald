@@ -902,8 +902,8 @@ function editComment() {
             var newText = $.trim($("#commentEditBox").val());
             if (/_|\n|:|\}|\{|\(|\)/.test(newText)) {
                 // TODO(AWE): slicker way of indicating errors...
-                alert("illegal characters in comment");
-                hideDialogBox();
+                alert("illegal characters in comment: illegal characters are _, :, {}, (), and newline");
+                // hideDialogBox();
                 return;
             }
             newText = newText.replace(/ /g, "_");
