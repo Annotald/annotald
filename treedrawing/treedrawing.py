@@ -119,7 +119,7 @@ class Treedraw(object):
             self.thefile = args[0]
         else:
             raise Error("Annotald requires exactly one .psd file argument")
-        fileMatch = re.search("^.*?([0-9A-Za-z\.]*)$", self.thefile)
+        fileMatch = re.search("^.*?([0-9A-Za-z\-\.]*)$", self.thefile)
         self.shortfile = fileMatch.group(1)
         self.options = options
         line = "" # TODO(AWE): does with introduce a new scope or not?
