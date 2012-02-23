@@ -4,6 +4,11 @@ import os.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 import sys
 import subprocess
+from datetime import datetime
+
+with open("timelog.txt", "a") as timelog:
+    # TODO(JB): need to figure out a cleverer way to identify the PSD filename, not just sys.argv[3]
+    timelog.write(sys.argv[3] + ": Started at " + str(datetime.now()) + ".\n")
 
 python_program = "python2"
 try:
@@ -14,5 +19,3 @@ except subprocess.CalledProcessError:
 
 os.system(python_program + " " + current_dir +
           "/treedrawing/treedrawing.py " + ' '.join(sys.argv[1:]))
-
-echo "Started at $(date)."

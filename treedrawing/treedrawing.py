@@ -30,6 +30,8 @@ import subprocess
 # JB: codecs necessary for Unicode Greek support
 import codecs
 
+from datetime import datetime
+
 # Ripped from NLTK.tree and fixed to not do stupid things with Unicode
 # NLTK is distributed under the Apache License 2.0, which looks (to AWE)
 # to be compatible with redistribution under the LGPL3.
@@ -195,6 +197,8 @@ class Treedraw(object):
     @cherrypy.expose
     def doExit(self):
         print "Exit message received"
+        with open("timelog.txt", "a") as timelog:
+            timelog.write(self.shortfile + ": Stopped at " + str(datetime.now()) + ".\n")
         raise SystemExit(0)
 
     def loadPsd(self, fileName, text = None):
