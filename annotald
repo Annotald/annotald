@@ -14,3 +14,5 @@ except subprocess.CalledProcessError:
 
 os.system(python_program + " " + current_dir +
           "/treedrawing/treedrawing.py " + ' '.join(sys.argv[1:]))
+
+echo "Started at $(date)."
