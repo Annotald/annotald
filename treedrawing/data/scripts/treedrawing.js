@@ -1324,11 +1324,21 @@ function pruneNode() {
 }
 
 function setNodeLabel(node, label, noUndo) {
+    // TODO: fold this and setLabelLL together...
     if (!noUndo) {
         stackTree();
     }
-    textNode(node).replaceWith($.trim(label)+" ");
+    setLabelLL(node, label);
 }
+
+function setLeafLabel(node, label) {
+    if (!node.hasClass(".wnode")) {
+        node = node.children(".wnode").first();
+    }
+    textNode(node).replaceWith($.trim(label));
+}
+
+// TODO: need a setLemma function as well
 
 function appendExtension(node, extension, type) {
     if (!type) {
@@ -1338,8 +1348,8 @@ function appendExtension(node, extension, type) {
         // Adding an index to an empty category, and the EC is not an
         // empty operator.  The final proviso is needed because of
         // things like the empty WADJP in comparatives.
-        var theTextNode = textNode(node.children(".wnode").first());
-        theTextNode.replaceWith(theTextNode.text() + "-" + extension);
+        var oldLabel = textNode(node.children(".wnode").first()).text();;
+        setLeafLabel(node, oldLabel + type + extension);
     } else {
         setNodeLabel(node, getLabel(node) + type + extension, true);
     }
