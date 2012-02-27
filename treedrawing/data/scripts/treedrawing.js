@@ -860,6 +860,18 @@ function hideDialogBox() {
     document.body.onkeydown = handleKeyDown;
 }
 
+// TODO(AWE):make configurable
+var commentTypes = ["COM", "TODO", "MAN"];
+var commentTypeCheckboxes = "";
+
+(function () {
+    for (var i = 0; i < commentTypes.length; i++) {
+        commentTypeCheckboxes += commentTypes[i] + ': <input type="radio" name="commentType" value="' +
+            commentTypes[i] + '" id="commentType' + commentTypes[i] +
+            '" /> ';
+    }
+})();
+
 function editComment() {
     if (!startnode || endnode) return;
     var commentRaw = $.trim(wnodeString($(startnode)));
@@ -872,8 +884,11 @@ function editComment() {
     commentText = commentText.replace(/_/g, " ");
     showDialogBox('<div class="menuTitle">Edit Comment</div>' +
                   '<div id="dialogBody"><textarea id="commentEditBox">' +
-                  commentText + '</textarea><input type="button"' +
+                  commentText + '</textarea><div id="commentTypes">' +
+                  commentTypeCheckboxes + '</div>' +
+                  '<input type="button"' +
                   'id="commentEditButton" value="Save" /></div>');
+    $("input:radio[name=commentType]").val([commentType]);
     $("#commentEditBox").focus().get(0).setSelectionRange(commentText.length,
                                                           commentText.length);
     function editCommentDone (change) {
@@ -887,6 +902,7 @@ function editComment() {
                 return;
             }
             newText = newText.replace(/ /g, "_");
+            commentType = $("input:radio[name=commentType]:checked").val();
             setLabelLL($(startnode).children(".wnode"),
                        "{" + commentType + ":" + newText + "}");
         }

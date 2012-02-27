@@ -158,12 +158,19 @@ body {
     /* add the 16 from the title */
     top: 18px;
     /* TODO: how to get the height working? */
+    // height: 100%;
 }
 
 #commentEditButton {
     position: absolute;
     bottom: 6px;
     right: 6px;
+}
+
+#commentTypes {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
 }
 
 /* Context menu */
