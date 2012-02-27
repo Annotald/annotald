@@ -762,26 +762,28 @@ function makeLeaf(before, label, word, targetId) {
     var startRoot = null;
     var endRoot = null;
 
+    var doCoindex = false;
+
     if (endnode) {
         startRoot = getTokenRoot($(startnode)).attr("id");
         endRoot = getTokenRoot($(endnode)).attr("id");
-        stackTree();
         if (startRoot == endRoot) {
             word = "*ICH*";
             label = getLabel($(endnode));
             if (label.startsWith("W")) {
                 word = "*T*";
                 label = label.substr(1);
+            } else if (label.endsWith("-CL")) {
+                word = "*CL*";
+                label = "NP";
             }
-            var toadd = maxIndex(startRoot) + 1;
-            word = word + "-" + toadd;
-            appendExtension($(endnode), toadd);
+            doCoindex = true;
         } else { // abort if selecting from different tokens
-            undo();
-            redostack.pop();
             return;
         }
     }
+
+    stackTree();
 
     var newleaf = "<div class='snode " + label + "'>" + label +
         "<span class='wnode'>" + word;
@@ -794,6 +796,10 @@ function makeLeaf(before, label, word, targetId) {
         newleaf.insertBefore("#" + targetId);
     } else {
         newleaf.insertAfter("#" + targetId);
+    }
+    if (doCoindex) {
+        startnode = newleaf.get(0);
+        coIndex();
     }
     startnode = null;
     endnode = null;
