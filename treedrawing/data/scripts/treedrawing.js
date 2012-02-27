@@ -129,9 +129,6 @@ $(document).ready(function () {
     globalStyle.appendTo("head");
 });
 
-// menuon=true;
-// checks if the given node label is an ip node in the gui coloring sense
-
 function addStyle(string) {
     var style = globalStyle.text() + "\n" + string;
     globalStyle.text(style);
@@ -173,8 +170,6 @@ function isIpNode (text) {
         text.startsWith("FRAG") ||
         text.startsWith("QTP") ||
         text.startsWith("RRC");
-
-//        return contains( ipnodes, parseLabel(text) );
 }
 
 // returns true if array a contains object o
@@ -545,7 +540,6 @@ function moveNode(targetParent){
                 redostack.pop();
             } else {
                 resetIds();
-                //   updateSelection();
             }
         } else if (startnode.id == lastchildId) {
             stackTree();
@@ -556,7 +550,6 @@ function moveNode(targetParent){
                 redostack.pop();
             } else {
                 resetIds();
-                //   updateSelection();
             }
         } else {
             // alert("cannot move from this position");
@@ -696,7 +689,6 @@ function moveNodes(targetParent) {
                 return;
             } else {
                 resetIds();
-                //   updateSelection();
             }
         } else if (startnode.id == lastchildId) {
             //stackTree();
@@ -708,7 +700,6 @@ function moveNodes(targetParent) {
                 return;
             } else {
                 resetIds();
-                //   updateSelection();
             }
         } else {
             // alert("cannot move from this position");
@@ -729,7 +720,6 @@ function moveNodes(targetParent) {
                 return;
             } else {
                 resetIds();
-                //   updateSelection();
             }
             //}
         } else if (parseInt( startnode.id.substr(2) ) <
@@ -742,7 +732,6 @@ function moveNodes(targetParent) {
                 return;
             } else {
                 resetIds();
-                //   updateSelection();
             }
         }
     }
@@ -1288,12 +1277,8 @@ function makeNode(label) {
     startnode = null;
     endnode = null;
 
-    // toselect = $(".snode[xxx=newnode]").first();
-    //        alert(toselect.attr("xxx"));
-
     resetIds();
     var toselect = $(".snode[xxx=newnode]").first();
-    // alert(toselect.attr("id"));
 
     // BUG when making XP and then use context menu: todo XXX
 
@@ -1304,26 +1289,7 @@ function makeNode(label) {
     resetIds();
 
     toselect.mousedown(handleNodeClick);
-    // connectContextMenu( toselect );
 }
-
-
-/*
-function traceBefore(){
-        makeTrace(true);
-}
-
-function traceAfter(){
-        makeTrace(false);
-}
-
-function makeTrace( before ){
-        if( startnode && endnode ){
-                if( getLabel($(startnode) )
-                makeLeaf(before,"ADVP","*T*");
-        }
-}
-*/
 
 function pruneNode() {
     if (startnode && !endnode) {
@@ -1479,31 +1445,6 @@ function getNodesByIndex(tokenRoot, ind) {
     return nodes;
 }
 
-/*
-function updateIndices( tokenRoot ){
-        ind=1;
-
-        // alert( minIndex( tokenRoot, index )  );
-
-        while( minIndex( tokenRoot, ind ) != -1){
-                // alert( "startind: "+ind+" minind"+ minIndex( tokenRoot, ind )  );
-                minindex = minIndex( tokenRoot, ind );
-
-                nodes = getNodesByIndex(tokenRoot,minindex);
-
-                // alert("sss" + nodes.size() );
-
-                 nodes.each(function(index) {
-                      label=getLabel($(this)).substr(0,getLabel($(this)).length-1);
-                      label=label+ind;
-                      setNodeLabel( $(this), label, true );
-                });
-                ind++;
-                // replaceIndex( tokenRoot, minindex, index ); XXX todo getbyindex
-        }
-}
-*/
-
 function addToIndices(tokenRoot, numberToAdd) {
     var ind = 1;
     var maxindex = maxIndex(tokenRoot.attr("id"));
@@ -1616,26 +1557,6 @@ function resetIds() {
         snodes[i].id = "sn" + i;
     }
 }
-
-
-
-//                $("#"+snodes[i].id).addClass('snodesel');
-/*
-                text = $("#"+snodes[i].id).contents().filter(function() {
-                          return this.nodeType == 3;
-                }).first().text();
-                if( trim(text).startsWith("IP-SUB") ){
-                        $("#"+snodes[i].id).addClass('snodesel');
-                }
-*/
-
-//                snodes[i].="sn"+i;
-                //snodes[i].onmousedown=null;
-                //snodes[i].onmousedown=handleNodeClick;
-
-
-        // assignEvents();
-
 
 function wnodeString(node) {
     var text = $(node).find('.wnode').text();
