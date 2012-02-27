@@ -893,6 +893,7 @@ function editComment() {
                 // TODO(AWE): slicker way of indicating errors...
                 alert("illegal characters in comment: illegal characters are _, :, {}, (), and newline");
                 // hideDialogBox();
+                $("#commentEditBox").val(newText);
                 return;
             }
             newText = newText.replace(/ /g, "_");
