@@ -453,19 +453,8 @@ function clearSelection() {
 }
 
 function updateSelection() {
-    document.getElementById("labsel1").innerHTML = "null";
-    document.getElementById("labsel2").innerHTML = "null";
-    if (startnode) {
-        document.getElementById("labsel1").innerHTML = startnode.id;
-        //startnode.setAttribute('class','snodesel');
-    }
-    if (endnode) {
-        document.getElementById("labsel2").innerHTML=endnode.id;
-        //endnode.setAttribute('class','snodesel');
-    }
-
     // update selection display
-    $('.snode').removeClass('snodesel');
+    $('.snodesel').removeClass('snodesel');
 
     if (startnode) {
         $(startnode).addClass('snodesel');

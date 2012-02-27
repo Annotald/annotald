@@ -282,8 +282,6 @@ class Treedraw(object):
 
 </head>
 <body oncontextmenu="return false;">
-<div style="display:none"><span>Sel1: </span><span id="labsel1">null</span></div>
-<div style="display:none"><span>Sel2: </span><span id="labsel2">null</span></div>
 
 <br />
 
