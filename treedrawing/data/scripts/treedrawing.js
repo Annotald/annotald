@@ -286,7 +286,7 @@ var saveInProgress = false;
 
 function saveHandler (data) {
     if (data['result'] == "success") {
-        // TODO(AWE): ad time of alst successful save
+        // TODO(AWE): add time of last successful save
         $("#saveresult").html("<div style='color:green'>Save success</div>");
     } else {
         lastsavedstate = "";
