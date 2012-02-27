@@ -1714,10 +1714,8 @@ function nextValidationError() {
 
 function hasDashTag(node, tag) {
     var label = getLabel(node);
-    return (label.indexOf("-" + tag + "-") != -1) ||
-        /* The following gross hack is needed because the label often ends
-         * with " ", but sometimes might not. */
-    ((label + " ").indexOf("-" + tag + " ") != -1);
+    var tags = label.split("-").slice(1);
+    return (tags.indexOf(tag) > -1);
 }
 
 function fixError() {
