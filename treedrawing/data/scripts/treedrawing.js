@@ -1727,6 +1727,19 @@ function fixError() {
     updateSelection();
 }
 
+function zeroDashTags() {
+    if (!startnode || endnode) return;
+    stackTree();
+    var label = getLabel($(startnode));
+    var idx = parseIndex(label),
+        idxType = parseIndexType(label),
+        lab = parseLabel(label);
+    if (idx == -1) {
+        idx = idxType = "";
+    }
+    setLabelLL($(startnode), lab.split("-")[0] + idxType + idx);
+}
+
 // Local Variables:
 // js2-additional-externs: ("$" "setTimeout" "customCommands" "customConLeafBefore\
 // " "customConMenuGroups" "extensions" "vextensions" "clause_extensions")
