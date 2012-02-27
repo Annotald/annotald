@@ -172,14 +172,9 @@ function isIpNode (text) {
         text.startsWith("RRC");
 }
 
-// returns true if array a contains object o
 function contains(a, obj) {
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] === obj) {
-      return true;
-    }
-  }
-  return false;
+    // TODO: find where this is used, remove it
+    return (a.indexOf(obj) > -1);
 }
 
 
