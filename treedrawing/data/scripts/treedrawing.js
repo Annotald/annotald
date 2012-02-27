@@ -808,6 +808,7 @@ function makeLeaf(before, label, word, targetId) {
     updateSelection();
 }
 
+// TODO(AWE) is this still needed?
 function emergencyExitEdit() {
     // This function is to hack around a bug (which can't yet be
     // reproduced) in the label editor which sometimes causes it to freeze
