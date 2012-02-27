@@ -1594,6 +1594,9 @@ function toLabeledBrackets(node) {
     // If there is a space after the word but before the closing paren, it
     // will make CorpusSearch unhappy.
     out = out.replace(/ +\)/g, ")");
+    // Ditto for spaces btw. word and lemma, in dash format
+    out = out.replace(/- +/g, "-");
+
 
     return out;
 }
