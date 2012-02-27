@@ -1698,7 +1698,7 @@ function fixError() {
     if (!startnode || endnode) return;
     var sn = $(startnode);
     if (hasDashTag(sn, "FLAG")) {
-        toggleExtension("-FLAG");
+        toggleExtension("FLAG");
         // This should be done in a not-ad-hoc-way.
         var ipn = sn.hasClass("ipnode");
         startnode.className = "";
