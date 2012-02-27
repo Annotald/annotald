@@ -1486,9 +1486,10 @@ function maxIndex(tokenRoot) {
 }
 
 function removeIndex(node) {
-        setNodeLabel($(node),
-                     getLabel($(node)).substr(0, getLabel($(node)).length - 2 ),
-                     true);
+    // TODO: remove the assumption that a label can only be 1-9!
+    setNodeLabel($(node),
+                 getLabel($(node)).substr(0, getLabel($(node)).length - 2 ),
+                 true);
 }
 
 function coIndex() {
