@@ -1409,7 +1409,8 @@ function shouldIndexLeaf(node) {
     if (node.children(".wnode").size() == 0) return false;
     var str = wnodeString(node);
     return (str.substring(0,3) == "*T*" ||
-            str.substring(0,5) == "*ICH*");
+            str.substring(0,5) == "*ICH*" ||
+            str.substring(0,4) == "*CL*");
 }
 
 function getIndex(node) {
