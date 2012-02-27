@@ -1723,14 +1723,6 @@ function fixError() {
     var sn = $(startnode);
     if (hasDashTag(sn, "FLAG")) {
         toggleExtension("FLAG");
-        // This should be done in a not-ad-hoc-way.
-        var ipn = sn.hasClass("ipnode");
-        startnode.className = "";
-        sn.addClass("snode");
-        sn.addClass(getLabel(sn));
-        if (ipn) {
-            sn.addClass("ipnode");
-        }
     }
     updateSelection();
 }
