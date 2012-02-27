@@ -1175,6 +1175,7 @@ function toggleExtension(extension) {
     // The new config format however requires a dash-less extension.
     var newlabel = toggleStringExtension(oldlabel, extension, extensionList);
     textnode.replaceWith(newlabel + " ");
+    $(startnode).removeClass(oldlabel).addClass(newlabel);
 }
 
 // added by JEB
@@ -1637,7 +1638,10 @@ function setLabelLL(node, label) {
     } else {
         return;
     }
+    var oldLabel = $.trim(textNode(node).text());
     textNode(node).replaceWith(label);
+    node.removeClass(oldLabel);
+    node.addClass($.trim(label));
 }
 
 function textNode(node) {
