@@ -28,6 +28,13 @@ page][issues].
 This summer, we will be working on a stable version of Annotald to
 release.  The projected release date is Sep. 1, 2012.
 
+## Annotald Dependencies
+
+Annotald depends on the following software packages to function:
+* Python 2
+* The Natural language Toolkit ([NLTK][nltk])
+* The Google Chrome browser (or the non-Google branded Chromium version)
+
 ## Using Annotald
 
 Annotald currently has very little documentation.  This is one of the
@@ -58,3 +65,4 @@ Annotald development has been funded by the following funding sources:
 [jana]: http://www.ling.upenn.edu/~janabeck/
 [tags]: https://github.com/janabeck/Annotald/tags
 [issues]: https://github.com/janabeck/Annotald/issues
+[nltk]: http://www.nltk.org/
