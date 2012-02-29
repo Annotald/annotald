@@ -6,11 +6,11 @@ Created 2011/10/10
 @author: Anton Karl Ingason
 @author: Jana E. Beck
 @author: Aaron Ecay
-@copyright: GNU Lesser General Public License
-http://www.gnu.org/licenses/ This program is distributed in the hope
-that it will be useful, but WITHOUT ANY WARRANTY; without even the
-implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-PURPOSE. See the GNU Lesser General Public License for more details.
+@copyright: GNU General Public License, v. 3 or (at your option) any later
+version.  http://www.gnu.org/licenses/ This program is distributed in the hope
+that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
 @contact: jana.eliz.beck@gmail.com
 """
 

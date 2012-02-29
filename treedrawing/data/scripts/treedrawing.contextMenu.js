@@ -3,7 +3,7 @@
 // This file is part of the Annotald program for annotating
 // phrase-structure treebanks in the Penn Treebank style.
 
-// This file is distributed under the terms of the GNU Lesser General
+// This file is distributed under the terms of the GNU General
 // Public License as published by the Free Software Foundation, either
 // version 3 of the License, or (at your option) any later version.
 
