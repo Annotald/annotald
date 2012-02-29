@@ -296,8 +296,23 @@ function save() {
         var tosave = toLabeledBrackets($("#editpane"));
         $("#saveresult").html("<div style='color:red'>Saving...</div>");
         $.post("/doSave", {trees: tosave}, saveHandler);
+        if ($("#idlestatus").html().search("IDLE") != -1) {
+            idle();
+        }
         lastsavedstate = $("#editpane").html();
         saveInProgress = true;
+    }
+}
+
+function idle() {
+    if ($("#idlestatus").html().search("IDLE") != -1) {
+        $.post("/doIdle");
+        $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
+    }
+    else {
+        $.post("/doIdle");
+        $("#idlestatus").html("");
+        $("#idlestatus").html("<div style='color:red'>Status: IDLE.</div>");
     }
 }
 
@@ -309,6 +324,7 @@ function assignEvents() {
     $("#butsave").mousedown(save);
     $("#butundo").mousedown(undo);
     $("#butredo").mousedown(redo);
+    $("#butidle").mousedown(idle);
     $("#butexit").mousedown(quitServer);
     $("#butvalidate").mousedown(validateTrees);
     $("#butnexterr").unbind("click").click(nextValidationError);

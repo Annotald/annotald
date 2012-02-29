@@ -30,6 +30,8 @@ import subprocess
 # JB: codecs necessary for Unicode Greek support
 import codecs
 
+from datetime import datetime
+
 # Ripped from NLTK.tree and fixed to not do stupid things with Unicode
 # NLTK is distributed under the Apache License 2.0, which looks (to AWE)
 # to be compatible with redistribution under the LGPL3.
@@ -119,7 +121,7 @@ class Treedraw(object):
             self.thefile = args[0]
         else:
             raise Error("Annotald requires exactly one .psd file argument")
-        fileMatch = re.search("^.*?([0-9A-Za-z\.]*)$", self.thefile)
+        fileMatch = re.search("^.*?([0-9A-Za-z\-\.]*)$", self.thefile)
         self.shortfile = fileMatch.group(1)
         self.options = options
         line = "" # TODO(AWE): does with introduce a new scope or not?
@@ -130,6 +132,7 @@ class Treedraw(object):
         self.versionCookie = ""
         if versionMatch:
             self.versionCookie = versionMatch.group()
+        self.inidle = False
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
@@ -157,6 +160,8 @@ class Treedraw(object):
             os.rename(self.thefile + '.out', self.thefile)
             cherrypy.response.headers['Content-Type'] = 'application/json'
             return json.dumps(dict(result = "success"))
+            with open("timelog.txt", "a") as timelog:
+                timelog.write(self.shortfile + ": Saved at " + str(datetime.now()) + ".\n")
         except Exception as e:
             print "something went wrong: %s" % e
             cherrypy.response.headers['Content-Type'] = 'application/json'
@@ -194,8 +199,21 @@ class Treedraw(object):
             return json.dumps(dict(result = "failure"))
 
     @cherrypy.expose
+    def doIdle(self):
+        if self.inidle:
+            with open("timelog.txt", "a") as timelog:
+                timelog.write(self.shortfile + ": Resumed at " + str(datetime.now()) + ".\n")
+            self.inidle = False
+        else:
+            with open("timelog.txt", "a") as timelog:
+                timelog.write(self.shortfile + ": Idled at " + str(datetime.now()) + ".\n")
+            self.inidle = True
+
+    @cherrypy.expose
     def doExit(self):
         print "Exit message received"
+        with open("timelog.txt", "a") as timelog:
+            timelog.write(self.shortfile + ": Stopped at " + str(datetime.now()) + ".\n")
         raise SystemExit(0)
 
     def loadPsd(self, fileName, text = None):
@@ -296,8 +314,10 @@ class Treedraw(object):
     <input class="menubutton" type="button" value="Save" id="butsave"><br />
     <input class="menubutton" type="button" value="Undo" id="butundo"><br />
     <input class="menubutton" type="button" value="Redo" id="butredo"><br />
+    <input class="menubutton" type="button" value="Idle/Resume" id="butidle"><br />
     <input class="menubutton" type="button" value="Exit" id="butexit"><br />
-    
+
+    <div id="idlestatus"></div>
     <div id="saveresult"></div>
   </div>
 
@@ -362,6 +382,9 @@ parser.add_option("-o", "--out", dest = "bool",
 parser.set_defaults(port = 8080,
                     settings = sys.path[0] + "/settings.js")
 (options, args) = parser.parse_args()
+
+with open("timelog.txt", "a") as timelog:
+    timelog.write(args[0] + ": Started at " + str(datetime.now()) + ".\n")
 
 cherrypy.config.update({'server.socket_port': options.port})
 
