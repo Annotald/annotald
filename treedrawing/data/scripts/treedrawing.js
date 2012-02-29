@@ -1679,11 +1679,16 @@ function isLeafNode(node) {
     return $("#" + node.id + ">.wnode").size() > 0;
 }
 
+var validatingCurrently = false;
+
 function validateTrees() {
-    $("#toolsMsg").html("");
-    var toValidate = toLabeledBrackets($("#editpane"));
-    $("#toolsMsg").html("<div style='color:red'>Validating...</div>");
-    $.post("/doValidate", {trees: toValidate}, validateHandler);
+    if (!validatingCurrently) {
+        validatingCurrently = true;
+        $("#toolsMsg").html("");
+        var toValidate = toLabeledBrackets($("#editpane"));
+        $("#toolsMsg").html("<div style='color:red'>Validating...</div>");
+        $.post("/doValidate", {trees: toValidate}, validateHandler);
+    }
 }
 
 function validateHandler(data) {
@@ -1696,6 +1701,7 @@ function validateHandler(data) {
     } else {
         $("#toolsMsg").html("<div style='color:red'>Validate FAILED!!</div>");
     }
+    validatingCurrently = false;
     // TODO(AWE): more nuanced distinction between validation found errors and
     // validation script itself contains errors
 }
