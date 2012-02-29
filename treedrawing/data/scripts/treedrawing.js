@@ -773,7 +773,7 @@ function makeLeaf(before, label, word, targetId) {
             if (label.startsWith("W")) {
                 word = "*T*";
                 label = label.substr(1);
-            } else if (label.endsWith("-CL")) {
+            } else if (label.split("-").indexOf("CL") > -1) {
                 word = "*CL*";
                 label = "NP";
             }
