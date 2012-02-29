@@ -53,7 +53,7 @@ Annotald is available under the terms of the GNU General Public License
 Annotald development has been funded by the following funding sources:
 
 * From the Icelandic Research Fund (RANNÍS), grant nr. 090662011, Viable
-  Language Technology beyond English--Icelandic as a Test Case.
+  Language Technology beyond English – Icelandic as a Test Case.
 
 
 [psd-doc]: http://www.ling.upenn.edu/hist-corpora/annotation/intro.htm#parsed_files
