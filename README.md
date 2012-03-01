@@ -12,7 +12,7 @@ with [Jana Beck][jana] and [Aaron Ecay][aaron].
 
 The central location for Annotald development is [on
 Github][github-annotald].  You can download the development source
-directly using the [git revision control software][git].  The repositior
+directly using the [git revision control software][git].  The repositiory
 has several branches.  The currently active Annotald developers maintain
 branches with their first name followed by `-dev`, which represent their
 work.  The branch `master` is updated with bugfixes between releases.
@@ -32,7 +32,7 @@ release.  The projected release date is Sep. 1, 2012.
 
 Annotald depends on the following software packages to function:
 * Python 2
-* The Natural language Toolkit ([NLTK][nltk])
+* The Natural Language Toolkit ([NLTK][nltk])
 * The Google Chrome browser (or the non-Google branded Chromium version)
 
 ## Using Annotald
