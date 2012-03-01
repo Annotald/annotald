@@ -37,10 +37,10 @@ Annotald depends on the following software packages to function:
 
 ## Using Annotald
 
-Annotald currently has very little documentation.  This is one of the
-goals of the stable version.  In the meantime, look at the `manual.txt`
-file for instructions, and at the `treedrawing/settings.js` file for an
-example of how Annotald is configured.
+Annotald currently has very little documentation.  Improving this situation
+is one of the goals of the stable version.  In the meantime, look at the
+`manual.txt` file for instructions, and at the `treedrawing/settings.js`
+file for an example of how Annotald is configured.
 
 ## License
 
