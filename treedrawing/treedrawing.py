@@ -228,7 +228,7 @@ class Treedraw(object):
             # instead when in Mac OS X
             currentText = f.read().decode('utf-8')
 
-            if self.options.bool:
+            if self.options.outFile:
                 currentText = self.scrubText(currentText)
 
         # TODO(AWE): remove the one-line restriction
@@ -376,7 +376,7 @@ parser.add_option("-v", "--validator", action = "store",
 parser.add_option("-p", "--port", action = "store",
                   type = "int", dest = "port",
                   help = "port to run server on")
-parser.add_option("-o", "--out", dest = "bool",
+parser.add_option("-o", "--out", dest = "outFile",
                   default = False, action = "store_true",
                   help = "boolean for identifying CorpusSearch output files")
 parser.set_defaults(port = 8080,
