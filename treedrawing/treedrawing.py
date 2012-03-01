@@ -378,7 +378,7 @@ parser.add_argument("-v", "--validator", action = "store", dest = "validator",
 parser.add_argument("-p", "--port", action = "store",
                     type = int, dest = "port",
                     help = "port to run server on")
-parser.add_argument("-o", "--out", dest = "bool", action = "store_true",
+parser.add_argument("-o", "--out", dest = "outFile", action = "store_true",
                     help = "boolean for identifying CorpusSearch output files")
 parser.add_argument("-q", "--quiet", dest = "timelog", action = "store_false",
                     help = "boolean for specifying whether you'd like to silence the timelogging")
