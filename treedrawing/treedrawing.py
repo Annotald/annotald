@@ -24,7 +24,7 @@ import sys, subprocess
 import cherrypy, json
 import nltk.tree as T
 import string as STR
-import optparse
+import argparse
 import subprocess
 
 # JB: codecs necessary for Unicode Greek support
@@ -116,14 +116,14 @@ class Treedraw(object):
 
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
     # object has no attribute 'thefile'
-    def __init__(self, options, args):
-        if len(args) == 1:
-            self.thefile = args[0]
+    def __init__(self, args):
+        if len(args.psd) == 1:
+            self.thefile = args.psd[0]
         else:
-            raise Error("Annotald requires exactly one .psd file argument")
+            raise Error("Annotald requires exactly one .psd file argument!")
         fileMatch = re.search("^.*?([0-9A-Za-z\-\.]*)$", self.thefile)
         self.shortfile = fileMatch.group(1)
-        self.options = options
+        self.options = args
         line = "" # TODO(AWE): does with introduce a new scope or not?
         with open(self.thefile) as f:
             line = f.readline()
@@ -159,9 +159,10 @@ class Treedraw(object):
             subprocess.check_call(cmdline.split(" "))
             os.rename(self.thefile + '.out', self.thefile)
             cherrypy.response.headers['Content-Type'] = 'application/json'
+            if self.options.timelog:
+                with open("timelog.txt", "a") as timelog:
+                    timelog.write(self.shortfile + ": Saved at " + str(datetime.now().isoformat()) + ".\n")
             return json.dumps(dict(result = "success"))
-            with open("timelog.txt", "a") as timelog:
-                timelog.write(self.shortfile + ": Saved at " + str(datetime.now()) + ".\n")
         except Exception as e:
             print "something went wrong: %s" % e
             cherrypy.response.headers['Content-Type'] = 'application/json'
@@ -200,20 +201,22 @@ class Treedraw(object):
 
     @cherrypy.expose
     def doIdle(self):
-        if self.inidle:
-            with open("timelog.txt", "a") as timelog:
-                timelog.write(self.shortfile + ": Resumed at " + str(datetime.now()) + ".\n")
-            self.inidle = False
-        else:
-            with open("timelog.txt", "a") as timelog:
-                timelog.write(self.shortfile + ": Idled at " + str(datetime.now()) + ".\n")
-            self.inidle = True
+        if self.options.timelog:
+            if self.inidle:
+                with open("timelog.txt", "a") as timelog:
+                    timelog.write(self.shortfile + ": Resumed at " + str(datetime.now().isoformat()) + ".\n")
+                self.inidle = False
+            else:
+                with open("timelog.txt", "a") as timelog:
+                    timelog.write(self.shortfile + ": Idled at " + str(datetime.now().isoformat()) + ".\n")
+                self.inidle = True
 
     @cherrypy.expose
     def doExit(self):
         print "Exit message received"
-        with open("timelog.txt", "a") as timelog:
-            timelog.write(self.shortfile + ": Stopped at " + str(datetime.now()) + ".\n")
+        if self.options.timelog:
+            with open("timelog.txt", "a") as timelog:
+                timelog.write(self.shortfile + ": Stopped at " + str(datetime.now().isoformat()) + ".\n")
         raise SystemExit(0)
 
     def loadPsd(self, fileName, text = None):
@@ -365,27 +368,28 @@ class Treedraw(object):
 
 
 #index.exposed = True
-parser = optparse.OptionParser(usage = "%prog [options] file.psd",
+parser = argparse.ArgumentParser(usage = "%prog [options] file.psd",
                                version = "Annotald " + VERSION)
-parser.add_option("-s", "--settings", action = "store",
-                  type = "string", dest = "settings",
+parser.add_argument("-s", "--settings", action = "store", dest = "settings",
                   help = "path to settings.js file")
-parser.add_option("-v", "--validator", action = "store",
-                  type = "string", dest = "validator",
+parser.add_argument("-V", "--validator", action = "store", dest = "validator",
                   help = "path to a validation script")
-parser.add_option("-p", "--port", action = "store",
-                  type = "int", dest = "port",
+parser.add_argument("-p", "--port", action = "store",
+                  type = int, dest = "port",
                   help = "port to run server on")
-parser.add_option("-o", "--out", dest = "outFile",
-                  default = False, action = "store_true",
+parser.add_argument("-o", "--out", dest = "bool", action = "store_true",
                   help = "boolean for identifying CorpusSearch output files")
+parser.add_argument("-q", "--quiet", dest = "timelog", action = "store_false",
+                  help = "boolean for specifying whether you'd like to silence the timelogging")
+parser.add_argument("psd", nargs='+')
 parser.set_defaults(port = 8080,
                     settings = sys.path[0] + "/settings.js")
-(options, args) = parser.parse_args()
+args = parser.parse_args()
 
-with open("timelog.txt", "a") as timelog:
-    timelog.write(args[0] + ": Started at " + str(datetime.now()) + ".\n")
+if args.timelog:
+    with open("timelog.txt", "a") as timelog:
+        timelog.write(args.psd[0] + ": Started at " + str(datetime.now().isoformat()) + ".\n")
 
-cherrypy.config.update({'server.socket_port': options.port})
+cherrypy.config.update({'server.socket_port': args.port})
 
-cherrypy.quickstart(Treedraw(options, args))
+cherrypy.quickstart(Treedraw(args))
