@@ -160,7 +160,7 @@ class Treedraw(object):
             cherrypy.response.headers['Content-Type'] = 'application/json'
             if self.options.timelog:
                 with open("timelog.txt", "a") as timelog:
-                    timelog.write(self.shortfile + ": Saved at " + str(datetime.now()) + ".\n")
+                    timelog.write(self.shortfile + ": Saved at " + str(datetime.now().isoformat()) + ".\n")
             return json.dumps(dict(result = "success"))
         except Exception as e:
             print "something went wrong: %s" % e
@@ -203,11 +203,11 @@ class Treedraw(object):
         if self.options.timelog:
             if self.inidle:
                 with open("timelog.txt", "a") as timelog:
-                    timelog.write(self.shortfile + ": Resumed at " + str(datetime.now()) + ".\n")
+                    timelog.write(self.shortfile + ": Resumed at " + str(datetime.now().isoformat()) + ".\n")
                 self.inidle = False
             else:
                 with open("timelog.txt", "a") as timelog:
-                    timelog.write(self.shortfile + ": Idled at " + str(datetime.now()) + ".\n")
+                    timelog.write(self.shortfile + ": Idled at " + str(datetime.now().isoformat()) + ".\n")
                 self.inidle = True
 
     @cherrypy.expose
@@ -215,7 +215,7 @@ class Treedraw(object):
         print "Exit message received"
         if self.options.timelog:
             with open("timelog.txt", "a") as timelog:
-                timelog.write(self.shortfile + ": Stopped at " + str(datetime.now()) + ".\n")
+                timelog.write(self.shortfile + ": Stopped at " + str(datetime.now().isoformat()) + ".\n")
         raise SystemExit(0)
 
     def loadPsd(self, fileName, text = None):
@@ -389,7 +389,7 @@ args = parser.parse_args()
 
 if args.timelog:
     with open("timelog.txt", "a") as timelog:
-        timelog.write(args.psd[0] + ": Started at " + str(datetime.now()) + ".\n")
+        timelog.write(args.psd[0] + ": Started at " + str(datetime.now().isoformat()) + ".\n")
 
 cherrypy.config.update({'server.socket_port': args.port})
 
