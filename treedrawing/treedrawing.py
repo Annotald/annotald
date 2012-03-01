@@ -133,6 +133,7 @@ class Treedraw(object):
         if versionMatch:
             self.versionCookie = versionMatch.group()
         self.inidle = False
+        self.justexited = False
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
@@ -161,6 +162,7 @@ class Treedraw(object):
             if self.options.timelog:
                 with open("timelog.txt", "a") as timelog:
                     timelog.write(self.shortfile + ": Saved at " + str(datetime.now().isoformat()) + ".\n")
+                    self.justexited = False
             return json.dumps(dict(result = "success"))
         except Exception as e:
             print "something went wrong: %s" % e
@@ -205,17 +207,20 @@ class Treedraw(object):
                 with open("timelog.txt", "a") as timelog:
                     timelog.write(self.shortfile + ": Resumed at " + str(datetime.now().isoformat()) + ".\n")
                 self.inidle = False
+                self.justexited = False
             else:
                 with open("timelog.txt", "a") as timelog:
                     timelog.write(self.shortfile + ": Idled at " + str(datetime.now().isoformat()) + ".\n")
                 self.inidle = True
+                self.justexited = False
 
     @cherrypy.expose
     def doExit(self):
         print "Exit message received"
-        if self.options.timelog:
+        if self.options.timelog and not self.justexited:
             with open("timelog.txt", "a") as timelog:
                 timelog.write(self.shortfile + ": Stopped at " + str(datetime.now().isoformat()) + ".\n")
+                self.justexited = True
         raise SystemExit(0)
 
     def loadPsd(self, fileName, text = None):
