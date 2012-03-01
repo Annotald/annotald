@@ -369,18 +369,19 @@ class Treedraw(object):
 
 #index.exposed = True
 parser = argparse.ArgumentParser(usage = "%prog [options] file.psd",
-                               version = "Annotald " + VERSION)
+                                 version = "Annotald " + VERSION,
+                                 conflict_handler = "resolve")
 parser.add_argument("-s", "--settings", action = "store", dest = "settings",
-                  help = "path to settings.js file")
-parser.add_argument("-V", "--validator", action = "store", dest = "validator",
-                  help = "path to a validation script")
+                    help = "path to settings.js file")
+parser.add_argument("-v", "--validator", action = "store", dest = "validator",
+                    help = "path to a validation script")
 parser.add_argument("-p", "--port", action = "store",
-                  type = int, dest = "port",
-                  help = "port to run server on")
+                    type = int, dest = "port",
+                    help = "port to run server on")
 parser.add_argument("-o", "--out", dest = "bool", action = "store_true",
-                  help = "boolean for identifying CorpusSearch output files")
+                    help = "boolean for identifying CorpusSearch output files")
 parser.add_argument("-q", "--quiet", dest = "timelog", action = "store_false",
-                  help = "boolean for specifying whether you'd like to silence the timelogging")
+                    help = "boolean for specifying whether you'd like to silence the timelogging")
 parser.add_argument("psd", nargs='+')
 parser.set_defaults(port = 8080,
                     settings = sys.path[0] + "/settings.js")
