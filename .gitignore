@@ -4,3 +4,4 @@ test.psd
 TODO
 test-files/
 /timelog.txt
+*.pyc
