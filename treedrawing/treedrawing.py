@@ -159,10 +159,11 @@ class Treedraw(object):
             subprocess.check_call(cmdline.split(" "))
             os.rename(self.thefile + '.out', self.thefile)
             cherrypy.response.headers['Content-Type'] = 'application/json'
-            if self.options.timelog:
-                with open("timelog.txt", "a") as timelog:
-                    timelog.write(self.shortfile + ": Saved at " + str(datetime.now().isoformat()) + ".\n")
-                    self.justexited = False
+            # I think the below is extraneous...
+            ## if self.options.timelog:
+            ##     with open("timelog.txt", "a") as timelog:
+            ##         timelog.write(self.shortfile + ": Saved at " + str(datetime.now().isoformat()) + ".\n")
+            ##         self.justexited = False
             return json.dumps(dict(result = "success"))
         except Exception as e:
             print "something went wrong: %s" % e
