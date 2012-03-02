@@ -31,6 +31,7 @@ release.  The projected release date is Sep. 1, 2012.
 ## Annotald Dependencies
 
 Annotald depends on the following software packages to function:
+
 * Python 2.7
 * The Natural Language Toolkit ([NLTK][nltk])
 * The Google Chrome browser (or the non-Google branded Chromium version)
