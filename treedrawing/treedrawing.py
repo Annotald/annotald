@@ -148,8 +148,7 @@ class Treedraw(object):
             # JB: using codecs here when in Mac OS X
             f = codecs.open(self.thefile, 'w', 'utf-8')
             f.write(self.versionCookie + "\n\n")
-            tosave = trees.strip().replace("-FLAG ", " ")
-            tosave = trees.strip().replace("-FLAG-", "-")
+            tosave = trees.strip().replace("-FLAG", "")
             f.write(tosave)
             f.close()
             cmdline = 'java -classpath ' + CURRENT_DIR + '/../CS_Tony_oct19.jar' + \
