@@ -161,7 +161,8 @@ class Treedraw(object):
             cherrypy.response.headers['Content-Type'] = 'application/json'
             if self.options.timelog:
                 with open("timelog.txt", "a") as timelog:
-                    timelog.write(self.shortfile + ": Saved at " + str(datetime.now().isoformat()) + ".\n")
+                    timelog.write(self.shortfile + ": Saved at " +
+                                  str(datetime.now().isoformat()) + ".\n")
                     self.justexited = False
             return json.dumps(dict(result = "success"))
         except Exception as e:
@@ -205,12 +206,14 @@ class Treedraw(object):
         if self.options.timelog:
             if self.inidle:
                 with open("timelog.txt", "a") as timelog:
-                    timelog.write(self.shortfile + ": Resumed at " + str(datetime.now().isoformat()) + ".\n")
+                    timelog.write(self.shortfile + ": Resumed at " +
+                                  str(datetime.now().isoformat()) + ".\n")
                 self.inidle = False
                 self.justexited = False
             else:
                 with open("timelog.txt", "a") as timelog:
-                    timelog.write(self.shortfile + ": Idled at " + str(datetime.now().isoformat()) + ".\n")
+                    timelog.write(self.shortfile + ": Idled at " +
+                                  str(datetime.now().isoformat()) + ".\n")
                 self.inidle = True
                 self.justexited = False
 
@@ -219,7 +222,8 @@ class Treedraw(object):
         print "Exit message received"
         if self.options.timelog and not self.justexited:
             with open("timelog.txt", "a") as timelog:
-                timelog.write(self.shortfile + ": Stopped at " + str(datetime.now().isoformat()) + ".\n")
+                timelog.write(self.shortfile + ": Stopped at " +
+                              str(datetime.now().isoformat()) + ".\n")
                 self.justexited = True
         raise SystemExit(0)
 
@@ -385,7 +389,8 @@ parser.add_argument("-p", "--port", action = "store",
 parser.add_argument("-o", "--out", dest = "outFile", action = "store_true",
                     help = "boolean for identifying CorpusSearch output files")
 parser.add_argument("-q", "--quiet", dest = "timelog", action = "store_false",
-                    help = "boolean for specifying whether you'd like to silence the timelogging")
+                    help = "boolean for specifying whether you'd like to \
+silence the timelogging")
 parser.add_argument("psd", nargs='+')
 parser.set_defaults(port = 8080,
                     settings = sys.path[0] + "/settings.js")
@@ -393,7 +398,8 @@ args = parser.parse_args()
 
 if args.timelog:
     with open("timelog.txt", "a") as timelog:
-        timelog.write(args.psd[0] + ": Started at " + str(datetime.now().isoformat()) + ".\n")
+        timelog.write(args.psd[0] + ": Started at " +
+                      str(datetime.now().isoformat()) + ".\n")
 
 cherrypy.config.update({'server.socket_port': args.port})
 
