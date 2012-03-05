@@ -389,7 +389,6 @@ function handleKeyDown(e) {
 function handleNodeClick(e) {
     e = e || window.event;
     var elementId = (e.target || e.srcElement).id;
-    saveMetadata();
     if (e.button == 2) {
         // rightclick
         if (!elementId) {
@@ -480,8 +479,6 @@ function updateSelection() {
     if (endnode) {
         $(endnode).addClass('snodesel');
     }
-
-    updateMetadataEditor();
 }
 
 function scrollToShowSel() {
@@ -1603,27 +1600,6 @@ function wnodeString(node) {
     return text;
 }
 
-function jsonToTree(json) {
-    var d = JSON.parse(json);
-    return objectToTree(d);
-}
-
-function objectToTree(o) {
-    var res = "";
-    for (var p in o) {
-        if (o.hasOwnProperty(p)) {
-            res += "(" + p + " ";
-            if (typeof o[p] == "string") { // One of life's grosser hacks
-                res += o[p];
-            } else {
-                res += objectToTree(o[p]);
-            }
-            res += ")";
-        }
-    }
-    return res;
-}
-
 function toLabeledBrackets(node) {
     var out = node.clone();
 
@@ -1633,7 +1609,7 @@ function toLabeledBrackets(node) {
     // will turn the Z's into double-linebreaks
     out.find("#sn0>.snode").after(")ZZZZZ");
     out.find("#sn0>.snode").map(function () {
-        $(this).after(jsonToTree(this.getAttribute("data-metadata")));
+        $(this).after(this.title);
     });
 
     out.find(".snode").not("#sn0").before("(");
@@ -1688,7 +1664,6 @@ function getLabel(node) {
 // A low-level (LL) version of setLabel.  It is only responsible for changing
 // the label; not doing any kind of matching/changing/other crap.
 function setLabelLL(node, label) {
-    // TODO: don't add numeric indices to the CSS class
     if (node.hasClass("snode")) {
         if (label[label.length - 1] != " ") {
             // Some other spots in the code depend on the label ending with a
@@ -1765,7 +1740,6 @@ function hasDashTag(node, tag) {
     return (tags.indexOf(tag) > -1);
 }
 
-// TODO: something is wrong with this fn -- it also turns FLAG on
 function fixError() {
     if (!startnode || endnode) return;
     var sn = $(startnode);
@@ -1788,63 +1762,8 @@ function zeroDashTags() {
     setLabelLL($(startnode), lab.split("-")[0] + idxType + idx);
 }
 
-function getMetadata(node) {
-    var m = node.attr("data-metadata");
-    if (m) {
-        return JSON.parse(m);
-    } else {
-        return undefined;
-    }
-}
-
-function dictionaryToForm(dict) {
-    var res = "";
-    if (dict) {
-        res = '<table class="metadataTable"><thead><tr><td>Key</td>' +
-            '<td>Value</td></tr></thead>';
-        for (var k in dict) {
-            if (dict.hasOwnProperty(k)) {
-                if (typeof dict[k] == "string") {
-                    res += '<tr class="strval"><td class="key">' + k +
-                        '</td><td class="val"><input class="metadataField" type="text" name="' + k +
-                        '" value="' + dict[k] + '" /></td></tr>';
-                } // else if dict
-            }
-        }
-        res += '</table>';
-    }
-    return res;
-}
-
-function saveMetadata() {
-    if ($("#metadata").html() != "") {
-        $(startnode).attr("data-metadata",
-                          JSON.stringify(formToDictionary($("#metadata"))));
-    }
-}
-
-function updateMetadataEditor() {
-    if (!startnode || endnode) {
-        $("#metadata").html("");
-        return;
-    }
-    $("#metadata").html(dictionaryToForm(getMetadata($(startnode))));
-    $("#metadata").find(".metadataField").change(saveMetadata).
-        focusout(saveMetadata);
-}
-
-function formToDictionary(form) {
-    var d = {};
-    form.find(".strval").each(function() {
-        var key = $(this).children(".key").text();
-        var val = $(this).find(".val>.metadataField").val();
-        d[key] = val;
-    });
-    return d;
-}
-
 // Local Variables:
 // js2-additional-externs: ("$" "setTimeout" "customCommands" "customConLeafBefore\
-// " "customConMenuGroups" "extensions" "vextensions" "clause_extensions" "JSON")
+// " "customConMenuGroups" "extensions" "vextensions" "clause_extensions")
 // indent-tabs-mode: nil
 // End:
