@@ -14,7 +14,7 @@ Lesser General Public License for more details.
 @contact: jana.eliz.beck@gmail.com
 """
 
-VERSION = "11.12"
+VERSION = "12.03-dev"
 
 import os.path
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
