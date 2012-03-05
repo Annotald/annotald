@@ -44,7 +44,6 @@ class Treedraw(object):
         fileMatch = re.search("^.*?([0-9A-Za-z\-\.]*)$", self.thefile)
         self.shortfile = fileMatch.group(1)
         self.options = args
-        line = "" # TODO(AWE): does with introduce a new scope or not?
         with open(self.thefile) as f:
             line = f.readline()
         versionRe = re.compile('^\( \(VERSION.*$', re.M)
