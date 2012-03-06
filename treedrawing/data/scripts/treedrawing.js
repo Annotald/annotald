@@ -1843,10 +1843,20 @@ function updateMetadataEditor() {
         $("#metadata").html("");
         return;
     }
-    $("#metadata").html(dictionaryToForm(getMetadata($(startnode))));
+    var addButtonHtml = '<input type="button" id="addMetadataButton" ' +
+            'value="Add" />';
+    $("#metadata").html(dictionaryToForm(getMetadata($(startnode))) +
+                        addButtonHtml);
     $("#metadata").find(".metadataField").change(saveMetadata).
-        focusout(saveMetadata);
+        focusout(saveMetadata).keydown(function (e) {
+            if (e.keyCode == 13) {
+                $(e.target).blur();
+            }
+            e.stopPropagation();
+            return true;
+        });
     $("#metadata").find(".key").click(metadataKeyClick);
+    $("#addMetadataButton").click(addMetadataDialog);
 }
 
 function formToDictionary(form) {
@@ -1867,17 +1877,52 @@ function metadataKeyClick(e) {
         'id="metadataKeySave" /><input type="button" value="Delete" ' +
         'id="metadataKeyDelete" /></div>';
     showDialogBox("Edit Metadata", html);
-    $("#metadataKeySave").click(function () {
+    // TODO: make focus go to end, or select whole thing?
+    $("#metadataNewName").focus();
+    function saveMetadataInner() {
         $(keyNode).text($("#metadataNewName").val());
         hideDialogBox();
         saveMetadata();
-    });
-    $("#metadataKeyDelete").click(function () {
+    }
+    function deleteMetadata() {
         $(keyNode).parent().remove();
         hideDialogBox();
         saveMetadata();
+    }
+    $("#metadataKeySave").click(saveMetadataInner);
+    setInputFieldEnter($("#metadataNewName"), saveMetadataInner);
+    $("#metadataKeyDelete").click(deleteMetadata);
+}
+
+function addMetadataDialog() {
+    // TODO: allow specifying value too in initial dialog?
+    var html = 'New Name: <input type="text" id="metadataNewName" value="NEW" />' +
+            '<div id="dialogButtons"><input type="button" id="addMetadata" ' +
+            'value="Add" /></div>';
+    showDialogBox("Add Metatata", html);
+    function addMetadata() {
+        var oldMetadata = formToDictionary($("#metadata"));
+        oldMetadata[$("#metadataNewName").val()] = "NEW";
+        $(startnode).attr("data-metadata", JSON.stringify(oldMetadata));
+        updateMetadataEditor();
+        hideDialogBox();
+    }
+    $("#addMetadata").click(addMetadata);
+    setInputFieldEnter($("#metadataNewName"), addMetadata);
+}
+
+function setInputFieldEnter(field, fn) {
+    field.keydown(function (e) {
+        if (e.keyCode == 13) {
+            fn();
+            return false;
+        } else {
+            return true;
+        }
     });
 }
+
+// TODO: badly need a DSL for forms
 
 // Local Variables:
 // js2-additional-externs: ("$" "setTimeout" "customCommands" "customConLeafBefore\
