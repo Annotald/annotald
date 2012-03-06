@@ -562,7 +562,8 @@ function moveNode(targetParent){
         var tokenMerge = isRootNode( $(startnode) );
         var maxindex = maxIndex( getTokenRoot($("#"+targetParent) ).attr("id") );
         var movednode = $(startnode);
-        if (parseInt( startnode.id.substr(2) ) > parseInt(targetParent.substr(2))) {
+        if (parseInt( startnode.id.substr(2) ) >
+            parseInt(targetParent.substr(2))) {
             stackTree();
             if (tokenMerge) {
                 addToIndices( movednode, maxindex );
@@ -627,7 +628,8 @@ function moveNodes(targetParent) {
         var oldtext = currentText(parent_ip);
         //stackTree();
         $(startnode).add($(startnode).nextUntil("#"+endnode.id)).
-            add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">XP</div>');
+            add("#"+endnode.id).
+            wrapAll('<div xxx="newnode" class="snode">XP</div>');
         // undo if this messed up the text order
         if (currentText(parent_ip) != oldtext) {
             undo();
@@ -713,7 +715,8 @@ function moveNodes(targetParent) {
     } else {
         // otherwise move under my sister
         // if( parseInt( startnode.id.substr(2) ) >  parseInt( targetParent.substr(2) ) ){
-        if (parseInt( startnode.id.substr(2) ) > parseInt(targetParent.substr(2))) {
+        if (parseInt( startnode.id.substr(2) ) >
+            parseInt(targetParent.substr(2))) {
             //if( $("#"+startnode.id).siblings().is("#"+startnode.id+"~.snode") ){
             //stackTree();
             $(startnode).appendTo("#"+targetParent);
@@ -807,7 +810,8 @@ function makeLeaf(before, label, word, targetId) {
     var newleaf = "<div class='snode " + label + "'>" + label +
         "<span class='wnode'>" + word;
     if (lemma) {
-        newleaf += "<span class='lemma " + lemmaClass + "'>-" + lemma + "</span>";
+        newleaf += "<span class='lemma " + lemmaClass + "'>-" + lemma +
+            "</span>";
     }
     newleaf += "</span></div>\n";
     newleaf = $(newleaf);
@@ -892,7 +896,8 @@ var commentTypeCheckboxes = "";
 
 (function () {
     for (var i = 0; i < commentTypes.length; i++) {
-        commentTypeCheckboxes += commentTypes[i] + ': <input type="radio" name="commentType" value="' +
+        commentTypeCheckboxes += commentTypes[i] +
+            ': <input type="radio" name="commentType" value="' +
             commentTypes[i] + '" id="commentType' + commentTypes[i] +
             '" /> ';
     }
@@ -922,7 +927,8 @@ function editComment() {
             var newText = $.trim($("#commentEditBox").val());
             if (/_|\n|:|\}|\{|\(|\)/.test(newText)) {
                 // TODO(AWE): slicker way of indicating errors...
-                alert("illegal characters in comment: illegal characters are _, :, {}, (), and newline");
+                alert("illegal characters in comment: illegal characters are" +
+                      " _, :, {}, (), and newline");
                 // hideDialogBox();
                 $("#commentEditBox").val(newText);
                 return;
@@ -1047,8 +1053,8 @@ function displayRename() {
             setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
         } else {
             // this is not a terminal
-            var editor=$("<input id='labelbox' class='labeledit' type='text' value='" +
-                         label + "' />");
+            var editor=$("<input id='labelbox' class='labeledit' type='text' " +
+                         "value='" + label + "' />");
             var origNode = $(startnode);
             textNode(origNode).replaceWith(editor);
             $("#labelbox").keydown(
@@ -1090,7 +1096,9 @@ function editLemma() {
         }
         var lemma = $("#"+startnode.id+">.wnode>.lemma").text();
         lemma = lemma.substring(1);
-        var editor=$("<span id='leafeditor' class='wnode'><input id='leaflemmabox' class='labeledit' type='text' value='" + lemma + "' /></span>");
+        var editor=$("<span id='leafeditor' class='wnode'><input " +
+                     "id='leaflemmabox' class='labeledit' type='text' value='" +
+                     lemma + "' /></span>");
         $("#"+startnode.id+">.wnode>.lemma").replaceWith(editor);
         $("#leaflemmabox").keydown(
             function(event) {
@@ -1812,8 +1820,9 @@ function dictionaryToForm(dict) {
             if (dict.hasOwnProperty(k)) {
                 if (typeof dict[k] == "string") {
                     res += '<tr class="strval"><td class="key">' + k +
-                        '</td><td class="val"><input class="metadataField" type="text" name="' + k +
-                        '" value="' + dict[k] + '" /></td></tr>';
+                        '</td><td class="val"><input class="metadataField" ' +
+                        'type="text" name="' + k + '" value="' + dict[k] +
+                        '" /></td></tr>';
                 } // else if dict
             }
         }
