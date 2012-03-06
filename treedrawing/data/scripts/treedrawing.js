@@ -1837,6 +1837,7 @@ function updateMetadataEditor() {
     $("#metadata").html(dictionaryToForm(getMetadata($(startnode))));
     $("#metadata").find(".metadataField").change(saveMetadata).
         focusout(saveMetadata);
+    $("#metadata").find(".key").click(metadataKeyClick);
 }
 
 function formToDictionary(form) {
@@ -1847,6 +1848,26 @@ function formToDictionary(form) {
         d[key] = val;
     });
     return d;
+}
+
+function metadataKeyClick(e) {
+    var keyNode = e.target;
+    var html = 'Name: <input type="text" ' +
+            'id="metadataNewName" value="' + $(keyNode).text() +
+            '" /><div id="dialogButtons"><input type="button" value="Save" ' +
+        'id="metadataKeySave" /><input type="button" value="Delete" ' +
+        'id="metadataKeyDelete" /></div>';
+    showDialogBox("Edit Metadata", html);
+    $("#metadataKeySave").click(function () {
+        $(keyNode).text($("#metadataNewName").val());
+        hideDialogBox();
+        saveMetadata();
+    });
+    $("#metadataKeyDelete").click(function () {
+        $(keyNode).parent().remove();
+        hideDialogBox();
+        saveMetadata();
+    });
 }
 
 // Local Variables:
