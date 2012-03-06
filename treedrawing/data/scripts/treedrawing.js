@@ -868,8 +868,14 @@ function emergencyExitEdit() {
     postChange(replNode);
 }
 
-function showDialogBox(html) {
-    document.body.onkeydown = undefined;
+function showDialogBox(title, html) {
+    document.body.onkeydown = function (e) {
+        if (e.keyCode == 27) { // escape
+            hideDialogBox();
+        }
+    };
+    html = '<div class="menuTitle">' + title + '</div>' +
+        '<div id="dialogContent">' + html + '</div>';
     $("#dialogBox").html(html).get(0).style.visibility = "visible";
     $("#dialogBackground").get(0).style.visibility = "visible";
 }
@@ -902,10 +908,10 @@ function editComment() {
     commentText = commentText.substring(0, commentText.length - 1);
     // regex because string does not give global search.
     commentText = commentText.replace(/_/g, " ");
-    showDialogBox('<div class="menuTitle">Edit Comment</div>' +
-                  '<div id="dialogBody"><textarea id="commentEditBox">' +
+    showDialogBox("Edit Comment", 
+                  '<textarea id="commentEditBox">' +
                   commentText + '</textarea><div id="commentTypes">' +
-                  commentTypeCheckboxes + '</div>' +
+                  commentTypeCheckboxes + '</div><div id="dialogButtons">' +
                   '<input type="button"' +
                   'id="commentEditButton" value="Save" /></div>');
     $("input:radio[name=commentType]").val([commentType]);

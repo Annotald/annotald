@@ -171,6 +171,19 @@ body {
     background-color: #D2B48C;
 }
 
+#dialogContent {
+    text-align: left;
+    width: 100%;
+    height: 100%;
+    padding: 6px;
+}
+
+#dialogButtons {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+}
+
 /* Comment editor */
 #commentEditBox {
     position: absolute;
