@@ -886,9 +886,10 @@ var commentTypeCheckboxes = "";
 
 (function () {
     for (var i = 0; i < commentTypes.length; i++) {
-        commentTypeCheckboxes += commentTypes[i] + ': <input type="radio" name="commentType" value="' +
+        commentTypeCheckboxes +=
+            '<input type="radio" name="commentType" value="' +
             commentTypes[i] + '" id="commentType' + commentTypes[i] +
-            '" /> ';
+            '" /> ' + commentTypes[i];
     }
 })();
 
