@@ -791,7 +791,10 @@ function makeLeaf(before, label, word, targetId) {
                 label = label.substr(1);
             } else if (label.split("-").indexOf("CL") > -1) {
                 word = "*CL*";
-                label = "NP";
+                label = getLabel($(endnode)).replace("-CL", "");
+                if (label.substring(0,3) == "PRO") {
+                    label = "NP";
+                }
             }
             doCoindex = true;
         } else { // abort if selecting from different tokens
