@@ -1,3 +1,7 @@
+// TODO: known-broken tests
+
+// add license
+
 $(document).ready(function () {
     $("#buttests").mousedown(runTests);
 });
