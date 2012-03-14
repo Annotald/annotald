@@ -462,6 +462,7 @@ function selectNode(nodeId) {
 
 
 function clearSelection() {
+    saveMetadata();
     window.event.preventDefault();
     startnode = endnode = null;
     resetIds();
