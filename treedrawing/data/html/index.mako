@@ -14,8 +14,13 @@ any later version.  See the LICENSE file for more information. -->
     <script type= "application/javascript" src="scripts/jquery.js"></script>
     <script type= "application/javascript" src="scripts/jquery.mousewheel.min.js"></script>
     <script type= "application/javascript" src="scripts/treedrawing.js"></script>
+    <script type= "application/javascript" src="scripts/underscore-min.js"></script>
     <script type= "application/javascript">  ${currentSettings} </script>
     <script type= "application/javascript" src="scripts/treedrawing.contextMenu.js"></script>
+%if test:
+    <script type="application/javascript"
+    src="scripts/test.js"></script>
+%endif
 
   </head>
   <body oncontextmenu="return false;">
@@ -32,6 +37,10 @@ any later version.  See the LICENSE file for more information. -->
         <input class="menubutton" type="button" value="Redo" id="butredo" /><br />
 %if usetimelog:
         <input class="menubutton" type="button" value="Idle/Resume" id="butidle" /><br />
+%endif
+%if test:
+        <input class="menubutton" type="button" value="Run Tests"
+        id="buttests" /><br />
 %endif
         <input class="menubutton" type="button" value="Exit" id="butexit" /><br />
 

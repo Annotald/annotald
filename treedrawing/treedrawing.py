@@ -154,6 +154,35 @@ class Treedraw(object):
                 self.justexited = True
         raise SystemExit(0)
 
+    @cherrypy.expose
+    def test(self):
+        currentSettings = open(self.options.settings).read()
+        currentTree = self.loadPsd(None, text="""
+( (IP-MAT (NP-SBJ (D This)) (BEP is) (NP-PRD (D a) (N test)))
+  (ID test-01))
+""")
+
+        # The CURRENT_DIR below is a bit of a hack
+        indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
+                                 strict_undefined = True)
+
+        # Chicken and egg: treedrawing.js must go before the
+        # currentSettings, so that the functions there are defined for
+        # currentSettings.  But currentSettings in turn must define some
+        # functions for treedrawing.contextMenu.js.
+        return indexTemplate.render(annotaldVersion = VERSION,
+                                    currentSettings = currentSettings,
+                                    shortfile = self.shortfile,
+                                    currentTree = currentTree,
+                                    usetimelog = self.args.timelog,
+                                    usemetadata = self.useMetadata,
+                                    test = True)
+
+    @cherrypy.expose
+    def testLoadTrees(self, trees = None):
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        return json.dumps(dict(trees = self.loadPsd(None, text = trees)))
+
     def loadPsd(self, fileName, text = None):
         # TODO(AWE): remove
         # self.thefile = fileName
@@ -231,7 +260,8 @@ class Treedraw(object):
                                     shortfile = self.shortfile,
                                     currentTree = currentTree,
                                     usetimelog = self.args.timelog,
-                                    usemetadata = self.useMetadata)
+                                    usemetadata = self.useMetadata,
+                                    test = False)
 
 
 #index.exposed = True
