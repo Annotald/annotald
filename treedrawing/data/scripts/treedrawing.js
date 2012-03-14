@@ -389,6 +389,7 @@ function handleKeyDown(e) {
 function handleNodeClick(e) {
     e = e || window.event;
     var elementId = (e.target || e.srcElement).id;
+    saveMetadata();
     if (e.button == 2) {
         // rightclick
         if (!elementId) {
@@ -461,6 +462,7 @@ function selectNode(nodeId) {
 
 
 function clearSelection() {
+    saveMetadata();
     window.event.preventDefault();
     startnode = endnode = null;
     resetIds();
@@ -479,6 +481,8 @@ function updateSelection() {
     if (endnode) {
         $(endnode).addClass('snodesel');
     }
+
+    updateMetadataEditor();
 }
 
 function scrollToShowSel() {
@@ -559,7 +563,8 @@ function moveNode(targetParent){
         var tokenMerge = isRootNode( $(startnode) );
         var maxindex = maxIndex( getTokenRoot($("#"+targetParent) ).attr("id") );
         var movednode = $(startnode);
-        if (parseInt( startnode.id.substr(2) ) > parseInt(targetParent.substr(2))) {
+        if (parseInt( startnode.id.substr(2) ) >
+            parseInt(targetParent.substr(2))) {
             stackTree();
             if (tokenMerge) {
                 addToIndices( movednode, maxindex );
@@ -624,7 +629,8 @@ function moveNodes(targetParent) {
         var oldtext = currentText(parent_ip);
         //stackTree();
         $(startnode).add($(startnode).nextUntil("#"+endnode.id)).
-            add("#"+endnode.id).wrapAll('<div xxx="newnode" class="snode">XP</div>');
+            add("#"+endnode.id).
+            wrapAll('<div xxx="newnode" class="snode">XP</div>');
         // undo if this messed up the text order
         if (currentText(parent_ip) != oldtext) {
             undo();
@@ -710,7 +716,8 @@ function moveNodes(targetParent) {
     } else {
         // otherwise move under my sister
         // if( parseInt( startnode.id.substr(2) ) >  parseInt( targetParent.substr(2) ) ){
-        if (parseInt( startnode.id.substr(2) ) > parseInt(targetParent.substr(2))) {
+        if (parseInt( startnode.id.substr(2) ) >
+            parseInt(targetParent.substr(2))) {
             //if( $("#"+startnode.id).siblings().is("#"+startnode.id+"~.snode") ){
             //stackTree();
             $(startnode).appendTo("#"+targetParent);
@@ -807,7 +814,8 @@ function makeLeaf(before, label, word, targetId) {
     var newleaf = "<div class='snode " + label + "'>" + label +
         "<span class='wnode'>" + word;
     if (lemma) {
-        newleaf += "<span class='lemma " + lemmaClass + "'>-" + lemma + "</span>";
+        newleaf += "<span class='lemma " + lemmaClass + "'>-" + lemma +
+            "</span>";
     }
     newleaf += "</span></div>\n";
     newleaf = $(newleaf);
@@ -868,8 +876,14 @@ function emergencyExitEdit() {
     postChange(replNode);
 }
 
-function showDialogBox(html) {
-    document.body.onkeydown = undefined;
+function showDialogBox(title, html) {
+    document.body.onkeydown = function (e) {
+        if (e.keyCode == 27) { // escape
+            hideDialogBox();
+        }
+    };
+    html = '<div class="menuTitle">' + title + '</div>' +
+        '<div id="dialogContent">' + html + '</div>';
     $("#dialogBox").html(html).get(0).style.visibility = "visible";
     $("#dialogBackground").get(0).style.visibility = "visible";
 }
@@ -903,10 +917,10 @@ function editComment() {
     commentText = commentText.substring(0, commentText.length - 1);
     // regex because string does not give global search.
     commentText = commentText.replace(/_/g, " ");
-    showDialogBox('<div class="menuTitle">Edit Comment</div>' +
-                  '<div id="dialogBody"><textarea id="commentEditBox">' +
+    showDialogBox("Edit Comment", 
+                  '<textarea id="commentEditBox">' +
                   commentText + '</textarea><div id="commentTypes">' +
-                  commentTypeCheckboxes + '</div>' +
+                  commentTypeCheckboxes + '</div><div id="dialogButtons">' +
                   '<input type="button"' +
                   'id="commentEditButton" value="Save" /></div>');
     $("input:radio[name=commentType]").val([commentType]);
@@ -917,7 +931,8 @@ function editComment() {
             var newText = $.trim($("#commentEditBox").val());
             if (/_|\n|:|\}|\{|\(|\)/.test(newText)) {
                 // TODO(AWE): slicker way of indicating errors...
-                alert("illegal characters in comment: illegal characters are _, :, {}, (), and newline");
+                alert("illegal characters in comment: illegal characters are" +
+                      " _, :, {}, (), and newline");
                 // hideDialogBox();
                 $("#commentEditBox").val(newText);
                 return;
@@ -1042,8 +1057,8 @@ function displayRename() {
             setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
         } else {
             // this is not a terminal
-            var editor=$("<input id='labelbox' class='labeledit' type='text' value='" +
-                         label + "' />");
+            var editor=$("<input id='labelbox' class='labeledit' type='text' " +
+                         "value='" + label + "' />");
             var origNode = $(startnode);
             textNode(origNode).replaceWith(editor);
             $("#labelbox").keydown(
@@ -1085,7 +1100,9 @@ function editLemma() {
         }
         var lemma = $("#"+startnode.id+">.wnode>.lemma").text();
         lemma = lemma.substring(1);
-        var editor=$("<span id='leafeditor' class='wnode'><input id='leaflemmabox' class='labeledit' type='text' value='" + lemma + "' /></span>");
+        var editor=$("<span id='leafeditor' class='wnode'><input " +
+                     "id='leaflemmabox' class='labeledit' type='text' value='" +
+                     lemma + "' /></span>");
         $("#"+startnode.id+">.wnode>.lemma").replaceWith(editor);
         $("#leaflemmabox").keydown(
             function(event) {
@@ -1604,6 +1621,27 @@ function wnodeString(node) {
     return text;
 }
 
+function jsonToTree(json) {
+    var d = JSON.parse(json);
+    return objectToTree(d);
+}
+
+function objectToTree(o) {
+    var res = "";
+    for (var p in o) {
+        if (o.hasOwnProperty(p)) {
+            res += "(" + p + " ";
+            if (typeof o[p] == "string") { // One of life's grosser hacks
+                res += o[p];
+            } else {
+                res += objectToTree(o[p]);
+            }
+            res += ")";
+        }
+    }
+    return res;
+}
+
 function toLabeledBrackets(node) {
     var out = node.clone();
 
@@ -1613,7 +1651,7 @@ function toLabeledBrackets(node) {
     // will turn the Z's into double-linebreaks
     out.find("#sn0>.snode").after(")ZZZZZ");
     out.find("#sn0>.snode").map(function () {
-        $(this).after(this.title);
+        $(this).after(jsonToTree(this.getAttribute("data-metadata")));
     });
 
     out.find(".snode").not("#sn0").before("(");
@@ -1668,6 +1706,7 @@ function getLabel(node) {
 // A low-level (LL) version of setLabel.  It is only responsible for changing
 // the label; not doing any kind of matching/changing/other crap.
 function setLabelLL(node, label) {
+    // TODO: don't add numeric indices to the CSS class
     if (node.hasClass("snode")) {
         if (label[label.length - 1] != " ") {
             // Some other spots in the code depend on the label ending with a
@@ -1744,6 +1783,7 @@ function hasDashTag(node, tag) {
     return (tags.indexOf(tag) > -1);
 }
 
+// TODO: something is wrong with this fn -- it also turns FLAG on
 function fixError() {
     if (!startnode || endnode) return;
     var sn = $(startnode);
@@ -1766,8 +1806,164 @@ function zeroDashTags() {
     setLabelLL($(startnode), lab.split("-")[0] + idxType + idx);
 }
 
+function getMetadata(node) {
+    var m = node.attr("data-metadata");
+    if (m) {
+        return JSON.parse(m);
+    } else {
+        return undefined;
+    }
+}
+
+function dictionaryToForm(dict, level) {
+    if (!level) {
+        level = 0;
+    }
+    var res = "";
+    if (dict) {
+        res = '<table class="metadataTable"><thead><tr><td>Key</td>' +
+            '<td>Value</td></tr></thead>';
+        for (var k in dict) {
+            if (dict.hasOwnProperty(k)) {
+                if (typeof dict[k] == "string") {
+                    res += '<tr class="strval" data-level="' + level +
+                        '"><td class="key">' + '<span style="width:"' +
+                        4*level + 'px;"></span>' + k +
+                        '</td><td class="val"><input class="metadataField" ' +
+                        'type="text" name="' + k + '" value="' + dict[k] +
+                        '" /></td></tr>';
+                } else if (typeof dict[k] == "object") {
+                    res += '<tr class="tabhead"><td colspan=2>' + k +
+                        '</td></tr>';
+                    res += dictionaryToForm(dict[k], level + 1);
+                }
+            }
+        }
+        res += '</table>';
+    }
+    return res;
+}
+
+function saveMetadata() {
+    if ($("#metadata").html() != "") {
+        $(startnode).attr("data-metadata",
+                          JSON.stringify(formToDictionary($("#metadata"))));
+    }
+}
+
+function updateMetadataEditor() {
+    if (!startnode || endnode) {
+        $("#metadata").html("");
+        return;
+    }
+    var addButtonHtml = '<input type="button" id="addMetadataButton" ' +
+            'value="Add" />';
+    $("#metadata").html(dictionaryToForm(getMetadata($(startnode))) +
+                        addButtonHtml);
+    $("#metadata").find(".metadataField").change(saveMetadata).
+        focusout(saveMetadata).keydown(function (e) {
+            if (e.keyCode == 13) {
+                $(e.target).blur();
+            }
+            e.stopPropagation();
+            return true;
+        });
+    $("#metadata").find(".key").click(metadataKeyClick);
+    $("#addMetadataButton").click(addMetadataDialog);
+}
+
+function formToDictionary(form) {
+    var d = {},
+        dstack = [],
+        curlevel = 0,
+        namestack = [];
+    form.find("tr").each(function() {
+        if ($(this).hasClass("strval")) {
+            var key = $(this).children(".key").text();
+            var val = $(this).find(".val>.metadataField").val();
+            d[key] = val;
+            if ($(this).attr("data-level") < curlevel) {
+                var new_d = dstack.pop();
+                var next_name = namestack.pop();
+                new_d[next_name] = d;
+                d = new_d;
+            }
+        } else if ($(this).hasClass("tabhead")) {
+            namestack.push($(this).text());
+            curlevel = $(this).attr("data-level");
+            dstack.push(d);
+            d = {};
+        }
+    });
+    if (dstack.length > 0) {
+        var len = dstack.length;
+        for (var i = 0; i < len; i++) {
+            var new_d = dstack.pop();
+            var next_name = namestack.pop();
+            new_d[next_name] = d;
+            d = new_d;
+        }
+    }
+    return d;
+}
+
+function metadataKeyClick(e) {
+    var keyNode = e.target;
+    var html = 'Name: <input type="text" ' +
+            'id="metadataNewName" value="' + $(keyNode).text() +
+            '" /><div id="dialogButtons"><input type="button" value="Save" ' +
+        'id="metadataKeySave" /><input type="button" value="Delete" ' +
+        'id="metadataKeyDelete" /></div>';
+    showDialogBox("Edit Metadata", html);
+    // TODO: make focus go to end, or select whole thing?
+    $("#metadataNewName").focus();
+    function saveMetadataInner() {
+        $(keyNode).text($("#metadataNewName").val());
+        hideDialogBox();
+        saveMetadata();
+    }
+    function deleteMetadata() {
+        $(keyNode).parent().remove();
+        hideDialogBox();
+        saveMetadata();
+    }
+    $("#metadataKeySave").click(saveMetadataInner);
+    setInputFieldEnter($("#metadataNewName"), saveMetadataInner);
+    $("#metadataKeyDelete").click(deleteMetadata);
+}
+
+function addMetadataDialog() {
+    // TODO: allow specifying value too in initial dialog?
+    var html = 'New Name: <input type="text" id="metadataNewName" value="NEW" />' +
+            '<div id="dialogButtons"><input type="button" id="addMetadata" ' +
+            'value="Add" /></div>';
+    showDialogBox("Add Metatata", html);
+    function addMetadata() {
+        var oldMetadata = formToDictionary($("#metadata"));
+        oldMetadata[$("#metadataNewName").val()] = "NEW";
+        $(startnode).attr("data-metadata", JSON.stringify(oldMetadata));
+        updateMetadataEditor();
+        hideDialogBox();
+    }
+    $("#addMetadata").click(addMetadata);
+    setInputFieldEnter($("#metadataNewName"), addMetadata);
+}
+
+function setInputFieldEnter(field, fn) {
+    field.keydown(function (e) {
+        if (e.keyCode == 13) {
+            fn();
+            return false;
+        } else {
+            return true;
+        }
+    });
+}
+
+// TODO: badly need a DSL for forms
+
 // Local Variables:
 // js2-additional-externs: ("$" "setTimeout" "customCommands" "customConLeafBefore\
-// " "customConMenuGroups" "extensions" "vextensions" "clause_extensions")
+// " "customConMenuGroups" "extensions" "vextensions" "clause_extensions" "JSON")
 // indent-tabs-mode: nil
 // End:
