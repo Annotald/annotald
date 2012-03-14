@@ -1814,7 +1814,10 @@ function getMetadata(node) {
     }
 }
 
-function dictionaryToForm(dict) {
+function dictionaryToForm(dict, level) {
+    if (!level) {
+        level = 0;
+    }
     var res = "";
     if (dict) {
         res = '<table class="metadataTable"><thead><tr><td>Key</td>' +
@@ -1822,11 +1825,17 @@ function dictionaryToForm(dict) {
         for (var k in dict) {
             if (dict.hasOwnProperty(k)) {
                 if (typeof dict[k] == "string") {
-                    res += '<tr class="strval"><td class="key">' + k +
+                    res += '<tr class="strval" data-level="' + level +
+                        '"><td class="key">' + '<span style="width:"' +
+                        4*level + 'px;"></span>' + k +
                         '</td><td class="val"><input class="metadataField" ' +
                         'type="text" name="' + k + '" value="' + dict[k] +
                         '" /></td></tr>';
-                } // else if dict
+                } else if (typeof dict[k] == "object") {
+                    res += '<tr class="tabhead"><td colspan=2>' + k +
+                        '</td></tr>';
+                    res += dictionaryToForm(dict[k], level + 1);
+                }
             }
         }
         res += '</table>';
@@ -1863,12 +1872,37 @@ function updateMetadataEditor() {
 }
 
 function formToDictionary(form) {
-    var d = {};
-    form.find(".strval").each(function() {
-        var key = $(this).children(".key").text();
-        var val = $(this).find(".val>.metadataField").val();
-        d[key] = val;
+    var d = {},
+        dstack = [],
+        curlevel = 0,
+        namestack = [];
+    form.find("tr").each(function() {
+        if ($(this).hasClass("strval")) {
+            var key = $(this).children(".key").text();
+            var val = $(this).find(".val>.metadataField").val();
+            d[key] = val;
+            if ($(this).attr("data-level") < curlevel) {
+                var new_d = dstack.pop();
+                var next_name = namestack.pop();
+                new_d[next_name] = d;
+                d = new_d;
+            }
+        } else if ($(this).hasClass("tabhead")) {
+            namestack.push($(this).text());
+            curlevel = $(this).attr("data-level");
+            dstack.push(d);
+            d = {};
+        }
     });
+    if (dstack.length > 0) {
+        var len = dstack.length;
+        for (var i = 0; i < len; i++) {
+            var new_d = dstack.pop();
+            var next_name = namestack.pop();
+            new_d[next_name] = d;
+            d = new_d;
+        }
+    }
     return d;
 }
 
