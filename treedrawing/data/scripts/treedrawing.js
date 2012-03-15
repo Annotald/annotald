@@ -1815,6 +1815,8 @@ function getMetadata(node) {
     }
 }
 
+// TODO(AWE): add getMetadataTU fn, to also do trickle-up of metadata.
+
 function dictionaryToForm(dict, level) {
     if (!level) {
         level = 0;

@@ -116,6 +116,27 @@ body {
     width: 32%;
 }
 
+/* Metadata editor */
+
+.metadataTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+.metadataTable tbody tr .key {
+    width: 33%;
+}
+.metadataTable tbody tr .val {
+    width: 66%;
+}
+.metadataTable thead tr td {
+    font-weight: bold;
+    // border-bottom: 1px solid #cccccc;
+    padding-bottom: 4px;
+}
+
+.metadataField {
+    width: 100%;
+}
 
 /* Lemmata */
 .lemmaShow {

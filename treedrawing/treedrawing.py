@@ -289,7 +289,8 @@ if args.timelog:
     fileMatch = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0])
     shortfile = fileMatch.group(1)
     with open("timelog.txt", "a") as timelog:
-        timelog.write(shortfile + ": Started at " + str(datetime.now().isoformat()) + ".\n")
+        timelog.write(shortfile + ": Started at " + \
+                          str(datetime.now().isoformat()) + ".\n")
 
 cherrypy.config.update({'server.socket_port': args.port})
 
