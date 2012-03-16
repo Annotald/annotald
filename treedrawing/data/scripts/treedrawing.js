@@ -316,6 +316,12 @@ function idle() {
     }
 }
 
+function navigationWarning() {
+    if ($("#editpane").html() != lastsavedstate) {
+        return "Unsaved changes exist, are you sure you want to leave the page?";
+    }
+}
+
 function assignEvents() {
     // load custom commands from user settings file
     customCommands();
@@ -331,6 +337,7 @@ function assignEvents() {
     $("#editpane").mousedown(clearSelection);
     $("#conMenu").mousedown(hideContextMenu);
     $(document).mousewheel(handleMouseWheel);
+    window.onbeforeunload = navigationWarning;
 }
 
 function editLemmaOrLabel() {
@@ -1691,6 +1698,7 @@ function quitServer() {
         alert("Cannot exit, unsaved changes exist.");
     } else {
         $.post("/doExit");
+        window.onbeforeunload = undefined;
         setTimeout(function(res) {
                        // I have no idea why this works, but it does
                        window.open('', '_self', '');
