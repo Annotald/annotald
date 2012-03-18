@@ -161,7 +161,7 @@ test))) (ID test-01))\n\n");
         leafBefore();
         expectEqualText("ATB movement doesn't copy index",
                        getLabel($(startnode)),
-                       "NP-1"); // broken
+                       "NP");
 
     });
 

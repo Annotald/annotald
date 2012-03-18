@@ -803,7 +803,7 @@ function makeLeaf(before, label, word, targetId) {
             label = getLabel($(endnode));
             if (label.startsWith("W")) {
                 word = "*T*";
-                label = label.substr(1);
+                label = label.substr(1).replace(/-[0-9]+$/, "");
             } else if (label.split("-").indexOf("CL") > -1) {
                 word = "*CL*";
                 label = getLabel($(endnode)).replace("-CL", "");
