@@ -99,7 +99,7 @@ test))) (ID test-01))\n\n");
     });
 
     suite("Metadata", function () {
-    
+
         var orig = { foo: "bar", baz: "quux" };
         var form = $(dictionaryToForm(orig));
 
@@ -109,7 +109,7 @@ test))) (ID test-01))\n\n");
 
         orig.blah = {one: "1", two: "2"};
         form = $(dictionaryToForm(orig));
-        
+
         expectEqual("recursive metadata",
                     orig,
                     formToDictionary(form));
@@ -119,7 +119,7 @@ test))) (ID test-01))\n\n");
         expectEqual("more recursive metadata",
                     orig,
                     formToDictionary(form));
-        
+
     });
 
     logTest("");
