@@ -148,6 +148,23 @@ test))) (ID test-01))\n\n");
 
     });
 
+    suite("Movement", function () {
+        loadTrees("( (CP-REL (WNP-1 (WD who))\n\
+(C 0)\n\
+(IP-SUB (IP-SUB (NP-SBJ *T*-1) (VBD danced))\n\
+(CONJP (CONJ and)\n\
+(IP-SUB (VBD sang))))))");
+
+        selectWord("sang");
+        selectWord("who", true);
+        selectParent(true);
+        leafBefore();
+        expectEqualText("ATB movement doesn't copy index",
+                       getLabel($(startnode)),
+                       "NP-1"); // broken
+
+    });
+
     logTest("");
     logTest("Test results: " + (numtests - testfailures) + "/" + numtests +
             " passed (" +
