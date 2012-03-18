@@ -70,13 +70,39 @@ function suite(name, suite) {
 function loadTrees(trees) {
     $.ajax("/testLoadTrees",
            { async: false,
-             success: function(trees) {
-                 $("#editpane").html(trees);
+             success: function(res) {
+                 $("#editpane").html(res['trees']);
+                 resetIds();
+                 resetLabelClasses(false);
              },
-           data: "json" });
+             dataType: "json",
+             type: "POST",
+             data: {trees: trees}});
+}
+
+function selectWord(word, end) {
+    var selnode = $("#editpane").find(".wnode").parents().filter(function () {
+        return wnodeString($(this)) == word;
+    }).get(0);
+    if (!end) {
+        startnode = selnode;
+        endnode = undefined;
+    } else {
+        endnode = selnode;
+    }
+    updateSelection();
+}
+
+function selectParent(end) {
+    if (end) {
+        endnode = $(endnode).parent().get(0);
+    } else {
+        startnode = $(startnode).parent().get(0);
+    }
 }
 
 function runTests() {
+    numtests = testfailures = 0;
     showDialogBox("Test Results", '<textarea id="testMsgBox" style="' +
                   'width: 100%;height: 100%;"></textarea>');
 
@@ -135,6 +161,8 @@ test))) (ID test-01))\n\n");
 
 // Local Variables:
 // js2-additional-externs: ("$" "JSON" "showDialogBox" "formToDictionary" "\
-// dictionaryToForm" "_" "toLabeledBrackets")
+// dictionaryToForm" "_" "toLabeledBrackets" "startnode" "endnode" "\
+// wnodeString" "updateSelection" "leafBefore" "resetIds" "\
+// resetLabelClasses" "getLabel")
 // indent-tabs-mode: nil
 // End:
