@@ -282,6 +282,7 @@ var saveInProgress = false;
 function saveHandler (data) {
     if (data['result'] == "success") {
         // TODO(AWE): add time of last successful save
+        // TODO(AWE): add filename to avoid overwriting another file
         $("#saveresult").html("<div style='color:green'>Save success</div>");
     } else {
         lastsavedstate = "";
