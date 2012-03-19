@@ -41,6 +41,7 @@ Annotald depends on the following software packages to function:
 In addition, Annotald bundles the following libraries.  See the
 corresponding files in the repository for the associated license
 information:
+
 * [jQuery][jquery]
 * jQuery plugins:
   * [contextmenu][contextmenu]
