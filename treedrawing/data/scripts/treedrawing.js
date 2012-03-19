@@ -282,6 +282,7 @@ var saveInProgress = false;
 function saveHandler (data) {
     if (data['result'] == "success") {
         // TODO(AWE): add time of last successful save
+        // TODO(AWE): add filename to avoid overwriting another file
         $("#saveresult").html("<div style='color:green'>Save success</div>");
     } else {
         lastsavedstate = "";
@@ -316,6 +317,12 @@ function idle() {
     }
 }
 
+function navigationWarning() {
+    if ($("#editpane").html() != lastsavedstate) {
+        return "Unsaved changes exist, are you sure you want to leave the page?";
+    }
+}
+
 function assignEvents() {
     // load custom commands from user settings file
     customCommands();
@@ -331,6 +338,7 @@ function assignEvents() {
     $("#editpane").mousedown(clearSelection);
     $("#conMenu").mousedown(hideContextMenu);
     $(document).mousewheel(handleMouseWheel);
+    window.onbeforeunload = navigationWarning;
 }
 
 function editLemmaOrLabel() {
@@ -795,7 +803,7 @@ function makeLeaf(before, label, word, targetId) {
             label = getLabel($(endnode));
             if (label.startsWith("W")) {
                 word = "*T*";
-                label = label.substr(1);
+                label = label.substr(1).replace(/-[0-9]+$/, "");
             } else if (label.split("-").indexOf("CL") > -1) {
                 word = "*CL*";
                 label = getLabel($(endnode)).replace("-CL", "");
@@ -1691,6 +1699,7 @@ function quitServer() {
         alert("Cannot exit, unsaved changes exist.");
     } else {
         $.post("/doExit");
+        window.onbeforeunload = undefined;
         setTimeout(function(res) {
                        // I have no idea why this works, but it does
                        window.open('', '_self', '');
