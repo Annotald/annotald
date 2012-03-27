@@ -1548,9 +1548,13 @@ function maxIndex(tokenRoot) {
 }
 
 function removeIndex(node) {
-    // TODO: remove the assumption that a label can only be 1-9!
+    if (getIndex(node) == -1) {
+        return;
+    }
+    var label = getLabel($(node));
     setNodeLabel($(node),
-                 getLabel($(node)).substr(0, getLabel($(node)).length - 2 ),
+                 label.substr(0, Math.max(label.lastIndexOf("-"),
+                                          label.lastIndexOf("="))),
                  true);
 }
 
