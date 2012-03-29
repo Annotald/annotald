@@ -33,8 +33,20 @@ release.  The projected release date is Sep. 1, 2012.
 Annotald depends on the following software packages to function:
 
 * Python 2.7
-* The Natural Language Toolkit ([NLTK][nltk])
+* These Python libraries:
+  * The Natural Language Toolkit ([NLTK][nltk])
+  * [Mako][mako]
 * The Google Chrome browser (or the non-Google branded Chromium version)
+
+In addition, Annotald bundles the following libraries.  See the
+corresponding files in the repository for the associated license
+information:
+
+* [jQuery][jquery]
+* jQuery plugins:
+  * [contextmenu][contextmenu]
+  * [mousewheel][mousewheel]
+* [Underscore][underscore]
 
 ## Using Annotald
 
@@ -67,3 +79,8 @@ Annotald development has been funded by the following funding sources:
 [tags]: https://github.com/janabeck/Annotald/tags
 [issues]: https://github.com/janabeck/Annotald/issues
 [nltk]: http://www.nltk.org/
+[mako]: http://www.makotemplates.org/
+[jquery]: http://jquery.com/
+[contextmenu]: http://www.JavascriptToolbox.com/lib/contextmenu/
+[mousewheel]: http://archive.plugins.jquery.com/project/mousewheel
+[underscore]: http://documentcloud.github.com/underscore/
