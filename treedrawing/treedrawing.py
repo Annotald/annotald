@@ -162,21 +162,7 @@ class Treedraw(object):
   (ID test-01))
 """)
 
-        # The CURRENT_DIR below is a bit of a hack
-        indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
-                                 strict_undefined = True)
-
-        # Chicken and egg: treedrawing.js must go before the
-        # currentSettings, so that the functions there are defined for
-        # currentSettings.  But currentSettings in turn must define some
-        # functions for treedrawing.contextMenu.js.
-        return indexTemplate.render(annotaldVersion = VERSION,
-                                    currentSettings = currentSettings,
-                                    shortfile = self.shortfile,
-                                    currentTree = currentTree,
-                                    usetimelog = self.args.timelog,
-                                    usemetadata = self.useMetadata,
-                                    test = True)
+        return self.renderIndex(currentTree, currentSettings, True)
 
     @cherrypy.expose
     def testLoadTrees(self, trees = None):
@@ -242,27 +228,27 @@ class Treedraw(object):
 
         return output
 
+    def renderIndex(self, currentTree, currentSettings, test):
+        # The CURRENT_DIR below is a bit of a hack
+        indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
+                                 strict_undefined = True)
+
+        return indexTemplate.render(annotaldVersion = VERSION,
+                                    currentSettings = currentSettings,
+                                    shortfile = self.shortfile,
+                                    currentTree = currentTree,
+                                    usetimelog = self.options.timelog,
+                                    usemetadata = self.useMetadata,
+                                    test = test,
+                                    extraScripts =
+                                    self.pythonOptions['extraJavascripts'])
+
     @cherrypy.expose
     def index(self):
         currentSettings = open(self.options.settings).read()
         currentTree = self.loadPsd(self.thefile)
 
-        # The CURRENT_DIR below is a bit of a hack
-        indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
-                                 strict_undefined = True)
-
-        # Chicken and egg: treedrawing.js must go before the
-        # currentSettings, so that the functions there are defined for
-        # currentSettings.  But currentSettings in turn must define some
-        # functions for treedrawing.contextMenu.js.
-        return indexTemplate.render(annotaldVersion = VERSION,
-                                    currentSettings = currentSettings,
-                                    shortfile = self.shortfile,
-                                    currentTree = currentTree,
-                                    usetimelog = self.args.timelog,
-                                    usemetadata = self.useMetadata,
-                                    test = False)
-
+        return self.renderIndex(currentTree, currentSettings, False)
 
 #index.exposed = True
 parser = argparse.ArgumentParser(usage = "%prog [options] file.psd",
