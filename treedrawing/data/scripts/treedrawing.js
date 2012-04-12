@@ -990,8 +990,8 @@ function displayRename() {
                 startnode = endnode = null;
                 resetIds();
                 updateSelection();
+                document.body.onkeydown = handleKeyDown;
             }
-            document.body.onkeydown = handleKeyDown;
             // TODO(AWE): check that theNewPhrase id gets removed...it
             // doesn't seem to?
         }
@@ -1042,7 +1042,7 @@ function displayRename() {
                     if (event.keyCode == 32) {
                         space(event);
                     }
-                    if (event.keycode == 27) {
+                    if (event.keyCode == 27) {
                         replText = "<div class='snode'>" +
                             label + " <span class='wnode'>" + word;
                         if (useLemma) {
@@ -1061,7 +1061,6 @@ function displayRename() {
                             if (!testValidLeafLabel(newphrase)) {
                                 displayWarning("Not a valid leaf label: '" +
                                               newphrase + "'.");
-                                postChange(undefined);
                                 return;
                             }
                         }
@@ -1104,7 +1103,7 @@ function displayRename() {
                     if (event.keyCode == 32) {
                         space(event);
                     }
-                    if (event.keycode == 27) {
+                    if (event.keyCode == 27) {
                         $("#labelbox").replaceWith(label + " ");
                         postChange(origNode);
                     }
@@ -1114,7 +1113,6 @@ function displayRename() {
                             if (!testValidPhraseLabel(newphrase)) {
                                 displayWarning("Not a valid phrase label: '" +
                                               newphrase + "'.");
-                                postChange(undefined);
                                 return;
                             }
                         }
