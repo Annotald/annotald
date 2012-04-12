@@ -1975,6 +1975,10 @@ function setInputFieldEnter(field, fn) {
     });
 }
 
+function displayWarning(text) {
+    $("#messageBoxInner").text(text).css("color", "orange");
+}
+
 // TODO: badly need a DSL for forms
 
 // Local Variables:

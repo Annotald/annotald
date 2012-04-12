@@ -265,6 +265,13 @@ body {
     top: 0px;
 }
 
+/* Message box */
+#messageBox {
+    position: fixed;
+    bottom: 5%;
+    width: 15%;
+}
+
 /* Misc */
 .shown {
     visibility: visible;

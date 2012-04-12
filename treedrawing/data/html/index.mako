@@ -62,6 +62,11 @@ any later version.  See the LICENSE file for more information. -->
         <div class="menuTitle">Metadata</div>
         <div id="metadata"></div>
       </div>
+
+      <div id="messageBox" class="menuPane">
+        <div class="menuTitle">Messages</div>
+        <div id="messageBoxInner">----</div>
+      </div>
     </div>
 
     <div id="editpane">${currentTree}</div>
