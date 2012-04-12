@@ -1532,8 +1532,12 @@ function getIndexType (node) {
     if (getIndex(node) < 0) {
         return -1;
     }
-
-    var label = getLabel(node);
+    var label;
+    if (shouldIndexLeaf(node)) {
+        label = wnodeString(node);
+    } else {
+        label = getLabel(node);
+    }
     var lastpart = parseIndexType(label);
     return lastpart;
 }
@@ -1586,14 +1590,22 @@ function maxIndex(tokenRoot) {
 }
 
 function removeIndex(node) {
+    node = $(node);
     if (getIndex(node) == -1) {
         return;
     }
-    var label = getLabel($(node));
-    setNodeLabel($(node),
-                 label.substr(0, Math.max(label.lastIndexOf("-"),
-                                          label.lastIndexOf("="))),
-                 true);
+    var label, setLabelFn;
+    if (shouldIndexLeaf(node)) {
+        label = wnodeString(node);
+        setLabelFn = setLeafLabel;
+    } else {
+        label = getLabel(node);
+        setLabelFn = setNodeLabel;
+    }
+    setLabelFn(node,
+               label.substr(0, Math.max(label.lastIndexOf("-"),
+                                        label.lastIndexOf("="))),
+               true);
 }
 
 function coIndex() {
