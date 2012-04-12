@@ -15,6 +15,11 @@ any later version.  See the LICENSE file for more information. -->
     <script type= "application/javascript" src="scripts/jquery.mousewheel.min.js"></script>
     <script type= "application/javascript" src="scripts/treedrawing.js"></script>
     <script type= "application/javascript" src="scripts/underscore-min.js"></script>
+%for script in extraScripts:
+    <script type="application/javascript">
+      ${open(script).read()}
+    </script>
+%endfor
     <script type= "application/javascript">  ${currentSettings} </script>
     <script type= "application/javascript" src="scripts/treedrawing.contextMenu.js"></script>
 %if test:

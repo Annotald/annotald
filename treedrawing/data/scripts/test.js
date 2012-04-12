@@ -244,6 +244,16 @@ test))) (ID test-01))\n\n");
                     wnodeString($(endnode)),
                     "*T*-1");
     });
+
+    suite("POS tag validation", function () {
+        testValidLeafLabel = basesAndDashes(["FOO","BAR","BAZ"],
+                                            ["AAA","BBB","CCC"]);
+        expectEqual("correct label",
+                    testValidLeafLabel("FOO-AAA-CCC"), true);
+        expectEqual("incorrect label",
+                    testValidLeafLabel("NP-SBJ"), false);
+    });
+
     logTest("");
     logTest("Test results: " + (numtests - testfailures) + "/" + numtests +
             " passed (" +
@@ -251,14 +261,11 @@ test))) (ID test-01))\n\n");
 }
 
 
-
-
-
-
 // Local Variables:
 // js2-additional-externs: ("$" "JSON" "showDialogBox" "formToDictionary" "\
 // dictionaryToForm" "_" "toLabeledBrackets" "startnode" "endnode" "\
 // wnodeString" "updateSelection" "leafBefore" "resetIds" "\
-// resetLabelClasses" "getLabel")
+// resetLabelClasses" "getLabel" "testValidLeafLabel" "basesAndDashes" "\
+// getIndex" "coIndex")
 // indent-tabs-mode: nil
 // End:

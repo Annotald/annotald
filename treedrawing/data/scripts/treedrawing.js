@@ -2029,10 +2029,22 @@ function displayWarning(text) {
     $("#messageBoxInner").text(text).css("color", "orange");
 }
 
+function basesAndDashes(bases, dashes) {
+    function _basesAndDashes(string) {
+        var spl = string.split("-");
+        var b = spl.shift();
+        return (bases.indexOf(b) > -1) &&
+            _.all(spl, function (x) { return (dashes.indexOf(x) > -1); });
+    }
+    return _basesAndDashes;
+}
+
 // TODO: badly need a DSL for forms
 
 // Local Variables:
-// js2-additional-externs: ("$" "setTimeout" "customCommands" "customConLeafBefore\
-// " "customConMenuGroups" "extensions" "vextensions" "clause_extensions" "JSON")
+// js2-additional-externs: ("$" "setTimeout" "customCommands\
+// " "customConLeafBefore" "customConMenuGroups" "extensions" "vextensions\
+// " "clause_extensions" "JSON" "testValidLeafLabel" "testValidPhraseLabel\
+// " "_")
 // indent-tabs-mode: nil
 // End:

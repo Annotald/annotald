@@ -29,6 +29,15 @@ var caseTags=["N","NS","NPR","NPRS",
               "Q","QR","QS"];
 
 /*
+ * These two functions should return true if the string argument is a valid
+ * label for a branching (-Phrase-) and non-branching (-Leaf-) label, and
+ * false otherwise.  The utility function basesAndDashes is provided.  It
+ * takes two arguments, a list of base tags and a list of dash tags.  It
+ * returns a function suitable for assigning to one of these variables.*/
+var testValidPhraseLabel = undefined;
+var testValidLeafLabel   = undefined;
+
+/*
  * Extensions are treated as not part of the label for various purposes, they
  * are all binary, and they show up in the toggle extension menu.  There are 3
  * classes of extensions: those that apply to leaf nodes, those that apply to
