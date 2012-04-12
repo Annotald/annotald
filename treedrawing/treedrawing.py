@@ -27,6 +27,7 @@ import argparse
 import subprocess
 from mako.template import Template
 import util
+import runpy
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -59,7 +60,7 @@ class Treedraw(object):
         else:
             self.conversionFn = util.treeToHtml
             self.useMetadata = False
-        self.args = args
+        self.pythonOptions = runpy.run_path(args.pythonSettings)
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
@@ -279,9 +280,12 @@ parser.add_argument("-o", "--out", dest = "outFile", action = "store_true",
 parser.add_argument("-q", "--quiet", dest = "timelog", action = "store_false",
                     help = "boolean for specifying whether you'd like to \
 silence the timelogging")
+parser.add_argument("-S", "--python-settings", dest = "pythonSettings",
+                    action = "store", help = "path to Python settings file")
 parser.add_argument("psd", nargs='+')
 parser.set_defaults(port = 8080,
-                    settings = sys.path[0] + "/settings.js")
+                    settings = sys.path[0] + "/settings.js",
+                    pythonSettings = sys.path[0] + "/settings.py")
 args = parser.parse_args()
 shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
 
