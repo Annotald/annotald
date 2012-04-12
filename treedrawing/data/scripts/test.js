@@ -187,8 +187,8 @@ test))) (ID test-01))\n\n");
         selectParent(true);
         leafBefore();
         expectEqualText("ATB movement doesn't copy index",
-                       getLabel($(startnode)),
-                       "NP");
+                        getLabel($(startnode)),
+                        "NP");
 
     });
 
