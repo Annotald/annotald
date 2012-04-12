@@ -36,13 +36,12 @@ from datetime import datetime
 class Treedraw(object):
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
     # object has no attribute 'thefile'
-    def __init__(self, args):
+    def __init__(self, args, shortfile):
         if len(args.psd) == 1:
             self.thefile = args.psd[0]
         else:
             raise Error("Annotald requires exactly one .psd file argument!")
-        fileMatch = re.search("^.*?([0-9A-Za-z\-\.]*)$", self.thefile)
-        self.shortfile = fileMatch.group(1)
+        self.shortfile = shortfile
         self.options = args
         with open(self.thefile) as f:
             line = f.readline()
@@ -284,14 +283,14 @@ parser.add_argument("psd", nargs='+')
 parser.set_defaults(port = 8080,
                     settings = sys.path[0] + "/settings.js")
 args = parser.parse_args()
+shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
+
 
 if args.timelog:
-    fileMatch = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0])
-    shortfile = fileMatch.group(1)
     with open("timelog.txt", "a") as timelog:
         timelog.write(shortfile + ": Started at " + \
                           str(datetime.now().isoformat()) + ".\n")
 
 cherrypy.config.update({'server.socket_port': args.port})
 
-cherrypy.quickstart(Treedraw(args))
+cherrypy.quickstart(Treedraw(args, shortfile))
