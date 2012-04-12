@@ -34,6 +34,7 @@ Annotald depends on the following software packages to function:
 
 * Python 2.7
 * These Python libraries:
+  * [argparse][argparse]
   * The Natural Language Toolkit ([NLTK][nltk])
   * [Mako][mako]
 * The Google Chrome browser (or the non-Google branded Chromium version)
@@ -84,3 +85,4 @@ Annotald development has been funded by the following funding sources:
 [contextmenu]: http://www.JavascriptToolbox.com/lib/contextmenu/
 [mousewheel]: http://archive.plugins.jquery.com/project/mousewheel
 [underscore]: http://documentcloud.github.com/underscore/
+[argparse]: http://docs.python.org/library/argparse.html
