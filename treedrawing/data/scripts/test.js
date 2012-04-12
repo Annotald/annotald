@@ -1,5 +1,3 @@
-// TODO: known-broken tests
-
 // add license
 
 $(document).ready(function () {
@@ -10,7 +8,8 @@ $(document).ready(function () {
 var numtests = 0,
     testfailures = 0,
     tests = [],
-    currentindent = 0;
+    currentindent = 0,
+    nextTestFails = false;
 
 function logTest(line) {
     $("#testMsgBox").val($("#testMsgBox").val() + line + "\n");
@@ -22,7 +21,12 @@ function testSucceed(name) {
     for (var i = 0; i < currentindent; i++) {
         indent += " ";
     }
-    logTest(indent + "Test '" + name + "' succeeded.");
+    if (nextTestFails) {
+        logTest(indent + "Test '" + name + "' succeeded unexpectedly.");
+        nextTestFails = false;
+    } else {
+        logTest(indent + "Test '" + name + "' succeeded.");
+    }
 }
 
 function testFail(name, info) {
@@ -32,7 +36,12 @@ function testFail(name, info) {
     for (var i = 0; i < currentindent; i++) {
         indent += " ";
     }
-    logTest("Test '" + name + "' FAILED: " + info);
+    if (nextTestFails) {
+        logTest(indent + "Test '" + name + "' failed expectedly: " + info);
+        nextTestFails = false;
+    } else {
+        logTest(indent + "Test '" + name + "' FAILED: " + info);
+    }
 }
 
 function testFailThrow(name) {
@@ -58,6 +67,10 @@ function expectEqualText(name, x, y) {
     x = x.replace(/ /g, "").replace(/\n/g, "");
     y = y.replace(/ /g, "").replace(/\n/g, "");
     expectEqual(name, x, y);
+}
+
+function failingTest() {
+    nextTestFails = true;
 }
 
 function suite(name, suite) {
