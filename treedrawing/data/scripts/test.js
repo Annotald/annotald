@@ -192,6 +192,58 @@ test))) (ID test-01))\n\n");
 
     });
 
+    suite("Coindexation", function () {
+        loadTrees("( (IP-MAT (NP-SBJ (NPR John))\n\
+(VBP loves) (NP-OB1 (PRO himself))\n\
+(NP *T*)))");
+        selectNodeByLabel("NP-SBJ");
+        selectNodeByLabel("NP-OB1", true);
+        function testCoindexing (cond) {
+            coIndex();
+            expectEqual(cond + " -- Coindexation works",
+                        getIndex($(startnode)),
+                        1);
+            expectEqual(cond + " -- Coindexation works 2",
+                        getIndex($(endnode)),
+                        1);
+            expectEqual(cond + " -- Coindexation gives same index",
+                        getIndex($(startnode)),
+                        getIndex($(endnode)));
+            expectEqual(cond + " -- Index types",
+                        getIndexType($(startnode)) +
+                        getIndexType($(endnode)),
+                        "--");
+            coIndex();
+            expectEqual(cond + " -- Type cycling 1",
+                        getIndexType($(startnode)) +
+                        getIndexType($(endnode)),
+                        "-=");
+            coIndex();
+            expectEqual(cond + " -- Type cycling 2",
+                        getIndexType($(startnode)) +
+                        getIndexType($(endnode)),
+                        "=-");
+            coIndex();
+            expectEqual(cond + " -- Type cycling 3",
+                        getIndexType($(startnode)) +
+                        getIndexType($(endnode)),
+                        "==");
+            coIndex();
+            expectEqual(cond + " -- Index removal",
+                        getIndex($(startnode)),
+                        -1);
+            expectEqual(cond + " -- Index removal 2",
+                        getIndex($(endnode)),
+                        -1);
+        }
+        testCoindexing("Two phrases");
+        selectNodeByLabel("NP", true);
+        testCoindexing("Phrase and trace");
+        coIndex();
+        expectEqual("Index goes to trace leaf",
+                    wnodeString($(endnode)),
+                    "*T*-1");
+    });
     logTest("");
     logTest("Test results: " + (numtests - testfailures) + "/" + numtests +
             " passed (" +
