@@ -4,6 +4,7 @@
 
 $(document).ready(function () {
     $("#buttests").mousedown(runTests);
+    window.onbeforeunload = undefined;
 });
 
 var numtests = 0,
