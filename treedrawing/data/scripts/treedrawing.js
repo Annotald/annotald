@@ -321,6 +321,7 @@ function navigationWarning() {
     if ($("#editpane").html() != lastsavedstate) {
         return "Unsaved changes exist, are you sure you want to leave the page?";
     }
+    return undefined;
 }
 
 function assignEvents() {
