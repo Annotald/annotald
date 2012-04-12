@@ -115,6 +115,19 @@ function selectParent(end) {
     }
 }
 
+function selectNodeByLabel(label, end) {
+    var selnode = $("#editpane").find(".snode").filter(function() {
+        return getLabel($(this)) == label;
+    }).get(0);
+    if (!end) {
+        startnode = selnode;
+        endnode = undefined;
+    } else {
+        endnode = selnode;
+    }
+    updateSelection();
+}
+
 function runTests() {
     numtests = testfailures = 0;
     showDialogBox("Test Results", '<textarea id="testMsgBox" style="' +
