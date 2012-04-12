@@ -27,7 +27,7 @@ any later version.  See the LICENSE file for more information. -->
     <br />
     <div id="menus">
       <div id="floatMenu" class="menuPane">
-        <div style="background-color: #2E2E2E; color: white; font-weight: bold;">
+        <div class="menuTitle">
           Annotald ${annotaldVersion}
         </div>
 
