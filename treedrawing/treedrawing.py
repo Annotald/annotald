@@ -27,6 +27,7 @@ import argparse
 import subprocess
 from mako.template import Template
 import util
+import runpy
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -36,13 +37,12 @@ from datetime import datetime
 class Treedraw(object):
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
     # object has no attribute 'thefile'
-    def __init__(self, args):
+    def __init__(self, args, shortfile):
         if len(args.psd) == 1:
             self.thefile = args.psd[0]
         else:
             raise Error("Annotald requires exactly one .psd file argument!")
-        fileMatch = re.search("^.*?([0-9A-Za-z\-\.]*)$", self.thefile)
-        self.shortfile = fileMatch.group(1)
+        self.shortfile = shortfile
         self.options = args
         with open(self.thefile) as f:
             line = f.readline()
@@ -60,7 +60,7 @@ class Treedraw(object):
         else:
             self.conversionFn = util.treeToHtml
             self.useMetadata = False
-        self.args = args
+        self.pythonOptions = runpy.run_path(args.pythonSettings)
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
@@ -162,21 +162,7 @@ class Treedraw(object):
   (ID test-01))
 """)
 
-        # The CURRENT_DIR below is a bit of a hack
-        indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
-                                 strict_undefined = True)
-
-        # Chicken and egg: treedrawing.js must go before the
-        # currentSettings, so that the functions there are defined for
-        # currentSettings.  But currentSettings in turn must define some
-        # functions for treedrawing.contextMenu.js.
-        return indexTemplate.render(annotaldVersion = VERSION,
-                                    currentSettings = currentSettings,
-                                    shortfile = self.shortfile,
-                                    currentTree = currentTree,
-                                    usetimelog = self.args.timelog,
-                                    usemetadata = self.useMetadata,
-                                    test = True)
+        return self.renderIndex(currentTree, currentSettings, True)
 
     @cherrypy.expose
     def testLoadTrees(self, trees = None):
@@ -242,27 +228,27 @@ class Treedraw(object):
 
         return output
 
+    def renderIndex(self, currentTree, currentSettings, test):
+        # The CURRENT_DIR below is a bit of a hack
+        indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
+                                 strict_undefined = True)
+
+        return indexTemplate.render(annotaldVersion = VERSION,
+                                    currentSettings = currentSettings,
+                                    shortfile = self.shortfile,
+                                    currentTree = currentTree,
+                                    usetimelog = self.options.timelog,
+                                    usemetadata = self.useMetadata,
+                                    test = test,
+                                    extraScripts =
+                                    self.pythonOptions['extraJavascripts'])
+
     @cherrypy.expose
     def index(self):
         currentSettings = open(self.options.settings).read()
         currentTree = self.loadPsd(self.thefile)
 
-        # The CURRENT_DIR below is a bit of a hack
-        indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
-                                 strict_undefined = True)
-
-        # Chicken and egg: treedrawing.js must go before the
-        # currentSettings, so that the functions there are defined for
-        # currentSettings.  But currentSettings in turn must define some
-        # functions for treedrawing.contextMenu.js.
-        return indexTemplate.render(annotaldVersion = VERSION,
-                                    currentSettings = currentSettings,
-                                    shortfile = self.shortfile,
-                                    currentTree = currentTree,
-                                    usetimelog = self.args.timelog,
-                                    usemetadata = self.useMetadata,
-                                    test = False)
-
+        return self.renderIndex(currentTree, currentSettings, False)
 
 #index.exposed = True
 parser = argparse.ArgumentParser(usage = "%prog [options] file.psd",
@@ -280,18 +266,21 @@ parser.add_argument("-o", "--out", dest = "outFile", action = "store_true",
 parser.add_argument("-q", "--quiet", dest = "timelog", action = "store_false",
                     help = "boolean for specifying whether you'd like to \
 silence the timelogging")
+parser.add_argument("-S", "--python-settings", dest = "pythonSettings",
+                    action = "store", help = "path to Python settings file")
 parser.add_argument("psd", nargs='+')
 parser.set_defaults(port = 8080,
-                    settings = sys.path[0] + "/settings.js")
+                    settings = sys.path[0] + "/settings.js",
+                    pythonSettings = sys.path[0] + "/settings.py")
 args = parser.parse_args()
+shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
+
 
 if args.timelog:
-    fileMatch = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0])
-    shortfile = fileMatch.group(1)
     with open("timelog.txt", "a") as timelog:
         timelog.write(shortfile + ": Started at " + \
                           str(datetime.now().isoformat()) + ".\n")
 
 cherrypy.config.update({'server.socket_port': args.port})
 
-cherrypy.quickstart(Treedraw(args))
+cherrypy.quickstart(Treedraw(args, shortfile))

@@ -15,6 +15,11 @@ any later version.  See the LICENSE file for more information. -->
     <script type= "application/javascript" src="scripts/jquery.mousewheel.min.js"></script>
     <script type= "application/javascript" src="scripts/treedrawing.js"></script>
     <script type= "application/javascript" src="scripts/underscore-min.js"></script>
+%for script in extraScripts:
+    <script type="application/javascript">
+      ${open(script).read()}
+    </script>
+%endfor
     <script type= "application/javascript">  ${currentSettings} </script>
     <script type= "application/javascript" src="scripts/treedrawing.contextMenu.js"></script>
 %if test:
@@ -27,7 +32,7 @@ any later version.  See the LICENSE file for more information. -->
     <br />
     <div id="menus">
       <div id="floatMenu" class="menuPane">
-        <div style="background-color: #2E2E2E; color: white; font-weight: bold;">
+        <div class="menuTitle">
           Annotald ${annotaldVersion}
         </div>
 
@@ -61,6 +66,11 @@ any later version.  See the LICENSE file for more information. -->
            >
         <div class="menuTitle">Metadata</div>
         <div id="metadata"></div>
+      </div>
+
+      <div id="messageBox" class="menuPane">
+        <div class="menuTitle">Messages</div>
+        <div id="messageBoxInner">----</div>
       </div>
     </div>
 

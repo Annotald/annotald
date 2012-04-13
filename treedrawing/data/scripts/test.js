@@ -1,15 +1,15 @@
-// TODO: known-broken tests
-
 // add license
 
 $(document).ready(function () {
     $("#buttests").mousedown(runTests);
+    window.onbeforeunload = undefined;
 });
 
 var numtests = 0,
     testfailures = 0,
     tests = [],
-    currentindent = 0;
+    currentindent = 0,
+    nextTestFails = false;
 
 function logTest(line) {
     $("#testMsgBox").val($("#testMsgBox").val() + line + "\n");
@@ -21,7 +21,12 @@ function testSucceed(name) {
     for (var i = 0; i < currentindent; i++) {
         indent += " ";
     }
-    logTest(indent + "Test '" + name + "' succeeded.");
+    if (nextTestFails) {
+        logTest(indent + "Test '" + name + "' succeeded unexpectedly.");
+        nextTestFails = false;
+    } else {
+        logTest(indent + "Test '" + name + "' succeeded.");
+    }
 }
 
 function testFail(name, info) {
@@ -31,7 +36,12 @@ function testFail(name, info) {
     for (var i = 0; i < currentindent; i++) {
         indent += " ";
     }
-    logTest("Test '" + name + "' FAILED: " + info);
+    if (nextTestFails) {
+        logTest(indent + "Test '" + name + "' failed expectedly: " + info);
+        nextTestFails = false;
+    } else {
+        logTest(indent + "Test '" + name + "' FAILED: " + info);
+    }
 }
 
 function testFailThrow(name) {
@@ -57,6 +67,10 @@ function expectEqualText(name, x, y) {
     x = x.replace(/ /g, "").replace(/\n/g, "");
     y = y.replace(/ /g, "").replace(/\n/g, "");
     expectEqual(name, x, y);
+}
+
+function failingTest() {
+    nextTestFails = true;
 }
 
 function suite(name, suite) {
@@ -99,6 +113,19 @@ function selectParent(end) {
     } else {
         startnode = $(startnode).parent().get(0);
     }
+}
+
+function selectNodeByLabel(label, end) {
+    var selnode = $("#editpane").find(".snode").filter(function() {
+        return getLabel($(this)) == label;
+    }).get(0);
+    if (!end) {
+        startnode = selnode;
+        endnode = undefined;
+    } else {
+        endnode = selnode;
+    }
+    updateSelection();
 }
 
 function runTests() {
@@ -160,9 +187,71 @@ test))) (ID test-01))\n\n");
         selectParent(true);
         leafBefore();
         expectEqualText("ATB movement doesn't copy index",
-                       getLabel($(startnode)),
-                       "NP");
+                        getLabel($(startnode)),
+                        "NP");
 
+    });
+
+    suite("Coindexation", function () {
+        loadTrees("( (IP-MAT (NP-SBJ (NPR John))\n\
+(VBP loves) (NP-OB1 (PRO himself))\n\
+(NP *T*)))");
+        selectNodeByLabel("NP-SBJ");
+        selectNodeByLabel("NP-OB1", true);
+        function testCoindexing (cond) {
+            coIndex();
+            expectEqual(cond + " -- Coindexation works",
+                        getIndex($(startnode)),
+                        1);
+            expectEqual(cond + " -- Coindexation works 2",
+                        getIndex($(endnode)),
+                        1);
+            expectEqual(cond + " -- Coindexation gives same index",
+                        getIndex($(startnode)),
+                        getIndex($(endnode)));
+            expectEqual(cond + " -- Index types",
+                        getIndexType($(startnode)) +
+                        getIndexType($(endnode)),
+                        "--");
+            coIndex();
+            expectEqual(cond + " -- Type cycling 1",
+                        getIndexType($(startnode)) +
+                        getIndexType($(endnode)),
+                        "-=");
+            coIndex();
+            expectEqual(cond + " -- Type cycling 2",
+                        getIndexType($(startnode)) +
+                        getIndexType($(endnode)),
+                        "=-");
+            coIndex();
+            expectEqual(cond + " -- Type cycling 3",
+                        getIndexType($(startnode)) +
+                        getIndexType($(endnode)),
+                        "==");
+            coIndex();
+            expectEqual(cond + " -- Index removal",
+                        getIndex($(startnode)),
+                        -1);
+            expectEqual(cond + " -- Index removal 2",
+                        getIndex($(endnode)),
+                        -1);
+        }
+        testCoindexing("Two phrases");
+        selectNodeByLabel("NP", true);
+        testCoindexing("Phrase and trace");
+        coIndex();
+        expectEqual("Index goes to trace leaf",
+                    wnodeString($(endnode)),
+                    "*T*-1");
+    });
+
+    suite("POS tag validation", function () {
+        testValidLeafLabel = basesAndDashes(["FOO","BAR","BAZ"],
+                                            ["AAA","BBB","CCC"]);
+        expectEqual("correct label",
+                    testValidLeafLabel("FOO-AAA-CCC"), true);
+        expectEqual("incorrect label",
+                    testValidLeafLabel("NP-SBJ"), false);
     });
 
     logTest("");
@@ -172,14 +261,11 @@ test))) (ID test-01))\n\n");
 }
 
 
-
-
-
-
 // Local Variables:
 // js2-additional-externs: ("$" "JSON" "showDialogBox" "formToDictionary" "\
 // dictionaryToForm" "_" "toLabeledBrackets" "startnode" "endnode" "\
 // wnodeString" "updateSelection" "leafBefore" "resetIds" "\
-// resetLabelClasses" "getLabel")
+// resetLabelClasses" "getLabel" "testValidLeafLabel" "basesAndDashes" "\
+// getIndex" "coIndex")
 // indent-tabs-mode: nil
 // End:

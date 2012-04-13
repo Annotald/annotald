@@ -321,6 +321,7 @@ function navigationWarning() {
     if ($("#editpane").html() != lastsavedstate) {
         return "Unsaved changes exist, are you sure you want to leave the page?";
     }
+    return undefined;
 }
 
 function assignEvents() {
@@ -978,22 +979,25 @@ function displayRename() {
             event.preventDefault();
         }
         function postChange(newNode) {
-            if(isIpNode(getLabel(newNode))) {
-                newNode.addClass("ipnode");
-            } else {
-                newNode.removeClass("ipnode");
+            if (newNode) {
+                if(isIpNode(getLabel(newNode))) {
+                    newNode.addClass("ipnode");
+                } else {
+                    newNode.removeClass("ipnode");
+                }
+                newNode.removeClass(oldClass);
+                newNode.addClass(getLabel(newNode));
+                startnode = endnode = null;
+                resetIds();
+                updateSelection();
+                document.body.onkeydown = handleKeyDown;
             }
-            newNode.removeClass(oldClass);
-            newNode.addClass(getLabel(newNode));
-            startnode = endnode = null;
-            resetIds();
-            updateSelection();
-            document.body.onkeydown = handleKeyDown;
             // TODO(AWE): check that theNewPhrase id gets removed...it
             // doesn't seem to?
         }
         var label = getLabel($(startnode));
         label = label.replace(/'/g, "&#39;");
+        var editor;
         if ($("#"+startnode.id+">.wnode").size() > 0) {
             // this is a terminal
             var word, lemma, useLemma;
@@ -1024,21 +1028,42 @@ function displayRename() {
             }
             editorHtml += "</div>";
 
-            var editor=$(editorHtml);
+            editor = $(editorHtml);
             $(startnode).replaceWith(editor);
             if (!isEmpty(word)) {
                 $("#leaftextbox").attr("disabled", true);
             }
             $("#leafphrasebox,#leaftextbox,#leaflemmabox").keydown(
                 function(event) {
-                    if (event.keyCode == '9') {
+                    var replText, replNode;
+                    if (event.keyCode == 9) {
                           var elementId = (event.target || event.srcElement).id;
                     }
-                    if (event.keyCode == '32') {
+                    if (event.keyCode == 32) {
                         space(event);
                     }
-                    if (event.keyCode == '13') {
-                        var newphrase = $("#leafphrasebox").val().toUpperCase()+" ";
+                    if (event.keyCode == 27) {
+                        replText = "<div class='snode'>" +
+                            label + " <span class='wnode'>" + word;
+                        if (useLemma) {
+                            replText += "<span class='lemma " + lemmaClass + "'>-" +
+                                lemma + "</span>";
+                        }
+                        replText += "</span></div>";
+                        replNode = $(replText);
+                        $("#leafeditor").replaceWith(replNode);
+                        postChange(replNode);
+                    }
+                    if (event.keyCode == 13) {
+                        var newphrase =
+                                $("#leafphrasebox").val().toUpperCase()+" ";
+                        if (typeof testValidLeafLabel !== "undefined") {
+                            if (!testValidLeafLabel(newphrase)) {
+                                displayWarning("Not a valid leaf label: '" +
+                                              newphrase + "'.");
+                                return;
+                            }
+                        }
                         var newtext = $("#leaftextbox").val();
                         var newlemma;
                         if (useLemma) {
@@ -1050,14 +1075,14 @@ function displayRename() {
                         newtext = newtext.replace(/</g,"&lt;");
                         newtext = newtext.replace(/>/g,"&gt;");
                         newtext = newtext.replace(/'/g,"&#39;");
-                        var replText = "<div class='snode'>" +
+                        replText = "<div class='snode'>" +
                             newphrase + " <span class='wnode'>" + newtext;
                         if (useLemma) {
                             replText += "<span class='lemma " + lemmaClass + "'>-" +
                                 newlemma + "</span>";
                         }
                         replText += "</span></div>";
-                        var replNode = $(replText);
+                        replNode = $(replText);
                         $("#leafeditor").replaceWith(replNode);
                         postChange(replNode);
                     }
@@ -1065,21 +1090,32 @@ function displayRename() {
             setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
         } else {
             // this is not a terminal
-            var editor=$("<input id='labelbox' class='labeledit' type='text' " +
-                         "value='" + label + "' />");
+            editor = $("<input id='labelbox' class='labeledit' " +
+                           "type='text' value='" + label + "' />");
             var origNode = $(startnode);
             textNode(origNode).replaceWith(editor);
             $("#labelbox").keydown(
                 function(event) {
-                    if (event.keyCode == '9') {
+                    if (event.keyCode == 9) {
                         // tab, do nothing
                           var elementId = (event.target || event.srcElement).id;
                     }
-                    if (event.keyCode == '32') {
+                    if (event.keyCode == 32) {
                         space(event);
                     }
-                    if (event.keyCode == '13') {
+                    if (event.keyCode == 27) {
+                        $("#labelbox").replaceWith(label + " ");
+                        postChange(origNode);
+                    }
+                    if (event.keyCode == 13) {
                         var newphrase = $("#labelbox").val().toUpperCase();
+                        if (typeof testValidPhraseLabel !== "undefined") {
+                            if (!testValidPhraseLabel(newphrase)) {
+                                displayWarning("Not a valid phrase label: '" +
+                                              newphrase + "'.");
+                                return;
+                            }
+                        }
                         $("#labelbox").replaceWith(newphrase + " ");
                         postChange(origNode);
                     }
@@ -1494,8 +1530,12 @@ function getIndexType (node) {
     if (getIndex(node) < 0) {
         return -1;
     }
-
-    var label = getLabel(node);
+    var label;
+    if (shouldIndexLeaf(node)) {
+        label = wnodeString(node);
+    } else {
+        label = getLabel(node);
+    }
     var lastpart = parseIndexType(label);
     return lastpart;
 }
@@ -1548,14 +1588,22 @@ function maxIndex(tokenRoot) {
 }
 
 function removeIndex(node) {
+    node = $(node);
     if (getIndex(node) == -1) {
         return;
     }
-    var label = getLabel($(node));
-    setNodeLabel($(node),
-                 label.substr(0, Math.max(label.lastIndexOf("-"),
-                                          label.lastIndexOf("="))),
-                 true);
+    var label, setLabelFn;
+    if (shouldIndexLeaf(node)) {
+        label = wnodeString(node);
+        setLabelFn = setLeafLabel;
+    } else {
+        label = getLabel(node);
+        setLabelFn = setNodeLabel;
+    }
+    setLabelFn(node,
+               label.substr(0, Math.max(label.lastIndexOf("-"),
+                                        label.lastIndexOf("="))),
+               true);
 }
 
 function coIndex() {
@@ -1975,10 +2023,26 @@ function setInputFieldEnter(field, fn) {
     });
 }
 
+function displayWarning(text) {
+    $("#messageBoxInner").text(text).css("color", "orange");
+}
+
+function basesAndDashes(bases, dashes) {
+    function _basesAndDashes(string) {
+        var spl = string.split("-");
+        var b = spl.shift();
+        return (bases.indexOf(b) > -1) &&
+            _.all(spl, function (x) { return (dashes.indexOf(x) > -1); });
+    }
+    return _basesAndDashes;
+}
+
 // TODO: badly need a DSL for forms
 
 // Local Variables:
-// js2-additional-externs: ("$" "setTimeout" "customCommands" "customConLeafBefore\
-// " "customConMenuGroups" "extensions" "vextensions" "clause_extensions" "JSON")
+// js2-additional-externs: ("$" "setTimeout" "customCommands\
+// " "customConLeafBefore" "customConMenuGroups" "extensions" "vextensions\
+// " "clause_extensions" "JSON" "testValidLeafLabel" "testValidPhraseLabel\
+// " "_")
 // indent-tabs-mode: nil
 // End:
