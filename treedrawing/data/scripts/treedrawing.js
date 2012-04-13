@@ -1057,7 +1057,7 @@ function displayRename() {
                     if (event.keyCode == 13) {
                         var newphrase =
                                 $("#leafphrasebox").val().toUpperCase()+" ";
-                        if (typeof testValidLeafLabel !== undefined) {
+                        if (typeof testValidLeafLabel !== "undefined") {
                             if (!testValidLeafLabel(newphrase)) {
                                 displayWarning("Not a valid leaf label: '" +
                                               newphrase + "'.");
