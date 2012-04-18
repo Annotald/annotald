@@ -811,6 +811,9 @@ function makeLeaf(before, label, word, targetId) {
                 if (label.substring(0,3) == "PRO") {
                     label = "NP";
                 }
+            } else if (label.startsWith("CL")) {
+                word = "*CL*";
+                label = getLabel($(endnode));
             }
             doCoindex = true;
         } else { // abort if selecting from different tokens
