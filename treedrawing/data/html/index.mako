@@ -50,14 +50,12 @@ any later version.  See the LICENSE file for more information. -->
         <input class="menubutton" type="button" value="Exit" id="butexit" /><br />
 
         <div id="idlestatus"></div>
-        <div id="saveresult"></div>
       </div>
 
       <div id="toolsMenu" class="menuPane">
         <div class="menuTitle">Tools</div>
         <input class="menubutton" type="button" value="Validate" id="butvalidate" /><br />
         <input class="menubutton" type="button" value="Next Error" id="butnexterr" /><br />
-        <div id="toolsMsg"></div>
       </div>
       <div id="metadataEditor"
 %if not usemetadata:

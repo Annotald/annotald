@@ -283,19 +283,18 @@ function saveHandler (data) {
     if (data['result'] == "success") {
         // TODO(AWE): add time of last successful save
         // TODO(AWE): add filename to avoid overwriting another file
-        $("#saveresult").html("<div style='color:green'>Save success</div>");
+        displayInfo("Save success.");
     } else {
         lastsavedstate = "";
-        $("#saveresult").html("<div style='color:red'>Save FAILED!!</div>");
+        displayError("Save FAILED!!!");
     }
     saveInProgress = false;
 }
 
 function save() {
     if (!saveInProgress) {
-        $("#saveresult").html("");
         var tosave = toLabeledBrackets($("#editpane"));
-        $("#saveresult").html("<div style='color:red'>Saving...</div>");
+        displayInfo("Saving...");
         $.post("/doSave", {trees: tosave}, saveHandler);
         if ($("#idlestatus").html().search("IDLE") != -1) {
             idle();
@@ -1804,22 +1803,19 @@ var validatingCurrently = false;
 function validateTrees() {
     if (!validatingCurrently) {
         validatingCurrently = true;
-        $("#toolsMsg").html("");
         var toValidate = toLabeledBrackets($("#editpane"));
-        $("#toolsMsg").html("<div style='color:red'>Validating...</div>");
+        displayInfo("Validating...");
         $.post("/doValidate", {trees: toValidate}, validateHandler);
     }
 }
 
 function validateHandler(data) {
     if (data['result'] == "success") {
-        $("#toolsMsg").html("<div style='color:green'>Validate success</div>");
+        displayInfo("Validate success.");
         $("#editpane").html(data['html']);
         documentReadyHandler();
-    } else if (data['result'] == "no-validator") {
-        $("#toolsMsg").html("<div style='color:red'>No validator script!!</div>");
-    } else {
-        $("#toolsMsg").html("<div style='color:red'>Validate FAILED!!</div>");
+    } else if (data['result'] == "failure") {
+        displayWarning("Validate failed: " + data['reason']);
     }
     validatingCurrently = false;
     // TODO(AWE): more nuanced distinction between validation found errors and
@@ -2027,6 +2023,15 @@ function displayWarning(text) {
     $("#messageBoxInner").text(text).css("color", "orange");
 }
 
+function displayInfo(text) {
+    $("#messageBoxInner").text(text).css("color", "green");
+}
+
+function displayError(text) {
+    $("#messageBoxInner").text(text).css("color", "red");
+}
+
+// TODO: should allow numeric indices
 function basesAndDashes(bases, dashes) {
     function _basesAndDashes(string) {
         var spl = string.split("-");
