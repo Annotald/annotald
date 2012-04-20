@@ -33,7 +33,11 @@ var caseTags=["N","NS","NPR","NPRS",
  * label for a branching (-Phrase-) and non-branching (-Leaf-) label, and
  * false otherwise.  The utility function basesAndDashes is provided.  It
  * takes two arguments, a list of base tags and a list of dash tags.  It
- * returns a function suitable for assigning to one of these variables.*/
+ * returns a function suitable for assigning to one of these variables. The
+ * recommended way to accomplish this, however, is to use the waxeye parser
+ * generator.  Samples and documentation for this method have yet to be
+ * written.
+ */
 var testValidPhraseLabel = undefined;
 var testValidLeafLabel   = undefined;
 
