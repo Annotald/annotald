@@ -23,6 +23,7 @@
 // - (AWE) what happens when you delete e.g. an NP node w metadata?
 //   Does the metadata get blown away? pro/demoted? Does deletion fail, or
 //   raise a prompt?
+// - strict mode
 
 var startnode = null;
 var endnode = null;
