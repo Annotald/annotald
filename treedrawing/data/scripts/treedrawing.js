@@ -335,6 +335,8 @@ function assignEvents() {
     $("#butexit").mousedown(quitServer);
     $("#butvalidate").mousedown(validateTrees);
     $("#butnexterr").unbind("click").click(nextValidationError);
+    $("#butnexttree").unbind("click").click(nextTree);
+    $("#butprevtree").unbind("click").click(prevTree);
     $("#editpane").mousedown(clearSelection);
     $("#conMenu").mousedown(hideContextMenu);
     $(document).mousewheel(handleMouseWheel);
@@ -2040,6 +2042,42 @@ function basesAndDashes(bases, dashes) {
             _.all(spl, function (x) { return (dashes.indexOf(x) > -1); });
     }
     return _basesAndDashes;
+}
+
+function nextTree(e) {
+    var find = undefined;
+    if (e.shiftKey) find = "-FLAG";
+    advanceTree("/nextTree", find);
+}
+
+function prevTree(e) {
+    var find = undefined;
+    if (e.shiftKey) find = "-FLAG";
+    advanceTree("/prevTree", find);
+}
+
+function advanceTree(where, find) {
+    var theTrees = toLabeledBrackets($("#editpane"));
+    displayInfo("Fetching tree...");
+    $.ajax(where,
+           { async: false,
+             success: function(res) {
+                 if (res['result'] == "failure") {
+                     displayWarning("Fetching tree failed: " + res['reason']);
+                 } else {
+                     // TODO: what to do about the save warning
+                     $("#editpane").html(res['tree']);
+                     resetIds();
+                     resetLabelClasses(false);
+                     undostack = new Array();
+                     document.body.onkeydown = handleKeyDown;
+                     $(".snode").mousedown(handleNodeClick);
+                     displayInfo("Tree fetched.");
+                 }
+             },
+             dataType: "json",
+             type: "POST",
+             data: {trees: theTrees, find: find}});
 }
 
 // TODO: badly need a DSL for forms

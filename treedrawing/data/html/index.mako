@@ -40,6 +40,10 @@ any later version.  See the LICENSE file for more information. -->
         <input class="menubutton" type="button" value="Save" id="butsave" /><br />
         <input class="menubutton" type="button" value="Undo" id="butundo" /><br />
         <input class="menubutton" type="button" value="Redo" id="butredo" /><br />
+%if oneTree:
+        <input class="menubutton" type="button" value="Prev Tree" id="butprevtree" /><br />
+        <input class="menubutton" type="button" value="Next Tree" id="butnexttree" /><br />
+%endif
 %if usetimelog:
         <input class="menubutton" type="button" value="Idle/Resume" id="butidle" /><br />
 %endif

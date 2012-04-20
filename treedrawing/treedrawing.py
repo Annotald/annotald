@@ -68,15 +68,27 @@ class Treedraw(object):
                    'tools.caching.on'      : False
                    }
 
+    def integrateTrees(self, trees):
+        if self.options.oneTree:
+            del self.trees[self.treeIndex]
+            trees = trees.strip().split("\n\n")
+            trees.reverse()
+            for t in trees:
+                self.trees.insert(self.treeIndex, t)
+            return "\n\n".join(self.trees)
+        else:
+            return trees.strip()
+
     @cherrypy.expose
     def doSave(self, trees = None):
+        tosave = self.integrateTrees(trees)
+        tosave = tosave.replace("-FLAG", "")
         try:
             print "self.thefile is: ", self.thefile
             os.rename(self.thefile, self.thefile + '.bak')
             # JB: using codecs here when in Mac OS X
             f = codecs.open(self.thefile, 'w', 'utf-8')
             f.write(self.versionCookie + "\n\n")
-            tosave = trees.strip().replace("-FLAG", "")
             f.write(tosave)
             f.close()
             cmdline = 'java -classpath ' + CURRENT_DIR + '/../CS_Tony_oct19.jar' + \
@@ -101,10 +113,10 @@ class Treedraw(object):
     def doValidate(self, trees = None):
         cherrypy.response.headers['Content-Type'] = 'application/json'
         if not self.options.validator:
-            return json.dumps(dict(result = "no-validator"))
-
+            return json.dumps(dict(result = "failure",
+                                   reason = "No validator specified"))
         try:
-            tovalidate = trees.strip()
+            tovalidate = self.integrateTrees(trees)
             # If the validator script is inside the cwd, then it looks like an
             # unqualified path and it gets searched for in $PATH, instead of
             # in the cwd.  So here we make an absolute pathname to fix that.
@@ -120,13 +132,21 @@ class Treedraw(object):
             utf8_reader = codecs.getreader("utf-8")
             stream = utf8_reader(validator.stdout)
             validated = stream.read()
-            validatedHtml = self.loadPsd(None, text = validated)
+            validatedTrees = self.readTrees(None, text = validated)
+
+            # this smells duplicated from the index method
+            if self.options.oneTree:
+                self.trees = validatedTrees
+                validatedHtml = self.treesToHtml([self.trees[self.treeIndex]])
+            else:
+                validatedHtml = self.treesToHtml(currentTrees)
 
             return json.dumps(dict(result = "success",
                                    html = validatedHtml))
         except Exception as e:
             print "something went wrong: %s, %s" % (type(e), e)
-            return json.dumps(dict(result = "failure"))
+            return json.dumps(dict(result = "failure",
+                                   reason = str(e)))
 
     @cherrypy.expose
     def doIdle(self):
@@ -157,22 +177,21 @@ class Treedraw(object):
     @cherrypy.expose
     def test(self):
         currentSettings = open(self.options.settings).read()
-        currentTree = self.loadPsd(None, text="""
+        currentTree = self.readTrees(None, text="""
 ( (IP-MAT (NP-SBJ (D This)) (BEP is) (NP-PRD (D a) (N test)))
   (ID test-01))
 """)
+        currentTree = self.treesToHtml(currentTree)
 
         return self.renderIndex(currentTree, currentSettings, True)
 
     @cherrypy.expose
     def testLoadTrees(self, trees = None):
         cherrypy.response.headers['Content-Type'] = 'application/json'
-        return json.dumps(dict(trees = self.loadPsd(None, text = trees)))
+        return json.dumps(dict(
+                trees = self.treesToHtml(self.readTrees(None, text = trees))))
 
-    def loadPsd(self, fileName, text = None):
-        # TODO(AWE): remove
-        # self.thefile = fileName
-
+    def readTrees(self, fileName, text = None):
         if text:
             currentText = text
         else:
@@ -190,15 +209,18 @@ class Treedraw(object):
         self.versionCookie = ""
         if versionMatch:
             self.versionCookie = versionMatch.group()
-        useLemmata = util.queryVersionCookie(self.versionCookie, fmt = "dash")
         currentText = re.sub(versionRe, '', currentText)
-        currentText = currentText.replace("<","&lt;")
-        currentText = currentText.replace(">","&gt;")
-        trees = currentText.split("\n\n")
+        trees = currentText.strip().split("\n\n")
 
+        return trees
+
+    def treesToHtml(self, trees):
+        useLemmata = util.queryVersionCookie(self.versionCookie, fmt = "dash")
         alltrees = '<div class="snode">'
         for tree in trees:
             tree = tree.strip()
+            tree = tree.replace("<","&lt;")
+            tree = tree.replace(">","&gt;")
             if not tree == "":
                 nltk_tree = T.Tree(tree)
                 alltrees = alltrees + self.conversionFn(nltk_tree, useLemmata)
@@ -240,15 +262,61 @@ class Treedraw(object):
                                     usetimelog = self.options.timelog,
                                     usemetadata = self.useMetadata,
                                     test = test,
-                                    extraScripts =
-                                    self.pythonOptions['extraJavascripts'])
+                                    oneTree = self.options.oneTree,
+                                    extraScripts = self.pythonOptions['extraJavascripts']
+                                    )
 
     @cherrypy.expose
     def index(self):
         currentSettings = open(self.options.settings).read()
-        currentTree = self.loadPsd(self.thefile)
+        currentTrees = self.readTrees(self.thefile)
+        if self.options.oneTree:
+            self.trees = currentTrees
+            self.treeIndex = 0
+            currentHtml = self.treesToHtml([self.trees[self.treeIndex]])
+        else:
+            currentHtml = self.treesToHtml(currentTrees)
 
-        return self.renderIndex(currentTree, currentSettings, False)
+        return self.renderIndex(currentHtml, currentSettings, False)
+
+    @cherrypy.expose
+    def nextTree(self, trees = None, find = None):
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        return self.advanceTree(1, trees, find)
+
+    @cherrypy.expose
+    def prevTree(self, trees = None, find = None):
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        return self.advanceTree(-1, trees, find)
+
+    def advanceTree(self, offset, trees = None, find = None):
+        if not self.options.oneTree:
+            return json.dumps(dict(result = 'failure',
+                                   reason = 'Not in one-tree mode.'))
+        else:
+            oldindex = self.treeIndex
+            self.integrateTrees(trees)
+            while True:
+                self.treeIndex = self.treeIndex + offset
+                if self.treeIndex >= len(self.trees):
+                    self.treeIndex = oldindex
+                    return json.dumps(dict(result = 'failure',
+                                       reason = 'At end of file.'))
+                elif self.treeIndex < 0:
+                    self.treeIndex = oldindex
+                    return json.dumps(dict(result = 'failure',
+                                           reason = 'At beginning of file.'))
+                if not find:
+                    # my kingdom for a do...while loop
+                    break
+                if find in self.trees[self.treeIndex]:
+                    break
+
+            return json.dumps(
+                dict(result = 'success',
+                     tree = self.treesToHtml([self.trees[self.treeIndex]])))
+
+
 
 #index.exposed = True
 parser = argparse.ArgumentParser(usage = "%prog [options] file.psd",
@@ -268,10 +336,14 @@ parser.add_argument("-q", "--quiet", dest = "timelog", action = "store_false",
 silence the timelogging")
 parser.add_argument("-S", "--python-settings", dest = "pythonSettings",
                     action = "store", help = "path to Python settings file")
+parser.add_argument("-1", "--one-tree-mode", dest = "oneTree",
+                     action = "store_true",
+                     help = "start Annotald in one-tree mode")
 parser.add_argument("psd", nargs='+')
 parser.set_defaults(port = 8080,
                     settings = sys.path[0] + "/settings.js",
-                    pythonSettings = sys.path[0] + "/settings.py")
+                    pythonSettings = sys.path[0] + "/settings.py",
+                    oneTree = False)
 args = parser.parse_args()
 shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
 
