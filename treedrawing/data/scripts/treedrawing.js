@@ -892,10 +892,12 @@ function emergencyExitEdit() {
     postChange(replNode);
 }
 
-function showDialogBox(title, html) {
+function showDialogBox(title, html, returnFn) {
     document.body.onkeydown = function (e) {
         if (e.keyCode == 27) { // escape
             hideDialogBox();
+        } else if (e.keyCode == 13 && returnFn) {
+            returnFn();
         }
     };
     html = '<div class="menuTitle">' + title + '</div>' +
