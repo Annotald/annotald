@@ -1247,11 +1247,27 @@ function toggleStringExtension (oldlabel, extension, extensionList) {
     return out;
 }
 
+function guessLeafNode(node) {
+    if (typeof testValidLeafLabel   !== "undefined" &&
+        typeof testValidPhraseLabel !== "undefined") {
+        if (testValidPhraseLabel(getLabel(node))) {
+            return false;
+        } else if (testValidLeafLabel(getLabel(node))) {
+            return true;
+        } else {
+            // not a valid label, fall back to structural check
+            return isLeafNode(node);
+        }
+    } else {
+        return isLeafNode(node);
+    }
+}
+
 function toggleExtension(extension) {
     if (!startnode || endnode) return;
 
     var extensionList;
-    if (isLeafNode(startnode)) {
+    if (guessLeafNode(startnode)) {
         extensionList = vextensions;
     } else if (getLabel($(startnode)).split("-")[0] == "IP" ||
                getLabel($(startnode)).split("-")[0] == "CP") {
