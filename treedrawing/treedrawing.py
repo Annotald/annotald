@@ -28,6 +28,7 @@ import subprocess
 from mako.template import Template
 import util
 import runpy
+import time
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -61,6 +62,7 @@ class Treedraw(object):
             self.conversionFn = util.treeToHtml
             self.useMetadata = False
         self.pythonOptions = runpy.run_path(args.pythonSettings)
+        self.startTime = str(int(time.time()))
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
@@ -80,7 +82,11 @@ class Treedraw(object):
             return trees.strip()
 
     @cherrypy.expose
-    def doSave(self, trees = None):
+    def doSave(self, trees = None, startTime = None, force = None):
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        if (startTime != self.startTime) and not (force == "true"):
+            return json.dumps(dict(result = "failure",
+                                   reason = "non-matching invocations of Annotald"))
         tosave = self.integrateTrees(trees)
         tosave = tosave.replace("-FLAG", "")
         try:
@@ -97,7 +103,6 @@ class Treedraw(object):
             # check_call throws on child error exit
             subprocess.check_call(cmdline.split(" "))
             os.rename(self.thefile + '.out', self.thefile)
-            cherrypy.response.headers['Content-Type'] = 'application/json'
             if self.options.timelog:
                 with open("timelog.txt", "a") as timelog:
                     timelog.write(self.shortfile + ": Saved at " +
@@ -106,8 +111,8 @@ class Treedraw(object):
             return json.dumps(dict(result = "success"))
         except Exception as e:
             print "something went wrong: %s" % e
-            cherrypy.response.headers['Content-Type'] = 'application/json'
-            return json.dumps(dict(result = "failure"))
+            return json.dumps(dict(result = "failure",
+                                   reason = "server got an exception"))
 
     @cherrypy.expose
     def doValidate(self, trees = None):
@@ -263,7 +268,8 @@ class Treedraw(object):
                                     usemetadata = self.useMetadata,
                                     test = test,
                                     oneTree = self.options.oneTree,
-                                    extraScripts = self.pythonOptions['extraJavascripts']
+                                    extraScripts = self.pythonOptions['extraJavascripts'],
+                                    startTime = self.startTime
                                     )
 
     @cherrypy.expose

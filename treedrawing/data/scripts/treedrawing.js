@@ -287,16 +287,21 @@ function saveHandler (data) {
         displayInfo("Save success.");
     } else {
         lastsavedstate = "";
-        displayError("Save FAILED!!!");
+        displayError("Save FAILED!!!: " + data['reason']);
     }
     saveInProgress = false;
 }
 
-function save() {
+function save(e, force) {
     if (!saveInProgress) {
-        var tosave = toLabeledBrackets($("#editpane"));
+        if (force) {
+            force = true;
+        } else {
+            force = false;
+        }
         displayInfo("Saving...");
-        $.post("/doSave", {trees: tosave}, saveHandler);
+        var tosave = toLabeledBrackets($("#editpane"));
+        $.post("/doSave", {trees: tosave, startTime: startTime, force: force}, saveHandler);
         if ($("#idlestatus").html().search("IDLE") != -1) {
             idle();
         }
@@ -2088,6 +2093,6 @@ function advanceTree(where, find) {
 // js2-additional-externs: ("$" "setTimeout" "customCommands\
 // " "customConLeafBefore" "customConMenuGroups" "extensions" "vextensions\
 // " "clause_extensions" "JSON" "testValidLeafLabel" "testValidPhraseLabel\
-// " "_")
+// " "_" "startTime")
 // indent-tabs-mode: nil
 // End:
