@@ -2105,6 +2105,45 @@ function advanceTree(where, find) {
              data: {trees: theTrees, find: find}});
 }
 
+function splitWord() {
+    if (!startnode || endnode) return;
+    if (!isLeafNode($(startnode))) return;
+    var origWord = wnodeString($(startnode)).split("-")[0];
+    function doSplit() {
+        var words = $("#splitWordInput").val().split("@");
+        if (words.join("") != origWord) {
+            displayWarning("The two new words don't match the original.  Aborting");
+            return;
+        }
+        if (words.length != 2) {
+            displayWarning("You can only split in one place at a time.");
+            return;
+        }
+        setLeafLabel($(startnode), words[0] + "$");
+        var hasLemma = $(startnode).find(".lemma").size() > 0;
+        makeLeaf(false, "X", "$" + words[1]);
+        if (hasLemma) {
+            addLemma();
+        }
+        hideDialogBox();
+    }
+    var html = "Enter an at-sign at the place to split the word: \
+<input type='text' id='splitWordInput' value='" + origWord +
+"' /><div id='dialogButtons'><input type='button' id='splitWordButton'\
+ value='Split' /></div>";
+    showDialogBox("Split word", html, doSplit);
+    $("#splitWordButton").click(doSplit);
+    $("#splitWordInput").focus();
+}
+
+function addLemma() {
+    // This only makes sense for dash-format corpora
+    if (!startnode || endnode) return;
+    if (!isLeafNode($(startnode))) return;
+    var theLemma = $("<span class='lemma " + lemmaClass + "'>-XXX</span>");
+    $(startnode).children(".wnode").append(theLemma);
+}
+
 // TODO: badly need a DSL for forms
 
 // Local Variables:
