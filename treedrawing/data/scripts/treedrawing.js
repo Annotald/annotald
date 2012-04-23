@@ -1804,7 +1804,7 @@ function isLeafNode(node) {
     // TODO (AWE): for certain purposes, it would be desirable to treat leaf
     // nodes as non-leaves.  e.g. for dash tag toggling, a trace should be
     // "not a leaf"
-    return $("#" + node.id + ">.wnode").size() > 0;
+    return $(node).children(".wnode").size() > 0;
 }
 
 var validatingCurrently = false;
