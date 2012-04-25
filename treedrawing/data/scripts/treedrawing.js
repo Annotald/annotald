@@ -545,6 +545,10 @@ function moveNode(parent) {
     } else if ($(startnode).parents().is(parent)) {
         // move up if moving to a node that is already my parent
         if ($(startnode).parent().children().first().is(startnode)) {
+            if ($(startnode).parentsUntil(parent).slice(0,-1).
+                filter(":not(:first-child)").size() > 0) {
+                return;
+            }
             stackTree();
             $(startnode).insertBefore($(parent).children().filter(
                                                  $(startnode).parents()));
@@ -555,6 +559,10 @@ function moveNode(parent) {
                 resetIds();
             }
         } else if ($(startnode).parent().children().last().is(startnode)) {
+            if ($(startnode).parentsUntil(parent).slice(0,-1).
+                filter(":not(:last-child)").size() > 0) {
+                return;
+            }
             stackTree();
             $(startnode).insertAfter($(parent).children().
                                      filter($(startnode).parents()));
@@ -576,7 +584,12 @@ function moveNode(parent) {
         // a.compareDocumentPosition(b) returns an integer.  The first (counting
         // from 0) bit is set if B precedes A, and the second bit is set if A
         // precedes B.
-        if (parent.compareDocumentPosition(startnode) & 0x4) {
+
+        // TODO: perhaps here and in the immediately following else if it is
+        // possible to simplify and remove the compareDocumentPosition call,
+        // since the jQuery subsumes it
+        if ((parent.compareDocumentPosition(startnode) & 0x4) &&
+            $(parent).next().is(startnode)) {
             // parent precedes startnode
             stackTree();
             if (tokenMerge) {
@@ -592,7 +605,8 @@ function moveNode(parent) {
                     resetIds();
                 }
             }
-        } else if (parent.compareDocumentPosition(startnode) & 0x2) {
+        } else if ((parent.compareDocumentPosition(startnode) & 0x2) &&
+                   $(startnode).next().is(parent)) {
             // startnode precedes parent
             stackTree();
             if (tokenMerge) {
