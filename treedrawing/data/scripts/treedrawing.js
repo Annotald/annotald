@@ -654,105 +654,14 @@ function moveNodes(parent) {
     } else {
         return; // they are not sisters
     }
-    resetIds();
-    var toselect = $(".snode[xxx=newnode]").first();
-
-    // TODO(AWE): what it seems this fn is doing is:
-    // 1) create a dummy parent node over the nodes to move
-    // 2) move this as a single node to the destination
-    // 3) delete the dummy node
-    // If this is true, then step (2) should be accomplisehd by calling
-    // moveNode().  It also may be a good idea to factor out moveNode into
-    // an error-checking part and a movement part, so this fn can do its
-    // own error checking, w/o having to duplicate
-
+    var toselect = $(".snode[xxx=newnode]").first().get(0);
     // BUG when making XP and then use context menu: todo XXX
-    clearSelection();
-    selectNode(toselect);
-    toselect.attr("xxx",null);
-    updateSelection();
-    resetIds();
 
-    parent = destination;
-
-    if (!isPossibleTarget(parent)) {
-        //alert("can't move under a tag node");
-        undo();
-        redostack.pop();
-        return;
-    } else if ($(startnode).parent().children().length == 1) {
-        //alert("cant move an only child");
-        undo();
-        redostack.pop();
-        return;
-    } else if ($(parent).parents().is(startnode)) {
-        //alert("can't move under one's own child");
-        undo();
-        redostack.pop();
-        return;
-    } else if ($(startnode).parents().is(parent)) {
-        // move up if moving to a node that is already my parent
-        if ($(startnode).parent().children().first().is(startnode)) {
-            //stackTree();
-            $(startnode).insertBefore($(parent).children().
-                                      filter($(startnode).parents()));
-            //resetIds();
-            //pruneNode();
-
-            if (currentText(parent_ip) != textbefore) {
-                undo();
-                redostack.pop();
-                return;
-            } else {
-                resetIds();
-            }
-        } else if ($(startnode).parent().children().last().is(startnode)) {
-            //stackTree();
-             $(startnode).insertAfter($(parent).children().
-                                         filter($(startnode).parents()));
-            if (currentText(parent_ip) != textbefore) {
-                undo();
-                redostack.pop();
-                return;
-            } else {
-                resetIds();
-            }
-        } else {
-            // alert("cannot move from this position");
-            undo();
-            redostack.pop();
-            return;
-        }
-    } else {
-        // otherwise move under my sister
-        // if( parseInt( startnode.id.substr(2) ) >  parseInt( targetParent.substr(2) ) ){
-        if (parent.compareDocumentPosition(startnode) & 0x4) {
-            // parent precedes startnode
-            //stackTree();
-            $(startnode).appendTo(parent);
-            if (currentText(parent_ip) != textbefore) {
-                undo();
-                redostack.pop();
-                return;
-            } else {
-                resetIds();
-            }
-            //}
-        } else if (parent.compareDocumentPosition(startnode) & 0x2) {
-            // startnode precedes parent
-            //stackTree();
-            $(startnode).insertBefore($(parent).children().first());
-            if (currentText(parent_ip) != textbefore) {
-                undo();
-                redostack.pop();
-                return;
-            } else {
-                resetIds();
-            }
-        } // TODO: conditional is not exhaustive
-    }
-    var movedNodes = $(startnode).children();
-    $(startnode).replaceWith(movedNodes);
+    startnode = toselect;
+    moveNode(parent);
+    startnode = toselect;
+    endnode = undefined;
+    pruneNode();
     clearSelection();
 }
 
