@@ -29,6 +29,7 @@ from mako.template import Template
 import util
 import runpy
 import time
+import cherrypy.lib.caching
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -275,6 +276,7 @@ class Treedraw(object):
 
     @cherrypy.expose
     def index(self):
+        cherrypy.lib.caching.expires(0, force = True)
         currentSettings = open(self.options.settings).read()
         currentTrees = self.readTrees(self.thefile)
         if self.options.oneTree:
