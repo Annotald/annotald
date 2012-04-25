@@ -269,7 +269,8 @@ class Treedraw(object):
                                     test = test,
                                     oneTree = self.options.oneTree,
                                     extraScripts = self.pythonOptions['extraJavascripts'],
-                                    startTime = self.startTime
+                                    startTime = self.startTime,
+                                    debugJs = self.pythonOptions['debugJs']
                                     )
 
     @cherrypy.expose

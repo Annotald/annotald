@@ -11,7 +11,11 @@ any later version.  See the LICENSE file for more information. -->
     <title>Annotald</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" type="text/css" href="css/treedrawing.css" type="text/css" />
+%if debugJs:
+    <script type= "application/javascript" src="scripts/jquery-debug.js"></script>
+%else:
     <script type= "application/javascript" src="scripts/jquery.js"></script>
+%endif
     <script type= "application/javascript" src="scripts/jquery.mousewheel.min.js"></script>
     <script type= "application/javascript" src="scripts/treedrawing.js"></script>
     <script type= "application/javascript" src="scripts/underscore-min.js"></script>
