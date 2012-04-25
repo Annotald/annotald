@@ -639,10 +639,8 @@ function moveNodes(parent) {
         startnode = endnode;
         endnode = temp;
     }
-    // TODO: check if they are really sisters
-    if ($(startnode).siblings().is(endnode)) {
-        // then, collect startnode and its sister up until endnode
-        var oldtext = currentText(parent_ip);
+    if (startnode.parentNode == endnode.parentNode) {
+        // collect startnode and its sister up until endnode
         $(startnode).add($(startnode).nextUntil(endnode)).
             add(endnode).
             wrapAll('<div xxx="newnode" class="snode">XP</div>');
