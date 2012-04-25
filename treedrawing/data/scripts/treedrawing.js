@@ -2146,6 +2146,6 @@ function addLemma(lemma) {
 // js2-additional-externs: ("$" "setTimeout" "customCommands\
 // " "customConLeafBefore" "customConMenuGroups" "extensions" "vextensions\
 // " "clause_extensions" "JSON" "testValidLeafLabel" "testValidPhraseLabel\
-// " "_" "startTime")
+// " "_" "startTime" "console")
 // indent-tabs-mode: nil
 // End:
