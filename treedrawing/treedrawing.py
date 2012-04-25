@@ -144,7 +144,7 @@ class Treedraw(object):
                 self.trees = validatedTrees
                 validatedHtml = self.treesToHtml([self.trees[self.treeIndex]])
             else:
-                validatedHtml = self.treesToHtml(currentTrees)
+                validatedHtml = self.treesToHtml(validatedTrees)
 
             return json.dumps(dict(result = "success",
                                    html = validatedHtml))
