@@ -556,8 +556,8 @@ function moveNode(parent) {
             }
         } else if ($(startnode).parent().children().last().is(startnode)) {
             stackTree();
-             $(startnode).insertAfter($(parent).children().
-                                      filter($(startnode).parents()));
+            $(startnode).insertAfter($(parent).children().
+                                     filter($(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
