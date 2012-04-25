@@ -64,7 +64,7 @@ def treeToHtml(tree, version, extra_data = None):
     if isinstance(tree[0], str) or isinstance(tree[0], unicode):
         # Leaf node
         if len(tree) > 1:
-            raise Error("Leaf node with more than one daughter!")
+            raise Exception("Leaf node with more than one daughter!: %s" % tree)
         res = '<div class="snode">' + tree.node + '<span class="wnode">'
         temp = tree[0].split("-")
         if version == "dash" and len(temp) > 1 and tree.node != "CODE":
@@ -91,7 +91,7 @@ def treeToHtml(tree, version, extra_data = None):
                 sisters.append(daughter)
             else:
                 if real_root:
-                    raise Error("root tree has too many/unknown daughters!")
+                    raise Exception("root tree has too many/unknown daughters!: %s" % tree)
                 else:
                     real_root = daughter
         xtra_data = sisters
@@ -101,7 +101,7 @@ def treeToHtml(tree, version, extra_data = None):
         if extra_data:
             if "\"" in extra_data:
                 # TODO(AWE): relax this restriction
-                raise Error("can't cope with ID/METADATA containing double-quote yet!")
+                raise Exception("can't cope with ID/METADATA containing double-quote yet!")
             res += ' data-metadata="' + safe_json(nodeListToDict(extra_data)) + '"'
         res += '>' + tree.node + ' '
         res += "\n".join(map(lambda x: treeToHtml(x, version), tree))

@@ -23,6 +23,7 @@
 // - (AWE) what happens when you delete e.g. an NP node w metadata?
 //   Does the metadata get blown away? pro/demoted? Does deletion fail, or
 //   raise a prompt?
+// - strict mode
 
 var startnode = null;
 var endnode = null;
@@ -283,20 +284,24 @@ function saveHandler (data) {
     if (data['result'] == "success") {
         // TODO(AWE): add time of last successful save
         // TODO(AWE): add filename to avoid overwriting another file
-        $("#saveresult").html("<div style='color:green'>Save success</div>");
+        displayInfo("Save success.");
     } else {
         lastsavedstate = "";
-        $("#saveresult").html("<div style='color:red'>Save FAILED!!</div>");
+        displayError("Save FAILED!!!: " + data['reason']);
     }
     saveInProgress = false;
 }
 
-function save() {
+function save(e, force) {
     if (!saveInProgress) {
-        $("#saveresult").html("");
+        if (force) {
+            force = true;
+        } else {
+            force = false;
+        }
+        displayInfo("Saving...");
         var tosave = toLabeledBrackets($("#editpane"));
-        $("#saveresult").html("<div style='color:red'>Saving...</div>");
-        $.post("/doSave", {trees: tosave}, saveHandler);
+        $.post("/doSave", {trees: tosave, startTime: startTime, force: force}, saveHandler);
         if ($("#idlestatus").html().search("IDLE") != -1) {
             idle();
         }
@@ -336,6 +341,8 @@ function assignEvents() {
     $("#butexit").mousedown(quitServer);
     $("#butvalidate").mousedown(validateTrees);
     $("#butnexterr").unbind("click").click(nextValidationError);
+    $("#butnexttree").unbind("click").click(nextTree);
+    $("#butprevtree").unbind("click").click(prevTree);
     $("#editpane").mousedown(clearSelection);
     $("#conMenu").mousedown(hideContextMenu);
     $(document).mousewheel(handleMouseWheel);
@@ -885,10 +892,12 @@ function emergencyExitEdit() {
     postChange(replNode);
 }
 
-function showDialogBox(title, html) {
+function showDialogBox(title, html, returnFn) {
     document.body.onkeydown = function (e) {
         if (e.keyCode == 27) { // escape
             hideDialogBox();
+        } else if (e.keyCode == 13 && returnFn) {
+            returnFn();
         }
     };
     html = '<div class="menuTitle">' + title + '</div>' +
@@ -1056,7 +1065,7 @@ function displayRename() {
                     }
                     if (event.keyCode == 13) {
                         var newphrase =
-                                $("#leafphrasebox").val().toUpperCase()+" ";
+                                $("#leafphrasebox").val().toUpperCase();
                         if (typeof testValidLeafLabel !== "undefined") {
                             if (!testValidLeafLabel(newphrase)) {
                                 displayWarning("Not a valid leaf label: '" +
@@ -1238,11 +1247,27 @@ function toggleStringExtension (oldlabel, extension, extensionList) {
     return out;
 }
 
+function guessLeafNode(node) {
+    if (typeof testValidLeafLabel   !== "undefined" &&
+        typeof testValidPhraseLabel !== "undefined") {
+        if (testValidPhraseLabel(getLabel(node))) {
+            return false;
+        } else if (testValidLeafLabel(getLabel(node))) {
+            return true;
+        } else {
+            // not a valid label, fall back to structural check
+            return isLeafNode(node);
+        }
+    } else {
+        return isLeafNode(node);
+    }
+}
+
 function toggleExtension(extension) {
     if (!startnode || endnode) return;
 
     var extensionList;
-    if (isLeafNode(startnode)) {
+    if (guessLeafNode(startnode)) {
         extensionList = vextensions;
     } else if (getLabel($(startnode)).split("-")[0] == "IP" ||
                getLabel($(startnode)).split("-")[0] == "CP") {
@@ -1510,7 +1535,8 @@ function shouldIndexLeaf(node) {
     var str = wnodeString(node);
     return (str.substring(0,3) == "*T*" ||
             str.substring(0,5) == "*ICH*" ||
-            str.substring(0,4) == "*CL*");
+            str.substring(0,4) == "*CL*" ||
+            $.trim(str) == "*");
 }
 
 function getIndex(node) {
@@ -1796,7 +1822,7 @@ function isLeafNode(node) {
     // TODO (AWE): for certain purposes, it would be desirable to treat leaf
     // nodes as non-leaves.  e.g. for dash tag toggling, a trace should be
     // "not a leaf"
-    return $("#" + node.id + ">.wnode").size() > 0;
+    return $(node).children(".wnode").size() > 0;
 }
 
 var validatingCurrently = false;
@@ -1804,22 +1830,19 @@ var validatingCurrently = false;
 function validateTrees() {
     if (!validatingCurrently) {
         validatingCurrently = true;
-        $("#toolsMsg").html("");
         var toValidate = toLabeledBrackets($("#editpane"));
-        $("#toolsMsg").html("<div style='color:red'>Validating...</div>");
+        displayInfo("Validating...");
         $.post("/doValidate", {trees: toValidate}, validateHandler);
     }
 }
 
 function validateHandler(data) {
     if (data['result'] == "success") {
-        $("#toolsMsg").html("<div style='color:green'>Validate success</div>");
+        displayInfo("Validate success.");
         $("#editpane").html(data['html']);
         documentReadyHandler();
-    } else if (data['result'] == "no-validator") {
-        $("#toolsMsg").html("<div style='color:red'>No validator script!!</div>");
-    } else {
-        $("#toolsMsg").html("<div style='color:red'>Validate FAILED!!</div>");
+    } else if (data['result'] == "failure") {
+        displayWarning("Validate failed: " + data['reason']);
     }
     validatingCurrently = false;
     // TODO(AWE): more nuanced distinction between validation found errors and
@@ -2027,6 +2050,15 @@ function displayWarning(text) {
     $("#messageBoxInner").text(text).css("color", "orange");
 }
 
+function displayInfo(text) {
+    $("#messageBoxInner").text(text).css("color", "green");
+}
+
+function displayError(text) {
+    $("#messageBoxInner").text(text).css("color", "red");
+}
+
+// TODO: should allow numeric indices
 function basesAndDashes(bases, dashes) {
     function _basesAndDashes(string) {
         var spl = string.split("-");
@@ -2037,12 +2069,102 @@ function basesAndDashes(bases, dashes) {
     return _basesAndDashes;
 }
 
+function nextTree(e) {
+    var find = undefined;
+    if (e.shiftKey) find = "-FLAG";
+    advanceTree("/nextTree", find);
+}
+
+function prevTree(e) {
+    var find = undefined;
+    if (e.shiftKey) find = "-FLAG";
+    advanceTree("/prevTree", find);
+}
+
+function advanceTree(where, find) {
+    var theTrees = toLabeledBrackets($("#editpane"));
+    displayInfo("Fetching tree...");
+    $.ajax(where,
+           { async: false,
+             success: function(res) {
+                 if (res['result'] == "failure") {
+                     displayWarning("Fetching tree failed: " + res['reason']);
+                 } else {
+                     // TODO: what to do about the save warning
+                     $("#editpane").html(res['tree']);
+                     resetIds();
+                     resetLabelClasses(false);
+                     undostack = new Array();
+                     document.body.onkeydown = handleKeyDown;
+                     $(".snode").mousedown(handleNodeClick);
+                     displayInfo("Tree fetched.");
+                 }
+             },
+             dataType: "json",
+             type: "POST",
+             data: {trees: theTrees, find: find}});
+}
+
+function splitWord() {
+    if (!startnode || endnode) return;
+    if (!isLeafNode($(startnode))) return;
+    var wordSplit = wnodeString($(startnode)).split("-");
+    var origWord = wordSplit[0];
+    var origLemma = "XXX";
+    if (wordSplit.length == 2) {
+        origLemma = "@" + wordSplit[1] + "@";
+    }
+    var origLabel = getLabel($(startnode));
+    function doSplit() {
+        var words = $("#splitWordInput").val().split("@");
+        if (words.join("") != origWord) {
+            displayWarning("The two new words don't match the original.  Aborting");
+            return;
+        }
+        if (words.length != 2) {
+            displayWarning("You can only split in one place at a time.");
+            return;
+        }
+        var labelSplit = origLabel.split("+");
+        var secondLabel = "X";
+        if (labelSplit.length == 2) {
+            setLeafLabel($(startnode), labelSplit[0]);
+            secondLabel = labelSplit[1];
+        }
+        setLeafLabel($(startnode), words[0] + "$");
+        var hasLemma = $(startnode).find(".lemma").size() > 0;
+        makeLeaf(false, secondLabel, "$" + words[1]);
+        if (hasLemma) {
+            // TODO: move to something like foo@1 and foo@2 for the two pieces
+            // of the lemmata
+            addLemma(origLemma);
+        }
+        hideDialogBox();
+    }
+    var html = "Enter an at-sign at the place to split the word: \
+<input type='text' id='splitWordInput' value='" + origWord +
+"' /><div id='dialogButtons'><input type='button' id='splitWordButton'\
+ value='Split' /></div>";
+    showDialogBox("Split word", html, doSplit);
+    $("#splitWordButton").click(doSplit);
+    $("#splitWordInput").focus();
+}
+
+function addLemma(lemma) {
+    // This only makes sense for dash-format corpora
+    if (!startnode || endnode) return;
+    if (!isLeafNode($(startnode))) return;
+    var theLemma = $("<span class='lemma " + lemmaClass + "'>-" + lemma +
+                     "</span>");
+    $(startnode).children(".wnode").append(theLemma);
+}
+
 // TODO: badly need a DSL for forms
 
 // Local Variables:
 // js2-additional-externs: ("$" "setTimeout" "customCommands\
 // " "customConLeafBefore" "customConMenuGroups" "extensions" "vextensions\
 // " "clause_extensions" "JSON" "testValidLeafLabel" "testValidPhraseLabel\
-// " "_")
+// " "_" "startTime")
 // indent-tabs-mode: nil
 // End:
