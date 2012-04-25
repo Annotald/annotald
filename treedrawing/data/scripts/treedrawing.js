@@ -593,24 +593,21 @@ function moveNode(parent) {
             // parent precedes startnode
             stackTree();
             if (tokenMerge) {
-                addToIndices( movednode, maxindex );
-                movednode.appendTo(parent);
-                resetIds();
+                addToIndices(movednode, maxindex);
+            }
+            movednode.appendTo(parent);
+            if (currentText(parent_ip) != textbefore)  {
+                undo();
+                redostack.pop();
             } else {
-                movednode.appendTo(parent);
-                if (currentText(parent_ip) != textbefore)  {
-                    undo();
-                    redostack.pop();
-                } else {
-                    resetIds();
-                }
+                resetIds();
             }
         } else if ((parent.compareDocumentPosition(startnode) & 0x2) &&
                    $(startnode).next().is(parent)) {
             // startnode precedes parent
             stackTree();
             if (tokenMerge) {
-                addToIndices( movednode, maxindex );
+                addToIndices(movednode, maxindex);
             }
             movednode.insertBefore($(parent).children().first());
             if (currentText(parent_ip) != textbefore) {
