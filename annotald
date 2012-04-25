@@ -12,5 +12,11 @@ try:
 except subprocess.CalledProcessError:
     python_program = "python"
 
+print
+print "You might want to clear your browsing history if you've recently switched Annotald branches!"
+print
+s = raw_input("Press ENTER to continue. ")
+print
+
 os.system(python_program + " " + current_dir +
           "/treedrawing/treedrawing.py " + ' '.join(sys.argv[1:]))
