@@ -91,16 +91,16 @@ function getSuggestions(label) {
     return suggestions.unique();
 }
 
-function loadContextMenu(nodeId) {
-    var nodeIndex = getIndex( $("#"+nodeId) );
+function loadContextMenu(nodeOrig) {
+    var nodeIndex = getIndex( $(nodeOrig) );
     var indexSep = "", indexString = "";
-    var node = $("#"+nodeId).clone();
+    var node = $(nodeOrig).clone();
     var nodelabel = $.trim(getLabel(node));
     function loadConMenuMousedown () {
         var e = window.event;
 	var elementId = (e.target || e.srcElement).id;
 	var suggestion = "" + $(this).text();
-	setNodeLabel($("#" + nodeId), suggestion);
+	setNodeLabel($(nodeOrig), suggestion);
 	hideContextMenu();
     }
 
@@ -117,7 +117,7 @@ function loadContextMenu(nodeId) {
     // TODO(AWE): not portable
     if (/-[NADG]$/.test(nodelabel)) {
 	for (var i = 0; i < caseTags.length; i++) {
-	    var theCase=nodelabel.substr(nodelabel.length - 1);
+	    var theCase = nodelabel.substr(nodelabel.length - 1);
 	    var suggestion = caseTags[i] + "-" + theCase;
 	    if (suggestion != nodelabel) {
 		var newnode = $("<div class='conMenuItem'><a href='#'>" +
@@ -210,16 +210,16 @@ function loadContextMenu(nodeId) {
 	// do the right side context menu
 	var newnode = $("<div class='conMenuItem'><a href='#'>" +
                         extensions[i] + "</a></div>");
-	$(newnode).mousedown(doToggleExtension(nodeId, extensions[i]));
+	$(newnode).mousedown(doToggleExtension(nodeOrig, extensions[i]));
 	$("#conRightest").append(newnode);
     }
 }
 
-function doToggleExtension(nodeId, extension) {
+function doToggleExtension(node, extension) {
     return function() {
 	stackTree();
 	clearSelection();
-	selectNode(nodeId);
+	selectNode(node);
 	toggleExtension(extension);
 	hideContextMenu();
 	clearSelection();
@@ -265,3 +265,13 @@ function doConLeaf(idx,conleaf,nodeId) {
 	hideContextMenu();
     };
 }
+
+// Local Variables:
+// js2-additional-externs: ("$" "setTimeout" "customCommands\
+// " "customConLeafBefore" "customConMenuGroups" "extensions" "vextensions\
+// " "clause_extensions" "JSON" "makeLeaf" "stackTree" "getLabel" "setNodeLabel\
+// " "hideContextMenu" "clearSelection" "toggleExtension" "selectNode\
+// " "parseIndex" "parseLabel" "defaultConMenuGroup" "getIndex" "parseIndexType\
+// " "displayCaseMenu")
+// indent-tabs-mode: nil
+// End:

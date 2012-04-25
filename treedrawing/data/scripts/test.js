@@ -86,7 +86,7 @@ function loadTrees(trees) {
            { async: false,
              success: function(res) {
                  $("#editpane").html(res['trees']);
-                 resetIds();
+                 resetIds(true);
                  resetLabelClasses(false);
              },
              dataType: "json",

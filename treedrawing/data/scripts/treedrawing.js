@@ -107,7 +107,7 @@ function styleIpNodes() {
 }
 
 function documentReadyHandler() {
-    resetIds();
+    resetIds(true);
     resetLabelClasses(false);
     assignEvents();
     $("#debugpane").empty();
@@ -194,8 +194,7 @@ function isEmpty (text) {
 function showContextMenu() {
     var e = window.event;
     var element = e.target || e.srcElement;
-    var elementId = element.id;
-    if (elementId == "sn0") {
+    if (element == document.getElementById("sn0")) {
         clearSelection();
         return;
     }
@@ -247,7 +246,7 @@ function addCommand(dict, fn, arg) {
 }
 
 function stackTree() {
-    undostack.push($("#editpane").html());
+    undostack.push($("#editpane").clone());
     // Keep this small, for memory reasons
     undostack = undostack.slice(-15);
 }
@@ -256,25 +255,31 @@ function redo() {
     var nextstate = redostack.pop();
     if (!(nextstate == undefined)) {
         var editPane = $("#editpane");
-        var currentstate = editPane.html();
+        var currentstate = editPane.clone();
         undostack.push(currentstate);
-        editPane.empty();
-        editPane.append(nextstate);
+        editPane.replaceWith(nextstate);
         clearSelection();
-        $(".snode").mousedown(handleNodeClick);
+        // next line maybe not needed
+        $("#sn0").mousedown(handleNodeClick);
     }
 }
 
 function undo() {
+    // lots of slowness in the event-handler handling part of jquery.  Perhaps
+    // replace that with doing it by hand in the DOM (but with the potential
+    // for memory leaks)
+    // MDN references:
+    // https://developer.mozilla.org/en/DOM/Node.cloneNode
+    // https://developer.mozilla.org/En/DOM/Node.replaceChild
     var prevstate = undostack.pop();
     if (!(prevstate == undefined)) {
         var editPane = $("#editpane");
-        var currentstate=$("#editpane").html();
+        var currentstate = $("#editpane").clone();
         redostack.push(currentstate);
-        editPane.empty();
-        editPane.append(prevstate);
+        editPane.replaceWith(prevstate);
         clearSelection();
-        $(".snode").mousedown(handleNodeClick);
+        // next line may not be needed
+        $("#sn0").mousedown(handleNodeClick);
     }
 }
 
@@ -333,7 +338,7 @@ function assignEvents() {
     // load custom commands from user settings file
     customCommands();
     document.body.onkeydown = handleKeyDown;
-    $(".snode").mousedown(handleNodeClick);
+    $("#sn0").mousedown(handleNodeClick);
     $("#butsave").mousedown(save);
     $("#butundo").mousedown(undo);
     $("#butredo").mousedown(redo);
@@ -371,7 +376,7 @@ function handleMouseWheel(e, delta) {
             nextNode = $(startnode).prev().get(0);
         }
         if (nextNode) {
-            selectNode(nextNode.id);
+            selectNode(nextNode);
             scrollToShowSel();
         }
     }
@@ -404,23 +409,20 @@ function handleKeyDown(e) {
 
 function handleNodeClick(e) {
     e = e || window.event;
-    var elementId = (e.target || e.srcElement).id;
+    var element = (e.target || e.srcElement);
     saveMetadata();
     if (e.button == 2) {
         // rightclick
-        if (!elementId) {
-            return; // prevent this if clicking a trace, for now
-        }
         if (startnode && !endnode) {
-            if (startnode.id != elementId) {
+            if (startnode != element) {
                 e.stopPropagation();
-                moveNode(elementId);
+                moveNode(element);
             } else {
                 showContextMenu();
             }
         } else if (startnode && endnode) {
             e.stopPropagation();
-            moveNodes(elementId);
+            moveNodes(element);
         } else {
             showContextMenu();
         }
@@ -428,13 +430,12 @@ function handleNodeClick(e) {
         // leftclick
         hideContextMenu();
         if (e.shiftKey && startnode) {
-            var node = document.getElementById(elementId);
-            endnode = node;
+            endnode = element;
             updateSelection();
             e.preventDefault(); // Otherwise, this sets the text
                                 // selection in the browser...
         } else {
-            selectNode(elementId);
+            selectNode(element);
             if (e.ctrlKey) {
                 makeNode("XP");
             }
@@ -444,11 +445,8 @@ function handleNodeClick(e) {
     last_event_was_mouse = true;
 }
 
-function selectNode(nodeId) {
-    // fix???
-    var node = document.getElementById(nodeId);
-
-    if (nodeId == "sn0") {
+function selectNode(node) {
+    if (node == document.getElementById("sn0")) {
         clearSelection();
         return;
     }
@@ -517,7 +515,7 @@ function scrollToShowSel() {
 function isPossibleTarget(node) {
     // cannot move under a tag node
     // TODO(AWE): what is the calling convention?  can we optimize this jquery call?
-    if ($("#"+node).children().first().is("span")) {
+    if ($(node).children().first().is("span")) {
         return false;
     }
     return true;
@@ -531,29 +529,25 @@ function currentText(root) {
     return text;
 }
 
-function moveNode(targetParent){
+function moveNode(parent) {
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
-    if (targetParent == "sn0") {
-        parent_ip = $("#sn0");
+    if (parent == document.getElementById("sn0")) {
+        parent_ip = $(parent);
     }
     var textbefore = currentText(parent_ip);
     var nodeMoved;
-    if (!isPossibleTarget(targetParent)) {
+    if (!isPossibleTarget(parent)) {
         // can't move under a tag node
     } else if ($(startnode).parent().children().length == 1) {
         // alert("cant move an only child");
-    } else if ($("#"+targetParent).parents().is("#"+startnode.id)) {
+    } else if ($(parent).parents().is(startnode)) {
         // alert("can't move under one's own child");
-    } else if ($(startnode).parents().is("#"+targetParent)) {
+    } else if ($(startnode).parents().is(parent)) {
         // move up if moving to a node that is already my parent
         // alert( startnode.id );
-        var firstchildId = $(startnode).parent().children().first().
-            closest("div").attr("id");
-        var lastchildId = $(startnode).parent().children().last().
-            closest("div").attr("id");
-        if (startnode.id == firstchildId) {
+        if ($(startnode).parent().children().first().is(startnode)) {
             stackTree();
-            $(startnode).insertBefore($("#"+targetParent).children().filter(
+            $(startnode).insertBefore($(parent).children().filter(
                                                  $(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 undo();
@@ -561,9 +555,9 @@ function moveNode(targetParent){
             } else {
                 resetIds();
             }
-        } else if (startnode.id == lastchildId) {
+        } else if ($(startnode).parent().children().last().is(startnode)) {
             stackTree();
-             $(startnode).insertAfter($("#"+targetParent).children().
+             $(startnode).insertAfter($(parent).children().
                                       filter($(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 undo();
@@ -575,19 +569,22 @@ function moveNode(targetParent){
             // alert("cannot move from this position");
         }
     } else { // otherwise move under my sister
-        // if( parseInt( startnode.id.substr(2) ) >  parseInt( targetParent.substr(2) ) ){
         var tokenMerge = isRootNode( $(startnode) );
-        var maxindex = maxIndex( getTokenRoot($("#"+targetParent) ).attr("id") );
+        var maxindex = maxIndex(getTokenRoot($(parent)));
         var movednode = $(startnode);
-        if (parseInt( startnode.id.substr(2) ) >
-            parseInt(targetParent.substr(2))) {
+        // where a and b are DOM elements (not jquery-wrapped),
+        // a.compareDocumentPosition(b) returns an integer.  The first (counting
+        // from 0) bit is set if B precedes A, and the second bit is set if A
+        // precedes B.
+        if (parent.compareDocumentPosition(startnode) & 0x4) {
+            // parent precedes startnode
             stackTree();
             if (tokenMerge) {
                 addToIndices( movednode, maxindex );
-                movednode.appendTo("#"+targetParent);
+                movednode.appendTo(parent);
                 resetIds();
             } else {
-                movednode.appendTo("#"+targetParent);
+                movednode.appendTo(parent);
                 if (currentText(parent_ip) != textbefore)  {
                     undo();
                     redostack.pop();
@@ -595,24 +592,20 @@ function moveNode(targetParent){
                     resetIds();
                 }
             }
-        } else if (parseInt(startnode.id.substr(2)) <
-                   parseInt(targetParent.substr(2)) ) {
+        } else if (parent.compareDocumentPosition(startnode) & 0x2) {
+            // startnode precedes parent
             stackTree();
             if (tokenMerge) {
                 addToIndices( movednode, maxindex );
             }
-            movednode.insertBefore($("#"+targetParent).children().first());
+            movednode.insertBefore($(parent).children().first());
             if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
             } else {
                 resetIds();
-                // if( tokenMerge ){
-                //            addToIndices( movednode, maxindex );
-                // }
-                //   updateSelection();
             }
-        }
+        } // TODO: conditional branches not exhaustive
     }
     clearSelection();
 }
@@ -625,27 +618,27 @@ function isRootNode(node) {
 // use editpanel.clone() here to implement undo, instead of the interactive
 // undo system.  This might also be an option of rht einteractive undo
 // system in general.
-function moveNodes(targetParent) {
+function moveNodes(parent) {
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
-    if (targetParent == "sn0") {
+    if (parent == document.getElementById("sn0")) {
         parent_ip = $("#sn0");
     }
     var textbefore = currentText(parent_ip);
-    var destination = $("#"+targetParent);
+    var destination = $(parent);
     stackTree();
-    if (parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2))) {
-        // reverse them if wrong order
+    if (startnode.compareDocumentPosition(endnode) & 0x2) {
+        // endnode precedes startnode, reverse them
         var temp = startnode;
         startnode = endnode;
         endnode = temp;
     }
     // TODO: check if they are really sisters
-    if ($(startnode).siblings().is("#"+endnode.id)) {
+    if ($(startnode).siblings().is(endnode)) {
         // then, collect startnode and its sister up until endnode
         var oldtext = currentText(parent_ip);
         //stackTree();
-        $(startnode).add($(startnode).nextUntil("#"+endnode.id)).
-            add("#"+endnode.id).
+        $(startnode).add($(startnode).nextUntil(endnode)).
+            add(endnode).
             wrapAll('<div xxx="newnode" class="snode">XP</div>');
         // undo if this messed up the text order
         if (currentText(parent_ip) != oldtext) {
@@ -670,37 +663,33 @@ function moveNodes(targetParent) {
 
     // BUG when making XP and then use context menu: todo XXX
     clearSelection();
-    selectNode( toselect.attr("id") );
+    selectNode(toselect);
     toselect.attr("xxx",null);
     updateSelection();
     resetIds();
-    //toselect.mousedown(handleNodeClick);
 
-    targetParent = destination.attr("id");
+    parent = destination;
 
-    if( ! isPossibleTarget(targetParent) ){
+    if (!isPossibleTarget(parent)) {
         //alert("can't move under a tag node");
-        undo(); redostack.pop(); return;
+        undo();
+        redostack.pop();
+        return;
     } else if ($(startnode).parent().children().length == 1) {
         //alert("cant move an only child");
         undo();
         redostack.pop();
         return;
-    } else if ($("#"+targetParent).parents().is("#"+startnode.id)) {
+    } else if ($(parent).parents().is(startnode)) {
         //alert("can't move under one's own child");
         undo();
         redostack.pop();
         return;
-    } else if ($(startnode).parents().is("#"+targetParent)) {
+    } else if ($(startnode).parents().is(parent)) {
         // move up if moving to a node that is already my parent
-        var firstchildId = $(startnode).parent().children().first().
-            closest("div").attr("id");
-        var lastchildId = $(startnode).parent().children().last().
-            closest("div").attr("id");
-
-        if (startnode.id == firstchildId) {
+        if ($(startnode).parent().children().first().is(startnode)) {
             //stackTree();
-            $(startnode).insertBefore($("#"+targetParent).children().
+            $(startnode).insertBefore($(parent).children().
                                       filter($(startnode).parents()));
             //resetIds();
             //pruneNode();
@@ -712,9 +701,9 @@ function moveNodes(targetParent) {
             } else {
                 resetIds();
             }
-        } else if (startnode.id == lastchildId) {
+        } else if ($(startnode).parent().children().last().is(startnode)) {
             //stackTree();
-             $(startnode).insertAfter($("#"+targetParent).children().
+             $(startnode).insertAfter($(parent).children().
                                          filter($(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 undo();
@@ -732,11 +721,10 @@ function moveNodes(targetParent) {
     } else {
         // otherwise move under my sister
         // if( parseInt( startnode.id.substr(2) ) >  parseInt( targetParent.substr(2) ) ){
-        if (parseInt( startnode.id.substr(2) ) >
-            parseInt(targetParent.substr(2))) {
-            //if( $("#"+startnode.id).siblings().is("#"+startnode.id+"~.snode") ){
+        if (parent.compareDocumentPosition(startnode) & 0x4) {
+            // parent precedes startnode
             //stackTree();
-            $(startnode).appendTo("#"+targetParent);
+            $(startnode).appendTo(parent);
             if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
@@ -745,10 +733,10 @@ function moveNodes(targetParent) {
                 resetIds();
             }
             //}
-        } else if (parseInt( startnode.id.substr(2) ) <
-                   parseInt(targetParent.substr(2))) {
+        } else if (parent.compareDocumentPosition(startnode) & 0x2) {
+            // startnode precedes parent
             //stackTree();
-            $(startnode).insertBefore($("#"+targetParent).children().first());
+            $(startnode).insertBefore($(parent).children().first());
             if (currentText(parent_ip) != textbefore) {
                 undo();
                 redostack.pop();
@@ -756,9 +744,9 @@ function moveNodes(targetParent) {
             } else {
                 resetIds();
             }
-        }
+        } // TODO: conditional is not exhaustive
     }
-    var movedNodes = $("#"+startnode.id+">*");
+    var movedNodes = $(startnode).children();
     $(startnode).replaceWith(movedNodes);
     clearSelection();
 }
@@ -778,8 +766,8 @@ function leafAfter() {
 // TODO: the hardcoding of defaults in this function is ugly.  We should
 // supply a default heuristic fn to try to guess these, then allow
 // settings.js to override it.
-function makeLeaf(before, label, word, targetId) {
-    if (!(targetId || startnode)) return;
+function makeLeaf(before, label, word, target) {
+    if (!(target || startnode)) return;
 
     if (!label) {
         label = "NP-SBJ";
@@ -787,8 +775,8 @@ function makeLeaf(before, label, word, targetId) {
     if (!word) {
         word = "*con*";
     }
-    if (!targetId) {
-        targetId = startnode.id;
+    if (!target) {
+        target = startnode;
     }
 
     var lemma = false;
@@ -798,14 +786,11 @@ function makeLeaf(before, label, word, targetId) {
         word = temp.join("-");
     }
 
-    var startRoot = null;
-    var endRoot = null;
-
     var doCoindex = false;
 
     if (endnode) {
-        startRoot = getTokenRoot($(startnode)).attr("id");
-        endRoot = getTokenRoot($(endnode)).attr("id");
+        var startRoot = getTokenRoot($(startnode));
+        var endRoot = getTokenRoot($(endnode));
         if (startRoot == endRoot) {
             word = "*ICH*";
             label = getLabel($(endnode));
@@ -836,9 +821,9 @@ function makeLeaf(before, label, word, targetId) {
     newleaf += "</span></div>\n";
     newleaf = $(newleaf);
     if (before) {
-        newleaf.insertBefore("#" + targetId);
+        newleaf.insertBefore(target);
     } else {
-        newleaf.insertAfter("#" + targetId);
+        newleaf.insertAfter(target);
     }
     if (doCoindex) {
         startnode = newleaf.get(0);
@@ -847,7 +832,7 @@ function makeLeaf(before, label, word, targetId) {
     startnode = null;
     endnode = null;
     resetIds();
-    selectNode(newleaf.attr("id"));
+    selectNode(newleaf);
     updateSelection();
 }
 
@@ -983,8 +968,8 @@ function displayRename() {
         document.body.onkeydown = null;
         var oldClass = getLabel($(startnode));
         function space(event) {
-            var elementId = (event.target || event.srcElement).id;
-            $("#"+elementId).val( $("#"+elementId).val() );
+            var element = (event.target || event.srcElement);
+            $(element).val($(element).val());
             event.preventDefault();
         }
         function postChange(newNode) {
@@ -1007,10 +992,10 @@ function displayRename() {
         var label = getLabel($(startnode));
         label = label.replace(/'/g, "&#39;");
         var editor;
-        if ($("#"+startnode.id+">.wnode").size() > 0) {
+        if ($(startnode).children(".wnode").size() > 0) {
             // this is a terminal
             var word, lemma, useLemma;
-            if ($("#" + startnode.id + ">.wnode>.lemma").size() > 0) {
+            if ($(startnode).children(".wnode").children(".lemma").size() > 0) {
                 var preword = $.trim($(startnode).children().first().text());
                 preword = preword.split("-");
                 lemma = preword.pop();
@@ -1045,9 +1030,9 @@ function displayRename() {
             $("#leafphrasebox,#leaftextbox,#leaflemmabox").keydown(
                 function(event) {
                     var replText, replNode;
-                    if (event.keyCode == 9) {
-                          var elementId = (event.target || event.srcElement).id;
-                    }
+                    // if (event.keyCode == 9) {
+                    //       var elementId = (event.target || event.srcElement);
+                    // }
                     if (event.keyCode == 32) {
                         space(event);
                     }
@@ -1105,10 +1090,10 @@ function displayRename() {
             textNode(origNode).replaceWith(editor);
             $("#labelbox").keydown(
                 function(event) {
-                    if (event.keyCode == 9) {
-                        // tab, do nothing
-                          var elementId = (event.target || event.srcElement).id;
-                    }
+                    // if (event.keyCode == 9) {
+                    //     // tab, do nothing
+                    //       var elementId = (event.target || event.srcElement).id;
+                    // }
                     if (event.keyCode == 32) {
                         space(event);
                     }
@@ -1135,13 +1120,13 @@ function displayRename() {
 }
 
 function editLemma() {
-    var foo = $("#"+startnode.id+">.wnode>.lemma");
-    if (startnode && !endnode && foo.size() > 0) {
+    var childLemmata = $(startnode).children(".wnode").children(".lemma");
+    if (startnode && !endnode && childLemmata.size() > 0) {
         stackTree();
         document.body.onkeydown = null;
         function space(event) {
-            var elementId = (event.target || event.srcElement).id;
-            $("#"+elementId).val( $("#"+elementId).val() );
+            var element = (event.target || event.srcElement);
+            $(element).val($(element).val());
             event.preventDefault();
         }
         function postChange() {
@@ -1151,16 +1136,16 @@ function editLemma() {
             updateSelection();
             document.body.onkeydown = handleKeyDown;
         }
-        var lemma = $("#"+startnode.id+">.wnode>.lemma").text();
+        var lemma = $(startnode).children(".wnode").children(".lemma").text();
         lemma = lemma.substring(1);
         var editor=$("<span id='leafeditor' class='wnode'><input " +
                      "id='leaflemmabox' class='labeledit' type='text' value='" +
                      lemma + "' /></span>");
-        $("#"+startnode.id+">.wnode>.lemma").replaceWith(editor);
+        $(startnode).children(".wnode").children(".lemma").replaceWith(editor);
         $("#leaflemmabox").keydown(
             function(event) {
                 if (event.keyCode == '9') {
-                      var elementId = (event.target || event.srcElement).id;
+                    // var elementId = (event.target || event.srcElement).id;
                     event.preventDefault();
                 }
                 if (event.keyCode == '32') {
@@ -1303,7 +1288,7 @@ function setLabel(labels) {
     if (!startnode || endnode) {
         return;
     }
-    if (!isPossibleTarget(startnode.id) &&
+    if (!isPossibleTarget(startnode) &&
         !isEmpty(wnodeString($(startnode)))) {
         return;
     }
@@ -1367,20 +1352,20 @@ function makeNode(label) {
         $(startnode).wrapAll('<div xxx="newnode" class="snode ' + label + '">'
                              + label + ' </div>\n');
     } else {
-        if (parseInt(startnode.id.substr(2)) > parseInt(endnode.id.substr(2))) {
-            // reverse them if wrong order
+        if (startnode.compareDocumentPosition(endnode) & 0x2) {
+            // startnode and endnode in wrong order, reverse them
             var temp = startnode;
             startnode = endnode;
             endnode = temp;
         }
 
         // check if they are really sisters XXXXXXXXXXXXXXX
-        if ($(startnode).siblings().is("#"+endnode.id)) {
+        if ($(startnode).siblings().is(endnode)) {
             // then, collect startnode and its sister up until endnode
             var oldtext = currentText(parent_ip);
             stackTree();
-            $(startnode).add($(startnode).nextUntil("#"+endnode.id)).add(
-                "#"+endnode.id).wrapAll('<div xxx="newnode" class="snode ' +
+            $(startnode).add($(startnode).nextUntil(endnode)).add(
+                endnode).wrapAll('<div xxx="newnode" class="snode ' +
                                         label + '">' + label + ' </div>\n');
             // undo if this messed up the text order
             if( currentText(parent_ip) != oldtext) {
@@ -1399,12 +1384,12 @@ function makeNode(label) {
     // BUG when making XP and then use context menu: todo XXX
 
     // TODO(AWE): the ipnodes thing isn't updated here
-    selectNode(toselect.attr("id"));
+    selectNode(toselect);
     toselect.attr("xxx",null);
     updateSelection();
     resetIds();
 
-    toselect.mousedown(handleNodeClick);
+    // toselect.mousedown(handleNodeClick);
 }
 
 function pruneNode() {
@@ -1419,20 +1404,21 @@ function pruneNode() {
             resetIds();
             updateSelection();
             return;
-        } else if (!isPossibleTarget(startnode.id)) {
+        } else if (!isPossibleTarget(startnode)) {
             // but other leaves are not deleted
             return;
-        } else if (startnode.id == "sn0") {
+        } else if (startnode == document.getElementById("sn0")) {
             return;
         }
 
         stackTree();
 
-        var toselect = $("#"+startnode.id+">*").first();
-        $(startnode).replaceWith($("#"+startnode.id+">*"));
+        var toselect = $(startnode).children().first();
+        $(startnode).replaceWith($(startnode).children());
         startnode = endnode = null;
-        resetIds();
-        selectNode(toselect.attr("id"));
+        // not needed, strictly removing
+        // resetIds();
+        selectNode(toselect);
         updateSelection();
     }
 }
@@ -1470,7 +1456,7 @@ function appendExtension(node, extension, type) {
 }
 
 function getTokenRoot(node) {
-    return $(node).parents().andSelf().filter("#sn0>.snode").eq(0);
+    return $(node).parents().andSelf().filter("#sn0>.snode").get(0);
 }
 
 /*
@@ -1579,7 +1565,7 @@ function getNodesByIndex(tokenRoot, ind) {
 
 function addToIndices(tokenRoot, numberToAdd) {
     var ind = 1;
-    var maxindex = maxIndex(tokenRoot.attr("id"));
+    var maxindex = maxIndex(tokenRoot);
     var nodes = tokenRoot.find(".snode,.wnode").andSelf();
     nodes.each(function(index) {
         var curNode = $(this);
@@ -1600,14 +1586,13 @@ function addToIndices(tokenRoot, numberToAdd) {
     });
 }
 
-function maxIndex(tokenRoot) {
-    var allSNodes = $("#" + tokenRoot + ",#" + tokenRoot + " .snode,#" +
-                      tokenRoot + " .wnode");
+function maxIndex(token) {
+    var allSNodes = $(token).find(".snode,.wnode");
     var temp = "";
     var ind = 0;
     var label;
 
-    for (var i=0; i < allSNodes.length; i++) {
+    for (var i = 0; i < allSNodes.length; i++) {
         label = getLabel($(allSNodes[i]));
         ind = Math.max(parseIndex(label), ind);
     }
@@ -1641,8 +1626,8 @@ function coIndex() {
         }
     } else if (startnode && endnode) {
         // don't do anything if different token roots
-        var startRoot = getTokenRoot($(startnode)).attr("id");
-        var endRoot = getTokenRoot($(endnode)).attr("id");
+        var startRoot = getTokenRoot($(startnode));
+        var endRoot = getTokenRoot($(endnode));
         if (startRoot != endRoot) {
             return;
         }
@@ -1682,8 +1667,6 @@ function coIndex() {
             stackTree();
             appendExtension( $(startnode), getIndex($(endnode)) );
         } else { // no indices here, so make them
-            startRoot = getTokenRoot($(startnode)).attr("id");
-            endRoot = getTokenRoot($(endnode)).attr("id");
             // if start and end are within the same token, do coindexing
             if(startRoot == endRoot) {
                 var index = maxIndex(startRoot) + 1;
@@ -1696,10 +1679,12 @@ function coIndex() {
 }
 
 
-function resetIds() {
-    var snodes = $(".snode");
-    for (var i = 0; i < snodes.length; i++) {
-        snodes[i].id = "sn" + i;
+function resetIds(really) {
+    if (really){
+        var snodes = $(".snode");
+        for (var i = 0; i < snodes.length; i++) {
+            snodes[i].id = "sn" + i;
+        }
     }
 }
 
@@ -2097,7 +2082,7 @@ function advanceTree(where, find) {
                      resetLabelClasses(false);
                      undostack = new Array();
                      document.body.onkeydown = handleKeyDown;
-                     $(".snode").mousedown(handleNodeClick);
+                     // $(".snode").mousedown(handleNodeClick);
                      displayInfo("Tree fetched.");
                  }
              },
