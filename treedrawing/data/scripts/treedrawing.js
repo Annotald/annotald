@@ -2108,7 +2108,13 @@ function advanceTree(where, find) {
 function splitWord() {
     if (!startnode || endnode) return;
     if (!isLeafNode($(startnode))) return;
-    var origWord = wnodeString($(startnode)).split("-")[0];
+    var wordSplit = wnodeString($(startnode)).split("-");
+    var origWord = wordSplit[0];
+    var origLemma = "XXX";
+    if (wordSplit.length == 2) {
+        origLemma = "@" + wordSplit[1] + "@";
+    }
+    var origLabel = getLabel($(startnode));
     function doSplit() {
         var words = $("#splitWordInput").val().split("@");
         if (words.join("") != origWord) {
@@ -2119,11 +2125,19 @@ function splitWord() {
             displayWarning("You can only split in one place at a time.");
             return;
         }
+        var labelSplit = origLabel.split("+");
+        var secondLabel = "X";
+        if (labelSplit.length == 2) {
+            setLeafLabel($(startnode), labelSplit[0]);
+            secondLabel = labelSplit[1];
+        }
         setLeafLabel($(startnode), words[0] + "$");
         var hasLemma = $(startnode).find(".lemma").size() > 0;
-        makeLeaf(false, "X", "$" + words[1]);
+        makeLeaf(false, secondLabel, "$" + words[1]);
         if (hasLemma) {
-            addLemma();
+            // TODO: move to something like foo@1 and foo@2 for the two pieces
+            // of the lemmata
+            addLemma(origLemma);
         }
         hideDialogBox();
     }
@@ -2136,11 +2150,12 @@ function splitWord() {
     $("#splitWordInput").focus();
 }
 
-function addLemma() {
+function addLemma(lemma) {
     // This only makes sense for dash-format corpora
     if (!startnode || endnode) return;
     if (!isLeafNode($(startnode))) return;
-    var theLemma = $("<span class='lemma " + lemmaClass + "'>-XXX</span>");
+    var theLemma = $("<span class='lemma " + lemmaClass + "'>-" + lemma +
+                     "</span>");
     $(startnode).children(".wnode").append(theLemma);
 }
 
