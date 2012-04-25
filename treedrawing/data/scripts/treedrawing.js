@@ -539,12 +539,11 @@ function moveNode(parent) {
     if (!isPossibleTarget(parent)) {
         // can't move under a tag node
     } else if ($(startnode).parent().children().length == 1) {
-        // alert("cant move an only child");
+        // cant move an only child
     } else if ($(parent).parents().is(startnode)) {
-        // alert("can't move under one's own child");
+        // can't move under one's own child
     } else if ($(startnode).parents().is(parent)) {
         // move up if moving to a node that is already my parent
-        // alert( startnode.id );
         if ($(startnode).parent().children().first().is(startnode)) {
             stackTree();
             $(startnode).insertBefore($(parent).children().filter(
@@ -566,9 +565,10 @@ function moveNode(parent) {
                 resetIds();
             }
         } else {
-            // alert("cannot move from this position");
+            // cannot move from this position
         }
-    } else { // otherwise move under my sister
+    } else {
+        // otherwise move under my sister
         var tokenMerge = isRootNode( $(startnode) );
         var maxindex = maxIndex(getTokenRoot($(parent)));
         var movednode = $(startnode);
@@ -614,10 +614,6 @@ function isRootNode(node) {
     return node.filter("#sn0>.snode").size() > 0;
 }
 
-// TODO(AWE): does Jquery clone() method do copy-on-write?  If so, then
-// use editpanel.clone() here to implement undo, instead of the interactive
-// undo system.  This might also be an option of rht einteractive undo
-// system in general.
 function moveNodes(parent) {
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
     if (parent == document.getElementById("sn0")) {
@@ -636,7 +632,6 @@ function moveNodes(parent) {
     if ($(startnode).siblings().is(endnode)) {
         // then, collect startnode and its sister up until endnode
         var oldtext = currentText(parent_ip);
-        //stackTree();
         $(startnode).add($(startnode).nextUntil(endnode)).
             add(endnode).
             wrapAll('<div xxx="newnode" class="snode">XP</div>');
@@ -647,7 +642,7 @@ function moveNodes(parent) {
             return;
         }
     } else {
-        return; // the are not sisters
+        return; // they are not sisters
     }
     resetIds();
     var toselect = $(".snode[xxx=newnode]").first();
@@ -753,7 +748,7 @@ function moveNodes(parent) {
 
 /*
  *  Making leafs
-*/
+ */
 
 function leafBefore() {
     makeLeaf(true);
