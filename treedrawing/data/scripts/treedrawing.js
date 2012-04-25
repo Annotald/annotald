@@ -631,7 +631,6 @@ function moveNodes(parent) {
         parent_ip = $("#sn0");
     }
     var textbefore = currentText(parent_ip);
-    var destination = $(parent);
     stackTree();
     if (startnode.compareDocumentPosition(endnode) & 0x2) {
         // endnode precedes startnode, reverse them
@@ -645,7 +644,9 @@ function moveNodes(parent) {
             add(endnode).
             wrapAll('<div xxx="newnode" class="snode">XP</div>');
         // undo if this messed up the text order
-        if (currentText(parent_ip) != oldtext) {
+        if (currentText(parent_ip) != textbefore) {
+            // TODO: we'd like to remove this if never triggered
+            console.log("Implausible occurrence");
             undo();
             redostack.pop();
             return;
