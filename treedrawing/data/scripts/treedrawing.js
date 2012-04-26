@@ -560,6 +560,9 @@ function moveNode(parent) {
                                                  $(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 parent_ip.replaceWith(parent_before);
+                if (parent_ip.attr("id") == "sn0") {
+                    $("#sn0").mousedown(handleNodeClick);
+                }
             } else {
                 resetIds();
             }
@@ -573,6 +576,9 @@ function moveNode(parent) {
                                      filter($(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 parent_ip.replaceWith(parent_before);
+                 if (parent_ip.attr("id") == "sn0") {
+                    $("#sn0").mousedown(handleNodeClick);
+                }
             } else {
                 resetIds();
             }
@@ -611,6 +617,9 @@ function moveNode(parent) {
             movednode.appendTo(parent);
             if (currentText(parent_ip) != textbefore)  {
                 parent_ip.replaceWith(parent_before);
+                 if (parent_ip.attr("id") == "sn0") {
+                    $("#sn0").mousedown(handleNodeClick);
+                }
             } else {
                 resetIds();
             }
@@ -628,6 +637,9 @@ function moveNode(parent) {
             movednode.insertBefore($(parent).children().first());
             if (currentText(parent_ip) != textbefore) {
                 parent_ip.replaceWith(parent_before);
+                 if (parent_ip == "sn0") {
+                    $("#sn0").mousedown(handleNodeClick);
+                }
             } else {
                 resetIds();
             }
