@@ -71,7 +71,7 @@ def treeToHtml(tree, version, extra_data = None):
             temp = tree[0].split("-")
             lemma = temp.pop()
             word = "-".join(temp)
-            if lemma.isdigit():
+            if lemma.isdigit() and tree.node != "NUM":
                 # If the lemma is all numbers, it is probably a trace index.
                 # Do nothing special with it.
                 res += word + "-" + lemma
