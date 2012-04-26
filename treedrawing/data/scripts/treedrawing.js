@@ -538,6 +538,7 @@ function moveNode(parent) {
     if (parent == document.getElementById("sn0")) {
         parent_ip = $(parent);
     }
+    var parent_before = parent_ip.clone();
     var textbefore = currentText(parent_ip);
     var nodeMoved;
     if (!isPossibleTarget(parent)) {
@@ -557,8 +558,7 @@ function moveNode(parent) {
             $(startnode).insertBefore($(parent).children().filter(
                                                  $(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
-                undo();
-                redostack.pop();
+                parent_ip.replaceWith(parent_before);
             } else {
                 resetIds();
             }
@@ -571,8 +571,7 @@ function moveNode(parent) {
             $(startnode).insertAfter($(parent).children().
                                      filter($(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
-                undo();
-                redostack.pop();
+                parent_ip.replaceWith(parent_before);
             } else {
                 resetIds();
             }
@@ -592,8 +591,17 @@ function moveNode(parent) {
         // TODO: perhaps here and in the immediately following else if it is
         // possible to simplify and remove the compareDocumentPosition call,
         // since the jQuery subsumes it
-        if ((parent.compareDocumentPosition(startnode) & 0x4) &&
-            $(parent).next().is(startnode)) {
+        if ((parent.compareDocumentPosition(startnode) & 0x4)
+            // check whether the nodes are adjacent.  Ideally, we would like
+            // to say selfAndParentsUntil, but no such jQuery fn exists, thus
+            // necessitating the disjunction.
+
+            // TODO: too strict
+            // &&
+            // $(startnode).prev().is(
+            //     $(parent).parentsUntil(startnode.parentNode).last()) ||
+            // $(startnode).prev().is(parent)
+           ) {
             // parent precedes startnode
             stackTree();
             if (tokenMerge) {
@@ -601,13 +609,16 @@ function moveNode(parent) {
             }
             movednode.appendTo(parent);
             if (currentText(parent_ip) != textbefore)  {
-                undo();
-                redostack.pop();
+                parent_ip.replaceWith(parent_before);
             } else {
                 resetIds();
             }
-        } else if ((parent.compareDocumentPosition(startnode) & 0x2) &&
-                   $(startnode).next().is(parent)) {
+        } else if ((parent.compareDocumentPosition(startnode) & 0x2)
+                   // &&
+                   // $(startnode).next().is(
+                   //     $(parent).parentsUntil(startnode.parentNode).last()) ||
+                   // $(startnode).next().is(parent)
+                  ) {
             // startnode precedes parent
             stackTree();
             if (tokenMerge) {
@@ -615,8 +626,7 @@ function moveNode(parent) {
             }
             movednode.insertBefore($(parent).children().first());
             if (currentText(parent_ip) != textbefore) {
-                undo();
-                redostack.pop();
+                parent_ip.replaceWith(parent_before);
             } else {
                 resetIds();
             }
