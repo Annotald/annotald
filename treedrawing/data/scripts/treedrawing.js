@@ -1250,9 +1250,9 @@ function toggleStringExtension (oldlabel, extension, extensionList) {
 function guessLeafNode(node) {
     if (typeof testValidLeafLabel   !== "undefined" &&
         typeof testValidPhraseLabel !== "undefined") {
-        if (testValidPhraseLabel(getLabel(node))) {
+        if (testValidPhraseLabel(getLabel($(node)))) {
             return false;
-        } else if (testValidLeafLabel(getLabel(node))) {
+        } else if (testValidLeafLabel(getLabel($(node)))) {
             return true;
         } else {
             // not a valid label, fall back to structural check
