@@ -11,10 +11,15 @@ any later version.  See the LICENSE file for more information. -->
     <title>Annotald</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" type="text/css" href="css/treedrawing.css" type="text/css" />
+%if debugJs:
+    <script type= "application/javascript" src="scripts/jquery-debug.js"></script>
+%else:
     <script type= "application/javascript" src="scripts/jquery.js"></script>
+%endif
     <script type= "application/javascript" src="scripts/jquery.mousewheel.min.js"></script>
     <script type= "application/javascript" src="scripts/treedrawing.js"></script>
     <script type= "application/javascript" src="scripts/underscore-min.js"></script>
+    <script type="application/javascript">var startTime = ${startTime};</script>
 %for script in extraScripts:
     <script type="application/javascript">
       ${open(script).read()}
@@ -40,6 +45,10 @@ any later version.  See the LICENSE file for more information. -->
         <input class="menubutton" type="button" value="Save" id="butsave" /><br />
         <input class="menubutton" type="button" value="Undo" id="butundo" /><br />
         <input class="menubutton" type="button" value="Redo" id="butredo" /><br />
+%if oneTree:
+        <input class="menubutton" type="button" value="Prev Tree" id="butprevtree" /><br />
+        <input class="menubutton" type="button" value="Next Tree" id="butnexttree" /><br />
+%endif
 %if usetimelog:
         <input class="menubutton" type="button" value="Idle/Resume" id="butidle" /><br />
 %endif
@@ -50,14 +59,12 @@ any later version.  See the LICENSE file for more information. -->
         <input class="menubutton" type="button" value="Exit" id="butexit" /><br />
 
         <div id="idlestatus"></div>
-        <div id="saveresult"></div>
       </div>
 
       <div id="toolsMenu" class="menuPane">
         <div class="menuTitle">Tools</div>
         <input class="menubutton" type="button" value="Validate" id="butvalidate" /><br />
         <input class="menubutton" type="button" value="Next Error" id="butnexterr" /><br />
-        <div id="toolsMsg"></div>
       </div>
       <div id="metadataEditor"
 %if not usemetadata:
