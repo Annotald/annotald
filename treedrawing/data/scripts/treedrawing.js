@@ -199,6 +199,7 @@ function showContextMenu() {
         return;
     }
 
+    // TODO(AWE): make this relative to mouse posn?
     var left = $(element).offset().left + 4;
     var top = $(element).offset().top + 17;
     left = left + "px";
@@ -2079,6 +2080,6 @@ function addLemma(lemma) {
 // js2-additional-externs: ("$" "setTimeout" "customCommands\
 // " "customConLeafBefore" "customConMenuGroups" "extensions" "vextensions\
 // " "clause_extensions" "JSON" "testValidLeafLabel" "testValidPhraseLabel\
-// " "_" "startTime" "console")
+// " "_" "startTime" "console" "loadContextMenu")
 // indent-tabs-mode: nil
 // End:
