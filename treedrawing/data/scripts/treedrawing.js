@@ -451,6 +451,10 @@ function selectNode(node) {
         return;
     }
 
+    if (node.className == "wnode") {
+        node = node.parentNode;
+    }
+
     if (node == startnode) {
         startnode = null;
         if (endnode) {
