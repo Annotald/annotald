@@ -1102,6 +1102,10 @@ function displayRename() {
             editor = $("<input id='labelbox' class='labeledit' " +
                            "type='text' value='" + label + "' />");
             var origNode = $(startnode);
+            var isWordLevelConj =
+                    origNode.children(".snode").children(".snode").size() == 0 &&
+                    // TODO: make configurable
+                    origNode.children(".CONJ") .size() > 0;
             textNode(origNode).replaceWith(editor);
             $("#labelbox").keydown(
                 function(event) {
@@ -1119,7 +1123,10 @@ function displayRename() {
                     if (event.keyCode == 13) {
                         var newphrase = $("#labelbox").val().toUpperCase();
                         if (typeof testValidPhraseLabel !== "undefined") {
-                            if (!testValidPhraseLabel(newphrase)) {
+                            if (!(testValidPhraseLabel(newphrase) ||
+                                  (typeof testValidLeafLabel !== "undefined" &&
+                                   isWordLevelConj &&
+                                   testValidLeafLabel(newphrase)))) {
                                 displayWarning("Not a valid phrase label: '" +
                                               newphrase + "'.");
                                 return;
