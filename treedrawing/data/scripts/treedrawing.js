@@ -527,7 +527,7 @@ function isPossibleTarget(node) {
 }
 
 function currentText(root) {
-    var text = $(root).find('.wnode').filter(
+    var text = $(root).find('.wnode').clone().remove(".lemma").filter(
         function() {
             return !isEmpty(this.textContent);
         }).text();
@@ -1028,6 +1028,10 @@ function displayRename() {
             editor = $("<input id='labelbox' class='labeledit' " +
                            "type='text' value='" + label + "' />");
             var origNode = $(startnode);
+            var isWordLevelConj =
+                    origNode.children(".snode").children(".snode").size() == 0 &&
+                    // TODO: make configurable
+                    origNode.children(".CONJ") .size() > 0;
             textNode(origNode).replaceWith(editor);
             $("#labelbox").keydown(
                 function(event) {
@@ -1045,7 +1049,10 @@ function displayRename() {
                     if (event.keyCode == 13) {
                         var newphrase = $("#labelbox").val().toUpperCase();
                         if (typeof testValidPhraseLabel !== "undefined") {
-                            if (!testValidPhraseLabel(newphrase)) {
+                            if (!(testValidPhraseLabel(newphrase) ||
+                                  (typeof testValidLeafLabel !== "undefined" &&
+                                   isWordLevelConj &&
+                                   testValidLeafLabel(newphrase)))) {
                                 displayWarning("Not a valid phrase label: '" +
                                               newphrase + "'.");
                                 return;
@@ -1514,12 +1521,12 @@ function addToIndices(tokenRoot, numberToAdd) {
         if (nindex > 0) {
             if (shouldIndexLeaf(curNode)) {
                 var leafText = wnodeString(curNode);
-                leafText = leafText.substr(0, leafText.length - 1);
+                leafText = parseLabel(leafText) + parseIndexType(leafText);
                 textNode(curNode.children(".wnode").first()).text(
                     leafText + (nindex + numberToAdd));
             } else {
-                var label = getLabel(curNode).substr(
-                    0, getLabel(curNode).length - 1);
+                var label = getLabel(curNode);
+                label = parseLabel(label) + parseIndexType(label);
                 label = label + (nindex + numberToAdd);
                 setNodeLabel(curNode, label, true);
             }
