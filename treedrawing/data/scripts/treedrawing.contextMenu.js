@@ -157,38 +157,38 @@ function loadContextMenu(nodeOrig) {
 	if (/-[NADG]$/.test(nodelabel)) {
 	    $("#conRight").append($("<div class='conMenuHeading'>Case</div>"));
 	    var newnode = $("<div class='conMenuItem'><a href='#'>-N</a></div>");
-	    $(newnode).mousedown(setCaseOnTag(nodeId,nodelabel,"N"));
+	    $(newnode).mousedown(setCaseOnTag(nodeOrig,nodelabel,"N"));
 	    $("#conRight").append(newnode);
 
 	    newnode = $("<div class='conMenuItem'><a href='#'>-A</a></div>");
-	    $(newnode).mousedown(setCaseOnTag(nodeId,nodelabel,"A"));
+	    $(newnode).mousedown(setCaseOnTag(nodeOrig,nodelabel,"A"));
 	    $("#conRight").append(newnode);
 
 	    newnode = $("<div class='conMenuItem'><a href='#'>-D</a></div>");
-	    $(newnode).mousedown(setCaseOnTag(nodeId,nodelabel,"D"));
+	    $(newnode).mousedown(setCaseOnTag(nodeOrig,nodelabel,"D"));
 	    $("#conRight").append(newnode);
 
 	    newnode = $("<div class='conMenuItem'><a href='#'>-G</a></div>");
-	    $(newnode).mousedown(setCaseOnTag(nodeId,nodelabel,"G"));
+	    $(newnode).mousedown(setCaseOnTag(nodeOrig,nodelabel,"G"));
 	    $("#conRight").append(newnode);
 	} else if(isCasePhrase(nodelabel)) {
             // TODO(AWE): this is almost-but-not-quite dupe of above.  Unify.
 	    $("#conRight").append($("<div class='conMenuHeading'>Case</div>"));
 
 	    var newnode = $("<div class='conMenuItem'><a href='#'>-N</a></div>");
-	    $(newnode).mousedown(doSetCase(nodeId,"N"));
+	    $(newnode).mousedown(doSetCase(nodeOrig,"N"));
 	    $("#conRight").append(newnode);
 
 	    newnode = $("<div class='conMenuItem'><a href='#'>-A</a></div>");
-	    $(newnode).mousedown(doSetCase(nodeId,"A"));
+	    $(newnode).mousedown(doSetCase(nodeOrig,"A"));
 	    $("#conRight").append(newnode);
 
 	    newnode = $("<div class='conMenuItem'><a href='#'>-D</a></div>");
-	    $(newnode).mousedown(doSetCase(nodeId,"D"));
+	    $(newnode).mousedown(doSetCase(nodeOrig,"D"));
 	    $("#conRight").append(newnode);
 
 	    newnode = $("<div class='conMenuItem'><a href='#'>-G</a></div>");
-	    $(newnode).mousedown(doSetCase(nodeId,"G"));
+	    $(newnode).mousedown(doSetCase(nodeOrig,"G"));
 	    $("#conRight").append(newnode);
 	}
     }
@@ -199,7 +199,7 @@ function loadContextMenu(nodeOrig) {
 	stackTree();
 	var newnode = $("<div class='conMenuItem'><a href='#'>" +
                         conleafs[i].suggestion + "</a></div>");
-	$(newnode).mousedown(doConLeaf(i,conleafs[i],nodeId));
+	$(newnode).mousedown(doConLeaf(i,conleafs[i],nodeOrig));
 	$("#conRight").append(newnode);
     }
 
@@ -229,10 +229,10 @@ function doToggleExtension(node, extension) {
 /*
  * set case just on this one tag
  */
-function setCaseOnTag(nodeId, oldLabel, theCase) {
+function setCaseOnTag(node, oldLabel, theCase) {
     return function() {
 	stackTree();
-	setNodeLabel($("#"+nodeId),
+	setNodeLabel($(node),
                      oldLabel.substr(0, oldLabel.length - 2) + "-" + theCase,
                      true);
     };
@@ -241,16 +241,16 @@ function setCaseOnTag(nodeId, oldLabel, theCase) {
 /*
  * set case on all case elements that are daughters of this phrase node
  */
-function doSetCase(nodeId, theCase) {
+function doSetCase(node, theCase) {
     return function() {
 	stackTree();
-	var daughters = $("#"+nodeId).children().each(
+	var daughters = $(node).children().each(
             function() {
-		var childId = $(this).attr("id");
-		var oldLabel=$.trim(getLabel($(this)));
+		var child = $(this);
+		var oldLabel = $.trim(getLabel($(this)));
                 // TODO(AWE): not portable
 		if(/-[NADG]$/.test(oldLabel)) {
-		    setNodeLabel($("#"+childId),
+		    setNodeLabel($(child),
                                  oldLabel.substr(0, oldLabel.length - 2) +
                                  "-" + theCase,
                                  true);
@@ -259,9 +259,9 @@ function doSetCase(nodeId, theCase) {
     };
 }
 
-function doConLeaf(idx,conleaf,nodeId) {
+function doConLeaf(idx,conleaf,node) {
     return function() {
-	makeLeaf(conleaf.before, conleaf.label, conleaf.word, nodeId, true);
+	makeLeaf(conleaf.before, conleaf.label, conleaf.word, node, true);
 	hideContextMenu();
     };
 }

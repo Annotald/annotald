@@ -209,7 +209,7 @@ function showContextMenu() {
         conm = $("#conMenu");
 
     conl.empty();
-    loadContextMenu(elementId);
+    loadContextMenu(element);
 
     // Make the columns equally high
     conl.height("auto");
