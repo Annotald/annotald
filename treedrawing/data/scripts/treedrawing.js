@@ -1263,18 +1263,19 @@ function guessLeafNode(node) {
     }
 }
 
-function toggleExtension(extension) {
+function toggleExtension(extension, extensionList) {
     if (!startnode || endnode) return;
 
-    var extensionList;
-    if (guessLeafNode(startnode)) {
-        extensionList = vextensions;
-    } else if (getLabel($(startnode)).split("-")[0] == "IP" ||
-               getLabel($(startnode)).split("-")[0] == "CP") {
-        // TODO: should FRAG be a clause?
-        extensionList = clause_extensions;
-    } else {
-        extensionList = extensions;
+    if (!extensionList) {
+        if (guessLeafNode(startnode)) {
+            extensionList = vextensions;
+        } else if (getLabel($(startnode)).split("-")[0] == "IP" ||
+                   getLabel($(startnode)).split("-")[0] == "CP") {
+            // TODO: should FRAG be a clause?
+            extensionList = clause_extensions;
+        } else {
+            extensionList = extensions;
+        }
     }
 
     // Tried to toggle an extension on an inapplicable node.
@@ -1872,7 +1873,7 @@ function fixError() {
     if (!startnode || endnode) return;
     var sn = $(startnode);
     if (hasDashTag(sn, "FLAG")) {
-        toggleExtension("FLAG");
+        toggleExtension("FLAG", ["FLAG"]);
     }
     updateSelection();
 }
