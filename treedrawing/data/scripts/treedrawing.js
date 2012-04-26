@@ -907,6 +907,7 @@ function displayRename() {
     if (startnode && !endnode) {
         stackTree();
         document.body.onkeydown = null;
+        $("#sn0").unbind('mousedown');
         var oldClass = getLabel($(startnode));
         function space(event) {
             var element = (event.target || event.srcElement);
@@ -926,6 +927,7 @@ function displayRename() {
                 resetIds();
                 updateSelection();
                 document.body.onkeydown = handleKeyDown;
+                $("#sn0").mousedown(handleNodeClick);
             }
             // TODO(AWE): check that theNewPhrase id gets removed...it
             // doesn't seem to?
@@ -1072,6 +1074,7 @@ function editLemma() {
     if (startnode && !endnode && childLemmata.size() > 0) {
         stackTree();
         document.body.onkeydown = null;
+        $("#sn0").unbind('mousedown');
         function space(event) {
             var element = (event.target || event.srcElement);
             $(element).val($(element).val());
@@ -1083,6 +1086,7 @@ function editLemma() {
             resetIds();
             updateSelection();
             document.body.onkeydown = handleKeyDown;
+            $("#sn0").mousedown(handleNodeClick);
         }
         var lemma = $(startnode).children(".wnode").children(".lemma").text();
         lemma = lemma.substring(1);
