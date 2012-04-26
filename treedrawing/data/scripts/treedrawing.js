@@ -524,7 +524,7 @@ function isPossibleTarget(node) {
 }
 
 function currentText(root) {
-    var text = $(root).find('.wnode').filter(
+    var text = $(root).find('.wnode').clone().remove(".lemma").filter(
         function() {
             return !isEmpty(this.textContent);
         }).text();
