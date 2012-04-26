@@ -1594,12 +1594,12 @@ function addToIndices(tokenRoot, numberToAdd) {
         if (nindex > 0) {
             if (shouldIndexLeaf(curNode)) {
                 var leafText = wnodeString(curNode);
-                leafText = leafText.substr(0, leafText.length - 1);
+                leafText = parseLabel(leafText) + parseIndexType(leafText);
                 textNode(curNode.children(".wnode").first()).text(
                     leafText + (nindex + numberToAdd));
             } else {
-                var label = getLabel(curNode).substr(
-                    0, getLabel(curNode).length - 1);
+                var label = getLabel(curNode);
+                label = parseLabel(label) + parseIndexType(label);
                 label = label + (nindex + numberToAdd);
                 setNodeLabel(curNode, label, true);
             }
