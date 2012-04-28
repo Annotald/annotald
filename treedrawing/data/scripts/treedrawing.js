@@ -697,7 +697,9 @@ function moveNodes(parent) {
     } else {
         return; // they are not sisters
     }
-    var toselect = $(".snode[xxx=newnode]").first().get(0);
+    var toselect = $(".snode[xxx=newnode]").first();
+    toselect.attr("xxx",null);
+    toselect = toselect.get(0);
     // BUG when making XP and then use context menu: todo XXX
 
     startnode = toselect;
