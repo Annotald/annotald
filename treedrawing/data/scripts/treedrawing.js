@@ -1219,7 +1219,7 @@ function guessLeafNode(node) {
 }
 
 function toggleExtension(extension, extensionList) {
-    if (!startnode || endnode) return;
+    if (!startnode || endnode) return false;
 
     if (!extensionList) {
         if (guessLeafNode(startnode)) {
@@ -1235,7 +1235,7 @@ function toggleExtension(extension, extensionList) {
 
     // Tried to toggle an extension on an inapplicable node.
     if (extensionList.indexOf(extension) < 0) {
-        return;
+        return false;
     }
 
     stackTree();
@@ -1246,6 +1246,8 @@ function toggleExtension(extension, extensionList) {
     var newlabel = toggleStringExtension(oldlabel, extension, extensionList);
     textnode.replaceWith(newlabel + " ");
     $(startnode).removeClass(oldlabel).addClass(newlabel);
+
+    return true;
 }
 
 // added by JEB
