@@ -305,13 +305,15 @@ function save(e, force) {
             force = false;
         }
         displayInfo("Saving...");
-        var tosave = toLabeledBrackets($("#editpane"));
-        $.post("/doSave", {trees: tosave, startTime: startTime, force: force}, saveHandler);
-        if ($("#idlestatus").html().search("IDLE") != -1) {
-            idle();
-        }
-        lastsavedstate = $("#editpane").html();
         saveInProgress = true;
+        setTimeout(function () {
+            var tosave = toLabeledBrackets($("#editpane"));
+            $.post("/doSave", {trees: tosave, startTime: startTime, force: force}, saveHandler);
+            if ($("#idlestatus").html().search("IDLE") != -1) {
+                idle();
+            }
+            lastsavedstate = $("#editpane").html();
+        }, 0);
     }
 }
 
@@ -1767,9 +1769,11 @@ var validatingCurrently = false;
 function validateTrees() {
     if (!validatingCurrently) {
         validatingCurrently = true;
-        var toValidate = toLabeledBrackets($("#editpane"));
         displayInfo("Validating...");
-        $.post("/doValidate", {trees: toValidate}, validateHandler);
+        setTimeout(function () {
+            var toValidate = toLabeledBrackets($("#editpane"));
+            $.post("/doValidate", {trees: toValidate}, validateHandler);
+        }, 0);
     }
 }
 
