@@ -20,17 +20,18 @@ var conmenus = new Object();
 var conleafs = new Array();
 
 function addConMenu(label, suggestions) {
-    conmenus[label] = new function() {
-	this.suggestions = suggestions;
+    conmenus[label] = {
+	suggestions : suggestions
     };
 }
 
 function addConLeaf(suggestion, before, label, word) {
-    var conleaf = new Object();
-    conleaf.suggestion=suggestion;
-    conleaf.before=before;
-    conleaf.label=label;
-    conleaf.word=word;
+    var conleaf = {
+        suggestion : suggestion,
+        before : before,
+        label : label,
+        word : word
+    };
 
     conleafs.push(conleaf);
 }
