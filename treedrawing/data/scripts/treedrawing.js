@@ -1256,31 +1256,15 @@ function toggleVerbalExtension(extension) {
     toggleExtension(extension);
 }
 
-function setLabel(labels) {
-    if (!startnode || endnode) {
-        return;
-    }
-    if (!isPossibleTarget(startnode) &&
-        !isEmpty(wnodeString($(startnode)))) {
-        return;
-    }
-    stackTree();
-    var textnode = textNode($(startnode));
-    var oldlabel = $.trim(textnode.text());
+function lookupNextLabel(oldlabel, labels) {
+    // labels is either: an array, an object
     var newlabel = null;
     // TODO(AWE): make this more robust!
     if (!(labels instanceof Array)) {
-        var prefix = oldlabel.indexOf("-") > 0 ?
-            oldlabel.substr(0,oldlabel.indexOf("-")) :
-            oldlabel;
+        var prefix = oldlabel.split("-")[0];
         var new_labels = labels[prefix];
         if (!new_labels) {
-            for (i in labels) {
-                new_labels = labels[i];
-                break;          // TODO(AWE): this is ugly, but I can't
-                                // figure out how to get the zero-th
-                                // property of an object in JS... :-/
-            }
+            new_labels = _.values(labels)[0];
         }
         labels = new_labels;
     }
@@ -1297,6 +1281,34 @@ function setLabel(labels) {
         newlabel = labels[0];
     }
     newlabel = changeJustLabel(oldlabel,newlabel);
+
+    return newlabel;
+}
+
+function setLabel(labels) {
+    if (!startnode || endnode) {
+        return false;
+    }
+
+    stackTree();
+    var textnode = textNode($(startnode));
+    var oldlabel = $.trim(textnode.text());
+    var newlabel = lookupNextLabel(oldlabel, labels);
+
+    if (guessLeafNode($(startnode))) {
+        if (typeof testValidLeafLabel !== "undefined") {
+            if (!testValidLeafLabel(newlabel)) {
+                return false;
+            }
+        }
+    } else {
+        if (typeof testValidPhraseLabel !== "undefined") {
+            if (!testValidPhraseLabel(newlabel)) {
+                return false;
+            }
+        }
+    }
+
     textnode.replaceWith(newlabel + " ");
     if (isIpNode(newlabel)) {
         $(startnode).addClass("ipnode");
@@ -1304,6 +1316,8 @@ function setLabel(labels) {
         $(startnode).removeClass("ipnode");
     }
     $(startnode).removeClass(parseLabel(oldlabel)).addClass(parseLabel(newlabel));
+
+    return true;
 }
 
 function makeNode(label) {
