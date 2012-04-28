@@ -230,8 +230,7 @@ function hideContextMenu() {
     $("#conMenu").css("visibility","hidden");
 }
 
-function addCommand(dict, fn, arg) {
-    // TODO(AWE): allow multiple arguments, via surgery on arguments array.
+function addCommand(dict, fn) {
     var commandMap;
     if (dict.ctrl) {
         commandMap = ctrlKeyMap;
@@ -242,7 +241,7 @@ function addCommand(dict, fn, arg) {
     }
     commandMap[dict.keycode] = {
         func: fn,
-        args: [arg]
+        args: Array.prototype.slice.call(arguments, 2)
     };
 }
 
