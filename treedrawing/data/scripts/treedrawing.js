@@ -2134,6 +2134,17 @@ function addLemma(lemma) {
     $(startnode).children(".wnode").append(theLemma);
 }
 
+function untilSuccess() {
+    for (var i = 0; i < arguments.length; i++) {
+        var fn = arguments[i][0],
+            args = arguments[i].slice(1);
+        var res = fn.apply(null, args);
+        if (res) {
+            return;
+        }
+    }
+}
+
 // TODO: badly need a DSL for forms
 
 // Local Variables:
