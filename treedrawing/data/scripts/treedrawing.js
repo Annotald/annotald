@@ -1308,10 +1308,11 @@ function setLabel(labels) {
 
 function makeNode(label) {
     // check if something is selected
-    var parent_ip = $(startnode).parentsUntil(".ipnode", ".ipnode");
+    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
     if (!startnode) {
         return;
     }
+    var parent_before = parent_ip.clone();
     // FIX, note one node situation
     //if( (startnode.id == "sn0") || (endnode.id == "sn0") ){
     // can't make node above root
@@ -1340,9 +1341,9 @@ function makeNode(label) {
                 endnode).wrapAll('<div xxx="newnode" class="snode ' +
                                         label + '">' + label + ' </div>\n');
             // undo if this messed up the text order
-            if( currentText(parent_ip) != oldtext) {
-                undo();
-                redostack.pop();
+            if(currentText(parent_ip) != oldtext) {
+                // TODO: is this plausible? can we remove the check?
+                parent_ip.replaceWith(parent_before);
             }
         }
     }
