@@ -546,7 +546,7 @@ function moveNode(parent) {
     if (parent == document.getElementById("sn0")) {
         parent_ip = $(parent);
     }
-    var parent_before = parent_ip.clone();
+    var parent_before;
     var textbefore = currentText(parent_ip);
     var nodeMoved;
     if (!isPossibleTarget(parent)) {
@@ -563,13 +563,15 @@ function moveNode(parent) {
                 return;
             }
             stackTree();
+            // parent_before = parent_ip.clone();
             $(startnode).insertBefore($(parent).children().filter(
                                                  $(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
-                parent_ip.replaceWith(parent_before);
-                if (parent_ip.attr("id") == "sn0") {
-                    $("#sn0").mousedown(handleNodeClick);
-                }
+                alert("failed what should have been a strict test");
+                // parent_ip.replaceWith(parent_before);
+                // if (parent_ip.attr("id") == "sn0") {
+                //     $("#sn0").mousedown(handleNodeClick);
+                // }
             } else {
                 resetIds();
             }
@@ -579,13 +581,15 @@ function moveNode(parent) {
                 return;
             }
             stackTree();
+            // parent_before = parent_ip.clone();
             $(startnode).insertAfter($(parent).children().
                                      filter($(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
-                parent_ip.replaceWith(parent_before);
-                 if (parent_ip.attr("id") == "sn0") {
-                    $("#sn0").mousedown(handleNodeClick);
-                }
+                alert("failed what should have been a strict test");
+                // parent_ip.replaceWith(parent_before);
+                //  if (parent_ip.attr("id") == "sn0") {
+                //     $("#sn0").mousedown(handleNodeClick);
+                // }
             } else {
                 resetIds();
             }
@@ -597,6 +601,11 @@ function moveNode(parent) {
         var tokenMerge = isRootNode( $(startnode) );
         var maxindex = maxIndex(getTokenRoot($(parent)));
         var movednode = $(startnode);
+
+        // NOTE: currently there are no more stringent checks below; if that
+        // changes, we might want to demote this
+        parent_before = parent_ip.clone();
+
         // where a and b are DOM elements (not jquery-wrapped),
         // a.compareDocumentPosition(b) returns an integer.  The first (counting
         // from 0) bit is set if B precedes A, and the second bit is set if A
