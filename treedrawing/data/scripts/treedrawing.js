@@ -528,10 +528,16 @@ function isPossibleTarget(node) {
 }
 
 function currentText(root) {
-    var text = $(root).find('.wnode').clone().remove(".lemma").filter(
-        function() {
-            return !isEmpty(this.textContent);
-        }).text();
+    var nodes = root.get(0).getElementsByClassName("wnode");
+    var text = "";
+    for (var i = 0; i < nodes.length; i++) {
+        text += nodes[i].childNodes[0].nodeValue;
+    }
+
+        // $(root).find('.wnode').map(
+        // function() {
+        //     return this.childNodes[0];
+        // }).text();
     return text;
 }
 
