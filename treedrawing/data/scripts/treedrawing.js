@@ -801,7 +801,7 @@ function makeLeaf(before, label, word, target) {
     startnode = null;
     endnode = null;
     resetIds();
-    selectNode(newleaf);
+    selectNode(newleaf.get(0));
     updateSelection();
 }
 
@@ -1381,7 +1381,7 @@ function makeNode(label) {
     // BUG when making XP and then use context menu: todo XXX
 
     // TODO(AWE): the ipnodes thing isn't updated here
-    selectNode(toselect);
+    selectNode(toselect.get(0));
     toselect.attr("xxx",null);
     updateSelection();
     resetIds();
@@ -1415,7 +1415,7 @@ function pruneNode() {
         startnode = endnode = null;
         // not needed, strictly removing
         // resetIds();
-        selectNode(toselect);
+        selectNode(toselect.get(0));
         updateSelection();
     }
 }
