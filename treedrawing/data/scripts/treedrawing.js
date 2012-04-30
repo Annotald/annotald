@@ -553,8 +553,10 @@ function currentText(root) {
 
 function moveNode(parent) {
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
-    if (parent == document.getElementById("sn0")) {
-        parent_ip = $(parent);
+    var other_parent = $(parent).parents("#sn0>.snode,#sn0").first();
+    if (parent == document.getElementById("sn0") ||
+        !parent_ip.is(other_parent)) {
+        parent_ip = $("#sn0");
     }
     var parent_before;
     var textbefore = currentText(parent_ip);
