@@ -708,13 +708,12 @@ function moveNodes(parent) {
         return; // they are not sisters
     }
     var toselect = $(".snode[xxx=newnode]").first();
-    toselect.attr("xxx",null);
     toselect = toselect.get(0);
     // BUG when making XP and then use context menu: todo XXX
 
     startnode = toselect;
     moveNode(parent);
-    startnode = toselect;
+    startnode = $(".snode[xxx=newnode]").first().get(0);
     endnode = undefined;
     pruneNode();
     clearSelection();
