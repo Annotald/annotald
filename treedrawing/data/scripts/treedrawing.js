@@ -448,6 +448,13 @@ function handleNodeClick(e) {
 }
 
 function selectNode(node) {
+    if (!(node instanceof Node)) {
+        try {
+            throw Error("foo");
+        } catch (e) {
+            console.log("selecting a non-node: " + e.stack);
+        }
+    }
     if (node == document.getElementById("sn0")) {
         clearSelection();
         return;
