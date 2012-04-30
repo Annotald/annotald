@@ -531,7 +531,10 @@ function currentText(root) {
     var nodes = root.get(0).getElementsByClassName("wnode");
     var text = "";
     for (var i = 0; i < nodes.length; i++) {
-        text += nodes[i].childNodes[0].nodeValue;
+        var nv = nodes[i].childNodes[0].nodeValue;
+        if (!isEmpty(nv)) {
+            text += nv;
+        }
     }
 
         // $(root).find('.wnode').map(
