@@ -1791,8 +1791,10 @@ function setLabelLL(node, label) {
     }
     var oldLabel = $.trim(textNode(node).text());
     textNode(node).replaceWith(label);
-    node.removeClass(oldLabel);
-    node.addClass($.trim(label));
+    if (node.hasClass("snode")) {
+        node.removeClass(oldLabel);
+        node.addClass($.trim(label));
+    }
 }
 
 function textNode(node) {
