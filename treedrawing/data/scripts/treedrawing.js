@@ -1835,12 +1835,12 @@ function isLeafNode(node) {
 
 var validatingCurrently = false;
 
-function validateTrees() {
+function validateTrees(e) {
     if (!validatingCurrently) {
         validatingCurrently = true;
         var toValidate = toLabeledBrackets($("#editpane"));
         displayInfo("Validating...");
-        $.post("/doValidate", {trees: toValidate}, validateHandler);
+        $.post("/doValidate", {trees: toValidate, shift: e.shiftKey}, validateHandler);
     }
 }
 
