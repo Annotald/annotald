@@ -1816,10 +1816,22 @@ function validateTrees() {
         validatingCurrently = true;
         displayInfo("Validating...");
         setTimeout(function () {
-            var toValidate = toLabeledBrackets($("#editpane"));
-            $.post("/doValidate", {trees: toValidate}, validateHandler);
+            // TODO: since this is a settimeout, do we need to also make it async?
+            validateTreesSync(true);
         }, 0);
     }
+}
+
+function validateTreesSync(async) {
+    var toValidate = toLabeledBrackets($("#editpane"));
+    $.ajax("/doValidate",
+           { type: 'POST',
+             url: "/doValidate",
+             data: {trees: toValidate},
+             success: validateHandler,
+             async: async,
+             dataType: "json"
+           });
 }
 
 function validateHandler(data) {
@@ -2058,37 +2070,37 @@ function basesAndDashes(bases, dashes) {
 function nextTree(e) {
     var find = undefined;
     if (e.shiftKey) find = "-FLAG";
-    advanceTree("/nextTree", find);
+    advanceTree("/nextTree", find, false);
 }
 
 function prevTree(e) {
     var find = undefined;
     if (e.shiftKey) find = "-FLAG";
-    advanceTree("/prevTree", find);
+    advanceTree("/prevTree", find, false);
 }
 
-function advanceTree(where, find) {
+function advanceTree(where, find, async) {
     var theTrees = toLabeledBrackets($("#editpane"));
     displayInfo("Fetching tree...");
-    $.ajax(where,
-           { async: false,
-             success: function(res) {
-                 if (res['result'] == "failure") {
-                     displayWarning("Fetching tree failed: " + res['reason']);
-                 } else {
-                     // TODO: what to do about the save warning
-                     $("#editpane").html(res['tree']);
-                     resetIds();
-                     resetLabelClasses(false);
-                     undostack = new Array();
-                     document.body.onkeydown = handleKeyDown;
-                     // $(".snode").mousedown(handleNodeClick);
-                     displayInfo("Tree fetched.");
-                 }
-             },
-             dataType: "json",
-             type: "POST",
-             data: {trees: theTrees, find: find}});
+    return $.ajax(where,
+                  { async: async,
+                    success: function(res) {
+                        if (res['result'] == "failure") {
+                            displayWarning("Fetching tree failed: " + res['reason']);
+                        } else {
+                            // TODO: what to do about the save warning
+                            $("#editpane").html(res['tree']);
+                            resetIds();
+                            resetLabelClasses(false);
+                            undostack = new Array();
+                            document.body.onkeydown = handleKeyDown;
+                            // $(".snode").mousedown(handleNodeClick);
+                            displayInfo("Tree fetched.");
+                        }
+                    },
+                    dataType: "json",
+                    type: "POST",
+                    data: {trees: theTrees, find: find}});
 }
 
 function splitWord() {
