@@ -338,8 +338,8 @@ function assignEvents() {
     $("#butundo").mousedown(undo);
     $("#butredo").mousedown(redo);
     $("#butidle").mousedown(idle);
-    $("#butexit").mousedown(quitServer);
-    $("#butvalidate").mousedown(validateTrees);
+    $("#butexit").unbind("click").click(quitServer);
+    $("#butvalidate").unbind("click").click(validateTrees);
     $("#butnexterr").unbind("click").click(nextValidationError);
     $("#butnexttree").unbind("click").click(nextTree);
     $("#butprevtree").unbind("click").click(prevTree);
