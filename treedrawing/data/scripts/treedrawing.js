@@ -338,8 +338,8 @@ function assignEvents() {
     $("#butundo").mousedown(undo);
     $("#butredo").mousedown(redo);
     $("#butidle").mousedown(idle);
-    $("#butexit").mousedown(quitServer);
-    $("#butvalidate").mousedown(validateTrees);
+    $("#butexit").unbind("click").click(quitServer);
+    $("#butvalidate").unbind("click").click(validateTrees);
     $("#butnexterr").unbind("click").click(nextValidationError);
     $("#butnexttree").unbind("click").click(nextTree);
     $("#butprevtree").unbind("click").click(prevTree);
@@ -524,7 +524,7 @@ function isPossibleTarget(node) {
 }
 
 function currentText(root) {
-    var text = $(root).find('.wnode').filter(
+    var text = $(root).find('.wnode').clone().remove(".lemma").filter(
         function() {
             return !isEmpty(this.textContent);
         }).text();
@@ -1105,6 +1105,10 @@ function displayRename() {
             editor = $("<input id='labelbox' class='labeledit' " +
                            "type='text' value='" + label + "' />");
             var origNode = $(startnode);
+            var isWordLevelConj =
+                    origNode.children(".snode").children(".snode").size() == 0 &&
+                    // TODO: make configurable
+                    origNode.children(".CONJ") .size() > 0;
             textNode(origNode).replaceWith(editor);
             $("#labelbox").keydown(
                 function(event) {
@@ -1122,7 +1126,10 @@ function displayRename() {
                     if (event.keyCode == 13) {
                         var newphrase = $("#labelbox").val().toUpperCase();
                         if (typeof testValidPhraseLabel !== "undefined") {
-                            if (!testValidPhraseLabel(newphrase)) {
+                            if (!(testValidPhraseLabel(newphrase) ||
+                                  (typeof testValidLeafLabel !== "undefined" &&
+                                   isWordLevelConj &&
+                                   testValidLeafLabel(newphrase)))) {
                                 displayWarning("Not a valid phrase label: '" +
                                               newphrase + "'.");
                                 return;
@@ -1253,9 +1260,9 @@ function toggleStringExtension (oldlabel, extension, extensionList) {
 function guessLeafNode(node) {
     if (typeof testValidLeafLabel   !== "undefined" &&
         typeof testValidPhraseLabel !== "undefined") {
-        if (testValidPhraseLabel(getLabel(node))) {
+        if (testValidPhraseLabel(getLabel($(node)))) {
             return false;
-        } else if (testValidLeafLabel(getLabel(node))) {
+        } else if (testValidLeafLabel(getLabel($(node)))) {
             return true;
         } else {
             // not a valid label, fall back to structural check
@@ -1266,18 +1273,19 @@ function guessLeafNode(node) {
     }
 }
 
-function toggleExtension(extension) {
+function toggleExtension(extension, extensionList) {
     if (!startnode || endnode) return;
 
-    var extensionList;
-    if (guessLeafNode(startnode)) {
-        extensionList = vextensions;
-    } else if (getLabel($(startnode)).split("-")[0] == "IP" ||
-               getLabel($(startnode)).split("-")[0] == "CP") {
-        // TODO: should FRAG be a clause?
-        extensionList = clause_extensions;
-    } else {
-        extensionList = extensions;
+    if (!extensionList) {
+        if (guessLeafNode(startnode)) {
+            extensionList = vextensions;
+        } else if (getLabel($(startnode)).split("-")[0] == "IP" ||
+                   getLabel($(startnode)).split("-")[0] == "CP") {
+            // TODO: should FRAG be a clause?
+            extensionList = clause_extensions;
+        } else {
+            extensionList = extensions;
+        }
     }
 
     // Tried to toggle an extension on an inapplicable node.
@@ -1589,12 +1597,12 @@ function addToIndices(tokenRoot, numberToAdd) {
         if (nindex > 0) {
             if (shouldIndexLeaf(curNode)) {
                 var leafText = wnodeString(curNode);
-                leafText = leafText.substr(0, leafText.length - 1);
+                leafText = parseLabel(leafText) + parseIndexType(leafText);
                 textNode(curNode.children(".wnode").first()).text(
                     leafText + (nindex + numberToAdd));
             } else {
-                var label = getLabel(curNode).substr(
-                    0, getLabel(curNode).length - 1);
+                var label = getLabel(curNode);
+                label = parseLabel(label) + parseIndexType(label);
                 label = label + (nindex + numberToAdd);
                 setNodeLabel(curNode, label, true);
             }
@@ -1830,12 +1838,12 @@ function isLeafNode(node) {
 
 var validatingCurrently = false;
 
-function validateTrees() {
+function validateTrees(e) {
     if (!validatingCurrently) {
         validatingCurrently = true;
         var toValidate = toLabeledBrackets($("#editpane"));
         displayInfo("Validating...");
-        $.post("/doValidate", {trees: toValidate}, validateHandler);
+        $.post("/doValidate", {trees: toValidate, shift: e.shiftKey}, validateHandler);
     }
 }
 
@@ -1875,7 +1883,7 @@ function fixError() {
     if (!startnode || endnode) return;
     var sn = $(startnode);
     if (hasDashTag(sn, "FLAG")) {
-        toggleExtension("FLAG");
+        toggleExtension("FLAG", ["FLAG"]);
     }
     updateSelection();
 }

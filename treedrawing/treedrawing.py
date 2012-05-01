@@ -116,13 +116,16 @@ class Treedraw(object):
                                    reason = "server got an exception"))
 
     @cherrypy.expose
-    def doValidate(self, trees = None):
+    def doValidate(self, trees = None, shift = None):
         cherrypy.response.headers['Content-Type'] = 'application/json'
         if not self.options.validator:
             return json.dumps(dict(result = "failure",
                                    reason = "No validator specified"))
         try:
-            tovalidate = self.integrateTrees(trees)
+            if self.options.oneTree and shift == "true":
+                tovalidate = self.integrateTrees(trees)
+            else:
+                tovalidate = trees.strip()
             # If the validator script is inside the cwd, then it looks like an
             # unqualified path and it gets searched for in $PATH, instead of
             # in the cwd.  So here we make an absolute pathname to fix that.
@@ -139,9 +142,7 @@ class Treedraw(object):
             stream = utf8_reader(validator.stdout)
             validated = stream.read()
             validatedTrees = self.readTrees(None, text = validated)
-
-            # this smells duplicated from the index method
-            if self.options.oneTree:
+            if self.options.oneTree and shift == "true":
                 self.trees = validatedTrees
                 validatedHtml = self.treesToHtml([self.trees[self.treeIndex]])
             else:
@@ -213,6 +214,7 @@ class Treedraw(object):
         versionRe = re.compile('^\( \(VERSION.*$', re.M)
         versionMatch = versionRe.search(currentText)
         self.versionCookie = ""
+        # TODO: don't set this every time...
         if versionMatch:
             self.versionCookie = versionMatch.group()
         currentText = re.sub(versionRe, '', currentText)
