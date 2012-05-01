@@ -122,7 +122,7 @@ class Treedraw(object):
             return json.dumps(dict(result = "failure",
                                    reason = "No validator specified"))
         try:
-            tovalidate = self.integrateTrees(trees)
+            tovalidate = trees.strip()
             # If the validator script is inside the cwd, then it looks like an
             # unqualified path and it gets searched for in $PATH, instead of
             # in the cwd.  So here we make an absolute pathname to fix that.
@@ -139,13 +139,7 @@ class Treedraw(object):
             stream = utf8_reader(validator.stdout)
             validated = stream.read()
             validatedTrees = self.readTrees(None, text = validated)
-
-            # this smells duplicated from the index method
-            if self.options.oneTree:
-                self.trees = validatedTrees
-                validatedHtml = self.treesToHtml([self.trees[self.treeIndex]])
-            else:
-                validatedHtml = self.treesToHtml(validatedTrees)
+            validatedHtml = self.treesToHtml(validatedTrees)
 
             return json.dumps(dict(result = "success",
                                    html = validatedHtml))
