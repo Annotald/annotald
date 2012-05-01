@@ -207,6 +207,7 @@ class Treedraw(object):
         versionRe = re.compile('^\( \(VERSION.*$', re.M)
         versionMatch = versionRe.search(currentText)
         self.versionCookie = ""
+        # TODO: don't set this every time...
         if versionMatch:
             self.versionCookie = versionMatch.group()
         currentText = re.sub(versionRe, '', currentText)
