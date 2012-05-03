@@ -2152,9 +2152,9 @@ function splitWord() {
             setLeafLabel($(startnode), labelSplit[0]);
             secondLabel = labelSplit[1];
         }
-        setLeafLabel($(startnode), words[0] + "$");
+        setLeafLabel($(startnode), words[0] + "@");
         var hasLemma = $(startnode).find(".lemma").size() > 0;
-        makeLeaf(false, secondLabel, "$" + words[1]);
+        makeLeaf(false, secondLabel, "@" + words[1]);
         if (hasLemma) {
             // TODO: move to something like foo@1 and foo@2 for the two pieces
             // of the lemmata
