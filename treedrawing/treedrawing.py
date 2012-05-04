@@ -24,7 +24,6 @@ import sys, subprocess
 import cherrypy, json
 import nltk.tree as T
 import argparse
-import subprocess
 from mako.template import Template
 import util
 import runpy
