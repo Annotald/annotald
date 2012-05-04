@@ -42,7 +42,7 @@ class Treedraw(object):
         if len(args.psd) == 1:
             self.thefile = args.psd[0]
         else:
-            raise Error("Annotald requires exactly one .psd file argument!")
+            raise Exception("Annotald requires exactly one .psd file argument!")
         self.shortfile = shortfile
         self.options = args
         with open(self.thefile) as f:
@@ -253,7 +253,7 @@ class Treedraw(object):
                 pass
 
         if comment:
-            raise Error("Unterminated comment in input file!")
+            raise Exception("Unterminated comment in input file!")
 
         return output
 
