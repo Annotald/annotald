@@ -343,6 +343,7 @@ function assignEvents() {
     $("#butnexterr").unbind("click").click(nextValidationError);
     $("#butnexttree").unbind("click").click(nextTree);
     $("#butprevtree").unbind("click").click(prevTree);
+    $("#butgototree").unbind("click").click(goToTree);
     $("#editpane").mousedown(clearSelection);
     $("#conMenu").mousedown(hideContextMenu);
     $(document).mousewheel(handleMouseWheel);
@@ -2093,6 +2094,23 @@ function basesAndDashes(bases, dashes) {
     return _basesAndDashes;
 }
 
+function goToTree() {
+
+    function goTo() {
+        var treeIndex = $("#gotoInput").val();
+        for (i = 0; i < treeIndex; i++) {
+            advanceTree("/nextTree", undefined, false);
+        }
+        hideDialogBox();
+    }
+    var html = "Enter the index of the tree you'd like to jump to: \
+<input type='text' id='gotoInput' value=' ' /><div id='dialogButtons'><input type='button' id='gotoButton'\
+ value='GoTo' /></div>";
+    showDialogBox("GoTo Tree", html, goTo);
+    $("#gotoButton").click(goTo);
+    $("#gotoInput").focus();
+}
+
 function nextTree(e) {
     var find = undefined;
     if (e.shiftKey) find = "-FLAG";
@@ -2121,7 +2139,7 @@ function advanceTree(where, find, async) {
                             undostack = new Array();
                             document.body.onkeydown = handleKeyDown;
                             $(".snode").mousedown(handleNodeClick);
-                            displayInfo("Tree fetched.");
+                            displayInfo("Tree " + res['treeIndex'] + " fetched.");
                         }
                     },
                     dataType: "json",
