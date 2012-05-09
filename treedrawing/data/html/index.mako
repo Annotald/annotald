@@ -48,6 +48,7 @@ any later version.  See the LICENSE file for more information. -->
 %if oneTree:
         <input class="menubutton" type="button" value="Prev Tree" id="butprevtree" /><br />
         <input class="menubutton" type="button" value="Next Tree" id="butnexttree" /><br />
+	<input class="menubutton" type="button" value="GoTo Tree #" id="butgototree" /><br />
 %endif
 %if usetimelog:
         <input class="menubutton" type="button" value="Idle/Resume" id="butidle" /><br />
