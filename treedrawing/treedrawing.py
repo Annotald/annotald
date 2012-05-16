@@ -326,7 +326,7 @@ class Treedraw(object):
 
 
 #index.exposed = True
-parser = argparse.ArgumentParser(usage = "%prog [options] file.psd",
+parser = argparse.ArgumentParser(description = "A program for annotating parsed corpora",
                                  version = "Annotald " + VERSION,
                                  conflict_handler = "resolve")
 parser.add_argument("-s", "--settings", action = "store", dest = "settings",
