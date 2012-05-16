@@ -75,9 +75,7 @@ class Treedraw(object):
         if self.options.oneTree:
             del self.trees[self.treeIndex]
             trees = trees.strip().split("\n\n")
-            trees.reverse()
-            for t in trees:
-                self.trees.insert(self.treeIndex, t)
+            self.trees[self.treeIndex:self.treeIndex] = trees
             return "\n\n".join(self.trees)
         else:
             return trees.strip()
