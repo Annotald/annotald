@@ -116,34 +116,19 @@ class Treedraw(object):
                                    reason = "server got an exception"))
 
     @cherrypy.expose
-    def doValidate(self, trees = None):
+    def doValidate(self, trees = None, validator = None):
         # TODO: don't dump the current doc's trees if something goes wrong
         # during validate
         cherrypy.response.headers['Content-Type'] = 'application/json'
-        if not self.options.validator:
-            return json.dumps(dict(result = "failure",
-                                   reason = "No validator specified"))
         try:
             if self.options.oneTree and shift == "true":
                 tovalidate = self.integrateTrees(trees)
             else:
                 tovalidate = trees.strip()
-            # If the validator script is inside the cwd, then it looks like an
-            # unqualified path and it gets searched for in $PATH, instead of
-            # in the cwd.  So here we make an absolute pathname to fix that.
-            abs_validator = os.path.abspath(self.options.validator)
-            validator = subprocess.Popen(abs_validator,
-                                         stdin = subprocess.PIPE,
-                                         stdout = subprocess.PIPE)
-            utf8_writer = codecs.getwriter("utf-8")
-            stream = utf8_writer(validator.stdin)
-            stream.write(self.versionCookie + "\n\n")
-            stream.write(tovalidate)
-            validator.stdin.close()
-            utf8_reader = codecs.getreader("utf-8")
-            stream = utf8_reader(validator.stdout)
-            validated = stream.read()
-            validatedTrees = self.readTrees(None, text = validated)
+            validatedTrees = self.pythonOptions['validators'][validator](
+                self.versionCookie, tovalidate
+                ).split("\n\n")
+
             if self.options.oneTree and shift == "true":
                 self.trees = validatedTrees
                 validatedHtml = self.treesToHtml([self.trees[self.treeIndex]])
@@ -265,6 +250,9 @@ class Treedraw(object):
         indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
                                  strict_undefined = True)
 
+        useValidator = len(self.pythonOptions['validators']) > 0
+        validatorNames = self.pythonOptions['validators'].keys()
+
         return indexTemplate.render(annotaldVersion = VERSION,
                                     currentSettings = currentSettings,
                                     shortfile = self.shortfile,
@@ -275,7 +263,9 @@ class Treedraw(object):
                                     oneTree = self.options.oneTree,
                                     extraScripts = self.pythonOptions['extraJavascripts'],
                                     startTime = self.startTime,
-                                    debugJs = self.pythonOptions['debugJs']
+                                    debugJs = self.pythonOptions['debugJs'],
+                                    useValidator = useValidator,
+                                    validators = validatorNames
                                     )
 
     @cherrypy.expose

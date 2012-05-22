@@ -1863,7 +1863,9 @@ function validateTreesSync(async) {
     $.ajax("/doValidate",
            { type: 'POST',
              url: "/doValidate",
-             data: {trees: toValidate},
+             data: { trees: toValidate,
+                     validator: $("#validatorsSelect").val()
+                   },
              success: validateHandler,
              async: async,
              dataType: "json"

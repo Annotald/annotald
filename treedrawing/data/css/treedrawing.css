@@ -82,7 +82,7 @@ body {
     margin-bottom: 6px;
 }
 
-.menubutton {
+.menubutton, #validatorsSelect {
     width: 80%;
 }
 
