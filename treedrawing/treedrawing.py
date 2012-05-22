@@ -66,7 +66,7 @@ class Treedraw(object):
             self.conversionFn = util.treeToHtml
             self.useMetadata = False
         self.pythonOptions = runpy.run_path(args.pythonSettings)
-        self.startTime = str(int(time.time()))
+        cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
