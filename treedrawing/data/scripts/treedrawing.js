@@ -448,43 +448,51 @@ function handleNodeClick(e) {
 }
 
 function selectNode(node) {
-    if (!(node instanceof Node)) {
+    if (node) {
+        if (!(node instanceof Node)) {
+            try {
+                throw Error("foo");
+            } catch (e) {
+                console.log("selecting a non-node: " + e.stack);
+            }
+        }
+        if (node == document.getElementById("sn0")) {
+            clearSelection();
+            return;
+        }
+
+        if (node.className == "wnode") {
+            node = node.parentNode;
+        }
+
+        if (node == startnode) {
+            startnode = null;
+            if (endnode) {
+                startnode = endnode;
+                endnode = null;
+            }
+        } else if (startnode == null) {
+            startnode = node;
+        } else {
+            if (last_event_was_mouse) {
+                if (node == endnode) {
+                    endnode = null;
+                } else {
+                    endnode = node;
+                }
+            } else {
+                endnode = null;
+                startnode = node;
+            }
+        }
+        updateSelection();
+    } else {
         try {
             throw Error("foo");
         } catch (e) {
-            console.log("selecting a non-node: " + e.stack);
+            console.log("tried to select something falsey: " + e.stack);
         }
     }
-    if (node == document.getElementById("sn0")) {
-        clearSelection();
-        return;
-    }
-
-    if (node.className == "wnode") {
-        node = node.parentNode;
-    }
-
-    if (node == startnode) {
-        startnode = null;
-        if (endnode) {
-            startnode = endnode;
-            endnode = null;
-        }
-    } else if (startnode == null) {
-        startnode = node;
-    } else {
-        if (last_event_was_mouse) {
-            if (node == endnode) {
-                endnode = null;
-            } else {
-                endnode = node;
-            }
-        } else {
-            endnode = null;
-            startnode = node;
-        }
-    }
-    updateSelection();
 }
 
 
