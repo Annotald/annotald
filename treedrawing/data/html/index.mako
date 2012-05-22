@@ -43,8 +43,10 @@ any later version.  See the LICENSE file for more information. -->
 
         Editing: ${shortfile} <br />
         <input class="menubutton" type="button" value="Save" id="butsave" /><br />
+        <div id="undoCtrls">
         <input class="menubutton" type="button" value="Undo" id="butundo" /><br />
         <input class="menubutton" type="button" value="Redo" id="butredo" /><br />
+        </div>
 %if oneTree:
         <input class="menubutton" type="button" value="Prev Tree" id="butprevtree" /><br />
         <input class="menubutton" type="button" value="Next Tree" id="butnexttree" /><br />

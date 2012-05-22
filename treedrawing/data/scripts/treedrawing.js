@@ -355,8 +355,7 @@ function assignEvents() {
     $("#sn0").mousedown(handleNodeClick);
     $("#butsave").mousedown(save);
     if (disableUndo) {
-        $("#butundo").hide();
-        $("#butredo").hide();
+        $("#undoCtrls").hide();
     } else {
         $("#butundo").mousedown(undo);
         $("#butredo").mousedown(redo);
