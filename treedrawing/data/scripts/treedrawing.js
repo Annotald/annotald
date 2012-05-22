@@ -246,40 +246,52 @@ function addCommand(dict, fn) {
 }
 
 function stackTree() {
-    undostack.push($("#editpane").clone());
-    // Keep this small, for memory reasons
-    undostack = undostack.slice(-15);
+    if (disableUndo) {
+        return;
+    } else {
+        undostack.push($("#editpane").clone());
+        // Keep this small, for memory reasons
+        undostack = undostack.slice(-15);
+    }
 }
 
 function redo() {
-    var nextstate = redostack.pop();
-    if (!(nextstate == undefined)) {
-        var editPane = $("#editpane");
-        var currentstate = editPane.clone();
-        undostack.push(currentstate);
-        editPane.replaceWith(nextstate);
-        clearSelection();
-        // next line maybe not needed
-        $("#sn0").mousedown(handleNodeClick);
+    if (disableUndo) {
+        return;
+    } else {
+        var nextstate = redostack.pop();
+        if (!(nextstate == undefined)) {
+            var editPane = $("#editpane");
+            var currentstate = editPane.clone();
+            undostack.push(currentstate);
+            editPane.replaceWith(nextstate);
+            clearSelection();
+            // next line maybe not needed
+            $("#sn0").mousedown(handleNodeClick);
+        }
     }
 }
 
 function undo() {
-    // lots of slowness in the event-handler handling part of jquery.  Perhaps
-    // replace that with doing it by hand in the DOM (but with the potential
-    // for memory leaks)
-    // MDN references:
-    // https://developer.mozilla.org/en/DOM/Node.cloneNode
-    // https://developer.mozilla.org/En/DOM/Node.replaceChild
-    var prevstate = undostack.pop();
-    if (!(prevstate == undefined)) {
-        var editPane = $("#editpane");
-        var currentstate = $("#editpane").clone();
-        redostack.push(currentstate);
-        editPane.replaceWith(prevstate);
-        clearSelection();
-        // next line may not be needed
-        $("#sn0").mousedown(handleNodeClick);
+    if (disableUndo) {
+        return;
+    } else {
+        // lots of slowness in the event-handler handling part of jquery.  Perhaps
+        // replace that with doing it by hand in the DOM (but with the potential
+        // for memory leaks)
+        // MDN references:
+        // https://developer.mozilla.org/en/DOM/Node.cloneNode
+        // https://developer.mozilla.org/En/DOM/Node.replaceChild
+        var prevstate = undostack.pop();
+        if (!(prevstate == undefined)) {
+            var editPane = $("#editpane");
+            var currentstate = $("#editpane").clone();
+            redostack.push(currentstate);
+            editPane.replaceWith(prevstate);
+            clearSelection();
+            // next line may not be needed
+            $("#sn0").mousedown(handleNodeClick);
+        }
     }
 }
 
@@ -342,8 +354,13 @@ function assignEvents() {
     document.body.onkeydown = handleKeyDown;
     $("#sn0").mousedown(handleNodeClick);
     $("#butsave").mousedown(save);
-    $("#butundo").mousedown(undo);
-    $("#butredo").mousedown(redo);
+    if (disableUndo) {
+        $("#butundo").hide();
+        $("#butredo").hide();
+    } else {
+        $("#butundo").mousedown(undo);
+        $("#butredo").mousedown(redo);
+    }
     $("#butidle").mousedown(idle);
     $("#butexit").mousedown(quitServer);
     $("#butvalidate").mousedown(validateTrees);
@@ -2194,6 +2211,6 @@ function untilSuccess() {
 // js2-additional-externs: ("$" "setTimeout" "customCommands\
 // " "customConLeafBefore" "customConMenuGroups" "extensions" "vextensions\
 // " "clause_extensions" "JSON" "testValidLeafLabel" "testValidPhraseLabel\
-// " "_" "startTime" "console" "loadContextMenu")
+// " "_" "startTime" "console" "loadContextMenu" "disableUndo")
 // indent-tabs-mode: nil
 // End:
