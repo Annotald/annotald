@@ -52,8 +52,12 @@ class Treedraw(object):
         self.versionCookie = ""
         if versionMatch:
             self.versionCookie = versionMatch.group()
+
+        # TODO: after a respawn these will not be right
         self.inidle = False
         self.justexited = False
+        self.startTime = str(int(time.time()))
+
         # TODO: this needs to come from an IO library, not ad hoc
         if util.queryVersionCookie(self.versionCookie, "deep"):
             self.conversionFn = util.deepTreeToHtml
