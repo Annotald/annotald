@@ -157,6 +157,9 @@ class Treedraw(object):
                 self.thefile
             # check_call throws on child error exit
             subprocess.check_call(cmdline.split(" "))
+            if os.name == "nt":
+                # Windows cannot do atomic file renames
+                os.unlink(self.thefile)
             os.rename(self.thefile + '.out', self.thefile)
             cherrypy.response.headers['Content-Type'] = 'application/json'
             if self.options.timelog:
