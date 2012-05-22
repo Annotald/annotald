@@ -115,6 +115,8 @@ class Treedraw(object):
 
     @cherrypy.expose
     def doValidate(self, trees = None):
+        # TODO: don't dump the current doc's trees if something goes wrong
+        # during validate
         cherrypy.response.headers['Content-Type'] = 'application/json'
         if not self.options.validator:
             return json.dumps(dict(result = "failure",
