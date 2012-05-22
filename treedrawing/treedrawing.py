@@ -74,9 +74,7 @@ class Treedraw(object):
         if self.options.oneTree:
             del self.trees[self.treeIndex]
             trees = trees.strip().split("\n\n")
-            trees.reverse()
-            for t in trees:
-                self.trees.insert(self.treeIndex, t)
+            self.trees[self.treeIndex:self.treeIndex] = trees
             return "\n\n".join(self.trees)
         else:
             return trees.strip()
@@ -115,7 +113,9 @@ class Treedraw(object):
                                    reason = "server got an exception"))
 
     @cherrypy.expose
-    def doValidate(self, trees = None, shift = None):
+    def doValidate(self, trees = None):
+        # TODO: don't dump the current doc's trees if something goes wrong
+        # during validate
         cherrypy.response.headers['Content-Type'] = 'application/json'
         if not self.options.validator:
             return json.dumps(dict(result = "failure",
@@ -329,7 +329,7 @@ class Treedraw(object):
 
 
 #index.exposed = True
-parser = argparse.ArgumentParser(usage = "%prog [options] file.psd",
+parser = argparse.ArgumentParser(description = "A program for annotating parsed corpora",
                                  version = "Annotald " + VERSION,
                                  conflict_handler = "resolve")
 parser.add_argument("-s", "--settings", action = "store", dest = "settings",
