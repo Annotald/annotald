@@ -331,8 +331,6 @@ parser = argparse.ArgumentParser(description = "A program for annotating parsed 
                                  conflict_handler = "resolve")
 parser.add_argument("-s", "--settings", action = "store", dest = "settings",
                     help = "path to settings.js file")
-parser.add_argument("-v", "--validator", action = "store", dest = "validator",
-                    help = "path to a validation script")
 parser.add_argument("-p", "--port", action = "store",
                     type = int, dest = "port",
                     help = "port to run server on")
