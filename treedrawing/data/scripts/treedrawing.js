@@ -965,6 +965,7 @@ function displayRename() {
         if ($(startnode).children(".wnode").size() > 0) {
             // this is a terminal
             var word, lemma, useLemma;
+            var isLeafNode = guessLeafNode($(startnode));
             if ($(startnode).children(".wnode").children(".lemma").size() > 0) {
                 var preword = $.trim($(startnode).children().first().text());
                 preword = preword.split("-");
@@ -1021,11 +1022,21 @@ function displayRename() {
                     if (event.keyCode == 13) {
                         var newphrase =
                                 $("#leafphrasebox").val().toUpperCase();
-                        if (typeof testValidLeafLabel !== "undefined") {
-                            if (!testValidLeafLabel(newphrase)) {
-                                displayWarning("Not a valid leaf label: '" +
-                                              newphrase + "'.");
-                                return;
+                        if (isLeafNode) {
+                            if (typeof testValidLeafLabel !== "undefined") {
+                                if (!testValidLeafLabel(newphrase)) {
+                                    displayWarning("Not a valid leaf label: '" +
+                                                   newphrase + "'.");
+                                    return;
+                                }
+                            }
+                        } else {
+                            if (typeof testValidPhraseLabel !== "undefined") {
+                                if (!testValidPhraseLabel(newphrase)) {
+                                    displayWarning("Not a valid phrase label: '" +
+                                                   newphrase + "'.");
+                                    return;
+                                }
                             }
                         }
                         var newtext = $("#leaftextbox").val();
