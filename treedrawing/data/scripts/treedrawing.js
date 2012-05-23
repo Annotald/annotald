@@ -1748,19 +1748,23 @@ function objectToTree(o) {
 function toLabeledBrackets(node) {
     var out = node.clone();
 
-    out.find("#sn0>.snode").before("( ");
     // The ZZZZZ is a placeholder; first we want to clean any
     // double-linebreaks from the output (which will be spurious), then we
     // will turn the Z's into double-linebreaks
-    out.find("#sn0>.snode").after(")ZZZZZ");
-    out.find("#sn0>.snode").map(function () {
+    out.find(".snode:not(#sn0)").each(function () {
+        this.insertBefore(document.createTextNode("("), this.firstChild);
+        this.appendChild(document.createTextNode(")"));
+    });
+
+    out.find("#sn0>.snode").each(function () {
+        this.insertBefore(document.createTextNode("( "), this.firstChild);
+        this.appendChild(document.createTextNode(")ZZZZZ"));
         $(this).after(jsonToTree(this.getAttribute("data-metadata")));
     });
 
-    out.find(".snode").not("#sn0").before("(");
-    out.find(".snode").not("#sn0").after(")");
-
-    out.find(".wnode").before(" ");
+    out.find(".wnode").each(function () {
+        this.insertBefore(document.createTextNode(" "), this.firstChild);
+    });
 
     out = out.text();
     // Must use rx for string replace bc using a string doesn't get a
