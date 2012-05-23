@@ -293,7 +293,13 @@ function save(e, force) {
         saveInProgress = true;
         setTimeout(function () {
             var tosave = toLabeledBrackets($("#editpane"));
-            $.post("/doSave", {trees: tosave, startTime: startTime, force: force}, saveHandler);
+            $.post("/doSave", { trees: tosave,
+                                startTime: startTime,
+                                force: force
+                              }, saveHandler).error(function () {
+                                  lastsavedstate = "";
+                                  saveInProgress = false;
+                              });
             if ($("#idlestatus").html().search("IDLE") != -1) {
                 idle();
             }
