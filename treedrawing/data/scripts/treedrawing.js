@@ -17,7 +17,6 @@
 // <http://www.gnu.org/licenses/>.
 
 // Global TODOs:
-// - (AWE) push ipnode bookkeeping/formatting into CSS
 // - (AWE) make the dash-tags modular, so that ctrl x -> set XXX, w ->
 //   set NP-SBJ doesn't blow away the XXX
 // - (AWE) what happens when you delete e.g. an NP node w metadata?
@@ -72,8 +71,6 @@ function resetLabelClasses(alertOnError) {
                 // This incantation removes a value from an array.
                 classes.indexOf("snode") >= 0 &&
                     classes.splice(classes.indexOf("snode"), 1);
-                classes.indexOf("ipnode") >= 0 &&
-                    classes.splice(classes.indexOf("ipnode"), 1);
                 classes.indexOf(label) >= 0 &&
                     classes.splice(classes.indexOf(label), 1);
                 if (classes.length > 0) {
@@ -112,16 +109,6 @@ function documentReadyHandler() {
     assignEvents();
     $("#debugpane").empty();
 
-    // inital highlight of IPs
-    // TODO(AWE): remove
-    var snodes = $(".snode");
-    for (var i=0; i<snodes.length; i++) {
-        var text = getLabel($("#"+snodes[i].id));
-        if (isIpNode(text)) {
-            $(snodes[i]).addClass('ipnode');
-        }
-    }
-
     lastsavedstate = $("#editpane").html();
 }
 
@@ -157,20 +144,6 @@ function styleTags(tagNames, css) {
     for (var i = 0; i < tagNames.length; i++) {
         styleTag(tagNames[i], css);
     }
-}
-
-// TODO(AWE): now that the node label is in the CSS class, can this be
-// factored out?
-function isIpNode (text) {
-        return text.startsWith("IP-SUB") ||
-        text.startsWith("IP-MAT") ||
-        text.startsWith("IP-IMP") ||
-        text.startsWith("IP-INF") ||
-        text.startsWith("IP-PPL") ||
-        text.startsWith("IP-ABS") ||
-        text.startsWith("FRAG") ||
-        text.startsWith("QTP") ||
-        text.startsWith("RRC");
 }
 
 function contains(a, obj) {
@@ -835,11 +808,6 @@ function emergencyExitEdit() {
     // and not accept the return key to terminate editing.  It is designed
     // to be called from the Chrome JS console.
     function postChange(newNode) {
-        if (isIpNode(getLabel(newNode))) {
-            newNode.addClass("ipnode");
-        } else {
-            newNode.removeClass("ipnode");
-        }
         newNode.addClass(getLabel(newNode));
         startnode = endnode = null;
         resetIds();
@@ -967,11 +935,6 @@ function displayRename() {
         }
         function postChange(newNode) {
             if (newNode) {
-                if(isIpNode(getLabel(newNode))) {
-                    newNode.addClass("ipnode");
-                } else {
-                    newNode.removeClass("ipnode");
-                }
                 newNode.removeClass(oldClass);
                 newNode.addClass(getLabel(newNode));
                 startnode = endnode = null;
@@ -1354,11 +1317,6 @@ function setLabel(labels) {
     }
 
     textnode.replaceWith(newlabel + " ");
-    if (isIpNode(newlabel)) {
-        $(startnode).addClass("ipnode");
-    } else {
-        $(startnode).removeClass("ipnode");
-    }
     $(startnode).removeClass(parseLabel(oldlabel)).addClass(parseLabel(newlabel));
 
     return true;
@@ -1414,7 +1372,6 @@ function makeNode(label) {
 
     // BUG when making XP and then use context menu: todo XXX
 
-    // TODO(AWE): the ipnodes thing isn't updated here
     selectNode(toselect.get(0));
     toselect.attr("xxx",null);
     updateSelection();
