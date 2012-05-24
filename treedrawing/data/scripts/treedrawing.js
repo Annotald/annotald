@@ -45,7 +45,7 @@ String.prototype.endsWith = function(str) {
 };
 
 
-/**
+/*
  * unique function by: Shamasis Bhattacharya
  * http://www.shamasis.net/2009/09/fast-algorithm-to-find-unique-items-in-javascript-array/
  */
@@ -122,6 +122,13 @@ function addStyle(string) {
     globalStyle.text(style);
 }
 
+/**
+ * Add a css style for a certain tag.
+ *
+ * @param {String} tagName The tag which to style.  Will match instances of
+ * the given tag with additional trailing dash tags.
+ * @param {String} css The css style declarations to associate with the tag.
+ */
 function styleTag(tagName, css) {
     // TODO(AWE): this is a really baroque selector.  The alternative
     // (faster?) way to do it is to keep track of the node name as a
@@ -131,6 +138,14 @@ function styleTag(tagName, css) {
              '="] { ' + css + ' }');
 }
 
+
+/**
+ * Add a css style for a certain dash tag.
+ *
+ * @param {String} tagName The tag which to style.  Will match any node with
+ * this dash tag.  Should not itself have leading or trailing dashes.
+ * @param {String} css The css style declarations to associate with the tag.
+ */
 function styleDashTag(tagName, css) {
     // TODO(AWE): this is a really baroque selector.  The alternative
     // (faster?) way to do it is to keep track of the node name as a
@@ -140,6 +155,12 @@ function styleDashTag(tagName, css) {
              '="] { ' + css + ' }');
 }
 
+/**
+ * A convenience function to wrap {@link styleTag}.
+ *
+ * @param {Array} tagNames Tags to style.
+ * @param {String} css The css style declarations to associate with the tags.
+ */
 function styleTags(tagNames, css) {
     for (var i = 0; i < tagNames.length; i++) {
         styleTag(tagNames[i], css);
@@ -151,7 +172,12 @@ function contains(a, obj) {
     return (a.indexOf(obj) > -1);
 }
 
-
+/**
+ * Test whether a string is empty, i.e. a trace, comment, or other empty
+ * category.
+ *
+ * @param {String} text the text to test.
+ */
 function isEmpty (text) {
     // TODO(AWE): should this be passed a node instead of a string, and then
     // test whether the node is a leaf or not before giving a return value?  This
@@ -203,6 +229,22 @@ function hideContextMenu() {
     $("#conMenu").css("visibility","hidden");
 }
 
+/**
+ * Add a keybinding command.
+ *
+ * Calls to this function should be in the `settings.js` file, grouped in a
+ * function called `customCommands`
+ *
+ * @param {Object} dict a mapping of properties of the keybinding.  Can
+ * contain:
+ * - `keycode`: the numeric keycode for the binding (mandatory)
+ * - `shift`: true if this is a binding with shift pressed (optional)
+ * - `ctrl`: true if this is a binding with control pressed (optional)
+ *
+ * @param {Function} fn the function to associate with the keybinding.  Any
+ * further arguments to the `addCommand` function are passed to `fn` on each
+ * invocation.
+ */
 function addCommand(dict, fn) {
     var commandMap;
     if (dict.ctrl) {
@@ -228,6 +270,9 @@ function stackTree() {
     }
 }
 
+/**
+ * Invoke redo, if not disabled.
+ */
 function redo() {
     if (disableUndo) {
         return;
@@ -245,6 +290,9 @@ function redo() {
     }
 }
 
+/**
+ * Invoke undo, if not enabled
+ */
 function undo() {
     if (disableUndo) {
         return;
@@ -351,6 +399,9 @@ function assignEvents() {
     window.onbeforeunload = navigationWarning;
 }
 
+/**
+ * Edit the lemma, if a leaf node is selected, or the label, if a phrasal node is.
+ */
 function editLemmaOrLabel() {
     if (getLabel($(startnode)) == "CODE" &&
         (wnodeString($(startnode)).substring(0,4) == "{COM" ||
@@ -442,6 +493,11 @@ function handleNodeClick(e) {
     last_event_was_mouse = true;
 }
 
+/**
+ * Select a node, and update the GUI to reflect that.
+ *
+ * @param {DOM Node} node the node to be selected
+ */
 function selectNode(node) {
     if (node) {
         if (!(node instanceof Node)) {
@@ -490,7 +546,9 @@ function selectNode(node) {
     }
 }
 
-
+/**
+ * Remove any selection of nodes.
+ */
 function clearSelection() {
     saveMetadata();
     window.event.preventDefault();
@@ -515,6 +573,9 @@ function updateSelection() {
     updateMetadataEditor();
 }
 
+/**
+ * Scroll the page so that the first selected node is visible.
+ */
 function scrollToShowSel() {
     function isTopVisible(elem) {
         var docViewTop = $(window).scrollTop();
@@ -554,6 +615,13 @@ function currentText(root) {
     return text;
 }
 
+/**
+ * Move the selected node(s) to a new position.
+ *
+ * The movement operation must not change the text of the token.
+ *
+ * @param {DOM Node} parent the parent node to move selection under.
+ */
 function moveNode(parent) {
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
     var other_parent = $(parent).parents("#sn0>.snode,#sn0").first();
@@ -683,6 +751,14 @@ function isRootNode(node) {
     return node.filter("#sn0>.snode").size() > 0;
 }
 
+/**
+ * Move several nodes.
+ *
+ * The two selected nodes must be sisters, and they and all intervening sisters
+ * will be moved as a unit.  Calls {@link moveNode} to do the heavy lifting.
+ *
+ * @param {DOM Node} parent the parent to move the selection under
+ */
 function moveNodes(parent) {
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
     if (parent == document.getElementById("sn0")) {
@@ -722,14 +798,22 @@ function moveNodes(parent) {
     clearSelection();
 }
 
-/*
- *  Making leafs
+/**
+ * Create a leaf node before the selected node.
+ *
+ * Uses heuristic to determine whether the new leaf is to be a trace, empty
+ * subject, etc.
  */
-
 function leafBefore() {
     makeLeaf(true);
 }
 
+/**
+ * Create a leaf node after the selected node.
+ *
+ * Uses heuristic to determine whether the new leaf is to be a trace, empty
+ * subject, etc.
+ */
 function leafAfter() {
     makeLeaf(false);
 }
@@ -737,6 +821,17 @@ function leafAfter() {
 // TODO: the hardcoding of defaults in this function is ugly.  We should
 // supply a default heuristic fn to try to guess these, then allow
 // settings.js to override it.
+
+// TODO: maybe put the heuristic into leafbefore/after, and leave this fn clean?
+
+/**
+ * Create a leaf node adjacent to the selection, or a given target.
+ *
+ * @param {Boolean} before whether to create the node before or after selection
+ * @param {String} label the label to give the new node
+ * @param {String} word the text to give the new node
+ * @param {DOM Node} target where to put the new node (default: selected node)
+ */
 function makeLeaf(before, label, word, target) {
     if (!(target || startnode)) return;
 
@@ -843,6 +938,16 @@ function emergencyExitEdit() {
     postChange(replNode);
 }
 
+/**
+ * Show a dialog box.
+ *
+ * This function creates keybindings for the escape (to close dialog box) and
+ * return (caller-specified behavior) keys.
+ *
+ * @param {String} title the title of the dialog box
+ * @param {String} html the html to display in the dialog box
+ * @param {Function} returnFn a function to call when return is pressed
+ */
 function showDialogBox(title, html, returnFn) {
     document.body.onkeydown = function (e) {
         if (e.keyCode == 27) { // escape
@@ -857,6 +962,9 @@ function showDialogBox(title, html, returnFn) {
     $("#dialogBackground").get(0).style.visibility = "visible";
 }
 
+/**
+ * Hide the displayed dialog box
+ */
 function hideDialogBox() {
     $("#dialogBox").get(0).style.visibility = "hidden";
     $("#dialogBackground").get(0).style.visibility = "hidden";
@@ -928,6 +1036,13 @@ function editComment() {
     });
 }
 
+/**
+ * Edit the selected node
+ *
+ * If the selected node is a terminal, edit its label, and lemma.  The text is
+ * available for editing if it is an empty node (trace, comment, etc.).  If a
+ * non-terminal, edit the node label.
+ */
 function displayRename() {
     if (startnode && !endnode) {
         stackTree();
@@ -1100,6 +1215,9 @@ function displayRename() {
     }
 }
 
+/**
+ * Edit the lemma of a terminal node.
+ */
 function editLemma() {
     var childLemmata = $(startnode).children(".wnode").children(".lemma");
     if (startnode && !endnode && childLemmata.size() > 0) {
@@ -1231,6 +1349,18 @@ function guessLeafNode(node) {
     }
 }
 
+/**
+ * Toggle a dash tag on a node
+ *
+ * If the node bears the given dash tag, remove it.  If not, add it.  This
+ * function attempts to put multiple dash tags in the proper order, according
+ * to the configuration in the `vextensions`, `extensions`, and
+ * `clause_extensions` variables in the `settings.js` file.
+ *
+ * @param {String} extension the dash tag to toggle
+ * @param {Array of String} [extensionList] override the guess as to the
+ * appropriate ordered list of possible extensions is.
+ */
 function toggleExtension(extension, extensionList) {
     if (!startnode || endnode) return false;
 
@@ -1298,6 +1428,20 @@ function lookupNextLabel(oldlabel, labels) {
     return newlabel;
 }
 
+/**
+ * Set the label of a node intelligently
+ *
+ * Given a list of labels, this function will attempt to find the node's
+ * current label in the list.  If it is successful, it sets the node's label
+ * to the next label in the list (or the first, if the node's current label is
+ * the last in the list).  If not, it sets the label to the first label in the
+ * list.
+ *
+ * @param labels a list of labels.  This can also be an object -- if so, the
+ * base label (without any dash tags) of the target node is looked up as a
+ * key, and its corresponding value is used as the list.  If there is no value
+ * for that key, the first value specified in the object is the default.
+ */
 function setLabel(labels) {
     if (!startnode || endnode) {
         return false;
@@ -1328,6 +1472,14 @@ function setLabel(labels) {
     return true;
 }
 
+/**
+ * Create a phrasal node.
+ *
+ * The node will dominate the selected node or (if two sisters are selected)
+ * the selection and all intervening sisters.
+ *
+ * @param {String} [label] the label to give the new node (default: XP)
+ */
 function makeNode(label) {
     // check if something is selected
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
@@ -1386,6 +1538,12 @@ function makeNode(label) {
     // toselect.mousedown(handleNodeClick);
 }
 
+/**
+ * Delete a node.
+ *
+ * The node can only be deleted if doing so does not affect the text, i.e. it
+ * directly dominates no non-empty terminals.
+ */
 function pruneNode() {
     if (startnode && !endnode) {
         var deltext = $(startnode).children().first().text();
@@ -1417,6 +1575,15 @@ function pruneNode() {
     }
 }
 
+/**
+ * Sets the label of a node
+ *
+ * Contains none of the heuristics of {@link setLabel}.
+ *
+ * @param {JQuery Node} node the target node
+ * @param {String} label the new label
+ * @param {Boolean} noUndo whether to record this operation for later undo
+ */
 function setNodeLabel(node, label, noUndo) {
     // TODO: fold this and setLabelLL together...
     if (!noUndo) {
@@ -1612,6 +1779,13 @@ function removeIndex(node) {
                true);
 }
 
+/**
+ * Coindex nodes.
+ *
+ * Coindex the two selected nodes.  If they are already coindexed, toggle
+ * types of coindexation (normal -> gapping -> backwards gapping -> double
+ * gapping -> no indices).  If only one node is selected, remove its index.
+ */
 function coIndex() {
     if (startnode && !endnode) {
         if (getIndex($(startnode)) > 0) {
@@ -1671,7 +1845,6 @@ function coIndex() {
         }
     }
 }
-
 
 function resetIds(really) {
     if (really){
@@ -1748,6 +1921,9 @@ function toLabeledBrackets(node) {
 
 var lemmaClass = "lemmaHide";
 
+/**
+ * Toggle display of lemmata.
+ */
 function toggleLemmata() {
     $('.lemma').toggleClass('lemmaShow');
     $('.lemma').toggleClass('lemmaHide');
