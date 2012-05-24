@@ -1,3 +1,10 @@
 .DS_Store
 test.psd
 *.bak
+/doc/symbols/src/treedrawing_data_scripts_jquery-debug.js.html
+/doc/symbols/src/treedrawing_data_scripts_jquery.contextmenu.js.html
+/doc/symbols/src/treedrawing_data_scripts_jquery.js.html
+/doc/symbols/src/treedrawing_data_scripts_jquery.mousewheel.min.js.html
+/doc/symbols/src/treedrawing_data_scripts_test.js.html
+/doc/symbols/src/treedrawing_data_scripts_treedrawing.contextMenu.js.html
+/doc/symbols/src/treedrawing_data_scripts_underscore-min.js.html
