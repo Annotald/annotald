@@ -29,6 +29,7 @@ import util
 import runpy
 import time
 import cherrypy.lib.caching
+import traceback
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -116,6 +117,7 @@ class Treedraw(object):
             return json.dumps(dict(result = "success"))
         except Exception as e:
             print "something went wrong: %s" % e
+            traceback.print_exc()
             return json.dumps(dict(result = "failure",
                                    reason = "server got an exception"))
 
@@ -143,6 +145,7 @@ class Treedraw(object):
                                    html = validatedHtml))
         except Exception as e:
             print "something went wrong: %s, %s" % (type(e), e)
+            traceback.print_exc()
             return json.dumps(dict(result = "failure",
                                    reason = str(e)))
 
