@@ -21,6 +21,7 @@ debugJs = False
 
 validators = {}
 
+# from lovett.annotald import stdinValidator, flagIf
 # validators = {
 #     "example of a stdin validation query": stdinValidator("/path/to/script.py"),
 #     "example of a lovett validator": flagIf(lovett expression),
