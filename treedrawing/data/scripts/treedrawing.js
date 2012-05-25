@@ -261,7 +261,7 @@ function addCommand(dict, fn) {
 }
 
 function stackTree() {
-    if (disableUndo) {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
         return;
     } else {
         undostack.push($("#editpane").clone());
@@ -274,7 +274,7 @@ function stackTree() {
  * Invoke redo, if not disabled.
  */
 function redo() {
-    if (disableUndo) {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
         return;
     } else {
         var nextstate = redostack.pop();
@@ -294,7 +294,7 @@ function redo() {
  * Invoke undo, if not enabled
  */
 function undo() {
-    if (disableUndo) {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
         return;
     } else {
         // lots of slowness in the event-handler handling part of jquery.  Perhaps
@@ -381,7 +381,7 @@ function assignEvents() {
     document.body.onkeydown = handleKeyDown;
     $("#sn0").mousedown(handleNodeClick);
     $("#butsave").mousedown(save);
-    if (disableUndo) {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
         $("#undoCtrls").hide();
     } else {
         $("#butundo").mousedown(undo);
