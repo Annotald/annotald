@@ -257,8 +257,15 @@ class Treedraw(object):
         indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
                                  strict_undefined = True)
 
-        useValidator = len(self.pythonOptions['validators']) > 0
-        validatorNames = self.pythonOptions['validators'].keys()
+        validators = {}
+
+        try:
+            validators = self.pythonOptions['validators']
+        except KeyError:
+            pass
+
+        useValidator = len(validators) > 0
+        validatorNames = validators.keys()
 
         return indexTemplate.render(annotaldVersion = VERSION,
                                     currentSettings = currentSettings,
