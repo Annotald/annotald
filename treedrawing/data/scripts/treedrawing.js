@@ -2272,7 +2272,7 @@ function advanceTree(where, find, async) {
                         } else {
                             // TODO: what to do about the save warning
                             $("#editpane").html(res['tree']);
-                            resetIds();
+                            resetIds(true);
                             resetLabelClasses(false);
                             undostack = new Array();
                             document.body.onkeydown = handleKeyDown;
