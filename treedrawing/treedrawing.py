@@ -122,7 +122,7 @@ class Treedraw(object):
                                    reason = "server got an exception"))
 
     @cherrypy.expose
-    def doValidate(self, trees = None, validator = None):
+    def doValidate(self, trees = None, validator = None, shift = None):
         # TODO: don't dump the current doc's trees if something goes wrong
         # during validate
         cherrypy.response.headers['Content-Type'] = 'application/json'

@@ -1996,18 +1996,19 @@ function validateTrees(e) {
         displayInfo("Validating...");
         setTimeout(function () {
             // TODO: since this is a settimeout, do we need to also make it async?
-            validateTreesSync(true);
+            validateTreesSync(true, e.shiftKey);
         }, 0);
     }
 }
 
-function validateTreesSync(async) {
+function validateTreesSync(async, shift) {
     var toValidate = toLabeledBrackets($("#editpane"));
     $.ajax("/doValidate",
            { type: 'POST',
              url: "/doValidate",
              data: { trees: toValidate,
-                     validator: $("#validatorsSelect").val()
+                     validator: $("#validatorsSelect").val(),
+                     shift: shift
                    },
              success: validateHandler,
              async: async,
