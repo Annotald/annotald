@@ -1893,9 +1893,9 @@ function toLabeledBrackets(node) {
     });
 
     out.find("#sn0>.snode").each(function () {
+        $(this).append(jsonToTree(this.getAttribute("data-metadata")));
         this.insertBefore(document.createTextNode("( "), this.firstChild);
         this.appendChild(document.createTextNode(")ZZZZZ"));
-        $(this).after(jsonToTree(this.getAttribute("data-metadata")));
     });
 
     out.find(".wnode").each(function () {
