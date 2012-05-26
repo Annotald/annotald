@@ -64,8 +64,6 @@ any later version.  See the LICENSE file for more information. -->
         id="buttests" /><br />
 %endif
         <input class="menubutton" type="button" value="Exit" id="butexit" /><br />
-
-        <div id="idlestatus"></div>
       </div>
 
       <div id="toolsMenu" class="menuPane">
@@ -92,6 +90,10 @@ any later version.  See the LICENSE file for more information. -->
       <div id="messageBox" class="menuPane">
         <div class="menuTitle">Messages</div>
         <div id="messageBoxInner">----</div>
+%if usetimelog:
+	<div class="menuTitle">Status</div>
+	<div id="idlestatus">${idle}</div>
+%endif
       </div>
     </div>
 
