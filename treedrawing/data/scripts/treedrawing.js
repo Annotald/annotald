@@ -37,6 +37,8 @@ var last_event_was_mouse = false;
 
 var globalStyle = $('<style type="text/css"></style>');
 
+var currentIndex = 1;
+
 String.prototype.startsWith = function(str) {
     return (this.substr(0,str.length) === str);
 };
@@ -2102,8 +2104,17 @@ function goToTree() {
 
     function goTo() {
         var treeIndex = $("#gotoInput").val();
-        for (i = 0; i < treeIndex; i++) {
-            advanceTree("/nextTree", undefined, false);
+        if (treeIndex > currentIndex) {
+            for (i = currentIndex; i < treeIndex; i++) {
+                advanceTree("/nextTree", undefined, false);
+            }
+        }
+        else if (treeIndex === currentIndex) {
+        }
+        else {
+            for (i = currentIndex; i > treeIndex; i--) {
+                advanceTree("/prevTree", undefined, false);
+            }
         }
         hideDialogBox();
     }
@@ -2143,8 +2154,9 @@ function advanceTree(where, find, async) {
                             undostack = new Array();
                             document.body.onkeydown = handleKeyDown;
                             $(".snode").mousedown(handleNodeClick);
-                            displayInfo("Tree " + res['treeIndex'] + " fetched.");
-                            displayTreeIndex("Editing tree #" + res['treeIndex'] + " out of " + res['totalTrees']);
+                            currentIndex = res['treeIndex'] + 1
+                            displayInfo("Tree " + currentIndex + " fetched.");
+                            displayTreeIndex("Editing tree #" + currentIndex + " out of " + res['totalTrees']);
                         }
                     },
                     dataType: "json",
