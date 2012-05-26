@@ -2083,6 +2083,10 @@ function displayError(text) {
     $("#messageBoxInner").text(text).css("color", "red");
 }
 
+function displayTreeIndex(text) {
+    $("#treeIndexDisplay").text(text);
+}
+
 // TODO: should allow numeric indices
 function basesAndDashes(bases, dashes) {
     function _basesAndDashes(string) {
@@ -2140,6 +2144,7 @@ function advanceTree(where, find, async) {
                             document.body.onkeydown = handleKeyDown;
                             $(".snode").mousedown(handleNodeClick);
                             displayInfo("Tree " + res['treeIndex'] + " fetched.");
+                            displayTreeIndex("Editing tree #" + res['treeIndex'] + " out of " + res['totalTrees']);
                         }
                     },
                     dataType: "json",
