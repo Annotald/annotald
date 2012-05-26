@@ -262,6 +262,11 @@ class Treedraw(object):
         indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
                                  strict_undefined = True)
 
+        if self.options.oneTree:
+            ti = "1 out of " + str(len(self.trees))
+        else:
+            ti = ""
+
         return indexTemplate.render(annotaldVersion = VERSION,
                                     currentSettings = currentSettings,
                                     shortfile = self.shortfile,
@@ -273,7 +278,7 @@ class Treedraw(object):
                                     extraScripts = self.pythonOptions['extraJavascripts'],
                                     startTime = self.startTime,
                                     debugJs = self.pythonOptions['debugJs'],
-                                    treeIndexStatement = "0 out of " + str(len(self.trees))
+                                    treeIndexStatement = ti
                                     )
 
     @cherrypy.expose
