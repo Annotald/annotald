@@ -272,7 +272,8 @@ class Treedraw(object):
                                     oneTree = self.options.oneTree,
                                     extraScripts = self.pythonOptions['extraJavascripts'],
                                     startTime = self.startTime,
-                                    debugJs = self.pythonOptions['debugJs']
+                                    debugJs = self.pythonOptions['debugJs'],
+                                    treeIndexStatement = "0 out of " + str(len(self.trees))
                                     )
 
     @cherrypy.expose
@@ -325,7 +326,8 @@ class Treedraw(object):
             return json.dumps(
                 dict(result = 'success',
                      tree = self.treesToHtml([self.trees[self.treeIndex]]),
-                     treeIndex = self.treeIndex))
+                     treeIndex = self.treeIndex,
+                     totalTrees = len(self.trees)))
 
 
 
