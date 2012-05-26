@@ -95,6 +95,11 @@ body {
     height: 16px;
 }
 
+#treeIndexDisplay {
+    color: #4682B4;
+    font-weight: bold;
+}
+
 /* Tag/word editor */
 #editpane {
     position: absolute;
@@ -270,6 +275,10 @@ body {
     position: fixed;
     bottom: 5%;
     width: 15%;
+}
+
+#messageBoxInner {
+    font-weight: bold;
 }
 
 /* Misc */
