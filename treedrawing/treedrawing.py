@@ -286,7 +286,8 @@ class Treedraw(object):
                                     debugJs = self.pythonOptions['debugJs'],
                                     useValidator = useValidator,
                                     validators = validatorNames,
-                                    treeIndexStatement = ti
+                                    treeIndexStatement = ti,
+                                    idle = "Editing."
                                     )
 
     @cherrypy.expose
