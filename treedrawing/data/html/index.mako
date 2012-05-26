@@ -10,7 +10,10 @@ any later version.  See the LICENSE file for more information. -->
   <head>
     <title>Annotald</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" type="text/css" href="css/treedrawing.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/treedrawing.css" />
+%if colorCSS:
+    <link rel="stylesheet" type="text/css" href="css/color.css" />
+%endif
 %if debugJs:
     <script type= "application/javascript" src="scripts/jquery-debug.js"></script>
 %else:
