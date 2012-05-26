@@ -43,8 +43,10 @@ any later version.  See the LICENSE file for more information. -->
 
         Editing: ${shortfile} <br />
         <input class="menubutton" type="button" value="Save" id="butsave" /><br />
+        <div id="undoCtrls">
         <input class="menubutton" type="button" value="Undo" id="butundo" /><br />
         <input class="menubutton" type="button" value="Redo" id="butredo" /><br />
+        </div>
 %if oneTree:
         <input class="menubutton" type="button" value="Prev Tree" id="butprevtree" /><br />
         <input class="menubutton" type="button" value="Next Tree" id="butnexttree" /><br />
@@ -65,8 +67,15 @@ any later version.  See the LICENSE file for more information. -->
 
       <div id="toolsMenu" class="menuPane">
         <div class="menuTitle">Tools</div>
+%if useValidator:
+        <select name="validators" id="validatorsSelect">
+%for v in validators:
+          <option value="${v}">${v}</option>
+%endfor
+        </select>
         <input class="menubutton" type="button" value="Validate" id="butvalidate" /><br />
         <input class="menubutton" type="button" value="Next Error" id="butnexterr" /><br />
+%endif
       </div>
       <div id="metadataEditor"
 %if not usemetadata:

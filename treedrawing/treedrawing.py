@@ -29,6 +29,7 @@ import util
 import runpy
 import time
 import cherrypy.lib.caching
+import traceback
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -52,8 +53,12 @@ class Treedraw(object):
         self.versionCookie = ""
         if versionMatch:
             self.versionCookie = versionMatch.group()
+
+        # TODO: after a respawn these will not be right
         self.inidle = False
         self.justexited = False
+        self.startTime = str(int(time.time()))
+
         # TODO: this needs to come from an IO library, not ad hoc
         if util.queryVersionCookie(self.versionCookie, "deep"):
             self.conversionFn = util.deepTreeToHtml
@@ -62,7 +67,7 @@ class Treedraw(object):
             self.conversionFn = util.treeToHtml
             self.useMetadata = False
         self.pythonOptions = runpy.run_path(args.pythonSettings)
-        self.startTime = str(int(time.time()))
+        cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   : CURRENT_DIR + '/data',
@@ -74,9 +79,7 @@ class Treedraw(object):
         if self.options.oneTree:
             del self.trees[self.treeIndex]
             trees = trees.strip().split("\n\n")
-            trees.reverse()
-            for t in trees:
-                self.trees.insert(self.treeIndex, t)
+            self.trees[self.treeIndex:self.treeIndex] = trees
             return "\n\n".join(self.trees)
         else:
             return trees.strip()
@@ -102,6 +105,9 @@ class Treedraw(object):
                 self.thefile
             # check_call throws on child error exit
             subprocess.check_call(cmdline.split(" "))
+            if os.name == "nt":
+                # Windows cannot do atomic file renames
+                os.unlink(self.thefile)
             os.rename(self.thefile + '.out', self.thefile)
             if self.options.timelog:
                 with open("timelog.txt", "a") as timelog:
@@ -111,36 +117,24 @@ class Treedraw(object):
             return json.dumps(dict(result = "success"))
         except Exception as e:
             print "something went wrong: %s" % e
+            traceback.print_exc()
             return json.dumps(dict(result = "failure",
                                    reason = "server got an exception"))
 
     @cherrypy.expose
-    def doValidate(self, trees = None, shift = None):
+    def doValidate(self, trees = None, validator = None, shift = None):
+        # TODO: don't dump the current doc's trees if something goes wrong
+        # during validate
         cherrypy.response.headers['Content-Type'] = 'application/json'
-        if not self.options.validator:
-            return json.dumps(dict(result = "failure",
-                                   reason = "No validator specified"))
         try:
             if self.options.oneTree and shift == "true":
                 tovalidate = self.integrateTrees(trees)
             else:
                 tovalidate = trees.strip()
-            # If the validator script is inside the cwd, then it looks like an
-            # unqualified path and it gets searched for in $PATH, instead of
-            # in the cwd.  So here we make an absolute pathname to fix that.
-            abs_validator = os.path.abspath(self.options.validator)
-            validator = subprocess.Popen(abs_validator,
-                                         stdin = subprocess.PIPE,
-                                         stdout = subprocess.PIPE)
-            utf8_writer = codecs.getwriter("utf-8")
-            stream = utf8_writer(validator.stdin)
-            stream.write(self.versionCookie + "\n\n")
-            stream.write(tovalidate)
-            validator.stdin.close()
-            utf8_reader = codecs.getreader("utf-8")
-            stream = utf8_reader(validator.stdout)
-            validated = stream.read()
-            validatedTrees = self.readTrees(None, text = validated)
+            validatedTrees = self.pythonOptions['validators'][validator](
+                self.versionCookie, tovalidate
+                ).split("\n\n")
+
             if self.options.oneTree and shift == "true":
                 self.trees = validatedTrees
                 validatedHtml = self.treesToHtml([self.trees[self.treeIndex]])
@@ -151,6 +145,7 @@ class Treedraw(object):
                                    html = validatedHtml))
         except Exception as e:
             print "something went wrong: %s, %s" % (type(e), e)
+            traceback.print_exc()
             return json.dumps(dict(result = "failure",
                                    reason = str(e)))
 
@@ -262,10 +257,15 @@ class Treedraw(object):
         indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
                                  strict_undefined = True)
 
-        if self.options.oneTree:
-            ti = "1 out of " + str(len(self.trees))
-        else:
-            ti = ""
+        validators = {}
+
+        try:
+            validators = self.pythonOptions['validators']
+        except KeyError:
+            pass
+
+        useValidator = len(validators) > 0
+        validatorNames = validators.keys()
 
         return indexTemplate.render(annotaldVersion = VERSION,
                                     currentSettings = currentSettings,
@@ -278,7 +278,8 @@ class Treedraw(object):
                                     extraScripts = self.pythonOptions['extraJavascripts'],
                                     startTime = self.startTime,
                                     debugJs = self.pythonOptions['debugJs'],
-                                    treeIndexStatement = ti
+                                    useValidator = useValidator,
+                                    validators = validatorNames
                                     )
 
     @cherrypy.expose
@@ -337,13 +338,11 @@ class Treedraw(object):
 
 
 #index.exposed = True
-parser = argparse.ArgumentParser(usage = "%prog [options] file.psd",
+parser = argparse.ArgumentParser(description = "A program for annotating parsed corpora",
                                  version = "Annotald " + VERSION,
                                  conflict_handler = "resolve")
 parser.add_argument("-s", "--settings", action = "store", dest = "settings",
                     help = "path to settings.js file")
-parser.add_argument("-v", "--validator", action = "store", dest = "validator",
-                    help = "path to a validation script")
 parser.add_argument("-p", "--port", action = "store",
                     type = int, dest = "port",
                     help = "port to run server on")

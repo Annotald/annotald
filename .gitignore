@@ -5,3 +5,4 @@ TODO
 test-files/
 /timelog.txt
 *.pyc
+doc/
