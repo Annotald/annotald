@@ -350,9 +350,13 @@ function save(e, force) {
                                   lastsavedstate = "";
                                   saveInProgress = false;
                               });
-            if ($("#idlestatus").html().search("IDLE") != -1) {
-                idle();
+            try {
+                if ($("#idlestatus").html().search("IDLE") != -1) {
+                    idle();
+                }
             }
+            catch (err) {
+                }
             lastsavedstate = $("#editpane").html();
         }, 0);
     }
