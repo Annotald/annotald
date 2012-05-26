@@ -267,6 +267,11 @@ class Treedraw(object):
         useValidator = len(validators) > 0
         validatorNames = validators.keys()
 
+        if self.options.oneTree:
+            ti = "1 out of " + str(len(self.trees))
+        else:
+            ti = ""
+            
         return indexTemplate.render(annotaldVersion = VERSION,
                                     currentSettings = currentSettings,
                                     shortfile = self.shortfile,
@@ -279,7 +284,8 @@ class Treedraw(object):
                                     startTime = self.startTime,
                                     debugJs = self.pythonOptions['debugJs'],
                                     useValidator = useValidator,
-                                    validators = validatorNames
+                                    validators = validatorNames,
+                                    treeIndexStatement = ti
                                     )
 
     @cherrypy.expose
