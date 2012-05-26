@@ -261,7 +261,7 @@ function addCommand(dict, fn) {
 }
 
 function stackTree() {
-    if (disableUndo) {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
         return;
     } else {
         undostack.push($("#editpane").clone());
@@ -274,7 +274,7 @@ function stackTree() {
  * Invoke redo, if not disabled.
  */
 function redo() {
-    if (disableUndo) {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
         return;
     } else {
         var nextstate = redostack.pop();
@@ -294,7 +294,7 @@ function redo() {
  * Invoke undo, if not enabled
  */
 function undo() {
-    if (disableUndo) {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
         return;
     } else {
         // lots of slowness in the event-handler handling part of jquery.  Perhaps
@@ -381,7 +381,7 @@ function assignEvents() {
     document.body.onkeydown = handleKeyDown;
     $("#sn0").mousedown(handleNodeClick);
     $("#butsave").mousedown(save);
-    if (disableUndo) {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
         $("#undoCtrls").hide();
     } else {
         $("#butundo").mousedown(undo);
@@ -1893,9 +1893,9 @@ function toLabeledBrackets(node) {
     });
 
     out.find("#sn0>.snode").each(function () {
+        $(this).append(jsonToTree(this.getAttribute("data-metadata")));
         this.insertBefore(document.createTextNode("( "), this.firstChild);
         this.appendChild(document.createTextNode(")ZZZZZ"));
-        $(this).after(jsonToTree(this.getAttribute("data-metadata")));
     });
 
     out.find(".wnode").each(function () {
@@ -1996,18 +1996,19 @@ function validateTrees(e) {
         displayInfo("Validating...");
         setTimeout(function () {
             // TODO: since this is a settimeout, do we need to also make it async?
-            validateTreesSync(true);
+            validateTreesSync(true, e.shiftKey);
         }, 0);
     }
 }
 
-function validateTreesSync(async) {
+function validateTreesSync(async, shift) {
     var toValidate = toLabeledBrackets($("#editpane"));
     $.ajax("/doValidate",
            { type: 'POST',
              url: "/doValidate",
              data: { trees: toValidate,
-                     validator: $("#validatorsSelect").val()
+                     validator: $("#validatorsSelect").val(),
+                     shift: shift
                    },
              success: validateHandler,
              async: async,
@@ -2271,11 +2272,8 @@ function advanceTree(where, find, async) {
                         } else {
                             // TODO: what to do about the save warning
                             $("#editpane").html(res['tree']);
-                            resetIds();
-                            resetLabelClasses(false);
+                            documentReadyHandler();
                             undostack = new Array();
-                            document.body.onkeydown = handleKeyDown;
-                            // $(".snode").mousedown(handleNodeClick);
                             displayInfo("Tree fetched.");
                         }
                     },
