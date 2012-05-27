@@ -282,6 +282,7 @@ class Treedraw(object):
                                     oneTree = self.options.oneTree,
                                     extraScripts = self.pythonOptions['extraJavascripts'],
                                     colorCSS = self.pythonOptions['colorCSS'],
+                                    colorPath = self.pythonOptions['colorCSSPath'],
                                     startTime = self.startTime,
                                     debugJs = self.pythonOptions['debugJs'],
                                     useValidator = useValidator,
