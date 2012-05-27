@@ -94,6 +94,9 @@ class Treedraw(object):
         tosave = tosave.replace("-FLAG", "")
         try:
             print "self.thefile is: ", self.thefile
+            if os.name == "nt":
+                os.unlink(self.thefile + '.bak')
+
             os.rename(self.thefile, self.thefile + '.bak')
             # JB: using codecs here when in Mac OS X
             f = codecs.open(self.thefile, 'w', 'utf-8')
