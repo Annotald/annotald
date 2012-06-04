@@ -325,6 +325,7 @@ function saveHandler (data) {
         displayInfo("Save success.");
     } else {
         lastsavedstate = "";
+        // TODO: add a link to force save
         displayError("Save FAILED!!!: " + data['reason']);
     }
     saveInProgress = false;
