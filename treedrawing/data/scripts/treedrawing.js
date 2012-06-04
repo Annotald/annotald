@@ -316,6 +316,15 @@ function undo() {
     }
 }
 
+// TODO: move this function to a "utils" section
+function safeGet (obj, key, def) {
+    if (_.has(obj, key)) {
+        return obj[key];
+    } else {
+        return def;
+    }
+}
+
 var saveInProgress = false;
 
 function saveHandler (data) {
