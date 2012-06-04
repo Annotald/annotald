@@ -334,8 +334,13 @@ function saveHandler (data) {
         displayInfo("Save success.");
     } else {
         lastsavedstate = "";
-        // TODO: add a link to force save
-        displayError("Save FAILED!!!: " + data['reason']);
+        var extraInfo = "";
+        // TODO: let force saving sync the annotald instances, so it's only necessary once?
+        if (safeGet(data, 'reasonCode', 0) == 1) {
+            extraInfo = " <a href='#' id='forceSave' " +
+                "onclick='javascript:save(null, true)'>Force save</a>";
+        }
+        displayError("Save FAILED!!!: " + data['reason'] + extraInfo);
     }
     saveInProgress = false;
 }
