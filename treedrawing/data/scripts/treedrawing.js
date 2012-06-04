@@ -882,7 +882,7 @@ function makeLeaf(before, label, word, target) {
     var newleaf = "<div class='snode " + label + "'>" + label +
         "<span class='wnode'>" + word;
     if (lemma) {
-        newleaf += "<span class='lemma " + lemmaClass + "'>-" + lemma +
+        newleaf += "<span class='lemma'>-" + lemma +
             "</span>";
     }
     newleaf += "</span></div>\n";
@@ -930,7 +930,7 @@ function emergencyExitEdit() {
     var replText = "<div class='snode'>" +
             newphrase + " <span class='wnode'>" + newtext;
     if (useLemma) {
-        replText += "<span class='lemma " + lemmaClass + "'>-" +
+        replText += "<span class='lemma'>-" +
             newlemma + "</span>";
     }
     replText += "</span></div>";
@@ -1120,7 +1120,7 @@ function displayRename() {
                         replText = "<div class='snode'>" +
                             label + " <span class='wnode'>" + word;
                         if (useLemma) {
-                            replText += "<span class='lemma " + lemmaClass + "'>-" +
+                            replText += "<span class='lemma'>-" +
                                 lemma + "</span>";
                         }
                         replText += "</span></div>";
@@ -1162,7 +1162,7 @@ function displayRename() {
                         replText = "<div class='snode'>" +
                             newphrase + " <span class='wnode'>" + newtext;
                         if (useLemma) {
-                            replText += "<span class='lemma " + lemmaClass + "'>-" +
+                            replText += "<span class='lemma'>-" +
                                 newlemma + "</span>";
                         }
                         replText += "</span></div>";
@@ -1259,8 +1259,7 @@ function editLemma() {
                     newlemma = newlemma.replace(">","&gt;");
                     newlemma = newlemma.replace(/'/g,"&#39;");
 
-                    $("#leafeditor").replaceWith("<span class='lemma " +
-                                                 lemmaClass + "'>-" +
+                    $("#leafeditor").replaceWith("<span class='lemma'>-" +
                                                  newlemma + "</span>");
                     postChange();
                 }
@@ -1920,15 +1919,24 @@ function toLabeledBrackets(node) {
     return out;
 }
 
-var lemmaClass = "lemmaHide";
+var lemmataStyleNode, lemmataHidden = false;
+(function () {
+    lemmataStyleNode = document.createElement("style");
+    lemmataStyleNode.setAttribute("type", "text/css");
+    document.getElementsByTagName("head")[0].appendChild(lemmataStyleNode);
+    lemmataStyleNode.innerHTML = ".lemma { display: none; }";
+})();
 
 /**
  * Toggle display of lemmata.
  */
 function toggleLemmata() {
-    $('.lemma').toggleClass('lemmaShow');
-    $('.lemma').toggleClass('lemmaHide');
-    lemmaClass = lemmaClass == "lemmaHide" ? "lemmaShow" : "lemmaHide";
+    if (lemmataHidden) {
+        lemmataStyleNode.innerHTML = "";
+    } else {
+        lemmataStyleNode.innerHTML = ".lemma { display: none; }";
+    }
+    lemmataHidden = !lemmataHidden;
 }
 
 var lastsavedstate = $("#editpane").html();
@@ -2332,7 +2340,7 @@ function addLemma(lemma) {
     // This only makes sense for dash-format corpora
     if (!startnode || endnode) return;
     if (!isLeafNode($(startnode))) return;
-    var theLemma = $("<span class='lemma " + lemmaClass + "'>-" + lemma +
+    var theLemma = $("<span class='lemma'>-" + lemma +
                      "</span>");
     $(startnode).children(".wnode").append(theLemma);
 }

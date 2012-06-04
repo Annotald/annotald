@@ -76,7 +76,7 @@ def treeToHtml(tree, version, extra_data = None):
                 # Do nothing special with it.
                 res += word + "-" + lemma
             else:
-                res += word + '<span class="lemma lemmaHide">-' + lemma + '</span>'
+                res += word + '<span class="lemma">-' + lemma + '</span>'
         else:
             res += tree[0]
         res += '</span></div>'
