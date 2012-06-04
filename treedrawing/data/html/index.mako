@@ -47,7 +47,7 @@ any later version.  See the LICENSE file for more information. -->
         <input class="menubutton" type="button" value="Undo" id="butundo" /><br />
         <input class="menubutton" type="button" value="Redo" id="butredo" /><br />
         </div>
-%if oneTree:
+%if partialFile:
         <input class="menubutton" type="button" value="Prev Tree" id="butprevtree" /><br />
         <input class="menubutton" type="button" value="Next Tree" id="butnexttree" /><br />
 %endif

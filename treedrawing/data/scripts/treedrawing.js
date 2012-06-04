@@ -2275,19 +2275,19 @@ function basesAndDashes(bases, dashes) {
 function nextTree(e) {
     var find = undefined;
     if (e.shiftKey) find = "-FLAG";
-    advanceTree("/nextTree", find, false);
+    advanceTree(find, false, 1);
 }
 
 function prevTree(e) {
     var find = undefined;
     if (e.shiftKey) find = "-FLAG";
-    advanceTree("/prevTree", find, false);
+    advanceTree(find, false, -1);
 }
 
-function advanceTree(where, find, async) {
+function advanceTree(find, async, offset) {
     var theTrees = toLabeledBrackets($("#editpane"));
     displayInfo("Fetching tree...");
-    return $.ajax(where,
+    return $.ajax("/advanceTree",
                   { async: async,
                     success: function(res) {
                         if (res['result'] == "failure") {
@@ -2302,7 +2302,10 @@ function advanceTree(where, find, async) {
                     },
                     dataType: "json",
                     type: "POST",
-                    data: {trees: theTrees, find: find}});
+                    data: { trees: theTrees,
+                            find: find,
+                            offset: offset
+                          }});
 }
 
 function splitWord() {
