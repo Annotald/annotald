@@ -2235,16 +2235,16 @@ function setInputFieldEnter(field, fn) {
     });
 }
 
-function displayWarning(text) {
-    $("#messageBoxInner").text(text).css("color", "orange");
+function displayWarning(html) {
+    $("#messageBoxInner").html(html).css("color", "orange");
 }
 
-function displayInfo(text) {
-    $("#messageBoxInner").text(text).css("color", "green");
+function displayInfo(html) {
+    $("#messageBoxInner").html(html).css("color", "green");
 }
 
-function displayError(text) {
-    $("#messageBoxInner").text(text).css("color", "red");
+function displayError(html) {
+    $("#messageBoxInner").html(html).css("color", "red");
 }
 
 // TODO: should allow numeric indices
