@@ -1163,7 +1163,7 @@ function displayRename() {
                             }
                         }
                         var newtext = $("#leaftextbox").val();
-                        var newlemma;
+                        var newlemma = "";
                         if (useLemma) {
                             newlemma = $('#leaflemmabox').val();
                             newlemma = newlemma.replace(/</g,"&lt;");
@@ -1173,6 +1173,10 @@ function displayRename() {
                         newtext = newtext.replace(/</g,"&lt;");
                         newtext = newtext.replace(/>/g,"&gt;");
                         newtext = newtext.replace(/'/g,"&#39;");
+                        if (newtext + newlemma == "") {
+                            displayWarning("Cannot create an empty leaf.");
+                            return;
+                        }
                         replText = "<div class='snode'>" +
                             newphrase + " <span class='wnode'>" + newtext;
                         if (useLemma) {
