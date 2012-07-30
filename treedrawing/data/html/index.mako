@@ -17,6 +17,7 @@ any later version.  See the LICENSE file for more information. -->
     <script type= "application/javascript" src="scripts/jquery.js"></script>
 %endif
     <script type= "application/javascript" src="scripts/jquery.mousewheel.min.js"></script>
+    <script type= "application/javascript" src="scripts/treedrawing.utils.js"></script>
     <script type= "application/javascript" src="scripts/treedrawing.js"></script>
     <script type= "application/javascript" src="scripts/underscore-min.js"></script>
     <script type="application/javascript">var startTime = ${startTime};</script>

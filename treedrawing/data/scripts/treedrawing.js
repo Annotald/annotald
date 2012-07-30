@@ -316,14 +316,6 @@ function undo() {
     }
 }
 
-// TODO: move this function to a "utils" section
-function safeGet (obj, key, def) {
-    if (_.has(obj, key)) {
-        return obj[key];
-    } else {
-        return def;
-    }
-}
 
 var saveInProgress = false;
 
@@ -604,31 +596,7 @@ function scrollToShowSel() {
     }
 }
 
-function isPossibleTarget(node) {
-    // cannot move under a tag node
-    // TODO(AWE): what is the calling convention?  can we optimize this jquery call?
-    if ($(node).children().first().is("span")) {
-        return false;
-    }
-    return true;
-}
 
-function currentText(root) {
-    var nodes = root.get(0).getElementsByClassName("wnode");
-    var text = "";
-    for (var i = 0; i < nodes.length; i++) {
-        var nv = nodes[i].childNodes[0].nodeValue;
-        if (!isEmpty(nv)) {
-            text += nv;
-        }
-    }
-
-        // $(root).find('.wnode').map(
-        // function() {
-        //     return this.childNodes[0];
-        // }).text();
-    return text;
-}
 
 /**
  * Move the selected node(s) to a new position.
@@ -760,10 +728,6 @@ function moveNode(parent) {
         } // TODO: conditional branches not exhaustive
     }
     clearSelection();
-}
-
-function isRootNode(node) {
-    return node.filter("#sn0>.snode").size() > 0;
 }
 
 /**
@@ -1286,87 +1250,6 @@ function editLemma() {
     }
 }
 
-function changeJustLabel (oldlabel, newlabel) {
-    var label = oldlabel;
-    var index = parseIndex(oldlabel);
-    if (index > 0) {
-        label = parseLabel(oldlabel);
-        var indextype = parseIndexType(oldlabel);
-        return newlabel+indextype+index;
-    }
-    return newlabel;
-}
-
-// This function takes 3 arguments: a node label with dash tags and possibly
-// indices, a dash tag to toggle (no dash), and a list of possible extensions
-// (in L-to-R order).  It returns a string, which is the label with
-// transformations applied
-function toggleStringExtension (oldlabel, extension, extensionList) {
-    if (extension[0] == "-") {
-        // temporary compatibility hack for old configs
-        extension = extension.substring(1);
-        extensionList = extensionList.map(function(s) { return s.substring(1); });
-    }
-    var index = parseIndex(oldlabel);
-    var indextype = "";
-    if (index > 0) {
-        indextype = parseIndexType(oldlabel);
-    }
-    var currentLabel = parseLabel(oldlabel);
-
-    // The strategy here is as follows:
-    // - split the label into an array of dash tags
-    // - operate on the array
-    // - reform the array into a string
-    currentLabel = currentLabel.split("-");
-    var labelBase = currentLabel.shift();
-    var idx = currentLabel.indexOf(extension);
-
-    if (idx > -1) {
-        // currentLabel contains extension, remove it
-        currentLabel.splice(idx, 1);
-    } else {
-        idx = extensionList.indexOf(extension);
-        if (idx > -1) {
-            // Loop through the list, stop when we pass the right spot
-            for (var i = 0; i < currentLabel.length; i++) {
-                if (idx < extensionList.indexOf(currentLabel[i])) {
-                    break;
-                }
-            }
-            currentLabel.splice(i, 0, extension);
-        } else {
-            currentLabel.push(extension);
-        }
-    }
-
-    var out = labelBase;
-    if (currentLabel.length > 0) {
-        out += "-" + currentLabel.join("-");
-    }
-    if (index > 0) {
-        out += indextype;
-        out += index;
-    }
-    return out;
-}
-
-function guessLeafNode(node) {
-    if (typeof testValidLeafLabel   !== "undefined" &&
-        typeof testValidPhraseLabel !== "undefined") {
-        if (testValidPhraseLabel(getLabel($(node)))) {
-            return false;
-        } else if (testValidLeafLabel(getLabel($(node)))) {
-            return true;
-        } else {
-            // not a valid label, fall back to structural check
-            return isLeafNode(node);
-        }
-    } else {
-        return isLeafNode(node);
-    }
-}
-
 /**
  * Toggle a dash tag on a node
  *
@@ -1415,35 +1298,6 @@ function toggleExtension(extension, extensionList) {
 // alias for compatibility
 function toggleVerbalExtension(extension) {
     toggleExtension(extension);
-}
-
-function lookupNextLabel(oldlabel, labels) {
-    // labels is either: an array, an object
-    var newlabel = null;
-    // TODO(AWE): make this more robust!
-    if (!(labels instanceof Array)) {
-        var prefix = oldlabel.split("-")[0];
-        var new_labels = labels[prefix];
-        if (!new_labels) {
-            new_labels = _.values(labels)[0];
-        }
-        labels = new_labels;
-    }
-    for (var i = 0; i < labels.length; i++ ) {
-        if (labels[i] == parseLabel(oldlabel)) {
-            if (i < labels.length - 1) {
-                newlabel = labels[i + 1];
-            } else {
-                newlabel = labels[0];
-            }
-        }
-    }
-    if (!newlabel) {
-        newlabel = labels[0];
-    }
-    newlabel = changeJustLabel(oldlabel,newlabel);
-
-    return newlabel;
 }
 
 /**
@@ -1634,150 +1488,6 @@ function appendExtension(node, extension, type) {
     }
 }
 
-function getTokenRoot(node) {
-    return $(node).parents().andSelf().filter("#sn0>.snode").get(0);
-}
-
-/*
- * returns value of lowest index if there are any indices, returns -1 otherwise
-*/
-function minIndex (tokenRoot, offset) {
-    var allSNodes = $("#" + tokenRoot + " .snode,#" + tokenRoot + " .wnode");
-    var highnumber = 9000000;
-    var index = highnumber;
-    var label, lastpart;
-    for (var i=0; i < allSNodes.length; i++){
-        label = getLabel($(allSNodes[i]));
-        lastpart = parseInt(label.substr(label.lastIndexOf("-")+1));
-        if (!isNaN(parseInt(lastpart))) {
-            if (lastpart != 0 && lastpart >=offset) {
-                index = Math.min(lastpart, index);
-            }
-        }
-    }
-    if (index == highnumber) {
-        return -1;
-    }
-
-    if (index < offset) {
-        return -1;
-    }
-
-    return index;
-}
-
-function parseIndex (label) {
-    var index = -1;
-    var lastindex = Math.max(label.lastIndexOf("-"),label.lastIndexOf("="));
-    if (lastindex == -1) {
-        return -1;
-    }
-    var lastpart = parseInt(label.substr(lastindex+1));
-    if(!isNaN(parseInt(lastpart))) {
-        index = Math.max(lastpart, index);
-    }
-    if (index == 0) {
-        return -1;
-    }
-    return index;
-}
-
-function parseLabel (label) {
-    var index = parseIndex(label);
-    if (index > 0) {
-        var lastindex = Math.max(label.lastIndexOf("-"),
-                                 label.lastIndexOf("="));
-        var out = $.trim("" + label.substr(0,lastindex));
-        return out;
-    }
-    return $.trim(label);
-}
-
-function shouldIndexLeaf(node) {
-    // The below check bogusly returns true if the leftmost node in a tree is
-    // a trace, even if it is not a direct daughter.  Only do the more
-    // complicated check if we are at a POS label, otherwise short circuit
-    if (node.children(".wnode").size() == 0) return false;
-    var str = wnodeString(node);
-    return (str.substring(0,3) == "*T*" ||
-            str.substring(0,5) == "*ICH*" ||
-            str.substring(0,4) == "*CL*" ||
-            $.trim(str) == "*");
-}
-
-function getIndex(node) {
-    if (shouldIndexLeaf(node)) {
-        return parseIndex(textNode(node.children(".wnode").first()).text());
-    } else {
-        return parseIndex(getLabel(node));
-    }
-}
-
-function parseIndexType(label){
-    var lastindex = Math.max(label.lastIndexOf("-"), label.lastIndexOf("="));
-    return label.charAt(lastindex);
-}
-
-function getIndexType (node) {
-    if (getIndex(node) < 0) {
-        return -1;
-    }
-    var label;
-    if (shouldIndexLeaf(node)) {
-        label = wnodeString(node);
-    } else {
-        label = getLabel(node);
-    }
-    var lastpart = parseIndexType(label);
-    return lastpart;
-}
-
-
-function getNodesByIndex(tokenRoot, ind) {
-    var nodes = $("#" + tokenRoot + " .snode,#" + tokenRoot + " .wnode").filter(
-        function(index) {
-            // TODO(AWE): is this below correct?  optimal?
-            return getIndex($(this)) == ind;
-        });
-    return nodes;
-}
-
-function addToIndices(tokenRoot, numberToAdd) {
-    var ind = 1;
-    var maxindex = maxIndex(tokenRoot);
-    var nodes = tokenRoot.find(".snode,.wnode").andSelf();
-    nodes.each(function(index) {
-        var curNode = $(this);
-        var nindex = getIndex(curNode);
-        if (nindex > 0) {
-            if (shouldIndexLeaf(curNode)) {
-                var leafText = wnodeString(curNode);
-                leafText = parseLabel(leafText) + parseIndexType(leafText);
-                textNode(curNode.children(".wnode").first()).text(
-                    leafText + (nindex + numberToAdd));
-            } else {
-                var label = getLabel(curNode);
-                label = parseLabel(label) + parseIndexType(label);
-                label = label + (nindex + numberToAdd);
-                setNodeLabel(curNode, label, true);
-            }
-        }
-    });
-}
-
-function maxIndex(token) {
-    var allSNodes = $(token).find(".snode,.wnode");
-    var temp = "";
-    var ind = 0;
-    var label;
-
-    for (var i = 0; i < allSNodes.length; i++) {
-        label = getLabel($(allSNodes[i]));
-        ind = Math.max(parseIndex(label), ind);
-    }
-    return ind;
-}
-
 function removeIndex(node) {
     node = $(node);
     if (getIndex(node) == -1) {
@@ -1873,31 +1583,7 @@ function resetIds(really) {
     }
 }
 
-function wnodeString(node) {
-    var text = $(node).find('.wnode').text();
-    return text;
-}
 
-function jsonToTree(json) {
-    var d = JSON.parse(json);
-    return objectToTree(d);
-}
-
-function objectToTree(o) {
-    var res = "";
-    for (var p in o) {
-        if (o.hasOwnProperty(p)) {
-            res += "(" + p + " ";
-            if (typeof o[p] == "string") { // One of life's grosser hacks
-                res += o[p];
-            } else {
-                res += objectToTree(o[p]);
-            }
-            res += ")";
-        }
-    }
-    return res;
-}
 
 function toLabeledBrackets(node) {
     var out = node.clone();
@@ -1973,10 +1659,6 @@ function quitServer() {
     }
 }
 
-function getLabel(node) {
-    return $.trim(textNode(node).text());
-}
-
 // A low-level (LL) version of setLabel.  It is only responsible for changing
 // the label; not doing any kind of matching/changing/other crap.
 function setLabelLL(node, label) {
@@ -1999,20 +1681,6 @@ function setLabelLL(node, label) {
         node.removeClass(oldLabel);
         node.addClass($.trim(label));
     }
-}
-
-function textNode(node) {
-    return node.contents().filter(function() {
-                                         return this.nodeType == 3;
-                                     }).first();
-}
-
-function isLeafNode(node) {
-    // TODO (AWE): for certain purposes, it would be desirable to treat leaf
-    // nodes as non-leaves.  e.g. for dash tag toggling, a trace should be
-    // "not a leaf"
-    return $(node).children(".wnode").size() > 0 &&
-        !($(node).children(".wnode").text()[0] == "*");
 }
 
 var validatingCurrently = false;
@@ -2068,11 +1736,7 @@ function nextValidationError() {
     }
 }
 
-function hasDashTag(node, tag) {
-    var label = getLabel(node);
-    var tags = label.split("-").slice(1);
-    return (tags.indexOf(tag) > -1);
-}
+
 
 // TODO: something is wrong with this fn -- it also turns FLAG on
 function fixError() {
@@ -2095,46 +1759,6 @@ function zeroDashTags() {
         idx = idxType = "";
     }
     setLabelLL($(startnode), lab.split("-")[0] + idxType + idx);
-}
-
-function getMetadata(node) {
-    var m = node.attr("data-metadata");
-    if (m) {
-        return JSON.parse(m);
-    } else {
-        return undefined;
-    }
-}
-
-// TODO(AWE): add getMetadataTU fn, to also do trickle-up of metadata.
-
-function dictionaryToForm(dict, level) {
-    if (!level) {
-        level = 0;
-    }
-    var res = "";
-    if (dict) {
-        res = '<table class="metadataTable"><thead><tr><td>Key</td>' +
-            '<td>Value</td></tr></thead>';
-        for (var k in dict) {
-            if (dict.hasOwnProperty(k)) {
-                if (typeof dict[k] == "string") {
-                    res += '<tr class="strval" data-level="' + level +
-                        '"><td class="key">' + '<span style="width:"' +
-                        4*level + 'px;"></span>' + k +
-                        '</td><td class="val"><input class="metadataField" ' +
-                        'type="text" name="' + k + '" value="' + dict[k] +
-                        '" /></td></tr>';
-                } else if (typeof dict[k] == "object") {
-                    res += '<tr class="tabhead"><td colspan=2>' + k +
-                        '</td></tr>';
-                    res += dictionaryToForm(dict[k], level + 1);
-                }
-            }
-        }
-        res += '</table>';
-    }
-    return res;
 }
 
 function saveMetadata() {
@@ -2165,40 +1789,7 @@ function updateMetadataEditor() {
     $("#addMetadataButton").click(addMetadataDialog);
 }
 
-function formToDictionary(form) {
-    var d = {},
-        dstack = [],
-        curlevel = 0,
-        namestack = [];
-    form.find("tr").each(function() {
-        if ($(this).hasClass("strval")) {
-            var key = $(this).children(".key").text();
-            var val = $(this).find(".val>.metadataField").val();
-            d[key] = val;
-            if ($(this).attr("data-level") < curlevel) {
-                var new_d = dstack.pop();
-                var next_name = namestack.pop();
-                new_d[next_name] = d;
-                d = new_d;
-            }
-        } else if ($(this).hasClass("tabhead")) {
-            namestack.push($(this).text());
-            curlevel = $(this).attr("data-level");
-            dstack.push(d);
-            d = {};
-        }
-    });
-    if (dstack.length > 0) {
-        var len = dstack.length;
-        for (var i = 0; i < len; i++) {
-            var new_d = dstack.pop();
-            var next_name = namestack.pop();
-            new_d[next_name] = d;
-            d = new_d;
-        }
-    }
-    return d;
-}
+
 
 function metadataKeyClick(e) {
     var keyNode = e.target;
@@ -2253,17 +1844,7 @@ function setInputFieldEnter(field, fn) {
     });
 }
 
-function displayWarning(html) {
-    $("#messageBoxInner").html(html).css("color", "orange");
-}
 
-function displayInfo(html) {
-    $("#messageBoxInner").html(html).css("color", "green");
-}
-
-function displayError(html) {
-    $("#messageBoxInner").html(html).css("color", "red");
-}
 
 // TODO: should allow numeric indices
 function basesAndDashes(bases, dashes) {
