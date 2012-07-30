@@ -70,6 +70,13 @@ var ipnodes = ["IP-SUB","IP-MAT","IP-IMP","IP-INF","IP-PPL","RRC"];
 var invisibleRootCategories = ["ID", "METADATA"];
 var invisibleCategories = ["META"];
 
+// Types of comments.
+// Comments are nodes of the form (CODE {XXX:words_words_words})
+// If "XXX" is in the following list, then when editing the contents of the
+// comment with one of the editing functions (TODO: list), a dialog box will
+// appear allowing the comment to be edited as text.
+var commentTypes = ["COM", "TODO", "MAN"];
+
 /*
  * Keycode is from onKeyDown event.
  * This can for example be tested here:
