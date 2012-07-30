@@ -24,6 +24,9 @@
 //   raise a prompt?
 // - strict mode
 
+
+// ===== Initialization
+
 var startnode = null;
 var endnode = null;
 var undostack = new Array();
@@ -36,6 +39,14 @@ var last_event_was_mouse = false;
 
 var globalStyle = $('<style type="text/css"></style>');
 
+var lemmataStyleNode, lemmataHidden = false;
+(function () {
+    lemmataStyleNode = document.createElement("style");
+    lemmataStyleNode.setAttribute("type", "text/css");
+    document.getElementsByTagName("head")[0].appendChild(lemmataStyleNode);
+    lemmataStyleNode.innerHTML = ".lemma { display: none; }";
+})();
+
 String.prototype.startsWith = function(str) {
     return (this.substr(0,str.length) === str);
 };
@@ -43,7 +54,6 @@ String.prototype.startsWith = function(str) {
 String.prototype.endsWith = function(str) {
     return (this.substr(this.length-str.length) === str);
 };
-
 
 /*
  * unique function by: Shamasis Bhattacharya
@@ -56,35 +66,43 @@ Array.prototype.unique = function() {
     return r;
 };
 
+function assignEvents() {
+    // load custom commands from user settings file
+    customCommands();
+    document.body.onkeydown = handleKeyDown;
+    $("#sn0").mousedown(handleNodeClick);
+    $("#butsave").mousedown(save);
+    if (typeof disableUndo !== "undefined" && disableUndo) {
+        $("#undoCtrls").hide();
+    } else {
+        $("#butundo").mousedown(undo);
+        $("#butredo").mousedown(redo);
+    }
+    $("#butidle").mousedown(idle);
+    $("#butexit").unbind("click").click(quitServer);
+    $("#butvalidate").unbind("click").click(validateTrees);
+    $("#butnexterr").unbind("click").click(nextValidationError);
+    $("#butnexttree").unbind("click").click(nextTree);
+    $("#butprevtree").unbind("click").click(prevTree);
+    $("#editpane").mousedown(clearSelection);
+    $("#conMenu").mousedown(hideContextMenu);
+    $(document).mousewheel(handleMouseWheel);
+    window.onbeforeunload = navigationWarning;
+}
 
-// TODO(AWE): I think that updating labels on changing nodes works, but
-// this fn should be interactively called with debugging arg to test this
-// supposition.  When I am confident of the behavior of the code, the
-// debugging branch will be optimized/removed.
-function resetLabelClasses(alertOnError) {
-    var nodes = $(".snode").each(
-        function() {
-            var node = $(this);
-            var label = $.trim(getLabel(node));
-            if (alertOnError) { // TODO(AWE): optimize test inside loop
-                var classes = node.attr("class").split(" ");
-                // This incantation removes a value from an array.
-                classes.indexOf("snode") >= 0 &&
-                    classes.splice(classes.indexOf("snode"), 1);
-                classes.indexOf(label) >= 0 &&
-                    classes.splice(classes.indexOf(label), 1);
-                if (classes.length > 0) {
-                    alert("Spurious classes '" + classes.join() +
-                          "' detected on node id'" + node.attr("id") + "'");
-                }
-            }
-        node.attr("class", "snode " + label);
-        });
+function resetIds(really) {
+    if (really) {
+        var snodes = $(".snode");
+        for (var i = 0; i < snodes.length; i++) {
+            snodes[i].id = "sn" + i;
+        }
+    }
 }
 
 // Declare global variables from settings.js
 var invisibleCategories, invisibleRootCategories, ipnodes;
 
+// TODO: is this still current?
 function hideCategories() {
     var i;
     for (i = 0; i < invisibleRootCategories.length; i++) {
@@ -107,15 +125,20 @@ function documentReadyHandler() {
     resetIds(true);
     resetLabelClasses(false);
     assignEvents();
-    $("#debugpane").empty();
+    styleIpNodes();
+    hideCategories();
+    globalStyle.appendTo("head");
 
     lastsavedstate = $("#editpane").html();
 }
 
 $(document).ready(function () {
     documentReadyHandler();
-    globalStyle.appendTo("head");
 });
+
+// ===== User configuration
+
+// ========== CSS styles
 
 function addStyle(string) {
     var style = globalStyle.text() + "\n" + string;
@@ -137,7 +160,6 @@ function styleTag(tagName, css) {
              ' "],*[class$=" ' + tagName + '"],[class*=" ' + tagName +
              '="] { ' + css + ' }');
 }
-
 
 /**
  * Add a css style for a certain dash tag.
@@ -171,63 +193,7 @@ function contains(a, obj) {
     // TODO: find where this is used, remove it
     return (a.indexOf(obj) > -1);
 }
-
-/**
- * Test whether a string is empty, i.e. a trace, comment, or other empty
- * category.
- *
- * @param {String} text the text to test.
- */
-function isEmpty (text) {
-    // TODO(AWE): should this be passed a node instead of a string, and then
-    // test whether the node is a leaf or not before giving a return value?  This
-    // would simplify the check I had to put in shouldIndexLeafNode, and prevent
-    // future such errors.
-    if (text.startsWith("*") || text.startsWith("{") ||
-        text.split("-")[0] == "0") {
-        return true;
-    }
-    return false;
-}
-
-function showContextMenu() {
-    var e = window.event;
-    var element = e.target || e.srcElement;
-    if (element == document.getElementById("sn0")) {
-        clearSelection();
-        return;
-    }
-
-    // TODO(AWE): make this relative to mouse posn?
-    var left = $(element).offset().left + 4;
-    var top = $(element).offset().top + 17;
-    left = left + "px";
-    top = top + "px";
-
-    var conl = $("#conLeft"),
-        conr = $("#conRight"),
-        conm = $("#conMenu");
-
-    conl.empty();
-    loadContextMenu(element);
-
-    // Make the columns equally high
-    conl.height("auto");
-    conr.height("auto");
-    if (conl.height() < conr.height()) {
-        conl.height(conr.height());
-    } else {
-        conr.height(conl.height());
-    }
-
-    conm.css("left",left);
-    conm.css("top",top);
-    conm.css("visibility","visible");
-}
-
-function hideContextMenu() {
-    $("#conMenu").css("visibility","hidden");
-}
+// ========== Key bindings
 
 /**
  * Add a keybinding command.
@@ -260,167 +226,9 @@ function addCommand(dict, fn) {
     };
 }
 
-function stackTree() {
-    if (typeof disableUndo !== "undefined" && disableUndo) {
-        return;
-    } else {
-        undostack.push($("#editpane").clone());
-        // Keep this small, for memory reasons
-        undostack = undostack.slice(-15);
-    }
-}
+// ===== UI functions
 
-/**
- * Invoke redo, if not disabled.
- */
-function redo() {
-    if (typeof disableUndo !== "undefined" && disableUndo) {
-        return;
-    } else {
-        var nextstate = redostack.pop();
-        if (!(nextstate == undefined)) {
-            var editPane = $("#editpane");
-            var currentstate = editPane.clone();
-            undostack.push(currentstate);
-            editPane.replaceWith(nextstate);
-            clearSelection();
-            // next line maybe not needed
-            $("#sn0").mousedown(handleNodeClick);
-        }
-    }
-}
-
-/**
- * Invoke undo, if not enabled
- */
-function undo() {
-    if (typeof disableUndo !== "undefined" && disableUndo) {
-        return;
-    } else {
-        // lots of slowness in the event-handler handling part of jquery.  Perhaps
-        // replace that with doing it by hand in the DOM (but with the potential
-        // for memory leaks)
-        // MDN references:
-        // https://developer.mozilla.org/en/DOM/Node.cloneNode
-        // https://developer.mozilla.org/En/DOM/Node.replaceChild
-        var prevstate = undostack.pop();
-        if (!(prevstate == undefined)) {
-            var editPane = $("#editpane");
-            var currentstate = $("#editpane").clone();
-            redostack.push(currentstate);
-            editPane.replaceWith(prevstate);
-            clearSelection();
-            // next line may not be needed
-            $("#sn0").mousedown(handleNodeClick);
-        }
-    }
-}
-
-
-var saveInProgress = false;
-
-function saveHandler (data) {
-    if (data['result'] == "success") {
-        // TODO(AWE): add time of last successful save
-        // TODO(AWE): add filename to avoid overwriting another file
-        displayInfo("Save success.");
-    } else {
-        lastsavedstate = "";
-        var extraInfo = "";
-        // TODO: let force saving sync the annotald instances, so it's only necessary once?
-        if (safeGet(data, 'reasonCode', 0) == 1) {
-            extraInfo = " <a href='#' id='forceSave' " +
-                "onclick='javascript:save(null, true)'>Force save</a>";
-        }
-        displayError("Save FAILED!!!: " + data['reason'] + extraInfo);
-    }
-    saveInProgress = false;
-}
-
-function save(e, force) {
-    if (!saveInProgress) {
-        if (force) {
-            force = true;
-        } else {
-            force = false;
-        }
-        displayInfo("Saving...");
-        saveInProgress = true;
-        setTimeout(function () {
-            var tosave = toLabeledBrackets($("#editpane"));
-            $.post("/doSave", { trees: tosave,
-                                startTime: startTime,
-                                force: force
-                              }, saveHandler).error(function () {
-                                  lastsavedstate = "";
-                                  saveInProgress = false;
-                              });
-            if ($("#idlestatus").html().search("IDLE") != -1) {
-                idle();
-            }
-            lastsavedstate = $("#editpane").html();
-        }, 0);
-    }
-}
-
-function idle() {
-    if ($("#idlestatus").html().search("IDLE") != -1) {
-        $.post("/doIdle");
-        $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
-    }
-    else {
-        $.post("/doIdle");
-        $("#idlestatus").html("");
-        $("#idlestatus").html("<div style='color:red'>Status: IDLE.</div>");
-    }
-}
-
-function navigationWarning() {
-    if ($("#editpane").html() != lastsavedstate) {
-        return "Unsaved changes exist, are you sure you want to leave the page?";
-    }
-    return undefined;
-}
-
-function assignEvents() {
-    // load custom commands from user settings file
-    customCommands();
-    document.body.onkeydown = handleKeyDown;
-    $("#sn0").mousedown(handleNodeClick);
-    $("#butsave").mousedown(save);
-    if (typeof disableUndo !== "undefined" && disableUndo) {
-        $("#undoCtrls").hide();
-    } else {
-        $("#butundo").mousedown(undo);
-        $("#butredo").mousedown(redo);
-    }
-    $("#butidle").mousedown(idle);
-    $("#butexit").unbind("click").click(quitServer);
-    $("#butvalidate").unbind("click").click(validateTrees);
-    $("#butnexterr").unbind("click").click(nextValidationError);
-    $("#butnexttree").unbind("click").click(nextTree);
-    $("#butprevtree").unbind("click").click(prevTree);
-    $("#editpane").mousedown(clearSelection);
-    $("#conMenu").mousedown(hideContextMenu);
-    $(document).mousewheel(handleMouseWheel);
-    window.onbeforeunload = navigationWarning;
-}
-
-/**
- * Edit the lemma, if a leaf node is selected, or the label, if a phrasal node is.
- */
-function editLemmaOrLabel() {
-    if (getLabel($(startnode)) == "CODE" &&
-        (wnodeString($(startnode)).substring(0,4) == "{COM" ||
-         wnodeString($(startnode)).substring(0,5) == "{TODO" ||
-         wnodeString($(startnode)).substring(0,4) == "{MAN")) {
-        editComment();
-    } else if (isLeafNode(startnode)) {
-        editLemma();
-    } else {
-        displayRename();
-    }
-}
+// ========== Event handlers
 
 function handleMouseWheel(e, delta) {
     if (e.shiftKey && startnode) {
@@ -461,7 +269,6 @@ function handleKeyDown(e) {
     return false;
 }
 
-
 function handleNodeClick(e) {
     e = e || window.event;
     var element = (e.target || e.srcElement);
@@ -499,6 +306,84 @@ function handleNodeClick(e) {
     e.stopPropagation();
     last_event_was_mouse = true;
 }
+
+// ========== Context Menu
+
+function showContextMenu() {
+    var e = window.event;
+    var element = e.target || e.srcElement;
+    if (element == document.getElementById("sn0")) {
+        clearSelection();
+        return;
+    }
+
+    // TODO(AWE): make this relative to mouse posn?
+    var left = $(element).offset().left + 4;
+    var top = $(element).offset().top + 17;
+    left = left + "px";
+    top = top + "px";
+
+    var conl = $("#conLeft"),
+        conr = $("#conRight"),
+        conm = $("#conMenu");
+
+    conl.empty();
+    loadContextMenu(element);
+
+    // Make the columns equally high
+    conl.height("auto");
+    conr.height("auto");
+    if (conl.height() < conr.height()) {
+        conl.height(conr.height());
+    } else {
+        conr.height(conl.height());
+    }
+
+    conm.css("left",left);
+    conm.css("top",top);
+    conm.css("visibility","visible");
+}
+
+function hideContextMenu() {
+    $("#conMenu").css("visibility","hidden");
+}
+
+// ========== Dialog boxes
+
+/**
+ * Show a dialog box.
+ *
+ * This function creates keybindings for the escape (to close dialog box) and
+ * return (caller-specified behavior) keys.
+ *
+ * @param {String} title the title of the dialog box
+ * @param {String} html the html to display in the dialog box
+ * @param {Function} returnFn a function to call when return is pressed
+ */
+function showDialogBox(title, html, returnFn) {
+    document.body.onkeydown = function (e) {
+        if (e.keyCode == 27) { // escape
+            hideDialogBox();
+        } else if (e.keyCode == 13 && returnFn) {
+            returnFn();
+        }
+    };
+    html = '<div class="menuTitle">' + title + '</div>' +
+        '<div id="dialogContent">' + html + '</div>';
+    $("#dialogBox").html(html).get(0).style.visibility = "visible";
+    $("#dialogBackground").get(0).style.visibility = "visible";
+}
+
+/**
+ * Hide the displayed dialog box
+ */
+function hideDialogBox() {
+    $("#dialogBox").get(0).style.visibility = "hidden";
+    $("#dialogBackground").get(0).style.visibility = "hidden";
+    document.body.onkeydown = handleKeyDown;
+}
+
+// ========== Selection
 
 /**
  * Select a node, and update the GUI to reflect that.
@@ -596,7 +481,9 @@ function scrollToShowSel() {
     }
 }
 
+// ===== Tree manipulations
 
+// ========== Movement
 
 /**
  * Move the selected node(s) to a new position.
@@ -777,6 +664,8 @@ function moveNodes(parent) {
     clearSelection();
 }
 
+// ========== Creation
+
 /**
  * Create a leaf node before the selected node.
  *
@@ -881,6 +770,466 @@ function makeLeaf(before, label, word, target) {
     updateSelection();
 }
 
+/**
+ * Create a phrasal node.
+ *
+ * The node will dominate the selected node or (if two sisters are selected)
+ * the selection and all intervening sisters.
+ *
+ * @param {String} [label] the label to give the new node (default: XP)
+ */
+function makeNode(label) {
+    // check if something is selected
+    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
+    if (!startnode) {
+        return;
+    }
+    var parent_before = parent_ip.clone();
+    // FIX, note one node situation
+    //if( (startnode.id == "sn0") || (endnode.id == "sn0") ){
+    // can't make node above root
+    //        return;
+    //}
+    // make end = start if only one node is selected
+    if (!endnode) {
+        // if only one node, wrap around that one
+        stackTree();
+        $(startnode).wrapAll('<div xxx="newnode" class="snode ' + label + '">'
+                             + label + ' </div>\n');
+    } else {
+        if (startnode.compareDocumentPosition(endnode) & 0x2) {
+            // startnode and endnode in wrong order, reverse them
+            var temp = startnode;
+            startnode = endnode;
+            endnode = temp;
+        }
+
+        // check if they are really sisters XXXXXXXXXXXXXXX
+        if ($(startnode).siblings().is(endnode)) {
+            // then, collect startnode and its sister up until endnode
+            var oldtext = currentText(parent_ip);
+            stackTree();
+            $(startnode).add($(startnode).nextUntil(endnode)).add(
+                endnode).wrapAll('<div xxx="newnode" class="snode ' +
+                                        label + '">' + label + ' </div>\n');
+            // undo if this messed up the text order
+            if(currentText(parent_ip) != oldtext) {
+                // TODO: is this plausible? can we remove the check?
+                parent_ip.replaceWith(parent_before);
+            }
+        }
+    }
+
+    startnode = null;
+    endnode = null;
+
+    resetIds();
+    var toselect = $(".snode[xxx=newnode]").first();
+
+    // BUG when making XP and then use context menu: todo XXX
+
+    selectNode(toselect.get(0));
+    toselect.attr("xxx",null);
+    updateSelection();
+    resetIds();
+
+    // toselect.mousedown(handleNodeClick);
+}
+
+// ========== Deletion
+
+/**
+ * Delete a node.
+ *
+ * The node can only be deleted if doing so does not affect the text, i.e. it
+ * directly dominates no non-empty terminals.
+ */
+function pruneNode() {
+    if (startnode && !endnode) {
+        var deltext = $(startnode).children().first().text();
+        // if this is a leaf, todo XXX fix
+        if (isEmpty(deltext)) {
+            // it is ok to delete leaf if is empty/trace
+            stackTree();
+            $(startnode).remove();
+            startnode = endnode = null;
+            resetIds();
+            updateSelection();
+            return;
+        } else if (!isPossibleTarget(startnode)) {
+            // but other leaves are not deleted
+            return;
+        } else if (startnode == document.getElementById("sn0")) {
+            return;
+        }
+
+        stackTree();
+
+        var toselect = $(startnode).children().first();
+        $(startnode).replaceWith($(startnode).children());
+        startnode = endnode = null;
+        // not needed, strictly removing
+        // resetIds();
+        selectNode(toselect.get(0));
+        updateSelection();
+    }
+}
+
+// ========== Label editing
+
+/**
+ * Toggle a dash tag on a node
+ *
+ * If the node bears the given dash tag, remove it.  If not, add it.  This
+ * function attempts to put multiple dash tags in the proper order, according
+ * to the configuration in the `leaf_extensions`, `extensions`, and
+ * `clause_extensions` variables in the `settings.js` file.
+ *
+ * @param {String} extension the dash tag to toggle
+ * @param {Array of String} [extensionList] override the guess as to the
+ * appropriate ordered list of possible extensions is.
+ */
+function toggleExtension(extension, extensionList) {
+    if (!startnode || endnode) return false;
+
+    if (!extensionList) {
+        if (guessLeafNode(startnode)) {
+            extensionList = leaf_extensions;
+        } else if (getLabel($(startnode)).split("-")[0] == "IP" ||
+                   getLabel($(startnode)).split("-")[0] == "CP") {
+            // TODO: should FRAG be a clause?
+            extensionList = clause_extensions;
+        } else {
+            extensionList = extensions;
+        }
+    }
+
+    // Tried to toggle an extension on an inapplicable node.
+    if (extensionList.indexOf(extension) < 0) {
+        return false;
+    }
+
+    stackTree();
+    var textnode = textNode($(startnode));
+    var oldlabel = $.trim(textnode.text());
+    // Extension is not de-dashed here.  toggleStringExtension handles it.
+    // The new config format however requires a dash-less extension.
+    var newlabel = toggleStringExtension(oldlabel, extension, extensionList);
+    textnode.replaceWith(newlabel + " ");
+    $(startnode).removeClass(oldlabel).addClass(newlabel);
+
+    return true;
+}
+
+// added by JEB
+// alias for compatibility
+// TODO: remove
+function toggleVerbalExtension(extension) {
+    toggleExtension(extension);
+}
+
+/**
+ * Set the label of a node intelligently
+ *
+ * Given a list of labels, this function will attempt to find the node's
+ * current label in the list.  If it is successful, it sets the node's label
+ * to the next label in the list (or the first, if the node's current label is
+ * the last in the list).  If not, it sets the label to the first label in the
+ * list.
+ *
+ * @param labels a list of labels.  This can also be an object -- if so, the
+ * base label (without any dash tags) of the target node is looked up as a
+ * key, and its corresponding value is used as the list.  If there is no value
+ * for that key, the first value specified in the object is the default.
+ */
+function setLabel(labels) {
+    if (!startnode || endnode) {
+        return false;
+    }
+
+    stackTree();
+    var textnode = textNode($(startnode));
+    var oldlabel = $.trim(textnode.text());
+    var newlabel = lookupNextLabel(oldlabel, labels);
+
+    if (guessLeafNode($(startnode))) {
+        if (typeof testValidLeafLabel !== "undefined") {
+            if (!testValidLeafLabel(newlabel)) {
+                return false;
+            }
+        }
+    } else {
+        if (typeof testValidPhraseLabel !== "undefined") {
+            if (!testValidPhraseLabel(newlabel)) {
+                return false;
+            }
+        }
+    }
+
+    textnode.replaceWith(newlabel + " ");
+    $(startnode).removeClass(parseLabel(oldlabel)).addClass(parseLabel(newlabel));
+
+    return true;
+}
+
+// ========== Coindexation
+
+/**
+ * Coindex nodes.
+ *
+ * Coindex the two selected nodes.  If they are already coindexed, toggle
+ * types of coindexation (normal -> gapping -> backwards gapping -> double
+ * gapping -> no indices).  If only one node is selected, remove its index.
+ */
+function coIndex() {
+    if (startnode && !endnode) {
+        if (getIndex($(startnode)) > 0) {
+            stackTree();
+            removeIndex(startnode);
+        }
+    } else if (startnode && endnode) {
+        // don't do anything if different token roots
+        var startRoot = getTokenRoot($(startnode));
+        var endRoot = getTokenRoot($(endnode));
+        if (startRoot != endRoot) {
+            return;
+        }
+        // if both nodes already have an index
+        if (getIndex($(startnode)) > 0 && getIndex($(endnode)) > 0) {
+            // and if it is the same index
+            if (getIndex($(startnode)) == getIndex($(endnode))) {
+                var theIndex = getIndex($(startnode));
+                var types = "" + getIndexType($(startnode)) +
+                    "" + getIndexType($(endnode));
+                // remove it
+                stackTree();
+
+                if (types == "=-") {
+                    removeIndex(startnode);
+                    removeIndex(endnode);
+                    appendExtension($(startnode), theIndex, "=");
+                    appendExtension($(endnode), theIndex, "=");
+                } else if( types == "--" ){
+                    removeIndex(endnode);
+                    appendExtension($(endnode), getIndex($(startnode)),"=");
+                } else if (types == "-=") {
+                    removeIndex(startnode);
+                    removeIndex(endnode);
+                    appendExtension($(startnode), theIndex,"=");
+                    appendExtension($(endnode), theIndex,"-");
+                } else if (types == "==") {
+                    removeIndex(startnode);
+                    removeIndex(endnode);
+                }
+            }
+        } else if (getIndex($(startnode)) > 0 && getIndex($(endnode)) == -1) {
+            stackTree();
+            appendExtension($(endnode), getIndex($(startnode)));
+        } else if (getIndex($(startnode)) == -1 && getIndex($(endnode)) > 0) {
+            stackTree();
+            appendExtension( $(startnode), getIndex($(endnode)) );
+        } else { // no indices here, so make them
+            // if start and end are within the same token, do coindexing
+            if(startRoot == endRoot) {
+                var index = maxIndex(startRoot) + 1;
+                stackTree();
+                appendExtension($(startnode), index);
+                appendExtension($(endnode), index);
+            }
+        }
+    }
+}
+
+// ===== Saving
+
+var saveInProgress = false;
+
+function saveHandler (data) {
+    if (data['result'] == "success") {
+        // TODO(AWE): add time of last successful save
+        // TODO(AWE): add filename to avoid overwriting another file
+        displayInfo("Save success.");
+    } else {
+        lastsavedstate = "";
+        var extraInfo = "";
+        // TODO: let force saving sync the annotald instances, so it's only necessary once?
+        if (safeGet(data, 'reasonCode', 0) == 1) {
+            extraInfo = " <a href='#' id='forceSave' " +
+                "onclick='javascript:save(null, true)'>Force save</a>";
+        }
+        displayError("Save FAILED!!!: " + data['reason'] + extraInfo);
+    }
+    saveInProgress = false;
+}
+
+function save(e, force) {
+    if (!saveInProgress) {
+        if (force) {
+            force = true;
+        } else {
+            force = false;
+        }
+        displayInfo("Saving...");
+        saveInProgress = true;
+        setTimeout(function () {
+            var tosave = toLabeledBrackets($("#editpane"));
+            $.post("/doSave", { trees: tosave,
+                                startTime: startTime,
+                                force: force
+                              }, saveHandler).error(function () {
+                                  lastsavedstate = "";
+                                  saveInProgress = false;
+                              });
+            if ($("#idlestatus").html().search("IDLE") != -1) {
+                idle();
+            }
+            lastsavedstate = $("#editpane").html();
+        }, 0);
+    }
+}
+
+// ===== Advancing through the file
+
+function nextTree(e) {
+    var find = undefined;
+    if (e.shiftKey) find = "-FLAG";
+    advanceTree(find, false, 1);
+}
+
+function prevTree(e) {
+    var find = undefined;
+    if (e.shiftKey) find = "-FLAG";
+    advanceTree(find, false, -1);
+}
+
+function advanceTree(find, async, offset) {
+    var theTrees = toLabeledBrackets($("#editpane"));
+    displayInfo("Fetching tree...");
+    return $.ajax("/advanceTree",
+                  { async: async,
+                    success: function(res) {
+                        if (res['result'] == "failure") {
+                            displayWarning("Fetching tree failed: " + res['reason']);
+                        } else {
+                            // TODO: what to do about the save warning
+                            $("#editpane").html(res['tree']);
+                            documentReadyHandler();
+                            undostack = new Array();
+                            displayInfo("Tree fetched.");
+                        }
+                    },
+                    dataType: "json",
+                    type: "POST",
+                    data: { trees: theTrees,
+                            find: find,
+                            offset: offset
+                          }});
+}
+
+// ===== Idle/resume
+
+function idle() {
+    if ($("#idlestatus").html().search("IDLE") != -1) {
+        $.post("/doIdle");
+        $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
+    }
+    else {
+        $.post("/doIdle");
+        $("#idlestatus").html("");
+        $("#idlestatus").html("<div style='color:red'>Status: IDLE.</div>");
+    }
+}
+
+
+// ===== Undo/redo
+
+function stackTree() {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
+        return;
+    } else {
+        undostack.push($("#editpane").clone());
+        // Keep this small, for memory reasons
+        undostack = undostack.slice(-15);
+    }
+}
+
+/**
+ * Invoke redo, if not disabled.
+ */
+function redo() {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
+        return;
+    } else {
+        var nextstate = redostack.pop();
+        if (!(nextstate == undefined)) {
+            var editPane = $("#editpane");
+            var currentstate = editPane.clone();
+            undostack.push(currentstate);
+            editPane.replaceWith(nextstate);
+            clearSelection();
+            // next line maybe not needed
+            $("#sn0").mousedown(handleNodeClick);
+        }
+    }
+}
+
+/**
+ * Invoke undo, if not enabled
+ */
+function undo() {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
+        return;
+    } else {
+        // lots of slowness in the event-handler handling part of jquery.  Perhaps
+        // replace that with doing it by hand in the DOM (but with the potential
+        // for memory leaks)
+        // MDN references:
+        // https://developer.mozilla.org/en/DOM/Node.cloneNode
+        // https://developer.mozilla.org/En/DOM/Node.replaceChild
+        var prevstate = undostack.pop();
+        if (!(prevstate == undefined)) {
+            var editPane = $("#editpane");
+            var currentstate = $("#editpane").clone();
+            redostack.push(currentstate);
+            editPane.replaceWith(prevstate);
+            clearSelection();
+            // next line may not be needed
+            $("#sn0").mousedown(handleNodeClick);
+        }
+    }
+}
+
+
+
+
+//==================================================
+
+
+
+
+function navigationWarning() {
+    if ($("#editpane").html() != lastsavedstate) {
+        return "Unsaved changes exist, are you sure you want to leave the page?";
+    }
+    return undefined;
+}
+
+/**
+ * Edit the lemma, if a leaf node is selected, or the label, if a phrasal node is.
+ */
+function editLemmaOrLabel() {
+    if (getLabel($(startnode)) == "CODE" &&
+        (wnodeString($(startnode)).substring(0,4) == "{COM" ||
+         wnodeString($(startnode)).substring(0,5) == "{TODO" ||
+         wnodeString($(startnode)).substring(0,4) == "{MAN")) {
+        editComment();
+    } else if (isLeafNode(startnode)) {
+        editLemma();
+    } else {
+        displayRename();
+    }
+}
+
 // TODO(AWE) is this still needed?
 function emergencyExitEdit() {
     // This function is to hack around a bug (which can't yet be
@@ -917,38 +1266,7 @@ function emergencyExitEdit() {
     postChange(replNode);
 }
 
-/**
- * Show a dialog box.
- *
- * This function creates keybindings for the escape (to close dialog box) and
- * return (caller-specified behavior) keys.
- *
- * @param {String} title the title of the dialog box
- * @param {String} html the html to display in the dialog box
- * @param {Function} returnFn a function to call when return is pressed
- */
-function showDialogBox(title, html, returnFn) {
-    document.body.onkeydown = function (e) {
-        if (e.keyCode == 27) { // escape
-            hideDialogBox();
-        } else if (e.keyCode == 13 && returnFn) {
-            returnFn();
-        }
-    };
-    html = '<div class="menuTitle">' + title + '</div>' +
-        '<div id="dialogContent">' + html + '</div>';
-    $("#dialogBox").html(html).get(0).style.visibility = "visible";
-    $("#dialogBackground").get(0).style.visibility = "visible";
-}
 
-/**
- * Hide the displayed dialog box
- */
-function hideDialogBox() {
-    $("#dialogBox").get(0).style.visibility = "hidden";
-    $("#dialogBackground").get(0).style.visibility = "hidden";
-    document.body.onkeydown = handleKeyDown;
-}
 
 // TODO(AWE):make configurable
 var commentTypes = ["COM", "TODO", "MAN"];
@@ -1250,202 +1568,8 @@ function editLemma() {
     }
 }
 
-/**
- * Toggle a dash tag on a node
- *
- * If the node bears the given dash tag, remove it.  If not, add it.  This
- * function attempts to put multiple dash tags in the proper order, according
- * to the configuration in the `vextensions`, `extensions`, and
- * `clause_extensions` variables in the `settings.js` file.
- *
- * @param {String} extension the dash tag to toggle
- * @param {Array of String} [extensionList] override the guess as to the
- * appropriate ordered list of possible extensions is.
- */
-function toggleExtension(extension, extensionList) {
-    if (!startnode || endnode) return false;
 
-    if (!extensionList) {
-        if (guessLeafNode(startnode)) {
-            extensionList = vextensions;
-        } else if (getLabel($(startnode)).split("-")[0] == "IP" ||
-                   getLabel($(startnode)).split("-")[0] == "CP") {
-            // TODO: should FRAG be a clause?
-            extensionList = clause_extensions;
-        } else {
-            extensionList = extensions;
-        }
-    }
 
-    // Tried to toggle an extension on an inapplicable node.
-    if (extensionList.indexOf(extension) < 0) {
-        return false;
-    }
-
-    stackTree();
-    var textnode = textNode($(startnode));
-    var oldlabel = $.trim(textnode.text());
-    // Extension is not de-dashed here.  toggleStringExtension handles it.
-    // The new config format however requires a dash-less extension.
-    var newlabel = toggleStringExtension(oldlabel, extension, extensionList);
-    textnode.replaceWith(newlabel + " ");
-    $(startnode).removeClass(oldlabel).addClass(newlabel);
-
-    return true;
-}
-
-// added by JEB
-// alias for compatibility
-function toggleVerbalExtension(extension) {
-    toggleExtension(extension);
-}
-
-/**
- * Set the label of a node intelligently
- *
- * Given a list of labels, this function will attempt to find the node's
- * current label in the list.  If it is successful, it sets the node's label
- * to the next label in the list (or the first, if the node's current label is
- * the last in the list).  If not, it sets the label to the first label in the
- * list.
- *
- * @param labels a list of labels.  This can also be an object -- if so, the
- * base label (without any dash tags) of the target node is looked up as a
- * key, and its corresponding value is used as the list.  If there is no value
- * for that key, the first value specified in the object is the default.
- */
-function setLabel(labels) {
-    if (!startnode || endnode) {
-        return false;
-    }
-
-    stackTree();
-    var textnode = textNode($(startnode));
-    var oldlabel = $.trim(textnode.text());
-    var newlabel = lookupNextLabel(oldlabel, labels);
-
-    if (guessLeafNode($(startnode))) {
-        if (typeof testValidLeafLabel !== "undefined") {
-            if (!testValidLeafLabel(newlabel)) {
-                return false;
-            }
-        }
-    } else {
-        if (typeof testValidPhraseLabel !== "undefined") {
-            if (!testValidPhraseLabel(newlabel)) {
-                return false;
-            }
-        }
-    }
-
-    textnode.replaceWith(newlabel + " ");
-    $(startnode).removeClass(parseLabel(oldlabel)).addClass(parseLabel(newlabel));
-
-    return true;
-}
-
-/**
- * Create a phrasal node.
- *
- * The node will dominate the selected node or (if two sisters are selected)
- * the selection and all intervening sisters.
- *
- * @param {String} [label] the label to give the new node (default: XP)
- */
-function makeNode(label) {
-    // check if something is selected
-    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
-    if (!startnode) {
-        return;
-    }
-    var parent_before = parent_ip.clone();
-    // FIX, note one node situation
-    //if( (startnode.id == "sn0") || (endnode.id == "sn0") ){
-    // can't make node above root
-    //        return;
-    //}
-    // make end = start if only one node is selected
-    if (!endnode) {
-        // if only one node, wrap around that one
-        stackTree();
-        $(startnode).wrapAll('<div xxx="newnode" class="snode ' + label + '">'
-                             + label + ' </div>\n');
-    } else {
-        if (startnode.compareDocumentPosition(endnode) & 0x2) {
-            // startnode and endnode in wrong order, reverse them
-            var temp = startnode;
-            startnode = endnode;
-            endnode = temp;
-        }
-
-        // check if they are really sisters XXXXXXXXXXXXXXX
-        if ($(startnode).siblings().is(endnode)) {
-            // then, collect startnode and its sister up until endnode
-            var oldtext = currentText(parent_ip);
-            stackTree();
-            $(startnode).add($(startnode).nextUntil(endnode)).add(
-                endnode).wrapAll('<div xxx="newnode" class="snode ' +
-                                        label + '">' + label + ' </div>\n');
-            // undo if this messed up the text order
-            if(currentText(parent_ip) != oldtext) {
-                // TODO: is this plausible? can we remove the check?
-                parent_ip.replaceWith(parent_before);
-            }
-        }
-    }
-
-    startnode = null;
-    endnode = null;
-
-    resetIds();
-    var toselect = $(".snode[xxx=newnode]").first();
-
-    // BUG when making XP and then use context menu: todo XXX
-
-    selectNode(toselect.get(0));
-    toselect.attr("xxx",null);
-    updateSelection();
-    resetIds();
-
-    // toselect.mousedown(handleNodeClick);
-}
-
-/**
- * Delete a node.
- *
- * The node can only be deleted if doing so does not affect the text, i.e. it
- * directly dominates no non-empty terminals.
- */
-function pruneNode() {
-    if (startnode && !endnode) {
-        var deltext = $(startnode).children().first().text();
-        // if this is a leaf, todo XXX fix
-        if (isEmpty(deltext)) {
-            // it is ok to delete leaf if is empty/trace
-            stackTree();
-            $(startnode).remove();
-            startnode = endnode = null;
-            resetIds();
-            updateSelection();
-            return;
-        } else if (!isPossibleTarget(startnode)) {
-            // but other leaves are not deleted
-            return;
-        } else if (startnode == document.getElementById("sn0")) {
-            return;
-        }
-
-        stackTree();
-
-        var toselect = $(startnode).children().first();
-        $(startnode).replaceWith($(startnode).children());
-        startnode = endnode = null;
-        // not needed, strictly removing
-        // resetIds();
-        selectNode(toselect.get(0));
-        updateSelection();
-    }
-}
 
 /**
  * Sets the label of a node
@@ -1507,84 +1631,11 @@ function removeIndex(node) {
                true);
 }
 
-/**
- * Coindex nodes.
- *
- * Coindex the two selected nodes.  If they are already coindexed, toggle
- * types of coindexation (normal -> gapping -> backwards gapping -> double
- * gapping -> no indices).  If only one node is selected, remove its index.
- */
-function coIndex() {
-    if (startnode && !endnode) {
-        if (getIndex($(startnode)) > 0) {
-            stackTree();
-            removeIndex(startnode);
-        }
-    } else if (startnode && endnode) {
-        // don't do anything if different token roots
-        var startRoot = getTokenRoot($(startnode));
-        var endRoot = getTokenRoot($(endnode));
-        if (startRoot != endRoot) {
-            return;
-        }
-        // if both nodes already have an index
-        if (getIndex($(startnode)) > 0 && getIndex($(endnode)) > 0) {
-            // and if it is the same index
-            if (getIndex($(startnode)) == getIndex($(endnode))) {
-                var theIndex = getIndex($(startnode));
-                var types = "" + getIndexType($(startnode)) +
-                    "" + getIndexType($(endnode));
-                // remove it
-                stackTree();
-
-                if (types == "=-") {
-                    removeIndex(startnode);
-                    removeIndex(endnode);
-                    appendExtension($(startnode), theIndex, "=");
-                    appendExtension($(endnode), theIndex, "=");
-                } else if( types == "--" ){
-                    removeIndex(endnode);
-                    appendExtension($(endnode), getIndex($(startnode)),"=");
-                } else if (types == "-=") {
-                    removeIndex(startnode);
-                    removeIndex(endnode);
-                    appendExtension($(startnode), theIndex,"=");
-                    appendExtension($(endnode), theIndex,"-");
-                } else if (types == "==") {
-                    removeIndex(startnode);
-                    removeIndex(endnode);
-                }
-            }
-
-        } else if (getIndex($(startnode)) > 0 && getIndex($(endnode)) == -1) {
-            stackTree();
-            appendExtension($(endnode), getIndex($(startnode)));
-        } else if (getIndex($(startnode)) == -1 && getIndex($(endnode)) > 0) {
-            stackTree();
-            appendExtension( $(startnode), getIndex($(endnode)) );
-        } else { // no indices here, so make them
-            // if start and end are within the same token, do coindexing
-            if(startRoot == endRoot) {
-                var index = maxIndex(startRoot) + 1;
-                stackTree();
-                appendExtension($(startnode), index);
-                appendExtension($(endnode), index);
-            }
-        }
-    }
-}
-
-function resetIds(really) {
-    if (really){
-        var snodes = $(".snode");
-        for (var i = 0; i < snodes.length; i++) {
-            snodes[i].id = "sn" + i;
-        }
-    }
-}
 
 
 
+// TODO: this is not very general, in fact only works when called with
+// #editpane as arg
 function toLabeledBrackets(node) {
     var out = node.clone();
 
@@ -1622,14 +1673,6 @@ function toLabeledBrackets(node) {
 
     return out;
 }
-
-var lemmataStyleNode, lemmataHidden = false;
-(function () {
-    lemmataStyleNode = document.createElement("style");
-    lemmataStyleNode.setAttribute("type", "text/css");
-    document.getElementsByTagName("head")[0].appendChild(lemmataStyleNode);
-    lemmataStyleNode.innerHTML = ".lemma { display: none; }";
-})();
 
 /**
  * Toggle display of lemmata.
@@ -1857,42 +1900,6 @@ function basesAndDashes(bases, dashes) {
     return _basesAndDashes;
 }
 
-function nextTree(e) {
-    var find = undefined;
-    if (e.shiftKey) find = "-FLAG";
-    advanceTree(find, false, 1);
-}
-
-function prevTree(e) {
-    var find = undefined;
-    if (e.shiftKey) find = "-FLAG";
-    advanceTree(find, false, -1);
-}
-
-function advanceTree(find, async, offset) {
-    var theTrees = toLabeledBrackets($("#editpane"));
-    displayInfo("Fetching tree...");
-    return $.ajax("/advanceTree",
-                  { async: async,
-                    success: function(res) {
-                        if (res['result'] == "failure") {
-                            displayWarning("Fetching tree failed: " + res['reason']);
-                        } else {
-                            // TODO: what to do about the save warning
-                            $("#editpane").html(res['tree']);
-                            documentReadyHandler();
-                            undostack = new Array();
-                            displayInfo("Tree fetched.");
-                        }
-                    },
-                    dataType: "json",
-                    type: "POST",
-                    data: { trees: theTrees,
-                            find: find,
-                            offset: offset
-                          }});
-}
-
 function splitWord() {
     if (!startnode || endnode) return;
     if (!isLeafNode($(startnode))) return;
@@ -1958,12 +1965,47 @@ function untilSuccess() {
     }
 }
 
+
+
+// TODO(AWE): I think that updating labels on changing nodes works, but
+// this fn should be interactively called with debugging arg to test this
+// supposition.  When I am confident of the behavior of the code, the
+// debugging branch will be optimized/removed.
+function resetLabelClasses(alertOnError) {
+    var nodes = $(".snode").each(
+        function() {
+            var node = $(this);
+            var label = $.trim(getLabel(node));
+            if (alertOnError) { // TODO(AWE): optimize test inside loop
+                var classes = node.attr("class").split(" ");
+                // This incantation removes a value from an array.
+                classes.indexOf("snode") >= 0 &&
+                    classes.splice(classes.indexOf("snode"), 1);
+                classes.indexOf(label) >= 0 &&
+                    classes.splice(classes.indexOf(label), 1);
+                if (classes.length > 0) {
+                    alert("Spurious classes '" + classes.join() +
+                          "' detected on node id'" + node.attr("id") + "'");
+                }
+            }
+        node.attr("class", "snode " + label);
+        });
+}
+
+
 // TODO: badly need a DSL for forms
 
 // Local Variables:
 // js2-additional-externs: ("$" "setTimeout" "customCommands\
-// " "customConLeafBefore" "customConMenuGroups" "extensions" "vextensions\
+// " "customConLeafBefore" "customConMenuGroups" "extensions" "leaf_extensions\
 // " "clause_extensions" "JSON" "testValidLeafLabel" "testValidPhraseLabel\
-// " "_" "startTime" "console" "loadContextMenu" "disableUndo")
+// " "_" "startTime" "console" "loadContextMenu" "disableUndo" "safeGet\
+// " "jsonToTree" "objectToTree" "dictionaryToForm" "formToDictionary\
+// " "displayWarning" "displayInfo" "displayError" "isEmpty" "isPossibleTarget\
+// " "isRootNode" "isLeafNode" "guessLeafNode" "getTokenRoot" "wnodeString\
+// " "currentText" "getLabel" "textNode" "getMetadata" "hasDashTag\
+// " "parseIndex" "parseLabel" "parseIndexType" "getIndex" "getIndexType\
+// " "shouldIndexLeaf" "maxIndex" "addToIndices" "changeJustLabel\
+// " "toggleStringExtension" "lookupNextLabel")
 // indent-tabs-mode: nil
 // End:
