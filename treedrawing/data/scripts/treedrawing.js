@@ -36,6 +36,7 @@ var shiftKeyMap = new Object();
 var regularKeyMap = new Object();
 
 var last_event_was_mouse = false;
+var lastsavedstate = "";
 
 var globalStyle = $('<style type="text/css"></style>');
 
@@ -107,6 +108,7 @@ function resetIds(really) {
 }
 
 // Declare global variables from settings.js
+// TODO: move to externs decl
 var invisibleCategories, invisibleRootCategories, ipnodes;
 
 // TODO: is this still current?
@@ -1187,6 +1189,49 @@ function coIndex() {
 
 // ========== Saving
 
+// =============== Save helper function
+
+// TODO: move to utils?
+// TODO: this is not very general, in fact only works when called with
+// #editpane as arg
+function toLabeledBrackets(node) {
+    var out = node.clone();
+
+    // The ZZZZZ is a placeholder; first we want to clean any
+    // double-linebreaks from the output (which will be spurious), then we
+    // will turn the Z's into double-linebreaks
+    out.find(".snode:not(#sn0)").each(function () {
+        this.insertBefore(document.createTextNode("("), this.firstChild);
+        this.appendChild(document.createTextNode(")"));
+    });
+
+    out.find("#sn0>.snode").each(function () {
+        $(this).append(jsonToTree(this.getAttribute("data-metadata")));
+        this.insertBefore(document.createTextNode("( "), this.firstChild);
+        this.appendChild(document.createTextNode(")ZZZZZ"));
+    });
+
+    out.find(".wnode").each(function () {
+        this.insertBefore(document.createTextNode(" "), this.firstChild);
+    });
+
+    out = out.text();
+    // Must use rx for string replace bc using a string doesn't get a
+    // global replace.
+    out = out.replace(/\)\(/g, ") (");
+    out = out.replace(/  +/g, " ");
+    out = out.replace(/\n\n+/g,"\n");
+    out = out.replace(/ZZZZZ/g, "\n\n");
+    // If there is a space after the word but before the closing paren, it
+    // will make CorpusSearch unhappy.
+    out = out.replace(/ +\)/g, ")");
+    // Ditto for spaces btw. word and lemma, in dash format
+    out = out.replace(/- +/g, "-");
+
+
+    return out;
+}
+
 var saveInProgress = false;
 
 function saveHandler (data) {
@@ -1340,6 +1385,21 @@ function idle() {
     }
 }
 
+// ========== Quitting
+
+function quitServer() {
+    if ($("#editpane").html() != lastsavedstate) {
+        alert("Cannot exit, unsaved changes exist.");
+    } else {
+        $.post("/doExit");
+        window.onbeforeunload = undefined;
+        setTimeout(function(res) {
+                       // I have no idea why this works, but it does
+                       window.open('', '_self', '');
+                       window.close();
+               }, 100);
+    }
+}
 
 // ===== Undo/redo
 
@@ -1784,6 +1844,7 @@ function setLeafLabel(node, label) {
 
 // TODO: need a setLemma function as well
 
+// TODO: only called with indices, possibly specialize name?
 function appendExtension(node, extension, type) {
     if (!type) {
         type="-";
@@ -1818,49 +1879,6 @@ function removeIndex(node) {
                true);
 }
 
-
-
-
-// TODO: this is not very general, in fact only works when called with
-// #editpane as arg
-function toLabeledBrackets(node) {
-    var out = node.clone();
-
-    // The ZZZZZ is a placeholder; first we want to clean any
-    // double-linebreaks from the output (which will be spurious), then we
-    // will turn the Z's into double-linebreaks
-    out.find(".snode:not(#sn0)").each(function () {
-        this.insertBefore(document.createTextNode("("), this.firstChild);
-        this.appendChild(document.createTextNode(")"));
-    });
-
-    out.find("#sn0>.snode").each(function () {
-        $(this).append(jsonToTree(this.getAttribute("data-metadata")));
-        this.insertBefore(document.createTextNode("( "), this.firstChild);
-        this.appendChild(document.createTextNode(")ZZZZZ"));
-    });
-
-    out.find(".wnode").each(function () {
-        this.insertBefore(document.createTextNode(" "), this.firstChild);
-    });
-
-    out = out.text();
-    // Must use rx for string replace bc using a string doesn't get a
-    // global replace.
-    out = out.replace(/\)\(/g, ") (");
-    out = out.replace(/  +/g, " ");
-    out = out.replace(/\n\n+/g,"\n");
-    out = out.replace(/ZZZZZ/g, "\n\n");
-    // If there is a space after the word but before the closing paren, it
-    // will make CorpusSearch unhappy.
-    out = out.replace(/ +\)/g, ")");
-    // Ditto for spaces btw. word and lemma, in dash format
-    out = out.replace(/- +/g, "-");
-
-
-    return out;
-}
-
 /**
  * Toggle display of lemmata.
  */
@@ -1871,22 +1889,6 @@ function toggleLemmata() {
         lemmataStyleNode.innerHTML = ".lemma { display: none; }";
     }
     lemmataHidden = !lemmataHidden;
-}
-
-var lastsavedstate = $("#editpane").html();
-
-function quitServer() {
-    if ($("#editpane").html() != lastsavedstate) {
-        alert("Cannot exit, unsaved changes exist.");
-    } else {
-        $.post("/doExit");
-        window.onbeforeunload = undefined;
-        setTimeout(function(res) {
-                       // I have no idea why this works, but it does
-                       window.open('', '_self', '');
-                       window.close();
-               }, 100);
-    }
 }
 
 // A low-level (LL) version of setLabel.  It is only responsible for changing
@@ -1950,7 +1952,7 @@ function basesAndDashes(bases, dashes) {
 }
 
 function addLemma(lemma) {
-    // This only makes sense for dash-format corpora
+    // TODO: This only makes sense for dash-format corpora
     if (!startnode || endnode) return;
     if (!isLeafNode($(startnode))) return;
     var theLemma = $("<span class='lemma'>-" + lemma +
@@ -2010,6 +2012,6 @@ function resetLabelClasses(alertOnError) {
 // " "currentText" "getLabel" "textNode" "getMetadata" "hasDashTag\
 // " "parseIndex" "parseLabel" "parseIndexType" "getIndex" "getIndexType\
 // " "shouldIndexLeaf" "maxIndex" "addToIndices" "changeJustLabel\
-// " "toggleStringExtension" "lookupNextLabel")
+// " "toggleStringExtension" "lookupNextLabel" "commentTypes")
 // indent-tabs-mode: nil
 // End:
