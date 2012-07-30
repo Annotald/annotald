@@ -57,7 +57,7 @@ var disableUndo = false;
  */
 var extensions        = ["SBJ","RSP","LFD","PRN","SPE","XXX"];
 var clause_extensions = ["RSP","LFD","SBJ","PRN","SPE","XXX"];
-var vextensions       = [];
+var leaf_extensions   = [];
 
 /*
  * Phrase labels in this list (including the same ones with indices and
@@ -65,19 +65,17 @@ var vextensions       = [];
  * see the "floor" of the current clause
  */
 var ipnodes = ["IP-SUB","IP-MAT","IP-IMP","IP-INF","IP-PPL","RRC"];
-styleIpNodes();
 
 // TODO: document this
 var invisibleRootCategories = ["ID", "METADATA"];
 var invisibleCategories = ["META"];
-hideCategories();
 
 /*
  * Keycode is from onKeyDown event.
  * This can for example be tested here:
  * http://www.asquare.net/javascript/tests/KeyCode.html
  */
-function customCommands(){
+function customCommands() {
     addCommand({ keycode: 65 }, leafAfter ); // a
     addCommand({ keycode: 66 }, leafBefore); // b
     addCommand({ keycode: 69 }, setLabel, ["CP-ADV","CP-CMP"]); //e
@@ -102,16 +100,13 @@ function customCommands(){
     addCommand({ keycode: 192 }, toggleLemmata); // `
     addCommand({ keycode: 76, ctrl: true }, displayRename); // ctrl + l
 
+
+    // TODO: remove this
     // An example of a context-sensitive label switching command.  If
     // neither NP or PP is the POS, the NP value (first in the dictionary)
     // is chosen by default.
     // addCommand({ keycode: 123 } , setLabel, { NP: ["NP-SBJ", "NP-OB1", "NP-OB2"],
     //                                           PP: ["PP-SBJ", "PP-OB1", "PP-OB2"]});
-
-// addCommand(51,"makenode","NP","NP-PRD","NP-POS"); // 3
-// addCommand(188,"clearselection"); // <
-// addCommand(78, "makenode","XP"); // n
-// addCommand(49,"redo"); // 1
 }
 
 
@@ -120,34 +115,35 @@ function customCommands(){
  */
 var defaultConMenuGroup = ["VBPI","VBPS","VBDI","VBDS","VBI","VAN","VBN","VB"];
 
-/**
- * Phrase labels that are suggested in context menu when one of the other ones is set
+/*
+ * Phrase labels that are suggested in context menu when one of the other ones
+ * is set
  */
-function customConMenuGroups(){
-	addConMenuGroup( ["IP-SUB","IP-MAT","IP-INF","IP-IMP","CP-QUE","QTP","FRAG"] );
-	addConMenuGroup( ["ADJP","ADJX","NP-MSR","QP","NP","ADVP","IP-PPL"] );
-	addConMenuGroup( ["NP-SBJ","NP-OB1","NP-OB2","NP-PRD","NP-POS","NP-PRN",
-                          "NP","NX","NP-MSR","NP-TMP","NP-ADV","NP-COM","NP-CMP",
-                          "NP-DIR","NP-ADT","NP-VOC","QP"] );
-	addConMenuGroup( ["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR","NP-MSR","NP-ADV"] );
-	addConMenuGroup( ["VBPI","VBPS","VBDI","VBDS","VBI","VAN","VBN","VB","HV"] );
-	addConMenuGroup( ["HVPI","HVPS","HVDI","HVDS","HVI","HV"] );	
-	addConMenuGroup( ["RP","P","ADV","ADVR","ADVS","ADJ","ADJR","ADJS","C","CONJ","ALSO"] );
-	addConMenuGroup( ["WADVP","WNP","WPP","WQP","WADJP"] );
-	addConMenuGroup( ["CP-THT","CP-QUE","CP-REL","CP-DEG","CP-ADV","CP-CMP"] );
+function customConMenuGroups() {
+    addConMenuGroup( ["IP-SUB","IP-MAT","IP-INF","IP-IMP","CP-QUE","QTP","FRAG"] );
+    addConMenuGroup( ["ADJP","ADJX","NP-MSR","QP","NP","ADVP","IP-PPL"] );
+    addConMenuGroup( ["NP-SBJ","NP-OB1","NP-OB2","NP-PRD","NP-POS","NP-PRN",
+                      "NP","NX","NP-MSR","NP-TMP","NP-ADV","NP-COM","NP-CMP",
+                      "NP-DIR","NP-ADT","NP-VOC","QP"] );
+    addConMenuGroup( ["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR","NP-MSR","NP-ADV"] );
+    addConMenuGroup( ["VBPI","VBPS","VBDI","VBDS","VBI","VAN","VBN","VB","HV"] );
+    addConMenuGroup( ["HVPI","HVPS","HVDI","HVDS","HVI","HV"] );	
+    addConMenuGroup( ["RP","P","ADV","ADVR","ADVS","ADJ","ADJR","ADJS","C","CONJ","ALSO"] );
+    addConMenuGroup( ["WADVP","WNP","WPP","WQP","WADJP"] );
+    addConMenuGroup( ["CP-THT","CP-QUE","CP-REL","CP-DEG","CP-ADV","CP-CMP"] );
 }
 
 /*
  * Context menu items for "leaf before" shortcuts
  */
-function customConLeafBefore(){
-	addConLeafBefore( "NP-SBJ", "*con*");
-	addConLeafBefore( "NP-SBJ", "*pro*");
-	addConLeafBefore( "C", "0");
-	addConLeafBefore( "CODE", "{COM:XXX}");
+function customConLeafBefore() {
+    addConLeafBefore("NP-SBJ" , "*con*"     );
+    addConLeafBefore("NP-SBJ" , "*pro*"     );
+    addConLeafBefore("C"      , "0"         );
+    addConLeafBefore("CODE"   , "{COM:XXX}" );
 }
 
-// An example of a CSS rule for coloring a POS tag.  The styleTag
+// An example of a CSS rule for coloring a syntactic tag.  The styleTag
 // function takes care of setting up a (somewhat complex) CSS rule that
 // applies the given style to any node that has the given label.  Dash tags
 // are accounted for, i.e. NP also matches NP-FOO (but not NPR).  The
