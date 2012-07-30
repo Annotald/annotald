@@ -360,6 +360,8 @@ parser.add_argument("-S", "--python-settings", dest = "pythonSettings",
 parser.add_argument("-1", "--one-tree-mode", dest = "oneTree",
                      action = "store_true",
                      help = "start Annotald in one-tree mode")
+# TODO: this will not be handled properly if the arg is greater than the
+# number of trees in the file.
 parser.add_argument("-n", "--n-trees-mode", dest = "numTrees",
                      type = int, action = "store",
                      help = "number of trees to show at a time")
