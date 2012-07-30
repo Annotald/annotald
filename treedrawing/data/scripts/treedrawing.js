@@ -66,6 +66,13 @@ Array.prototype.unique = function() {
     return r;
 };
 
+function navigationWarning() {
+    if ($("#editpane").html() != lastsavedstate) {
+        return "Unsaved changes exist, are you sure you want to leave the page?";
+    }
+    return undefined;
+}
+
 function assignEvents() {
     // load custom commands from user settings file
     customCommands();
@@ -375,12 +382,27 @@ function showDialogBox(title, html, returnFn) {
 }
 
 /**
- * Hide the displayed dialog box
+ * Hide the displayed dialog box.
  */
 function hideDialogBox() {
     $("#dialogBox").get(0).style.visibility = "hidden";
     $("#dialogBackground").get(0).style.visibility = "hidden";
     document.body.onkeydown = handleKeyDown;
+}
+
+/**
+ * Set a handler for the enter key in a text box.
+ * @private
+ */
+function setInputFieldEnter(field, fn) {
+    field.keydown(function (e) {
+        if (e.keyCode == 13) {
+            fn();
+            return false;
+        } else {
+            return true;
+        }
+    });
 }
 
 // ========== Selection
@@ -479,6 +501,127 @@ function scrollToShowSel() {
     if (!isTopVisible(startnode)) {
         window.scroll(0, $(startnode).offset().top - $(window).height() * 0.25);
     }
+}
+
+// ========== Metadata editor
+
+function saveMetadata() {
+    if ($("#metadata").html() != "") {
+        $(startnode).attr("data-metadata",
+                          JSON.stringify(formToDictionary($("#metadata"))));
+    }
+}
+
+function updateMetadataEditor() {
+    if (!startnode || endnode) {
+        $("#metadata").html("");
+        return;
+    }
+    var addButtonHtml = '<input type="button" id="addMetadataButton" ' +
+            'value="Add" />';
+    $("#metadata").html(dictionaryToForm(getMetadata($(startnode))) +
+                        addButtonHtml);
+    $("#metadata").find(".metadataField").change(saveMetadata).
+        focusout(saveMetadata).keydown(function (e) {
+            if (e.keyCode == 13) {
+                $(e.target).blur();
+            }
+            e.stopPropagation();
+            return true;
+        });
+    $("#metadata").find(".key").click(metadataKeyClick);
+    $("#addMetadataButton").click(addMetadataDialog);
+}
+
+
+
+function metadataKeyClick(e) {
+    var keyNode = e.target;
+    var html = 'Name: <input type="text" ' +
+            'id="metadataNewName" value="' + $(keyNode).text() +
+            '" /><div id="dialogButtons"><input type="button" value="Save" ' +
+        'id="metadataKeySave" /><input type="button" value="Delete" ' +
+        'id="metadataKeyDelete" /></div>';
+    showDialogBox("Edit Metadata", html);
+    // TODO: make focus go to end, or select whole thing?
+    $("#metadataNewName").focus();
+    function saveMetadataInner() {
+        $(keyNode).text($("#metadataNewName").val());
+        hideDialogBox();
+        saveMetadata();
+    }
+    function deleteMetadata() {
+        $(keyNode).parent().remove();
+        hideDialogBox();
+        saveMetadata();
+    }
+    $("#metadataKeySave").click(saveMetadataInner);
+    setInputFieldEnter($("#metadataNewName"), saveMetadataInner);
+    $("#metadataKeyDelete").click(deleteMetadata);
+}
+
+function addMetadataDialog() {
+    // TODO: allow specifying value too in initial dialog?
+    var html = 'New Name: <input type="text" id="metadataNewName" value="NEW" />' +
+            '<div id="dialogButtons"><input type="button" id="addMetadata" ' +
+            'value="Add" /></div>';
+    showDialogBox("Add Metatata", html);
+    function addMetadata() {
+        var oldMetadata = formToDictionary($("#metadata"));
+        oldMetadata[$("#metadataNewName").val()] = "NEW";
+        $(startnode).attr("data-metadata", JSON.stringify(oldMetadata));
+        updateMetadataEditor();
+        hideDialogBox();
+    }
+    $("#addMetadata").click(addMetadata);
+    setInputFieldEnter($("#metadataNewName"), addMetadata);
+}
+
+// ========== Splitting words
+
+function splitWord() {
+    if (!startnode || endnode) return;
+    if (!isLeafNode($(startnode))) return;
+    var wordSplit = wnodeString($(startnode)).split("-");
+    var origWord = wordSplit[0];
+    var origLemma = "XXX";
+    if (wordSplit.length == 2) {
+        origLemma = "@" + wordSplit[1] + "@";
+    }
+    var origLabel = getLabel($(startnode));
+    function doSplit() {
+        var words = $("#splitWordInput").val().split("@");
+        if (words.join("") != origWord) {
+            displayWarning("The two new words don't match the original.  Aborting");
+            return;
+        }
+        if (words.length != 2) {
+            displayWarning("You can only split in one place at a time.");
+            return;
+        }
+        var labelSplit = origLabel.split("+");
+        var secondLabel = "X";
+        if (labelSplit.length == 2) {
+            setLeafLabel($(startnode), labelSplit[0]);
+            secondLabel = labelSplit[1];
+        }
+        setLeafLabel($(startnode), words[0] + "@");
+        var hasLemma = $(startnode).find(".lemma").size() > 0;
+        makeLeaf(false, secondLabel, "@" + words[1]);
+        if (hasLemma) {
+            // TODO: move to something like foo@1 and foo@2 for the two pieces
+            // of the lemmata
+            addLemma(origLemma);
+        }
+        hideDialogBox();
+    }
+    var html = "Enter an at-sign at the place to split the word: \
+<input type='text' id='splitWordInput' value='" + origWord +
+"' /><div id='dialogButtons'><input type='button' id='splitWordButton'\
+ value='Split' /></div>";
+    showDialogBox("Split word", html, doSplit);
+    $("#splitWordButton").click(doSplit);
+    $("#splitWordInput").focus();
 }
 
 // ===== Tree manipulations
@@ -1040,7 +1183,9 @@ function coIndex() {
     }
 }
 
-// ===== Saving
+// ===== Server-side operations
+
+// ========== Saving
 
 var saveInProgress = false;
 
@@ -1088,7 +1233,62 @@ function save(e, force) {
     }
 }
 
-// ===== Advancing through the file
+// ========== Validating
+
+var validatingCurrently = false;
+
+function validateTrees(e) {
+    if (!validatingCurrently) {
+        validatingCurrently = true;
+        displayInfo("Validating...");
+        setTimeout(function () {
+            // TODO: since this is a settimeout, do we need to also make it async?
+            validateTreesSync(true, e.shiftKey);
+        }, 0);
+    }
+}
+
+function validateTreesSync(async, shift) {
+    var toValidate = toLabeledBrackets($("#editpane"));
+    $.ajax("/doValidate",
+           { type: 'POST',
+             url: "/doValidate",
+             data: { trees: toValidate,
+                     validator: $("#validatorsSelect").val(),
+                     shift: shift
+                   },
+             success: validateHandler,
+             async: async,
+             dataType: "json"
+           });
+}
+
+function validateHandler(data) {
+    if (data['result'] == "success") {
+        displayInfo("Validate success.");
+        $("#editpane").html(data['html']);
+        documentReadyHandler();
+    } else if (data['result'] == "failure") {
+        displayWarning("Validate failed: " + data['reason']);
+    }
+    validatingCurrently = false;
+    // TODO(AWE): more nuanced distinction between validation found errors and
+    // validation script itself contains errors
+}
+
+function nextValidationError() {
+    var docViewTop = $(window).scrollTop();
+    var docViewMiddle = docViewTop + $(window).height() / 2;
+    var nextError = $(".snode[class*=\"FLAG\"],.snode[class$=\"FLAG\"]").filter(
+        function () {
+            return $(this).offset().top > docViewMiddle;
+        }).first();
+    if (nextError) {
+        window.scroll(0, nextError.offset().top - $(window).height() * 0.25);
+    }
+}
+
+// ========== Advancing through the file
 
 function nextTree(e) {
     var find = undefined;
@@ -1126,7 +1326,7 @@ function advanceTree(find, async, offset) {
                           }});
 }
 
-// ===== Idle/resume
+// ========== Idle/resume
 
 function idle() {
     if ($("#idlestatus").html().search("IDLE") != -1) {
@@ -1205,15 +1405,6 @@ function undo() {
 //==================================================
 
 
-
-
-function navigationWarning() {
-    if ($("#editpane").html() != lastsavedstate) {
-        return "Unsaved changes exist, are you sure you want to leave the page?";
-    }
-    return undefined;
-}
-
 /**
  * Edit the lemma, if a leaf node is selected, or the label, if a phrasal node is.
  */
@@ -1266,10 +1457,6 @@ function emergencyExitEdit() {
     postChange(replNode);
 }
 
-
-
-// TODO(AWE):make configurable
-var commentTypes = ["COM", "TODO", "MAN"];
 var commentTypeCheckboxes = "";
 
 (function () {
@@ -1726,61 +1913,6 @@ function setLabelLL(node, label) {
     }
 }
 
-var validatingCurrently = false;
-
-function validateTrees(e) {
-    if (!validatingCurrently) {
-        validatingCurrently = true;
-        displayInfo("Validating...");
-        setTimeout(function () {
-            // TODO: since this is a settimeout, do we need to also make it async?
-            validateTreesSync(true, e.shiftKey);
-        }, 0);
-    }
-}
-
-function validateTreesSync(async, shift) {
-    var toValidate = toLabeledBrackets($("#editpane"));
-    $.ajax("/doValidate",
-           { type: 'POST',
-             url: "/doValidate",
-             data: { trees: toValidate,
-                     validator: $("#validatorsSelect").val(),
-                     shift: shift
-                   },
-             success: validateHandler,
-             async: async,
-             dataType: "json"
-           });
-}
-
-function validateHandler(data) {
-    if (data['result'] == "success") {
-        displayInfo("Validate success.");
-        $("#editpane").html(data['html']);
-        documentReadyHandler();
-    } else if (data['result'] == "failure") {
-        displayWarning("Validate failed: " + data['reason']);
-    }
-    validatingCurrently = false;
-    // TODO(AWE): more nuanced distinction between validation found errors and
-    // validation script itself contains errors
-}
-
-function nextValidationError() {
-    var docViewTop = $(window).scrollTop();
-    var docViewMiddle = docViewTop + $(window).height() / 2;
-    var nextError = $(".snode[class*=\"FLAG\"],.snode[class$=\"FLAG\"]").filter(
-        function () {
-            return $(this).offset().top > docViewMiddle;
-        }).first();
-    if (nextError) {
-        window.scroll(0, nextError.offset().top - $(window).height() * 0.25);
-    }
-}
-
-
-
 // TODO: something is wrong with this fn -- it also turns FLAG on
 function fixError() {
     if (!startnode || endnode) return;
@@ -1804,89 +1936,6 @@ function zeroDashTags() {
     setLabelLL($(startnode), lab.split("-")[0] + idxType + idx);
 }
 
-function saveMetadata() {
-    if ($("#metadata").html() != "") {
-        $(startnode).attr("data-metadata",
-                          JSON.stringify(formToDictionary($("#metadata"))));
-    }
-}
-
-function updateMetadataEditor() {
-    if (!startnode || endnode) {
-        $("#metadata").html("");
-        return;
-    }
-    var addButtonHtml = '<input type="button" id="addMetadataButton" ' +
-            'value="Add" />';
-    $("#metadata").html(dictionaryToForm(getMetadata($(startnode))) +
-                        addButtonHtml);
-    $("#metadata").find(".metadataField").change(saveMetadata).
-        focusout(saveMetadata).keydown(function (e) {
-            if (e.keyCode == 13) {
-                $(e.target).blur();
-            }
-            e.stopPropagation();
-            return true;
-        });
-    $("#metadata").find(".key").click(metadataKeyClick);
-    $("#addMetadataButton").click(addMetadataDialog);
-}
-
-
-
-function metadataKeyClick(e) {
-    var keyNode = e.target;
-    var html = 'Name: <input type="text" ' +
-            'id="metadataNewName" value="' + $(keyNode).text() +
-            '" /><div id="dialogButtons"><input type="button" value="Save" ' +
-        'id="metadataKeySave" /><input type="button" value="Delete" ' +
-        'id="metadataKeyDelete" /></div>';
-    showDialogBox("Edit Metadata", html);
-    // TODO: make focus go to end, or select whole thing?
-    $("#metadataNewName").focus();
-    function saveMetadataInner() {
-        $(keyNode).text($("#metadataNewName").val());
-        hideDialogBox();
-        saveMetadata();
-    }
-    function deleteMetadata() {
-        $(keyNode).parent().remove();
-        hideDialogBox();
-        saveMetadata();
-    }
-    $("#metadataKeySave").click(saveMetadataInner);
-    setInputFieldEnter($("#metadataNewName"), saveMetadataInner);
-    $("#metadataKeyDelete").click(deleteMetadata);
-}
-
-function addMetadataDialog() {
-    // TODO: allow specifying value too in initial dialog?
-    var html = 'New Name: <input type="text" id="metadataNewName" value="NEW" />' +
-            '<div id="dialogButtons"><input type="button" id="addMetadata" ' +
-            'value="Add" /></div>';
-    showDialogBox("Add Metatata", html);
-    function addMetadata() {
-        var oldMetadata = formToDictionary($("#metadata"));
-        oldMetadata[$("#metadataNewName").val()] = "NEW";
-        $(startnode).attr("data-metadata", JSON.stringify(oldMetadata));
-        updateMetadataEditor();
-        hideDialogBox();
-    }
-    $("#addMetadata").click(addMetadata);
-    setInputFieldEnter($("#metadataNewName"), addMetadata);
-}
-
-function setInputFieldEnter(field, fn) {
-    field.keydown(function (e) {
-        if (e.keyCode == 13) {
-            fn();
-            return false;
-        } else {
-            return true;
-        }
-    });
-}
-
 
 
 // TODO: should allow numeric indices
@@ -1898,51 +1947,6 @@ function basesAndDashes(bases, dashes) {
             _.all(spl, function (x) { return (dashes.indexOf(x) > -1); });
     }
     return _basesAndDashes;
-}
-
-function splitWord() {
-    if (!startnode || endnode) return;
-    if (!isLeafNode($(startnode))) return;
-    var wordSplit = wnodeString($(startnode)).split("-");
-    var origWord = wordSplit[0];
-    var origLemma = "XXX";
-    if (wordSplit.length == 2) {
-        origLemma = "@" + wordSplit[1] + "@";
-    }
-    var origLabel = getLabel($(startnode));
-    function doSplit() {
-        var words = $("#splitWordInput").val().split("@");
-        if (words.join("") != origWord) {
-            displayWarning("The two new words don't match the original.  Aborting");
-            return;
-        }
-        if (words.length != 2) {
-            displayWarning("You can only split in one place at a time.");
-            return;
-        }
-        var labelSplit = origLabel.split("+");
-        var secondLabel = "X";
-        if (labelSplit.length == 2) {
-            setLeafLabel($(startnode), labelSplit[0]);
-            secondLabel = labelSplit[1];
-        }
-        setLeafLabel($(startnode), words[0] + "@");
-        var hasLemma = $(startnode).find(".lemma").size() > 0;
-        makeLeaf(false, secondLabel, "@" + words[1]);
-        if (hasLemma) {
-            // TODO: move to something like foo@1 and foo@2 for the two pieces
-            // of the lemmata
-            addLemma(origLemma);
-        }
-        hideDialogBox();
-    }
-    var html = "Enter an at-sign at the place to split the word: \
-<input type='text' id='splitWordInput' value='" + origWord +
-"' /><div id='dialogButtons'><input type='button' id='splitWordButton'\
- value='Split' /></div>";
-    showDialogBox("Split word", html, doSplit);
-    $("#splitWordButton").click(doSplit);
-    $("#splitWordInput").focus();
 }
 
 function addLemma(lemma) {
@@ -1966,7 +1970,7 @@ function untilSuccess() {
 }
 
 
-
+// TODO: calc labels in util.py, suppress this code
 // TODO(AWE): I think that updating labels on changing nodes works, but
 // this fn should be interactively called with debugging arg to test this
 // supposition.  When I am confident of the behavior of the code, the
