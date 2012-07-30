@@ -373,7 +373,7 @@ function parseLabel (label) {
  */
 // TODO: document that this doesn't check whether there is a numerical index,
 // or actually do the test
-function parseIndexType(label){
+function parseIndexType(label) {
     var lastindex = Math.max(label.lastIndexOf("-"), label.lastIndexOf("="));
     return label.charAt(lastindex);
 }
