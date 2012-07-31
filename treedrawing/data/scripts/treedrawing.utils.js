@@ -258,10 +258,10 @@ function guessLeafNode(node) {
 /**
  * Get the root of the tree that a node belongs to.
  *
- * @param {DOM node} node the node to operate on
+ * @param {JQuery Node} node the node to operate on
  */
 function getTokenRoot(node) {
-    return $(node).parents().andSelf().filter("#sn0>.snode").get(0);
+    return node.parents().andSelf().filter("#sn0>.snode").get(0);
 }
 
 /**
