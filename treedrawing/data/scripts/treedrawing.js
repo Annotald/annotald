@@ -24,6 +24,47 @@
 //   raise a prompt?
 // - strict mode
 
+// Notes for undo system:
+// - globally unique monotonic counter for root-level trees
+// - handle storing undo info in the key handler(/click hdlr)
+// - individual fns call touchtree(node) when they make a change
+// - touchtree stores the orig version of a tree, if in this transaction one
+//   hasn't been stored
+// - at end of oper, push an undo info onto the stack, consisting of:
+//   - replace tree #N with this data: X
+//   - put tree: X onto the global list, after tree #N
+//   - delete tree #N from global list
+
+// Table of contents:
+// * Initialization
+// * User configuration
+// ** CSS styles
+// ** Key bindings
+// * UI functions
+// ** Event handlers
+// ** Context Menu
+// ** Dialog boxes
+// ** Selection
+// ** Metadata editor
+// ** Splitting words
+// ** Editing parts of the tree
+// * Tree manipulations
+// ** Movement
+// ** Creation
+// ** Deletion
+// ** Label editing
+// ** Coindexation
+// * Server-side operations
+// ** Saving
+// *** Save helper function
+// ** Validating
+// ** Advancing through the file
+// ** Idle/resume
+// ** Quitting
+// * Undo/redo
+// * Misc
+// * Misc (candidates to move to utils)
+// End TOC
 
 // ===== Initialization
 
