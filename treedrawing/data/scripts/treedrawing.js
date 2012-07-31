@@ -77,6 +77,8 @@ var ctrlKeyMap = new Object();
 var shiftKeyMap = new Object();
 var regularKeyMap = new Object();
 
+var startuphooks = [];
+
 var last_event_was_mouse = false;
 var lastsavedstate = "";
 
@@ -168,6 +170,10 @@ function styleIpNodes() {
     }
 }
 
+function addStartupHook(fn) {
+    startuphooks.push(fn);
+}
+
 function documentReadyHandler() {
     // TODO: make this a hook-like thing, so that code can be added from
     // anywhere in the file
@@ -180,6 +186,10 @@ function documentReadyHandler() {
     globalStyle.appendTo("head");
 
     lastsavedstate = $("#editpane").html();
+
+    _.each(startuphooks, function (hook) {
+        hook();
+    });
 }
 
 $(document).ready(function () {
