@@ -71,6 +71,7 @@
 
 var startnode = null;
 var endnode = null;
+// TODO: remove these two
 var undostack = new Array();
 var redostack = new Array();
 var ctrlKeyMap = new Object();
