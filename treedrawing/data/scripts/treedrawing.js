@@ -23,6 +23,7 @@
 //   Does the metadata get blown away? pro/demoted? Does deletion fail, or
 //   raise a prompt?
 // - strict mode
+// - modularize doc -- namespaces?
 
 // Notes for undo system:
 // - globally unique monotonic counter for root-level trees
