@@ -699,7 +699,7 @@ function editComment() {
     commentText = commentText.substring(0, commentText.length - 1);
     // regex because string does not give global search.
     commentText = commentText.replace(/_/g, " ");
-    showDialogBox("Edit Comment", 
+    showDialogBox("Edit Comment",
                   '<textarea id="commentEditBox">' +
                   commentText + '</textarea><div id="commentTypes">' +
                   commentTypeCheckboxes + '</div><div id="dialogButtons">' +
@@ -995,12 +995,12 @@ function moveNode(parent) {
     var parent_before;
     var textbefore = currentText(parent_ip);
     var nodeMoved;
-    if (!isPossibleTarget(parent)) {
-        // can't move under a tag node
-    } else if ($(startnode).parent().children().length == 1) {
-        // cant move an only child
-    } else if ($(parent).parents().is(startnode)) {
-        // can't move under one's own child
+    if (!isPossibleTarget(parent) || // can't move under a tag node
+        $(startnode).parent().children().length == 1 || // cant move an only child
+        $(parent).parents().is(startnode) // can't move under one's own child
+       ) {
+        clearSelection();
+        return;
     } else if ($(startnode).parents().is(parent)) {
         // move up if moving to a node that is already my parent
         if ($(startnode).parent().children().first().is(startnode)) {
@@ -1041,6 +1041,8 @@ function moveNode(parent) {
             }
         } else {
             // cannot move from this position
+            clearSelection();
+            return;
         }
     } else {
         // otherwise move under my sister
@@ -1130,14 +1132,7 @@ function moveNodes(parent) {
         $(startnode).add($(startnode).nextUntil(endnode)).
             add(endnode).
             wrapAll('<div xxx="newnode" class="snode">XP</div>');
-        // undo if this messed up the text order
-        // if (currentText(parent_ip) != textbefore) {
-        //     // TODO: we'd like to remove this if never triggered
-        //     console.log("Implausible occurrence");
-        //     undo();
-        //     redostack.pop();
-        //     return;
-        // }
+
     } else {
         return; // they are not sisters
     }
@@ -1273,11 +1268,6 @@ function makeNode(label) {
         return;
     }
     var parent_before = parent_ip.clone();
-    // FIX, note one node situation
-    //if( (startnode.id == "sn0") || (endnode.id == "sn0") ){
-    // can't make node above root
-    //        return;
-    //}
     // make end = start if only one node is selected
     if (!endnode) {
         // if only one node, wrap around that one
@@ -1332,7 +1322,7 @@ function makeNode(label) {
 function pruneNode() {
     if (startnode && !endnode) {
         var deltext = $(startnode).children().first().text();
-        // if this is a leaf, todo XXX fix
+        // if this is a leaf, TODO XXX fix
         if (isEmpty(deltext)) {
             // it is ok to delete leaf if is empty/trace
             stackTree();
@@ -1357,7 +1347,7 @@ function pruneNode() {
     }
 }
 
-// ========== Label editing
+// ========== Label manipulation
 
 /**
  * Toggle a dash tag on a node
