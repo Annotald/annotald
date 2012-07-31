@@ -149,10 +149,6 @@ function resetIds(really) {
     }
 }
 
-// Declare global variables from settings.js
-// TODO: move to externs decl
-var invisibleCategories, invisibleRootCategories, ipnodes;
-
 // TODO: is this still current?
 function hideCategories() {
     var i;
@@ -2056,6 +2052,7 @@ function resetLabelClasses(alertOnError) {
 // " "currentText" "getLabel" "textNode" "getMetadata" "hasDashTag\
 // " "parseIndex" "parseLabel" "parseIndexType" "getIndex" "getIndexType\
 // " "shouldIndexLeaf" "maxIndex" "addToIndices" "changeJustLabel\
-// " "toggleStringExtension" "lookupNextLabel" "commentTypes")
+// " "toggleStringExtension" "lookupNextLabel" "commentTypes\
+// " "invisibleCategories" "invisibleRootCategories" "ipnodes")
 // indent-tabs-mode: nil
 // End:
