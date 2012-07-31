@@ -172,11 +172,14 @@ function styleIpNodes() {
 }
 
 function documentReadyHandler() {
+    // TODO: make this a hook-like thing, so that code can be added from
+    // anywhere in the file
     resetIds(true);
     resetLabelClasses(false);
     assignEvents();
     styleIpNodes();
     hideCategories();
+    setupCommentTypes();
     globalStyle.appendTo("head");
 
     lastsavedstate = $("#editpane").html();
@@ -726,14 +729,14 @@ function emergencyExitEdit() {
 
 var commentTypeCheckboxes = "";
 
-(function () {
+function setupCommentTypes() {
     for (var i = 0; i < commentTypes.length; i++) {
         commentTypeCheckboxes +=
             '<input type="radio" name="commentType" value="' +
             commentTypes[i] + '" id="commentType' + commentTypes[i] +
             '" /> ' + commentTypes[i];
     }
-})();
+}
 
 function editComment() {
     if (!startnode || endnode) return;
