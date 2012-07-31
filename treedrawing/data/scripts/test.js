@@ -137,7 +137,7 @@ function runTests() {
         expectEqualText("initial test HTML",
                         $("#editpane").html(),
                         "<divclass=\"snode\"id=\"sn0\"><divclass=\"snodeIP-MAT\
-ipnode\"data-metadata=\"{&quot;ID&quot;:&quot;test-01&quot;}\"id=\"sn1\">IP-MA\
+\"data-metadata=\"{&quot;ID&quot;:&quot;test-01&quot;}\"id=\"sn1\">IP-MA\
 T<divclass=\"snodeNP-SBJ\"id=\"sn2\">NP-SBJ<divclass=\"snodeD\"id=\"sn3\">D<sp\
 anclass=\"wnode\">This</span></div></div><divclass=\"snodeBEP\"id=\"sn4\">BEP<\
 spanclass=\"wnode\">is</span></div><divclass=\"snodeNP-PRD\"id=\"sn5\">NP-PRD<\
