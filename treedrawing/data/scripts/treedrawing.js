@@ -678,42 +678,6 @@ function editLemmaOrLabel() {
     }
 }
 
-// TODO(AWE) is this still needed?
-function emergencyExitEdit() {
-    // This function is to hack around a bug (which can't yet be
-    // reproduced) in the label editor which sometimes causes it to freeze
-    // and not accept the return key to terminate editing.  It is designed
-    // to be called from the Chrome JS console.
-    function postChange(newNode) {
-        newNode.addClass(getLabel(newNode));
-        startnode = endnode = null;
-        resetIds();
-        updateSelection();
-        document.body.onkeydown = handleKeyDown;
-    }
-    var newphrase = $("#leafphrasebox").val().toUpperCase()+" ";
-    var newtext = $("#leaftextbox").val();
-    var newlemma;
-    var useLemma = $('#leaflemmabox').size() > 0;
-    if (useLemma) {
-        newlemma = $('#leaflemmabox').val();
-        newlemma = newlemma.replace("<","&lt;");
-        newlemma = newlemma.replace(">","&gt;");
-    }
-    newtext = newtext.replace("<","&lt;");
-    newtext = newtext.replace(">","&gt;");
-    var replText = "<div class='snode'>" +
-            newphrase + " <span class='wnode'>" + newtext;
-    if (useLemma) {
-        replText += "<span class='lemma'>-" +
-            newlemma + "</span>";
-    }
-    replText += "</span></div>";
-    var replNode = $(replText);
-    $("#leafeditor").replaceWith(replNode);
-    postChange(replNode);
-}
-
 var commentTypeCheckboxes = "";
 
 function setupCommentTypes() {
@@ -1451,13 +1415,6 @@ function toggleExtension(extension, extensionList) {
     $(startnode).removeClass(oldlabel).addClass(newlabel);
 
     return true;
-}
-
-// added by JEB
-// alias for compatibility
-// TODO: remove
-function toggleVerbalExtension(extension) {
-    toggleExtension(extension);
 }
 
 /**
