@@ -20,6 +20,19 @@
  * Utility functions for Annotald.
  */
 
+// Table of contents:
+// * Javascript object manipulation
+// * Interconversion of different representations
+// * UI helper functions
+// * Functions on node representation
+// ** Predicates
+// ** Accessor functions
+// ** Index-related functions
+// **********
+// End TOC
+
+
+
 // TODOs: mark @privates appropriately, consider naming scheme for dom vs JQ args
 
 // ===== Javascript object manipulation
