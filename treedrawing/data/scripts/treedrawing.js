@@ -242,10 +242,6 @@ function styleTags(tagNames, css) {
     }
 }
 
-function contains(a, obj) {
-    // TODO: find where this is used, remove it
-    return (a.indexOf(obj) > -1);
-}
 // ========== Key bindings
 
 /**
