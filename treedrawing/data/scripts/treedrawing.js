@@ -143,15 +143,6 @@ function assignEvents() {
     window.onbeforeunload = navigationWarning;
 }
 
-function resetIds(really) {
-    if (really) {
-        var snodes = $(".snode");
-        for (var i = 0; i < snodes.length; i++) {
-            snodes[i].id = "sn" + i;
-        }
-    }
-}
-
 // TODO: is this still current?
 function hideCategories() {
     var i;
@@ -176,9 +167,8 @@ function addStartupHook(fn) {
 }
 
 function documentReadyHandler() {
-    // TODO: make this a hook-like thing, so that code can be added from
-    // anywhere in the file
-    resetIds(true);
+    $("#editpane>.snode").attr("id", "sn0");
+    // TODO: move some of this into hooks
     resetLabelClasses(false);
     assignEvents();
     styleIpNodes();
@@ -511,7 +501,6 @@ function clearSelection() {
     saveMetadata();
     window.event.preventDefault();
     startnode = endnode = null;
-    resetIds();
     updateSelection();
     hideContextMenu();
 }
@@ -775,7 +764,6 @@ function displayRename() {
                 newNode.removeClass(oldClass);
                 newNode.addClass(getLabel(newNode));
                 startnode = endnode = null;
-                resetIds();
                 updateSelection();
                 document.body.onkeydown = handleKeyDown;
                 $("#sn0").mousedown(handleNodeClick);
@@ -951,8 +939,6 @@ function editLemma() {
         }
         function postChange() {
             startnode = null; endnode = null;
-            // Need we do this?
-            resetIds();
             updateSelection();
             document.body.onkeydown = handleKeyDown;
             $("#sn0").mousedown(handleNodeClick);
@@ -1096,8 +1082,6 @@ function moveNode(parent) {
                  if (parent_ip.attr("id") == "sn0") {
                     $("#sn0").mousedown(handleNodeClick);
                 }
-            } else {
-                resetIds();
             }
         } else if ((parent.compareDocumentPosition(startnode) & 0x2)
                    // &&
@@ -1116,8 +1100,6 @@ function moveNode(parent) {
                  if (parent_ip == "sn0") {
                     $("#sn0").mousedown(handleNodeClick);
                 }
-            } else {
-                resetIds();
             }
         } // TODO: conditional branches not exhaustive
     }
@@ -1272,7 +1254,6 @@ function makeLeaf(before, label, word, target) {
     }
     startnode = null;
     endnode = null;
-    resetIds();
     selectNode(newleaf.get(0));
     updateSelection();
 }
@@ -1330,7 +1311,6 @@ function makeNode(label) {
     startnode = null;
     endnode = null;
 
-    resetIds();
     var toselect = $(".snode[xxx=newnode]").first();
 
     // BUG when making XP and then use context menu: todo XXX
@@ -1338,8 +1318,6 @@ function makeNode(label) {
     selectNode(toselect.get(0));
     toselect.attr("xxx",null);
     updateSelection();
-    resetIds();
-
     // toselect.mousedown(handleNodeClick);
 }
 
@@ -1360,7 +1338,6 @@ function pruneNode() {
             stackTree();
             $(startnode).remove();
             startnode = endnode = null;
-            resetIds();
             updateSelection();
             return;
         } else if (!isPossibleTarget(startnode)) {
@@ -1375,8 +1352,6 @@ function pruneNode() {
         var toselect = $(startnode).children().first();
         $(startnode).replaceWith($(startnode).children());
         startnode = endnode = null;
-        // not needed, strictly removing
-        // resetIds();
         selectNode(toselect.get(0));
         updateSelection();
     }
