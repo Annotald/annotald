@@ -1922,7 +1922,6 @@ function removeIndex(node) {
 // A low-level (LL) version of setLabel.  It is only responsible for changing
 // the label; not doing any kind of matching/changing/other crap.
 function setLabelLL(node, label) {
-    // TODO: don't add numeric indices to the CSS class
     if (node.hasClass("snode")) {
         if (label[label.length - 1] != " ") {
             // Some other spots in the code depend on the label ending with a
@@ -1940,7 +1939,7 @@ function setLabelLL(node, label) {
     textNode(node).replaceWith(label);
     if (node.hasClass("snode")) {
         node.removeClass(oldLabel);
-        node.addClass($.trim(label));
+        node.addClass(parseLabel($.trim(label)));
     }
 }
 
