@@ -1,7 +1,8 @@
-.PHONY: doc
+.PHONY: api-doc private-doc deploy-docs
 
 api-doc:
-	jsdoc -v -d=api-doc treedrawing/data/scripts/treedrawing.js
+	jsdoc -v -d=api-doc treedrawing/data/scripts/treedrawing.js \
+		treedrawing/data/scripts/treedrawing.utils.js
 	mv api-doc/symbols/_global_.html api-doc/symbols/global.html
 	find api-doc -name "*.html" -print0 | xargs -0 sed -i'.bak' \
 		-e 's/_global_/global/g'
@@ -9,4 +10,9 @@ api-doc:
 
 deploy-docs: api-doc
 	cp -r api-doc ../annotald-doc
+
+private-doc:
+	jsdoc -v -p -d=priv-doc treedrawing/data/scripts/treedrawing.js \
+		treedrawing/data/scripts/treedrawing.utils.js
+
 
