@@ -203,9 +203,6 @@ function addStyle(string) {
  * @param {String} css The css style declarations to associate with the tag.
  */
 function styleTag(tagName, css) {
-    // TODO(AWE): this is a really baroque selector.  The alternative
-    // (faster?) way to do it is to keep track of the node name as a
-    // separate div-level property
     addStyle('*[class*=" ' + tagName + '-"],*[class*=" ' + tagName +
              ' "],*[class$=" ' + tagName + '"],[class*=" ' + tagName +
              '="] { ' + css + ' }');
@@ -219,9 +216,6 @@ function styleTag(tagName, css) {
  * @param {String} css The css style declarations to associate with the tag.
  */
 function styleDashTag(tagName, css) {
-    // TODO(AWE): this is a really baroque selector.  The alternative
-    // (faster?) way to do it is to keep track of the node name as a
-    // separate div-level property
     addStyle('*[class*="-' + tagName + '-"],*[class*="-' + tagName +
              ' "],*[class$="-' + tagName + '"],[class*="-' + tagName +
              '="] { ' + css + ' }');
