@@ -1069,6 +1069,7 @@ function moveNode(parent) {
             // $(startnode).prev().is(parent)
 
             // parent precedes startnode
+            undoBeginTransaction();
             if (tokenMerge) {
                 registerDeletedRootTree($(startnode));
                 touchTree($(parent));
@@ -1080,11 +1081,13 @@ function moveNode(parent) {
             }
             movednode.appendTo(parent);
             if (currentText(parent_ip) != textbefore)  {
-                // TODO: cancel what has been recorded with undo
+                undoAbortTransaction();
                 parent_ip.replaceWith(parent_before);
-                 if (parent_ip.attr("id") == "sn0") {
+                if (parent_ip.attr("id") == "sn0") {
                     $("#sn0").mousedown(handleNodeClick);
                 }
+            } else {
+                undoEndTransaction();
             }
         } else if ((parent.compareDocumentPosition(startnode) & 0x2)) {
             // &&
@@ -1093,6 +1096,7 @@ function moveNode(parent) {
             // $(startnode).next().is(parent)
 
             // startnode precedes parent
+            undoBeginTransaction();
             if (tokenMerge) {
                 registerDeletedRootTree($(startnode));
                 touchTree($(parent));
@@ -1102,11 +1106,13 @@ function moveNode(parent) {
             }
             movednode.insertBefore($(parent).children().first());
             if (currentText(parent_ip) != textbefore) {
-                // TODO: cancel recorded undo info
+                undoAbortTransaction();
                 parent_ip.replaceWith(parent_before);
-                 if (parent_ip == "sn0") {
+                if (parent_ip == "sn0") {
                     $("#sn0").mousedown(handleNodeClick);
                 }
+            } else {
+                undoEndTransaction();
             }
         } // TODO: conditional branches not exhaustive
     }
@@ -1274,6 +1280,7 @@ function makeNode(label) {
         return;
     }
     var rootLevel = isRootNode($(startnode));
+    undoBeginTransaction();
     if (rootLevel) {
         registerDeletedRootTree($(startnode));
     } else {
@@ -1304,8 +1311,10 @@ function makeNode(label) {
             // undo if this messed up the text order
             if(currentText(parent_ip) != oldtext) {
                 // TODO: is this plausible? can we remove the check?
-                // TODO: if not removed, roll back the undo info
                 parent_ip.replaceWith(parent_before);
+                undoAbortTransaction();
+                clearSelection();
+                return;
             }
         }
     }
@@ -1318,6 +1327,8 @@ function makeNode(label) {
     if (rootLevel) {
         registerNewRootTree(toselect);
     }
+
+    undoEndTransaction();
 
     // BUG when making XP and then use context menu: todo XXX
 
@@ -1509,13 +1520,9 @@ function coIndex() {
         } else if (getIndex($(startnode)) == -1 && getIndex($(endnode)) > 0) {
             appendExtension( $(startnode), getIndex($(endnode)) );
         } else { // no indices here, so make them
-            // if start and end are within the same token, do coindexing
-            if(startRoot == endRoot) {
-                var index = maxIndex(startRoot) + 1;
-                appendExtension($(startnode), index);
-                appendExtension($(endnode), index);
-            }
-            // TODO: roll back undo if we didn't just coindex
+            var index = maxIndex(startRoot) + 1;
+            appendExtension($(startnode), index);
+            appendExtension($(endnode), index);
         }
     }
 }
@@ -1796,7 +1803,12 @@ function undo() {
 
 // New undo system below this line
 
-var undoMap, undoNewTrees, undoDeletedTrees, undoStack = [], redoStack = [];
+var undoMap,
+    undoNewTrees,
+    undoDeletedTrees,
+    undoStack = [],
+    redoStack = [],
+    undoTransactionStack = [];
 
 var idNumber = 1;
 
@@ -1812,6 +1824,7 @@ function resetUndo() {
     undoMap = {};
     undoNewTrees = [];
     undoDeletedTrees = [];
+    undoTransactionStack = [];
 }
 
 function undoBarrier() {
@@ -1826,6 +1839,25 @@ function undoBarrier() {
         delTr: undoDeletedTrees
     });
     resetUndo();
+}
+
+function undoBeginTransaction() {
+    undoTransactionStack.push({
+        map: undoMap,
+        newTr: undoNewTrees,
+        delTr: undoDeletedTrees
+    });
+}
+
+function undoEndTransaction() {
+    undoTransactionStack.pop();
+}
+
+function undoAbortTransaction() {
+    var t = undoTransactionStack.pop();
+    undoMap = t["map"];
+    undoNewTrees = t["newTr"];
+    undoDeletedTrees = t["delTr"];
 }
 
 function touchTree(node) {
