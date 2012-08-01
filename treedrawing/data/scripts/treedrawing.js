@@ -1026,7 +1026,7 @@ function moveNode(parent) {
             }
             if (parent == document.getElementById("sn0")) {
                 registerNewRootTree($(startnode));
-                touchTree($(parent));
+                touchTree($(startnode));
             } else {
                 touchTree($(startnode));
             }
@@ -1058,17 +1058,16 @@ function moveNode(parent) {
         // TODO: perhaps here and in the immediately following else if it is
         // possible to simplify and remove the compareDocumentPosition call,
         // since the jQuery subsumes it
-        if ((parent.compareDocumentPosition(startnode) & 0x4)
+        if (parent.compareDocumentPosition(startnode) & 0x4) {
             // check whether the nodes are adjacent.  Ideally, we would like
             // to say selfAndParentsUntil, but no such jQuery fn exists, thus
             // necessitating the disjunction.
-
             // TODO: too strict
             // &&
             // $(startnode).prev().is(
             //     $(parent).parentsUntil(startnode.parentNode).last()) ||
             // $(startnode).prev().is(parent)
-           ) {
+
             // parent precedes startnode
             if (tokenMerge) {
                 registerDeletedRootTree($(startnode));
@@ -1087,12 +1086,12 @@ function moveNode(parent) {
                     $("#sn0").mousedown(handleNodeClick);
                 }
             }
-        } else if ((parent.compareDocumentPosition(startnode) & 0x2)
-                   // &&
-                   // $(startnode).next().is(
-                   //     $(parent).parentsUntil(startnode.parentNode).last()) ||
-                   // $(startnode).next().is(parent)
-                  ) {
+        } else if ((parent.compareDocumentPosition(startnode) & 0x2)) {
+            // &&
+            // $(startnode).next().is(
+            //     $(parent).parentsUntil(startnode.parentNode).last()) ||
+            // $(startnode).next().is(parent)
+
             // startnode precedes parent
             if (tokenMerge) {
                 registerDeletedRootTree($(startnode));
@@ -1145,7 +1144,7 @@ function moveNodes(parent) {
     }
     var toselect = $(".snode[xxx=newnode]").first();
     toselect = toselect.get(0);
-    // BUG when making XP and then use context menu: todo XXX
+    // BUG when making XP and then use context menu: TODO XXX
 
     startnode = toselect;
     moveNode(parent);
@@ -1808,8 +1807,6 @@ addStartupHook(function () {
     });
     resetUndo();
 });
-
-// TODO: assign all ids on startup and reset undo sys
 
 function resetUndo() {
     undoMap = {};
