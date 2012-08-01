@@ -1820,6 +1820,13 @@ addStartupHook(function () {
     resetUndo();
 });
 
+/**
+ * Reset the undo system.
+ *
+ * This function removes any intermediate state the undo system has stored; it
+ * does not affect the undo history.
+ * @private
+ */
 function resetUndo() {
     undoMap = {};
     undoNewTrees = [];
@@ -1827,6 +1834,10 @@ function resetUndo() {
     undoTransactionStack = [];
 }
 
+/**
+ * Record an undo step.
+ * @private
+ */
 function undoBarrier() {
     if (_.size(undoMap) == 0 &&
         _.size(undoNewTrees) == 0 &&
@@ -1841,6 +1852,13 @@ function undoBarrier() {
     resetUndo();
 }
 
+/**
+ * Begin an undo transaction.
+ *
+ * This function MUST be matched by a call to either `undoEndTransaction`
+ * (which keeps all intermediate steps since the start call) or
+ * `undoAbortTransaction` (which discards said steps).
+ */ 
 function undoBeginTransaction() {
     undoTransactionStack.push({
         map: undoMap,
@@ -1849,10 +1867,16 @@ function undoBeginTransaction() {
     });
 }
 
+/**
+ * End an undo transaction, keeping its changes
+ */
 function undoEndTransaction() {
     undoTransactionStack.pop();
 }
 
+/**
+ * End an undo transaction, discarding its changes
+ */
 function undoAbortTransaction() {
     var t = undoTransactionStack.pop();
     undoMap = t["map"];
@@ -1860,6 +1884,11 @@ function undoAbortTransaction() {
     undoDeletedTrees = t["delTr"];
 }
 
+/**
+ * Inform the undo system that changes are being made.
+ *
+ * @param {JQuery Node} node the node in which changes are being made
+ */
 function touchTree(node) {
     var root = $(getTokenRoot(node));
     if (!undoMap[root.attr("id")]) {
@@ -1867,6 +1896,11 @@ function touchTree(node) {
     }
 }
 
+/**
+ * Inform the undo system of the addition of a new tree at the root level.
+ *
+ * @param {JQuery Node} tree the tree being added
+ */
 function registerNewRootTree(tree) {
     var newid = "id" + idNumber;
     idNumber++;
@@ -1874,6 +1908,11 @@ function registerNewRootTree(tree) {
     tree.attr("id", newid);
 }
 
+/**
+ * Inform the undo system of a tree's removal at the root level
+ *
+ * @param {JQuery Node} tree the tree being removed
+ */
 function registerDeletedRootTree(tree) {
     var prev = tree.prev();
     if (prev.length == 0) {
@@ -1885,6 +1924,12 @@ function registerDeletedRootTree(tree) {
     });
 }
 
+/**
+ * Perform an undo operation.
+ *
+ * This is a worker function, wrapped by `newUndo` and `newRedo`.
+ * @private
+ */
 function doUndo(undoData) {
     var map = {},
         newTr = [],
@@ -1928,6 +1973,9 @@ function doUndo(undoData) {
     };
 }
 
+/**
+ * Perform undo.
+ */
 function newUndo() {
     if (undoStack.length == 0) {
         displayWarning("No further undo information");
@@ -1938,6 +1986,9 @@ function newUndo() {
     updateSelection();
 }
 
+/**
+ * Perform redo.
+ */
 function newRedo () {
     if (redoStack.length == 0) {
         displayWarning("No further redo information");
