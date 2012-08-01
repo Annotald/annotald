@@ -125,12 +125,8 @@ function assignEvents() {
     document.body.onkeydown = handleKeyDown;
     $("#sn0").mousedown(handleNodeClick);
     $("#butsave").mousedown(save);
-    if (typeof disableUndo !== "undefined" && disableUndo) {
-        $("#undoCtrls").hide();
-    } else {
-        $("#butundo").mousedown(undo);
-        $("#butredo").mousedown(redo);
-    }
+    $("#butundo").mousedown(newUndo);
+    $("#butredo").mousedown(newRedo);
     $("#butidle").mousedown(idle);
     $("#butexit").unbind("click").click(quitServer);
     $("#butvalidate").unbind("click").click(validateTrees);
@@ -307,6 +303,7 @@ function handleKeyDown(e) {
     var theFn = commandMap[e.keyCode].func;
     var theArgs = commandMap[e.keyCode].args;
     theFn.apply(undefined, theArgs);
+    undoBarrier();
     return false;
 }
 
@@ -346,6 +343,7 @@ function handleNodeClick(e) {
     }
     e.stopPropagation();
     last_event_was_mouse = true;
+    undoBarrier();
 }
 
 // ========== Context Menu
@@ -615,6 +613,7 @@ function addMetadataDialog() {
 function splitWord() {
     if (!startnode || endnode) return;
     if (!isLeafNode($(startnode))) return;
+    touchTree($(startnode));
     var wordSplit = wnodeString($(startnode)).split("-");
     var origWord = wordSplit[0];
     var origLemma = "XXX";
@@ -691,6 +690,7 @@ function setupCommentTypes() {
 
 function editComment() {
     if (!startnode || endnode) return;
+    touchTree($(startnode));
     var commentRaw = $.trim(wnodeString($(startnode)));
     var commentType = commentRaw.split(":")[0];
     // remove the {
@@ -748,9 +748,9 @@ function editComment() {
  * available for editing if it is an empty node (trace, comment, etc.).  If a
  * non-terminal, edit the node label.
  */
+// TODO: make undo-aware
 function displayRename() {
     if (startnode && !endnode) {
-        stackTree();
         document.body.onkeydown = null;
         $("#sn0").unbind('mousedown');
         var oldClass = getLabel($(startnode));
@@ -926,10 +926,10 @@ function displayRename() {
 /**
  * Edit the lemma of a terminal node.
  */
+// TODO: make undo-aware
 function editLemma() {
     var childLemmata = $(startnode).children(".wnode").children(".lemma");
     if (startnode && !endnode && childLemmata.size() > 0) {
-        stackTree();
         document.body.onkeydown = null;
         $("#sn0").unbind('mousedown');
         function space(event) {
@@ -1008,36 +1008,32 @@ function moveNode(parent) {
                 filter(":not(:first-child)").size() > 0) {
                 return;
             }
-            stackTree();
-            // parent_before = parent_ip.clone();
+            if (parent == document.getElementById("sn0")) {
+                touchTree($(startnode));
+                registerNewRootTree($(startnode));
+            } else {
+                touchTree($(startnode));
+            }
             $(startnode).insertBefore($(parent).children().filter(
                                                  $(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 alert("failed what should have been a strict test");
-                // parent_ip.replaceWith(parent_before);
-                // if (parent_ip.attr("id") == "sn0") {
-                //     $("#sn0").mousedown(handleNodeClick);
-                // }
-            } else {
-                resetIds();
             }
         } else if ($(startnode).parent().children().last().is(startnode)) {
             if ($(startnode).parentsUntil(parent).slice(0,-1).
                 filter(":not(:last-child)").size() > 0) {
                 return;
             }
-            stackTree();
-            // parent_before = parent_ip.clone();
+            if (parent == document.getElementById("sn0")) {
+                registerNewRootTree($(startnode));
+                touchTree($(parent));
+            } else {
+                touchTree($(startnode));
+            }
             $(startnode).insertAfter($(parent).children().
                                      filter($(startnode).parents()));
             if (currentText(parent_ip) != textbefore) {
                 alert("failed what should have been a strict test");
-                // parent_ip.replaceWith(parent_before);
-                //  if (parent_ip.attr("id") == "sn0") {
-                //     $("#sn0").mousedown(handleNodeClick);
-                // }
-            } else {
-                resetIds();
             }
         } else {
             // cannot move from this position
@@ -1074,12 +1070,18 @@ function moveNode(parent) {
             // $(startnode).prev().is(parent)
            ) {
             // parent precedes startnode
-            stackTree();
             if (tokenMerge) {
+                registerDeletedRootTree($(startnode));
+                touchTree($(parent));
+                // TODO: this will bomb if we are merging more than 2 tokens
+                // by multiple selection.
                 addToIndices(movednode, maxindex);
+            } else {
+                touchTree($(startnode));
             }
             movednode.appendTo(parent);
             if (currentText(parent_ip) != textbefore)  {
+                // TODO: cancel what has been recorded with undo
                 parent_ip.replaceWith(parent_before);
                  if (parent_ip.attr("id") == "sn0") {
                     $("#sn0").mousedown(handleNodeClick);
@@ -1092,12 +1094,16 @@ function moveNode(parent) {
                    // $(startnode).next().is(parent)
                   ) {
             // startnode precedes parent
-            stackTree();
             if (tokenMerge) {
+                registerDeletedRootTree($(startnode));
+                touchTree($(parent));
                 addToIndices(movednode, maxindex);
+            } else {
+                touchTree($(startnode));
             }
             movednode.insertBefore($(parent).children().first());
             if (currentText(parent_ip) != textbefore) {
+                // TODO: cancel recorded undo info
                 parent_ip.replaceWith(parent_before);
                  if (parent_ip == "sn0") {
                     $("#sn0").mousedown(handleNodeClick);
@@ -1116,6 +1122,7 @@ function moveNode(parent) {
  *
  * @param {DOM Node} parent the parent to move the selection under
  */
+// TODO: make undo aware
 function moveNodes(parent) {
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
     if (parent == document.getElementById("sn0")) {
@@ -1197,6 +1204,9 @@ function makeLeaf(before, label, word, target) {
         target = startnode;
     }
 
+    // TODO: what happens if you use this to add a new root-level tree?
+    touchTree($(target));
+
     var lemma = false;
     var temp = word.split("-");
     if (temp.length > 1) {
@@ -1227,8 +1237,6 @@ function makeLeaf(before, label, word, target) {
             return;
         }
     }
-
-    stackTree();
 
     var newleaf = "<div class='snode " + label + "'>" + label +
         "<span class='wnode'>" + word;
@@ -1263,15 +1271,20 @@ function makeLeaf(before, label, word, target) {
  */
 function makeNode(label) {
     // check if something is selected
-    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
     if (!startnode) {
         return;
     }
+    var rootLevel = isRootNode($(startnode));
+    if (rootLevel) {
+        registerDeletedRootTree($(startnode));
+    } else {
+        touchTree($(startnode));
+    }
+    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
     var parent_before = parent_ip.clone();
     // make end = start if only one node is selected
     if (!endnode) {
         // if only one node, wrap around that one
-        stackTree();
         $(startnode).wrapAll('<div xxx="newnode" class="snode ' + label + '">'
                              + label + ' </div>\n');
     } else {
@@ -1286,13 +1299,13 @@ function makeNode(label) {
         if ($(startnode).siblings().is(endnode)) {
             // then, collect startnode and its sister up until endnode
             var oldtext = currentText(parent_ip);
-            stackTree();
             $(startnode).add($(startnode).nextUntil(endnode)).add(
                 endnode).wrapAll('<div xxx="newnode" class="snode ' +
                                         label + '">' + label + ' </div>\n');
             // undo if this messed up the text order
             if(currentText(parent_ip) != oldtext) {
                 // TODO: is this plausible? can we remove the check?
+                // TODO: if not removed, roll back the undo info
                 parent_ip.replaceWith(parent_before);
             }
         }
@@ -1302,6 +1315,10 @@ function makeNode(label) {
     endnode = null;
 
     var toselect = $(".snode[xxx=newnode]").first();
+
+    if (rootLevel) {
+        registerNewRootTree(toselect);
+    }
 
     // BUG when making XP and then use context menu: todo XXX
 
@@ -1325,7 +1342,7 @@ function pruneNode() {
         // if this is a leaf, TODO XXX fix
         if (isEmpty(deltext)) {
             // it is ok to delete leaf if is empty/trace
-            stackTree();
+            touchTree($(startnode));
             $(startnode).remove();
             startnode = endnode = null;
             updateSelection();
@@ -1337,9 +1354,8 @@ function pruneNode() {
             return;
         }
 
-        stackTree();
-
         var toselect = $(startnode).children().first();
+        touchTree($(startnode));
         $(startnode).replaceWith($(startnode).children());
         startnode = endnode = null;
         selectNode(toselect.get(0));
@@ -1381,7 +1397,7 @@ function toggleExtension(extension, extensionList) {
         return false;
     }
 
-    stackTree();
+    touchTree($(startnode));
     var textnode = textNode($(startnode));
     var oldlabel = $.trim(textnode.text());
     // Extension is not de-dashed here.  toggleStringExtension handles it.
@@ -1412,7 +1428,6 @@ function setLabel(labels) {
         return false;
     }
 
-    stackTree();
     var textnode = textNode($(startnode));
     var oldlabel = $.trim(textnode.text());
     var newlabel = lookupNextLabel(oldlabel, labels);
@@ -1430,6 +1445,8 @@ function setLabel(labels) {
             }
         }
     }
+
+    touchTree($(startnode));
 
     textnode.replaceWith(newlabel + " ");
     $(startnode).removeClass(parseLabel(oldlabel)).addClass(parseLabel(newlabel));
@@ -1449,7 +1466,7 @@ function setLabel(labels) {
 function coIndex() {
     if (startnode && !endnode) {
         if (getIndex($(startnode)) > 0) {
-            stackTree();
+            touchTree($(startnode));
             removeIndex(startnode);
         }
     } else if (startnode && endnode) {
@@ -1459,6 +1476,8 @@ function coIndex() {
         if (startRoot != endRoot) {
             return;
         }
+
+        touchTree($(startnode));
         // if both nodes already have an index
         if (getIndex($(startnode)) > 0 && getIndex($(endnode)) > 0) {
             // and if it is the same index
@@ -1467,7 +1486,6 @@ function coIndex() {
                 var types = "" + getIndexType($(startnode)) +
                     "" + getIndexType($(endnode));
                 // remove it
-                stackTree();
 
                 if (types == "=-") {
                     removeIndex(startnode);
@@ -1488,19 +1506,17 @@ function coIndex() {
                 }
             }
         } else if (getIndex($(startnode)) > 0 && getIndex($(endnode)) == -1) {
-            stackTree();
             appendExtension($(endnode), getIndex($(startnode)));
         } else if (getIndex($(startnode)) == -1 && getIndex($(endnode)) > 0) {
-            stackTree();
             appendExtension( $(startnode), getIndex($(endnode)) );
         } else { // no indices here, so make them
             // if start and end are within the same token, do coindexing
             if(startRoot == endRoot) {
                 var index = maxIndex(startRoot) + 1;
-                stackTree();
                 appendExtension($(startnode), index);
                 appendExtension($(endnode), index);
             }
+            // TODO: roll back undo if we didn't just coindex
         }
     }
 }
@@ -1779,6 +1795,129 @@ function undo() {
     }
 }
 
+// New undo system below this line
+
+var undoMap, undoNewTrees, undoDeletedTrees, undoStack = [], redoStack = [];
+
+var idNumber = 1;
+
+addStartupHook(function () {
+    $("#sn0>.snode").map(function () {
+        $(this).attr("id", "id" + idNumber);
+        idNumber++;
+    });
+    resetUndo();
+});
+
+// TODO: assign all ids on startup and reset undo sys
+
+function resetUndo() {
+    undoMap = {};
+    undoNewTrees = [];
+    undoDeletedTrees = [];
+}
+
+function undoBarrier() {
+    if (_.size(undoMap) == 0 &&
+        _.size(undoNewTrees) == 0 &&
+        _.size(undoDeletedTrees) == 0) {
+        return;
+    }
+    undoStack.push({
+        map: undoMap,
+        newTr: undoNewTrees,
+        delTr: undoDeletedTrees
+    });
+    resetUndo();
+}
+
+function touchTree(node) {
+    var root = $(getTokenRoot(node));
+    if (!undoMap[root.attr("id")]) {
+        undoMap[root.attr("id")] = root.clone();
+    }
+}
+
+function registerNewRootTree(tree) {
+    var newid = "id" + idNumber;
+    idNumber++;
+    undoNewTrees.push(newid);
+    tree.attr("id", newid);
+}
+
+function registerDeletedRootTree(tree) {
+    var prev = tree.prev();
+    if (prev.length == 0) {
+        prev = null;
+    }
+    undoDeletedTrees.push({
+        tree: tree,
+        before: prev
+    });
+}
+
+function doUndo(undoData) {
+    var map = {},
+        newTr = [],
+        delTr = [];
+
+    _.each(undoData["map"], function(v, k) {
+        var theNode = $("#" + k);
+        map[k] = theNode.clone();
+        theNode.replaceWith(v);
+    });
+
+    // Add back the deleted trees before removing the new trees, just in case
+    // the insertion point of one of these is going to get zapped.  This
+    // shouldn't happen, though.
+    _.each(undoData["delTr"], function(v) {
+        var prev = v["prev"];
+        if (prev) {
+            v["tree"].insertAfter(prev);
+        } else {
+            v["tree"].prependTo($("#sn0"));
+        }
+    });
+
+    _.each(undoData["newTr"], function(v) {
+        var theNode = $("#" + v);
+        var prev = theNode.prev();
+        if (prev.length == 0) {
+            prev = null;
+        }
+        delTr.push({
+            tree: theNode.clone(),
+            before: prev
+        });
+        theNode.remove();
+    });
+
+    return {
+        map: map,
+        newTr: newTr,
+        delTr: delTr
+    };
+}
+
+function newUndo() {
+    if (undoStack.length == 0) {
+        displayWarning("No further undo information");
+        return;
+    }
+    redoStack.push(doUndo(undoStack.pop()));
+    startnode = endnode = undefined;
+    updateSelection();
+}
+
+function newRedo () {
+    if (redoStack.length == 0) {
+        displayWarning("No further redo information");
+        return;
+    }
+    undoStack.push(doUndo(redoStack.pop()));
+    startnode = endnode = undefined;
+    updateSelection();
+}
 
 // ===== Misc
 
@@ -1806,7 +1945,6 @@ function fixError() {
 
 function zeroDashTags() {
     if (!startnode || endnode) return;
-    stackTree();
     var label = getLabel($(startnode));
     var idx = parseIndex(label),
         idxType = parseIndexType(label),
@@ -1814,6 +1952,7 @@ function zeroDashTags() {
     if (idx == -1) {
         idx = idxType = "";
     }
+    touchTree($(startnode));
     setLabelLL($(startnode), lab.split("-")[0] + idxType + idx);
 }
 
@@ -1832,6 +1971,7 @@ function addLemma(lemma) {
     // TODO: This only makes sense for dash-format corpora
     if (!startnode || endnode) return;
     if (!isLeafNode($(startnode))) return;
+    touchTree($(startnode));
     var theLemma = $("<span class='lemma'>-" + lemma +
                      "</span>");
     $(startnode).children(".wnode").append(theLemma);
@@ -1933,7 +2073,7 @@ function setLabelLL(node, label) {
 function setNodeLabel(node, label, noUndo) {
     // TODO: fold this and setLabelLL together...
     if (!noUndo) {
-        stackTree();
+        //stackTree();
     }
     setLabelLL(node, label);
 }
