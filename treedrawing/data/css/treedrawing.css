@@ -138,14 +138,6 @@ body {
     width: 100%;
 }
 
-/* Lemmata */
-.lemmaShow {
-}
-
-.lemmaHide {
-    display: none;
-}
-
 /* Dialog box */
 #dialogBackground {
     z-index: 998;

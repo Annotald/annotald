@@ -17,6 +17,7 @@ any later version.  See the LICENSE file for more information. -->
     <script type= "application/javascript" src="scripts/jquery.js"></script>
 %endif
     <script type= "application/javascript" src="scripts/jquery.mousewheel.min.js"></script>
+    <script type= "application/javascript" src="scripts/treedrawing.utils.js"></script>
     <script type= "application/javascript" src="scripts/treedrawing.js"></script>
     <script type= "application/javascript" src="scripts/underscore-min.js"></script>
     <script type="application/javascript">var startTime = ${startTime};</script>
@@ -47,7 +48,7 @@ any later version.  See the LICENSE file for more information. -->
         <input class="menubutton" type="button" value="Undo" id="butundo" /><br />
         <input class="menubutton" type="button" value="Redo" id="butredo" /><br />
         </div>
-%if oneTree:
+%if partialFile:
         <input class="menubutton" type="button" value="Prev Tree" id="butprevtree" /><br />
         <input class="menubutton" type="button" value="Next Tree" id="butnexttree" /><br />
 %endif

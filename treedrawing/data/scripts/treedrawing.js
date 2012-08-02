@@ -23,18 +23,75 @@
 //   Does the metadata get blown away? pro/demoted? Does deletion fail, or
 //   raise a prompt?
 // - strict mode
+// - modularize doc -- namespaces?
+
+// Notes for undo system:
+// - globally unique monotonic counter for root-level trees
+// - handle storing undo info in the key handler(/click hdlr)
+// - individual fns call touchtree(node) when they make a change
+// - touchtree stores the orig version of a tree, if in this transaction one
+//   hasn't been stored
+// - at end of oper, push an undo info onto the stack, consisting of:
+//   - replace tree #N with this data: X
+//   - put tree: X onto the global list, after tree #N
+//   - delete tree #N from global list
+
+// Table of contents:
+// * Initialization
+// * User configuration
+// ** CSS styles
+// ** Key bindings
+// * UI functions
+// ** Event handlers
+// ** Context Menu
+// ** Dialog boxes
+// ** Selection
+// ** Metadata editor
+// ** Splitting words
+// ** Editing parts of the tree
+// * Tree manipulations
+// ** Movement
+// ** Creation
+// ** Deletion
+// ** Label editing
+// ** Coindexation
+// * Server-side operations
+// ** Saving
+// *** Save helper function
+// ** Validating
+// ** Advancing through the file
+// ** Idle/resume
+// ** Quitting
+// * Undo/redo
+// * Misc
+// * Misc (candidates to move to utils)
+// End TOC
+
+// ===== Initialization
 
 var startnode = null;
 var endnode = null;
+// TODO: remove these two
 var undostack = new Array();
 var redostack = new Array();
 var ctrlKeyMap = new Object();
 var shiftKeyMap = new Object();
 var regularKeyMap = new Object();
 
+var startuphooks = [];
+
 var last_event_was_mouse = false;
+var lastsavedstate = "";
 
 var globalStyle = $('<style type="text/css"></style>');
+
+var lemmataStyleNode, lemmataHidden = false;
+(function () {
+    lemmataStyleNode = document.createElement("style");
+    lemmataStyleNode.setAttribute("type", "text/css");
+    document.getElementsByTagName("head")[0].appendChild(lemmataStyleNode);
+    lemmataStyleNode.innerHTML = ".lemma { display: none; }";
+})();
 
 String.prototype.startsWith = function(str) {
     return (this.substr(0,str.length) === str);
@@ -43,7 +100,6 @@ String.prototype.startsWith = function(str) {
 String.prototype.endsWith = function(str) {
     return (this.substr(this.length-str.length) === str);
 };
-
 
 /*
  * unique function by: Shamasis Bhattacharya
@@ -56,35 +112,34 @@ Array.prototype.unique = function() {
     return r;
 };
 
-
-// TODO(AWE): I think that updating labels on changing nodes works, but
-// this fn should be interactively called with debugging arg to test this
-// supposition.  When I am confident of the behavior of the code, the
-// debugging branch will be optimized/removed.
-function resetLabelClasses(alertOnError) {
-    var nodes = $(".snode").each(
-        function() {
-            var node = $(this);
-            var label = $.trim(getLabel(node));
-            if (alertOnError) { // TODO(AWE): optimize test inside loop
-                var classes = node.attr("class").split(" ");
-                // This incantation removes a value from an array.
-                classes.indexOf("snode") >= 0 &&
-                    classes.splice(classes.indexOf("snode"), 1);
-                classes.indexOf(label) >= 0 &&
-                    classes.splice(classes.indexOf(label), 1);
-                if (classes.length > 0) {
-                    alert("Spurious classes '" + classes.join() +
-                          "' detected on node id'" + node.attr("id") + "'");
-                }
-            }
-        node.attr("class", "snode " + label);
-        });
+function navigationWarning() {
+    if ($("#editpane").html() != lastsavedstate) {
+        return "Unsaved changes exist, are you sure you want to leave the page?";
+    }
+    return undefined;
 }
 
-// Declare global variables from settings.js
-var invisibleCategories, invisibleRootCategories, ipnodes;
+function assignEvents() {
+    // load custom commands from user settings file
+    customCommands();
+    document.body.onkeydown = handleKeyDown;
+    $("#sn0").mousedown(handleNodeClick);
+    $("#butsave").mousedown(save);
+    $("#butundo").mousedown(newUndo);
+    $("#butredo").mousedown(newRedo);
+    $("#butidle").mousedown(idle);
+    $("#butexit").unbind("click").click(quitServer);
+    $("#butvalidate").unbind("click").click(validateTrees);
+    $("#butnexterr").unbind("click").click(nextValidationError);
+    $("#butnexttree").unbind("click").click(nextTree);
+    $("#butprevtree").unbind("click").click(prevTree);
+    $("#editpane").mousedown(clearSelection);
+    $("#conMenu").mousedown(hideContextMenu);
+    $(document).mousewheel(handleMouseWheel);
+    window.onbeforeunload = navigationWarning;
+}
 
+// TODO: is this still current?
 function hideCategories() {
     var i;
     for (i = 0; i < invisibleRootCategories.length; i++) {
@@ -103,19 +158,34 @@ function styleIpNodes() {
     }
 }
 
+function addStartupHook(fn) {
+    startuphooks.push(fn);
+}
+
 function documentReadyHandler() {
-    resetIds(true);
+    $("#editpane>.snode").attr("id", "sn0");
+    // TODO: move some of this into hooks
     resetLabelClasses(false);
     assignEvents();
-    $("#debugpane").empty();
+    styleIpNodes();
+    hideCategories();
+    setupCommentTypes();
+    globalStyle.appendTo("head");
 
     lastsavedstate = $("#editpane").html();
+
+    _.each(startuphooks, function (hook) {
+        hook();
+    });
 }
 
 $(document).ready(function () {
     documentReadyHandler();
-    globalStyle.appendTo("head");
 });
+
+// ===== User configuration
+
+// ========== CSS styles
 
 function addStyle(string) {
     var style = globalStyle.text() + "\n" + string;
@@ -130,14 +200,10 @@ function addStyle(string) {
  * @param {String} css The css style declarations to associate with the tag.
  */
 function styleTag(tagName, css) {
-    // TODO(AWE): this is a really baroque selector.  The alternative
-    // (faster?) way to do it is to keep track of the node name as a
-    // separate div-level property
     addStyle('*[class*=" ' + tagName + '-"],*[class*=" ' + tagName +
              ' "],*[class$=" ' + tagName + '"],[class*=" ' + tagName +
              '="] { ' + css + ' }');
 }
-
 
 /**
  * Add a css style for a certain dash tag.
@@ -147,9 +213,6 @@ function styleTag(tagName, css) {
  * @param {String} css The css style declarations to associate with the tag.
  */
 function styleDashTag(tagName, css) {
-    // TODO(AWE): this is a really baroque selector.  The alternative
-    // (faster?) way to do it is to keep track of the node name as a
-    // separate div-level property
     addStyle('*[class*="-' + tagName + '-"],*[class*="-' + tagName +
              ' "],*[class$="-' + tagName + '"],[class*="-' + tagName +
              '="] { ' + css + ' }');
@@ -167,28 +230,123 @@ function styleTags(tagNames, css) {
     }
 }
 
-function contains(a, obj) {
-    // TODO: find where this is used, remove it
-    return (a.indexOf(obj) > -1);
-}
+// ========== Key bindings
 
 /**
- * Test whether a string is empty, i.e. a trace, comment, or other empty
- * category.
+ * Add a keybinding command.
  *
- * @param {String} text the text to test.
+ * Calls to this function should be in the `settings.js` file, grouped in a
+ * function called `customCommands`
+ *
+ * @param {Object} dict a mapping of properties of the keybinding.  Can
+ * contain:
+ * - `keycode`: the numeric keycode for the binding (mandatory)
+ * - `shift`: true if this is a binding with shift pressed (optional)
+ * - `ctrl`: true if this is a binding with control pressed (optional)
+ *
+ * @param {Function} fn the function to associate with the keybinding.  Any
+ * further arguments to the `addCommand` function are passed to `fn` on each
+ * invocation.
  */
-function isEmpty (text) {
-    // TODO(AWE): should this be passed a node instead of a string, and then
-    // test whether the node is a leaf or not before giving a return value?  This
-    // would simplify the check I had to put in shouldIndexLeafNode, and prevent
-    // future such errors.
-    if (text.startsWith("*") || text.startsWith("{") ||
-        text.split("-")[0] == "0") {
+function addCommand(dict, fn) {
+    var commandMap;
+    if (dict.ctrl) {
+        commandMap = ctrlKeyMap;
+    } else if (dict.shift) {
+        commandMap = shiftKeyMap;
+    } else {
+        commandMap = regularKeyMap;
+    }
+    commandMap[dict.keycode] = {
+        func: fn,
+        args: Array.prototype.slice.call(arguments, 2)
+    };
+}
+
+// ===== UI functions
+
+// ========== Event handlers
+
+function handleMouseWheel(e, delta) {
+    if (e.shiftKey && startnode) {
+        var nextNode;
+        if (delta < 0) { // negative means scroll down, counterintuitively
+             nextNode = $(startnode).next().get(0);
+        } else {
+            nextNode = $(startnode).prev().get(0);
+        }
+        if (nextNode) {
+            selectNode(nextNode);
+            scrollToShowSel();
+        }
+    }
+}
+
+function handleKeyDown(e) {
+    if ((e.ctrlKey && e.shiftKey) || e.metaKey || e.altKey) {
+        // unsupported modifier combinations
         return true;
     }
+    var commandMap;
+    if (e.ctrlKey) {
+        commandMap = ctrlKeyMap;
+    } else if (e.shiftKey) {
+        commandMap = shiftKeyMap;
+    } else {
+        commandMap = regularKeyMap;
+    }
+    last_event_was_mouse = false;
+    if (!commandMap[e.keyCode]) {
+        return true;
+    }
+    e.preventDefault();
+    var theFn = commandMap[e.keyCode].func;
+    var theArgs = commandMap[e.keyCode].args;
+    theFn.apply(undefined, theArgs);
+    undoBarrier();
     return false;
 }
+
+function handleNodeClick(e) {
+    e = e || window.event;
+    var element = (e.target || e.srcElement);
+    saveMetadata();
+    if (e.button == 2) {
+        // rightclick
+        if (startnode && !endnode) {
+            if (startnode != element) {
+                e.stopPropagation();
+                moveNode(element);
+            } else {
+                showContextMenu();
+            }
+        } else if (startnode && endnode) {
+            e.stopPropagation();
+            moveNodes(element);
+        } else {
+            showContextMenu();
+        }
+    } else {
+        // leftclick
+        hideContextMenu();
+        if (e.shiftKey && startnode) {
+            endnode = element;
+            updateSelection();
+            e.preventDefault(); // Otherwise, this sets the text
+                                // selection in the browser...
+        } else {
+            selectNode(element);
+            if (e.ctrlKey) {
+                makeNode("XP");
+            }
+        }
+    }
+    e.stopPropagation();
+    last_event_was_mouse = true;
+    undoBarrier();
+}
+
+// ========== Context Menu
 
 function showContextMenu() {
     var e = window.event;
@@ -229,269 +387,57 @@ function hideContextMenu() {
     $("#conMenu").css("visibility","hidden");
 }
 
+// ========== Dialog boxes
+
 /**
- * Add a keybinding command.
+ * Show a dialog box.
  *
- * Calls to this function should be in the `settings.js` file, grouped in a
- * function called `customCommands`
+ * This function creates keybindings for the escape (to close dialog box) and
+ * return (caller-specified behavior) keys.
  *
- * @param {Object} dict a mapping of properties of the keybinding.  Can
- * contain:
- * - `keycode`: the numeric keycode for the binding (mandatory)
- * - `shift`: true if this is a binding with shift pressed (optional)
- * - `ctrl`: true if this is a binding with control pressed (optional)
- *
- * @param {Function} fn the function to associate with the keybinding.  Any
- * further arguments to the `addCommand` function are passed to `fn` on each
- * invocation.
+ * @param {String} title the title of the dialog box
+ * @param {String} html the html to display in the dialog box
+ * @param {Function} returnFn a function to call when return is pressed
  */
-function addCommand(dict, fn) {
-    var commandMap;
-    if (dict.ctrl) {
-        commandMap = ctrlKeyMap;
-    } else if (dict.shift) {
-        commandMap = shiftKeyMap;
-    } else {
-        commandMap = regularKeyMap;
-    }
-    commandMap[dict.keycode] = {
-        func: fn,
-        args: Array.prototype.slice.call(arguments, 2)
+function showDialogBox(title, html, returnFn) {
+    document.body.onkeydown = function (e) {
+        if (e.keyCode == 27) { // escape
+            hideDialogBox();
+        } else if (e.keyCode == 13 && returnFn) {
+            returnFn();
+        }
     };
-}
-
-function stackTree() {
-    if (typeof disableUndo !== "undefined" && disableUndo) {
-        return;
-    } else {
-        undostack.push($("#editpane").clone());
-        // Keep this small, for memory reasons
-        undostack = undostack.slice(-15);
-    }
+    html = '<div class="menuTitle">' + title + '</div>' +
+        '<div id="dialogContent">' + html + '</div>';
+    $("#dialogBox").html(html).get(0).style.visibility = "visible";
+    $("#dialogBackground").get(0).style.visibility = "visible";
 }
 
 /**
- * Invoke redo, if not disabled.
+ * Hide the displayed dialog box.
  */
-function redo() {
-    if (typeof disableUndo !== "undefined" && disableUndo) {
-        return;
-    } else {
-        var nextstate = redostack.pop();
-        if (!(nextstate == undefined)) {
-            var editPane = $("#editpane");
-            var currentstate = editPane.clone();
-            undostack.push(currentstate);
-            editPane.replaceWith(nextstate);
-            clearSelection();
-            // next line maybe not needed
-            $("#sn0").mousedown(handleNodeClick);
-        }
-    }
-}
-
-/**
- * Invoke undo, if not enabled
- */
-function undo() {
-    if (typeof disableUndo !== "undefined" && disableUndo) {
-        return;
-    } else {
-        // lots of slowness in the event-handler handling part of jquery.  Perhaps
-        // replace that with doing it by hand in the DOM (but with the potential
-        // for memory leaks)
-        // MDN references:
-        // https://developer.mozilla.org/en/DOM/Node.cloneNode
-        // https://developer.mozilla.org/En/DOM/Node.replaceChild
-        var prevstate = undostack.pop();
-        if (!(prevstate == undefined)) {
-            var editPane = $("#editpane");
-            var currentstate = $("#editpane").clone();
-            redostack.push(currentstate);
-            editPane.replaceWith(prevstate);
-            clearSelection();
-            // next line may not be needed
-            $("#sn0").mousedown(handleNodeClick);
-        }
-    }
-}
-
-var saveInProgress = false;
-
-function saveHandler (data) {
-    if (data['result'] == "success") {
-        // TODO(AWE): add time of last successful save
-        // TODO(AWE): add filename to avoid overwriting another file
-        displayInfo("Save success.");
-    } else {
-        lastsavedstate = "";
-        displayError("Save FAILED!!!: " + data['reason']);
-    }
-    saveInProgress = false;
-}
-
-function save(e, force) {
-    if (!saveInProgress) {
-        if (force) {
-            force = true;
-        } else {
-            force = false;
-        }
-        displayInfo("Saving...");
-        saveInProgress = true;
-        setTimeout(function () {
-            var tosave = toLabeledBrackets($("#editpane"));
-            $.post("/doSave", { trees: tosave,
-                                startTime: startTime,
-                                force: force
-                              }, saveHandler).error(function () {
-                                  lastsavedstate = "";
-                                  saveInProgress = false;
-                              });
-            if ($("#idlestatus").html().search("IDLE") != -1) {
-                idle();
-            }
-            lastsavedstate = $("#editpane").html();
-        }, 0);
-    }
-}
-
-function idle() {
-    if ($("#idlestatus").html().search("IDLE") != -1) {
-        $.post("/doIdle");
-        $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
-    }
-    else {
-        $.post("/doIdle");
-        $("#idlestatus").html("");
-        $("#idlestatus").html("<div style='color:red'>Status: IDLE.</div>");
-    }
-}
-
-function navigationWarning() {
-    if ($("#editpane").html() != lastsavedstate) {
-        return "Unsaved changes exist, are you sure you want to leave the page?";
-    }
-    return undefined;
-}
-
-function assignEvents() {
-    // load custom commands from user settings file
-    customCommands();
+function hideDialogBox() {
+    $("#dialogBox").get(0).style.visibility = "hidden";
+    $("#dialogBackground").get(0).style.visibility = "hidden";
     document.body.onkeydown = handleKeyDown;
-    $("#sn0").mousedown(handleNodeClick);
-    $("#butsave").mousedown(save);
-    if (typeof disableUndo !== "undefined" && disableUndo) {
-        $("#undoCtrls").hide();
-    } else {
-        $("#butundo").mousedown(undo);
-        $("#butredo").mousedown(redo);
-    }
-    $("#butidle").mousedown(idle);
-    $("#butexit").unbind("click").click(quitServer);
-    $("#butvalidate").unbind("click").click(validateTrees);
-    $("#butnexterr").unbind("click").click(nextValidationError);
-    $("#butnexttree").unbind("click").click(nextTree);
-    $("#butprevtree").unbind("click").click(prevTree);
-    $("#editpane").mousedown(clearSelection);
-    $("#conMenu").mousedown(hideContextMenu);
-    $(document).mousewheel(handleMouseWheel);
-    window.onbeforeunload = navigationWarning;
 }
 
 /**
- * Edit the lemma, if a leaf node is selected, or the label, if a phrasal node is.
+ * Set a handler for the enter key in a text box.
+ * @private
  */
-function editLemmaOrLabel() {
-    if (getLabel($(startnode)) == "CODE" &&
-        (wnodeString($(startnode)).substring(0,4) == "{COM" ||
-         wnodeString($(startnode)).substring(0,5) == "{TODO" ||
-         wnodeString($(startnode)).substring(0,4) == "{MAN")) {
-        editComment();
-    } else if (isLeafNode(startnode)) {
-        editLemma();
-    } else {
-        displayRename();
-    }
-}
-
-function handleMouseWheel(e, delta) {
-    if (e.shiftKey && startnode) {
-        var nextNode;
-        if (delta < 0) { // negative means scroll down, counterintuitively
-             nextNode = $(startnode).next().get(0);
+function setInputFieldEnter(field, fn) {
+    field.keydown(function (e) {
+        if (e.keyCode == 13) {
+            fn();
+            return false;
         } else {
-            nextNode = $(startnode).prev().get(0);
+            return true;
         }
-        if (nextNode) {
-            selectNode(nextNode);
-            scrollToShowSel();
-        }
-    }
+    });
 }
 
-function handleKeyDown(e) {
-    if ((e.ctrlKey && e.shiftKey) || e.metaKey || e.altKey) {
-        // unsupported modifier combinations
-        return true;
-    }
-    var commandMap;
-    if (e.ctrlKey) {
-        commandMap = ctrlKeyMap;
-    } else if (e.shiftKey) {
-        commandMap = shiftKeyMap;
-    } else {
-        commandMap = regularKeyMap;
-    }
-    last_event_was_mouse = false;
-    if (!commandMap[e.keyCode]) {
-        return true;
-    }
-    e.preventDefault();
-    var theFn = commandMap[e.keyCode].func;
-    var theArgs = commandMap[e.keyCode].args;
-    theFn.apply(undefined, theArgs);
-    return false;
-}
-
-
-function handleNodeClick(e) {
-    e = e || window.event;
-    var element = (e.target || e.srcElement);
-    saveMetadata();
-    if (e.button == 2) {
-        // rightclick
-        if (startnode && !endnode) {
-            if (startnode != element) {
-                e.stopPropagation();
-                moveNode(element);
-            } else {
-                showContextMenu();
-            }
-        } else if (startnode && endnode) {
-            e.stopPropagation();
-            moveNodes(element);
-        } else {
-            showContextMenu();
-        }
-    } else {
-        // leftclick
-        hideContextMenu();
-        if (e.shiftKey && startnode) {
-            endnode = element;
-            updateSelection();
-            e.preventDefault(); // Otherwise, this sets the text
-                                // selection in the browser...
-        } else {
-            selectNode(element);
-            if (e.ctrlKey) {
-                makeNode("XP");
-            }
-        }
-    }
-    e.stopPropagation();
-    last_event_was_mouse = true;
-}
+// ========== Selection
 
 /**
  * Select a node, and update the GUI to reflect that.
@@ -553,7 +499,6 @@ function clearSelection() {
     saveMetadata();
     window.event.preventDefault();
     startnode = endnode = null;
-    resetIds();
     updateSelection();
     hideContextMenu();
 }
@@ -589,403 +534,163 @@ function scrollToShowSel() {
     }
 }
 
-function isPossibleTarget(node) {
-    // cannot move under a tag node
-    // TODO(AWE): what is the calling convention?  can we optimize this jquery call?
-    if ($(node).children().first().is("span")) {
-        return false;
+// ========== Metadata editor
+
+function saveMetadata() {
+    if ($("#metadata").html() != "") {
+        $(startnode).attr("data-metadata",
+                          JSON.stringify(formToDictionary($("#metadata"))));
     }
-    return true;
 }
 
-function currentText(root) {
-    var nodes = root.get(0).getElementsByClassName("wnode");
-    var text = "";
-    for (var i = 0; i < nodes.length; i++) {
-        var nv = nodes[i].childNodes[0].nodeValue;
-        if (!isEmpty(nv)) {
-            text += nv;
-        }
+function updateMetadataEditor() {
+    if (!startnode || endnode) {
+        $("#metadata").html("");
+        return;
     }
-
-        // $(root).find('.wnode').map(
-        // function() {
-        //     return this.childNodes[0];
-        // }).text();
-    return text;
+    var addButtonHtml = '<input type="button" id="addMetadataButton" ' +
+            'value="Add" />';
+    $("#metadata").html(dictionaryToForm(getMetadata($(startnode))) +
+                        addButtonHtml);
+    $("#metadata").find(".metadataField").change(saveMetadata).
+        focusout(saveMetadata).keydown(function (e) {
+            if (e.keyCode == 13) {
+                $(e.target).blur();
+            }
+            e.stopPropagation();
+            return true;
+        });
+    $("#metadata").find(".key").click(metadataKeyClick);
+    $("#addMetadataButton").click(addMetadataDialog);
 }
 
-/**
- * Move the selected node(s) to a new position.
- *
- * The movement operation must not change the text of the token.
- *
- * @param {DOM Node} parent the parent node to move selection under.
- */
-function moveNode(parent) {
-    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
-    var other_parent = $(parent).parents("#sn0>.snode,#sn0").first();
-    if (parent == document.getElementById("sn0") ||
-        !parent_ip.is(other_parent)) {
-        parent_ip = $("#sn0");
+
+
+function metadataKeyClick(e) {
+    var keyNode = e.target;
+    var html = 'Name: <input type="text" ' +
+            'id="metadataNewName" value="' + $(keyNode).text() +
+            '" /><div id="dialogButtons"><input type="button" value="Save" ' +
+        'id="metadataKeySave" /><input type="button" value="Delete" ' +
+        'id="metadataKeyDelete" /></div>';
+    showDialogBox("Edit Metadata", html);
+    // TODO: make focus go to end, or select whole thing?
+    $("#metadataNewName").focus();
+    function saveMetadataInner() {
+        $(keyNode).text($("#metadataNewName").val());
+        hideDialogBox();
+        saveMetadata();
     }
-    var parent_before;
-    var textbefore = currentText(parent_ip);
-    var nodeMoved;
-    if (!isPossibleTarget(parent)) {
-        // can't move under a tag node
-    } else if ($(startnode).parent().children().length == 1) {
-        // cant move an only child
-    } else if ($(parent).parents().is(startnode)) {
-        // can't move under one's own child
-    } else if ($(startnode).parents().is(parent)) {
-        // move up if moving to a node that is already my parent
-        if ($(startnode).parent().children().first().is(startnode)) {
-            if ($(startnode).parentsUntil(parent).slice(0,-1).
-                filter(":not(:first-child)").size() > 0) {
-                return;
-            }
-            stackTree();
-            // parent_before = parent_ip.clone();
-            $(startnode).insertBefore($(parent).children().filter(
-                                                 $(startnode).parents()));
-            if (currentText(parent_ip) != textbefore) {
-                alert("failed what should have been a strict test");
-                // parent_ip.replaceWith(parent_before);
-                // if (parent_ip.attr("id") == "sn0") {
-                //     $("#sn0").mousedown(handleNodeClick);
-                // }
-            } else {
-                resetIds();
-            }
-        } else if ($(startnode).parent().children().last().is(startnode)) {
-            if ($(startnode).parentsUntil(parent).slice(0,-1).
-                filter(":not(:last-child)").size() > 0) {
-                return;
-            }
-            stackTree();
-            // parent_before = parent_ip.clone();
-            $(startnode).insertAfter($(parent).children().
-                                     filter($(startnode).parents()));
-            if (currentText(parent_ip) != textbefore) {
-                alert("failed what should have been a strict test");
-                // parent_ip.replaceWith(parent_before);
-                //  if (parent_ip.attr("id") == "sn0") {
-                //     $("#sn0").mousedown(handleNodeClick);
-                // }
-            } else {
-                resetIds();
-            }
-        } else {
-            // cannot move from this position
-        }
-    } else {
-        // otherwise move under my sister
-        var tokenMerge = isRootNode( $(startnode) );
-        var maxindex = maxIndex(getTokenRoot($(parent)));
-        var movednode = $(startnode);
-
-        // NOTE: currently there are no more stringent checks below; if that
-        // changes, we might want to demote this
-        parent_before = parent_ip.clone();
-
-        // where a and b are DOM elements (not jquery-wrapped),
-        // a.compareDocumentPosition(b) returns an integer.  The first (counting
-        // from 0) bit is set if B precedes A, and the second bit is set if A
-        // precedes B.
-
-        // TODO: perhaps here and in the immediately following else if it is
-        // possible to simplify and remove the compareDocumentPosition call,
-        // since the jQuery subsumes it
-        if ((parent.compareDocumentPosition(startnode) & 0x4)
-            // check whether the nodes are adjacent.  Ideally, we would like
-            // to say selfAndParentsUntil, but no such jQuery fn exists, thus
-            // necessitating the disjunction.
-
-            // TODO: too strict
-            // &&
-            // $(startnode).prev().is(
-            //     $(parent).parentsUntil(startnode.parentNode).last()) ||
-            // $(startnode).prev().is(parent)
-           ) {
-            // parent precedes startnode
-            stackTree();
-            if (tokenMerge) {
-                addToIndices(movednode, maxindex);
-            }
-            movednode.appendTo(parent);
-            if (currentText(parent_ip) != textbefore)  {
-                parent_ip.replaceWith(parent_before);
-                 if (parent_ip.attr("id") == "sn0") {
-                    $("#sn0").mousedown(handleNodeClick);
-                }
-            } else {
-                resetIds();
-            }
-        } else if ((parent.compareDocumentPosition(startnode) & 0x2)
-                   // &&
-                   // $(startnode).next().is(
-                   //     $(parent).parentsUntil(startnode.parentNode).last()) ||
-                   // $(startnode).next().is(parent)
-                  ) {
-            // startnode precedes parent
-            stackTree();
-            if (tokenMerge) {
-                addToIndices(movednode, maxindex);
-            }
-            movednode.insertBefore($(parent).children().first());
-            if (currentText(parent_ip) != textbefore) {
-                parent_ip.replaceWith(parent_before);
-                 if (parent_ip == "sn0") {
-                    $("#sn0").mousedown(handleNodeClick);
-                }
-            } else {
-                resetIds();
-            }
-        } // TODO: conditional branches not exhaustive
+    function deleteMetadata() {
+        $(keyNode).parent().remove();
+        hideDialogBox();
+        saveMetadata();
     }
-    clearSelection();
+    $("#metadataKeySave").click(saveMetadataInner);
+    setInputFieldEnter($("#metadataNewName"), saveMetadataInner);
+    $("#metadataKeyDelete").click(deleteMetadata);
 }
 
-function isRootNode(node) {
-    return node.filter("#sn0>.snode").size() > 0;
+function addMetadataDialog() {
+    // TODO: allow specifying value too in initial dialog?
+    var html = 'New Name: <input type="text" id="metadataNewName" value="NEW" />' +
+            '<div id="dialogButtons"><input type="button" id="addMetadata" ' +
+            'value="Add" /></div>';
+    showDialogBox("Add Metatata", html);
+    function addMetadata() {
+        var oldMetadata = formToDictionary($("#metadata"));
+        oldMetadata[$("#metadataNewName").val()] = "NEW";
+        $(startnode).attr("data-metadata", JSON.stringify(oldMetadata));
+        updateMetadataEditor();
+        hideDialogBox();
+    }
+    $("#addMetadata").click(addMetadata);
+    setInputFieldEnter($("#metadataNewName"), addMetadata);
 }
 
-/**
- * Move several nodes.
- *
- * The two selected nodes must be sisters, and they and all intervening sisters
- * will be moved as a unit.  Calls {@link moveNode} to do the heavy lifting.
- *
- * @param {DOM Node} parent the parent to move the selection under
- */
-function moveNodes(parent) {
-    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
-    if (parent == document.getElementById("sn0")) {
-        parent_ip = $("#sn0");
+// ========== Splitting words
+
+function splitWord() {
+    if (!startnode || endnode) return;
+    if (!isLeafNode($(startnode))) return;
+    touchTree($(startnode));
+    var wordSplit = wnodeString($(startnode)).split("-");
+    var origWord = wordSplit[0];
+    var origLemma = "XXX";
+    if (wordSplit.length == 2) {
+        origLemma = "@" + wordSplit[1] + "@";
     }
-    if (startnode.compareDocumentPosition(endnode) & 0x2) {
-        // endnode precedes startnode, reverse them
-        var temp = startnode;
-        startnode = endnode;
-        endnode = temp;
-    }
-    if (startnode.parentNode == endnode.parentNode) {
-        // collect startnode and its sister up until endnode
-        $(startnode).add($(startnode).nextUntil(endnode)).
-            add(endnode).
-            wrapAll('<div xxx="newnode" class="snode">XP</div>');
-        // undo if this messed up the text order
-        // if (currentText(parent_ip) != textbefore) {
-        //     // TODO: we'd like to remove this if never triggered
-        //     console.log("Implausible occurrence");
-        //     undo();
-        //     redostack.pop();
-        //     return;
-        // }
-    } else {
-        return; // they are not sisters
-    }
-    var toselect = $(".snode[xxx=newnode]").first();
-    toselect = toselect.get(0);
-    // BUG when making XP and then use context menu: todo XXX
-
-    startnode = toselect;
-    moveNode(parent);
-    startnode = $(".snode[xxx=newnode]").first().get(0);
-    endnode = undefined;
-    pruneNode();
-    clearSelection();
-}
-
-/**
- * Create a leaf node before the selected node.
- *
- * Uses heuristic to determine whether the new leaf is to be a trace, empty
- * subject, etc.
- */
-function leafBefore() {
-    makeLeaf(true);
-}
-
-/**
- * Create a leaf node after the selected node.
- *
- * Uses heuristic to determine whether the new leaf is to be a trace, empty
- * subject, etc.
- */
-function leafAfter() {
-    makeLeaf(false);
-}
-
-// TODO: the hardcoding of defaults in this function is ugly.  We should
-// supply a default heuristic fn to try to guess these, then allow
-// settings.js to override it.
-
-// TODO: maybe put the heuristic into leafbefore/after, and leave this fn clean?
-
-/**
- * Create a leaf node adjacent to the selection, or a given target.
- *
- * @param {Boolean} before whether to create the node before or after selection
- * @param {String} label the label to give the new node
- * @param {String} word the text to give the new node
- * @param {DOM Node} target where to put the new node (default: selected node)
- */
-function makeLeaf(before, label, word, target) {
-    if (!(target || startnode)) return;
-
-    if (!label) {
-        label = "NP-SBJ";
-    }
-    if (!word) {
-        word = "*con*";
-    }
-    if (!target) {
-        target = startnode;
-    }
-
-    var lemma = false;
-    var temp = word.split("-");
-    if (temp.length > 1) {
-        lemma = temp.pop();
-        word = temp.join("-");
-    }
-
-    var doCoindex = false;
-
-    if (endnode) {
-        var startRoot = getTokenRoot($(startnode));
-        var endRoot = getTokenRoot($(endnode));
-        if (startRoot == endRoot) {
-            word = "*ICH*";
-            label = getLabel($(endnode));
-            if (label.startsWith("W")) {
-                word = "*T*";
-                label = label.substr(1).replace(/-[0-9]+$/, "");
-            } else if (label.split("-").indexOf("CL") > -1) {
-                word = "*CL*";
-                label = getLabel($(endnode)).replace("-CL", "");
-                if (label.substring(0,3) == "PRO") {
-                    label = "NP";
-                }
-            }
-            doCoindex = true;
-        } else { // abort if selecting from different tokens
+    var origLabel = getLabel($(startnode));
+    function doSplit() {
+        var words = $("#splitWordInput").val().split("@");
+        if (words.join("") != origWord) {
+            displayWarning("The two new words don't match the original.  Aborting");
             return;
         }
-    }
-
-    stackTree();
-
-    var newleaf = "<div class='snode " + label + "'>" + label +
-        "<span class='wnode'>" + word;
-    if (lemma) {
-        newleaf += "<span class='lemma " + lemmaClass + "'>-" + lemma +
-            "</span>";
-    }
-    newleaf += "</span></div>\n";
-    newleaf = $(newleaf);
-    if (before) {
-        newleaf.insertBefore(target);
-    } else {
-        newleaf.insertAfter(target);
-    }
-    if (doCoindex) {
-        startnode = newleaf.get(0);
-        coIndex();
-    }
-    startnode = null;
-    endnode = null;
-    resetIds();
-    selectNode(newleaf.get(0));
-    updateSelection();
-}
-
-// TODO(AWE) is this still needed?
-function emergencyExitEdit() {
-    // This function is to hack around a bug (which can't yet be
-    // reproduced) in the label editor which sometimes causes it to freeze
-    // and not accept the return key to terminate editing.  It is designed
-    // to be called from the Chrome JS console.
-    function postChange(newNode) {
-        newNode.addClass(getLabel(newNode));
-        startnode = endnode = null;
-        resetIds();
-        updateSelection();
-        document.body.onkeydown = handleKeyDown;
-    }
-    var newphrase = $("#leafphrasebox").val().toUpperCase()+" ";
-    var newtext = $("#leaftextbox").val();
-    var newlemma;
-    var useLemma = $('#leaflemmabox').size() > 0;
-    if (useLemma) {
-        newlemma = $('#leaflemmabox').val();
-        newlemma = newlemma.replace("<","&lt;");
-        newlemma = newlemma.replace(">","&gt;");
-    }
-    newtext = newtext.replace("<","&lt;");
-    newtext = newtext.replace(">","&gt;");
-    var replText = "<div class='snode'>" +
-            newphrase + " <span class='wnode'>" + newtext;
-    if (useLemma) {
-        replText += "<span class='lemma " + lemmaClass + "'>-" +
-            newlemma + "</span>";
-    }
-    replText += "</span></div>";
-    var replNode = $(replText);
-    $("#leafeditor").replaceWith(replNode);
-    postChange(replNode);
-}
-
-/**
- * Show a dialog box.
- *
- * This function creates keybindings for the escape (to close dialog box) and
- * return (caller-specified behavior) keys.
- *
- * @param {String} title the title of the dialog box
- * @param {String} html the html to display in the dialog box
- * @param {Function} returnFn a function to call when return is pressed
- */
-function showDialogBox(title, html, returnFn) {
-    document.body.onkeydown = function (e) {
-        if (e.keyCode == 27) { // escape
-            hideDialogBox();
-        } else if (e.keyCode == 13 && returnFn) {
-            returnFn();
+        if (words.length != 2) {
+            displayWarning("You can only split in one place at a time.");
+            return;
         }
-    };
-    html = '<div class="menuTitle">' + title + '</div>' +
-        '<div id="dialogContent">' + html + '</div>';
-    $("#dialogBox").html(html).get(0).style.visibility = "visible";
-    $("#dialogBackground").get(0).style.visibility = "visible";
+        var labelSplit = origLabel.split("+");
+        var secondLabel = "X";
+        if (labelSplit.length == 2) {
+            setLeafLabel($(startnode), labelSplit[0]);
+            secondLabel = labelSplit[1];
+        }
+        setLeafLabel($(startnode), words[0] + "@");
+        var hasLemma = $(startnode).find(".lemma").size() > 0;
+        makeLeaf(false, secondLabel, "@" + words[1]);
+        if (hasLemma) {
+            // TODO: move to something like foo@1 and foo@2 for the two pieces
+            // of the lemmata
+            addLemma(origLemma);
+        }
+        hideDialogBox();
+    }
+    var html = "Enter an at-sign at the place to split the word: \
+<input type='text' id='splitWordInput' value='" + origWord +
+"' /><div id='dialogButtons'><input type='button' id='splitWordButton'\
+ value='Split' /></div>";
+    showDialogBox("Split word", html, doSplit);
+    $("#splitWordButton").click(doSplit);
+    $("#splitWordInput").focus();
 }
+
+// ========== Editing parts of the tree
+
+// TODO: document entry points better
+// TODO: split these fns up...they are monsters.  (or split to sep. file?)
 
 /**
- * Hide the displayed dialog box
+ * Edit the lemma, if a leaf node is selected, or the label, if a phrasal node is.
  */
-function hideDialogBox() {
-    $("#dialogBox").get(0).style.visibility = "hidden";
-    $("#dialogBackground").get(0).style.visibility = "hidden";
-    document.body.onkeydown = handleKeyDown;
+function editLemmaOrLabel() {
+    if (getLabel($(startnode)) == "CODE" &&
+        (wnodeString($(startnode)).substring(0,4) == "{COM" ||
+         wnodeString($(startnode)).substring(0,5) == "{TODO" ||
+         wnodeString($(startnode)).substring(0,4) == "{MAN")) {
+        editComment();
+    } else if (isLeafNode(startnode)) {
+        editLemma();
+    } else {
+        displayRename();
+    }
 }
 
-// TODO(AWE):make configurable
-var commentTypes = ["COM", "TODO", "MAN"];
 var commentTypeCheckboxes = "";
 
-(function () {
+function setupCommentTypes() {
     for (var i = 0; i < commentTypes.length; i++) {
         commentTypeCheckboxes +=
             '<input type="radio" name="commentType" value="' +
             commentTypes[i] + '" id="commentType' + commentTypes[i] +
             '" /> ' + commentTypes[i];
     }
-})();
+}
 
 function editComment() {
     if (!startnode || endnode) return;
+    touchTree($(startnode));
     var commentRaw = $.trim(wnodeString($(startnode)));
     var commentType = commentRaw.split(":")[0];
     // remove the {
@@ -994,7 +699,7 @@ function editComment() {
     commentText = commentText.substring(0, commentText.length - 1);
     // regex because string does not give global search.
     commentText = commentText.replace(/_/g, " ");
-    showDialogBox("Edit Comment", 
+    showDialogBox("Edit Comment",
                   '<textarea id="commentEditBox">' +
                   commentText + '</textarea><div id="commentTypes">' +
                   commentTypeCheckboxes + '</div><div id="dialogButtons">' +
@@ -1043,9 +748,9 @@ function editComment() {
  * available for editing if it is an empty node (trace, comment, etc.).  If a
  * non-terminal, edit the node label.
  */
+// TODO: make undo-aware
 function displayRename() {
     if (startnode && !endnode) {
-        stackTree();
         document.body.onkeydown = null;
         $("#sn0").unbind('mousedown');
         var oldClass = getLabel($(startnode));
@@ -1059,7 +764,6 @@ function displayRename() {
                 newNode.removeClass(oldClass);
                 newNode.addClass(getLabel(newNode));
                 startnode = endnode = null;
-                resetIds();
                 updateSelection();
                 document.body.onkeydown = handleKeyDown;
                 $("#sn0").mousedown(handleNodeClick);
@@ -1119,7 +823,7 @@ function displayRename() {
                         replText = "<div class='snode'>" +
                             label + " <span class='wnode'>" + word;
                         if (useLemma) {
-                            replText += "<span class='lemma " + lemmaClass + "'>-" +
+                            replText += "<span class='lemma'>-" +
                                 lemma + "</span>";
                         }
                         replText += "</span></div>";
@@ -1148,7 +852,7 @@ function displayRename() {
                             }
                         }
                         var newtext = $("#leaftextbox").val();
-                        var newlemma;
+                        var newlemma = "";
                         if (useLemma) {
                             newlemma = $('#leaflemmabox').val();
                             newlemma = newlemma.replace(/</g,"&lt;");
@@ -1158,10 +862,14 @@ function displayRename() {
                         newtext = newtext.replace(/</g,"&lt;");
                         newtext = newtext.replace(/>/g,"&gt;");
                         newtext = newtext.replace(/'/g,"&#39;");
+                        if (newtext + newlemma == "") {
+                            displayWarning("Cannot create an empty leaf.");
+                            return;
+                        }
                         replText = "<div class='snode'>" +
                             newphrase + " <span class='wnode'>" + newtext;
                         if (useLemma) {
-                            replText += "<span class='lemma " + lemmaClass + "'>-" +
+                            replText += "<span class='lemma'>-" +
                                 newlemma + "</span>";
                         }
                         replText += "</span></div>";
@@ -1218,10 +926,10 @@ function displayRename() {
 /**
  * Edit the lemma of a terminal node.
  */
+// TODO: make undo-aware
 function editLemma() {
     var childLemmata = $(startnode).children(".wnode").children(".lemma");
     if (startnode && !endnode && childLemmata.size() > 0) {
-        stackTree();
         document.body.onkeydown = null;
         $("#sn0").unbind('mousedown');
         function space(event) {
@@ -1231,8 +939,6 @@ function editLemma() {
         }
         function postChange() {
             startnode = null; endnode = null;
-            // Need we do this?
-            resetIds();
             updateSelection();
             document.body.onkeydown = handleKeyDown;
             $("#sn0").mousedown(handleNodeClick);
@@ -1258,8 +964,7 @@ function editLemma() {
                     newlemma = newlemma.replace(">","&gt;");
                     newlemma = newlemma.replace(/'/g,"&#39;");
 
-                    $("#leafeditor").replaceWith("<span class='lemma " +
-                                                 lemmaClass + "'>-" +
+                    $("#leafeditor").replaceWith("<span class='lemma'>-" +
                                                  newlemma + "</span>");
                     postChange();
                 }
@@ -1268,93 +973,414 @@ function editLemma() {
     }
 }
 
-function changeJustLabel (oldlabel, newlabel) {
-    var label = oldlabel;
-    var index = parseIndex(oldlabel);
-    if (index > 0) {
-        label = parseLabel(oldlabel);
-        var indextype = parseIndexType(oldlabel);
-        return newlabel+indextype+index;
+
+// ===== Tree manipulations
+
+// ========== Movement
+
+/**
+ * Move the selected node(s) to a new position.
+ *
+ * The movement operation must not change the text of the token.
+ *
+ * @param {DOM Node} parent the parent node to move selection under.
+ */
+function moveNode(parent) {
+    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
+    var other_parent = $(parent).parents("#sn0>.snode,#sn0").first();
+    if (parent == document.getElementById("sn0") ||
+        !parent_ip.is(other_parent)) {
+        parent_ip = $("#sn0");
     }
-    return newlabel;
+    var parent_before;
+    var textbefore = currentText(parent_ip);
+    var nodeMoved;
+    if (!isPossibleTarget(parent) || // can't move under a tag node
+        $(startnode).parent().children().length == 1 || // cant move an only child
+        $(parent).parents().is(startnode) // can't move under one's own child
+       ) {
+        clearSelection();
+        return;
+    } else if ($(startnode).parents().is(parent)) {
+        // move up if moving to a node that is already my parent
+        if ($(startnode).parent().children().first().is(startnode)) {
+            if ($(startnode).parentsUntil(parent).slice(0,-1).
+                filter(":not(:first-child)").size() > 0) {
+                return;
+            }
+            if (parent == document.getElementById("sn0")) {
+                touchTree($(startnode));
+                registerNewRootTree($(startnode));
+            } else {
+                touchTree($(startnode));
+            }
+            $(startnode).insertBefore($(parent).children().filter(
+                                                 $(startnode).parents()));
+            if (currentText(parent_ip) != textbefore) {
+                alert("failed what should have been a strict test");
+            }
+        } else if ($(startnode).parent().children().last().is(startnode)) {
+            if ($(startnode).parentsUntil(parent).slice(0,-1).
+                filter(":not(:last-child)").size() > 0) {
+                return;
+            }
+            if (parent == document.getElementById("sn0")) {
+                registerNewRootTree($(startnode));
+                touchTree($(startnode));
+            } else {
+                touchTree($(startnode));
+            }
+            $(startnode).insertAfter($(parent).children().
+                                     filter($(startnode).parents()));
+            if (currentText(parent_ip) != textbefore) {
+                alert("failed what should have been a strict test");
+            }
+        } else {
+            // cannot move from this position
+            clearSelection();
+            return;
+        }
+    } else {
+        // otherwise move under my sister
+        var tokenMerge = isRootNode( $(startnode) );
+        var maxindex = maxIndex(getTokenRoot($(parent)));
+        var movednode = $(startnode);
+
+        // NOTE: currently there are no more stringent checks below; if that
+        // changes, we might want to demote this
+        parent_before = parent_ip.clone();
+
+        // where a and b are DOM elements (not jquery-wrapped),
+        // a.compareDocumentPosition(b) returns an integer.  The first (counting
+        // from 0) bit is set if B precedes A, and the second bit is set if A
+        // precedes B.
+
+        // TODO: perhaps here and in the immediately following else if it is
+        // possible to simplify and remove the compareDocumentPosition call,
+        // since the jQuery subsumes it
+        if (parent.compareDocumentPosition(startnode) & 0x4) {
+            // check whether the nodes are adjacent.  Ideally, we would like
+            // to say selfAndParentsUntil, but no such jQuery fn exists, thus
+            // necessitating the disjunction.
+            // TODO: too strict
+            // &&
+            // $(startnode).prev().is(
+            //     $(parent).parentsUntil(startnode.parentNode).last()) ||
+            // $(startnode).prev().is(parent)
+
+            // parent precedes startnode
+            undoBeginTransaction();
+            if (tokenMerge) {
+                registerDeletedRootTree($(startnode));
+                touchTree($(parent));
+                // TODO: this will bomb if we are merging more than 2 tokens
+                // by multiple selection.
+                addToIndices(movednode, maxindex);
+            } else {
+                touchTree($(startnode));
+            }
+            movednode.appendTo(parent);
+            if (currentText(parent_ip) != textbefore)  {
+                undoAbortTransaction();
+                parent_ip.replaceWith(parent_before);
+                if (parent_ip.attr("id") == "sn0") {
+                    $("#sn0").mousedown(handleNodeClick);
+                }
+            } else {
+                undoEndTransaction();
+            }
+        } else if ((parent.compareDocumentPosition(startnode) & 0x2)) {
+            // &&
+            // $(startnode).next().is(
+            //     $(parent).parentsUntil(startnode.parentNode).last()) ||
+            // $(startnode).next().is(parent)
+
+            // startnode precedes parent
+            undoBeginTransaction();
+            if (tokenMerge) {
+                registerDeletedRootTree($(startnode));
+                touchTree($(parent));
+                addToIndices(movednode, maxindex);
+            } else {
+                touchTree($(startnode));
+            }
+            movednode.insertBefore($(parent).children().first());
+            if (currentText(parent_ip) != textbefore) {
+                undoAbortTransaction();
+                parent_ip.replaceWith(parent_before);
+                if (parent_ip == "sn0") {
+                    $("#sn0").mousedown(handleNodeClick);
+                }
+            } else {
+                undoEndTransaction();
+            }
+        } // TODO: conditional branches not exhaustive
+    }
+    clearSelection();
 }
 
-// This function takes 3 arguments: a node label with dash tags and possibly
-// indices, a dash tag to toggle (no dash), and a list of possible extensions
-// (in L-to-R order).  It returns a string, which is the label with
-// transformations applied
-function toggleStringExtension (oldlabel, extension, extensionList) {
-    if (extension[0] == "-") {
-        // temporary compatibility hack for old configs
-        extension = extension.substring(1);
-        extensionList = extensionList.map(function(s) { return s.substring(1); });
+/**
+ * Move several nodes.
+ *
+ * The two selected nodes must be sisters, and they and all intervening sisters
+ * will be moved as a unit.  Calls {@link moveNode} to do the heavy lifting.
+ *
+ * @param {DOM Node} parent the parent to move the selection under
+ */
+// TODO: make undo aware
+function moveNodes(parent) {
+    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
+    if (parent == document.getElementById("sn0")) {
+        parent_ip = $("#sn0");
     }
-    var index = parseIndex(oldlabel);
-    var indextype = "";
-    if (index > 0) {
-        indextype = parseIndexType(oldlabel);
+    if (startnode.compareDocumentPosition(endnode) & 0x2) {
+        // endnode precedes startnode, reverse them
+        var temp = startnode;
+        startnode = endnode;
+        endnode = temp;
     }
-    var currentLabel = parseLabel(oldlabel);
+    if (startnode.parentNode == endnode.parentNode) {
+        // collect startnode and its sister up until endnode
+        $(startnode).add($(startnode).nextUntil(endnode)).
+            add(endnode).
+            wrapAll('<div xxx="newnode" class="snode">XP</div>');
 
-    // The strategy here is as follows:
-    // - split the label into an array of dash tags
-    // - operate on the array
-    // - reform the array into a string
-    currentLabel = currentLabel.split("-");
-    var labelBase = currentLabel.shift();
-    var idx = currentLabel.indexOf(extension);
-
-    if (idx > -1) {
-        // currentLabel contains extension, remove it
-        currentLabel.splice(idx, 1);
     } else {
-        idx = extensionList.indexOf(extension);
-        if (idx > -1) {
-            // Loop through the list, stop when we pass the right spot
-            for (var i = 0; i < currentLabel.length; i++) {
-                if (idx < extensionList.indexOf(currentLabel[i])) {
-                    break;
+        return; // they are not sisters
+    }
+    var toselect = $(".snode[xxx=newnode]").first();
+    toselect = toselect.get(0);
+    // BUG when making XP and then use context menu: TODO XXX
+
+    startnode = toselect;
+    moveNode(parent);
+    startnode = $(".snode[xxx=newnode]").first().get(0);
+    endnode = undefined;
+    pruneNode();
+    clearSelection();
+}
+
+// ========== Creation
+
+/**
+ * Create a leaf node before the selected node.
+ *
+ * Uses heuristic to determine whether the new leaf is to be a trace, empty
+ * subject, etc.
+ */
+function leafBefore() {
+    makeLeaf(true);
+}
+
+/**
+ * Create a leaf node after the selected node.
+ *
+ * Uses heuristic to determine whether the new leaf is to be a trace, empty
+ * subject, etc.
+ */
+function leafAfter() {
+    makeLeaf(false);
+}
+
+// TODO: the hardcoding of defaults in this function is ugly.  We should
+// supply a default heuristic fn to try to guess these, then allow
+// settings.js to override it.
+
+// TODO: maybe put the heuristic into leafbefore/after, and leave this fn clean?
+
+/**
+ * Create a leaf node adjacent to the selection, or a given target.
+ *
+ * @param {Boolean} before whether to create the node before or after selection
+ * @param {String} label the label to give the new node
+ * @param {String} word the text to give the new node
+ * @param {DOM Node} target where to put the new node (default: selected node)
+ */
+function makeLeaf(before, label, word, target) {
+    if (!(target || startnode)) return;
+
+    if (!label) {
+        label = "NP-SBJ";
+    }
+    if (!word) {
+        word = "*con*";
+    }
+    if (!target) {
+        target = startnode;
+    }
+
+    // TODO: what happens if you use this to add a new root-level tree?
+    touchTree($(target));
+
+    var lemma = false;
+    var temp = word.split("-");
+    if (temp.length > 1) {
+        lemma = temp.pop();
+        word = temp.join("-");
+    }
+
+    var doCoindex = false;
+
+    if (endnode) {
+        var startRoot = getTokenRoot($(startnode));
+        var endRoot = getTokenRoot($(endnode));
+        if (startRoot == endRoot) {
+            word = "*ICH*";
+            label = getLabel($(endnode));
+            if (label.startsWith("W")) {
+                word = "*T*";
+                label = label.substr(1).replace(/-[0-9]+$/, "");
+            } else if (label.split("-").indexOf("CL") > -1) {
+                word = "*CL*";
+                label = getLabel($(endnode)).replace("-CL", "");
+                if (label.substring(0,3) == "PRO") {
+                    label = "NP";
                 }
             }
-            currentLabel.splice(i, 0, extension);
-        } else {
-            currentLabel.push(extension);
+            doCoindex = true;
+        } else { // abort if selecting from different tokens
+            return;
         }
     }
 
-    var out = labelBase;
-    if (currentLabel.length > 0) {
-        out += "-" + currentLabel.join("-");
+    var newleaf = "<div class='snode " + label + "'>" + label +
+        "<span class='wnode'>" + word;
+    if (lemma) {
+        newleaf += "<span class='lemma'>-" + lemma +
+            "</span>";
     }
-    if (index > 0) {
-        out += indextype;
-        out += index;
-    }
-    return out;
-}
-
-function guessLeafNode(node) {
-    if (typeof testValidLeafLabel   !== "undefined" &&
-        typeof testValidPhraseLabel !== "undefined") {
-        if (testValidPhraseLabel(getLabel($(node)))) {
-            return false;
-        } else if (testValidLeafLabel(getLabel($(node)))) {
-            return true;
-        } else {
-            // not a valid label, fall back to structural check
-            return isLeafNode(node);
-        }
+    newleaf += "</span></div>\n";
+    newleaf = $(newleaf);
+    if (before) {
+        newleaf.insertBefore(target);
     } else {
-        return isLeafNode(node);
+        newleaf.insertAfter(target);
+    }
+    if (doCoindex) {
+        startnode = newleaf.get(0);
+        coIndex();
+    }
+    startnode = null;
+    endnode = null;
+    selectNode(newleaf.get(0));
+    updateSelection();
+}
+
+/**
+ * Create a phrasal node.
+ *
+ * The node will dominate the selected node or (if two sisters are selected)
+ * the selection and all intervening sisters.
+ *
+ * @param {String} [label] the label to give the new node (default: XP)
+ */
+function makeNode(label) {
+    // check if something is selected
+    if (!startnode) {
+        return;
+    }
+    var rootLevel = isRootNode($(startnode));
+    undoBeginTransaction();
+    if (rootLevel) {
+        registerDeletedRootTree($(startnode));
+    } else {
+        touchTree($(startnode));
+    }
+    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
+    var parent_before = parent_ip.clone();
+    // make end = start if only one node is selected
+    if (!endnode) {
+        // if only one node, wrap around that one
+        $(startnode).wrapAll('<div xxx="newnode" class="snode ' + label + '">'
+                             + label + ' </div>\n');
+    } else {
+        if (startnode.compareDocumentPosition(endnode) & 0x2) {
+            // startnode and endnode in wrong order, reverse them
+            var temp = startnode;
+            startnode = endnode;
+            endnode = temp;
+        }
+
+        // check if they are really sisters XXXXXXXXXXXXXXX
+        if ($(startnode).siblings().is(endnode)) {
+            // then, collect startnode and its sister up until endnode
+            var oldtext = currentText(parent_ip);
+            $(startnode).add($(startnode).nextUntil(endnode)).add(
+                endnode).wrapAll('<div xxx="newnode" class="snode ' +
+                                        label + '">' + label + ' </div>\n');
+            // undo if this messed up the text order
+            if(currentText(parent_ip) != oldtext) {
+                // TODO: is this plausible? can we remove the check?
+                parent_ip.replaceWith(parent_before);
+                undoAbortTransaction();
+                clearSelection();
+                return;
+            }
+        }
+    }
+
+    startnode = null;
+    endnode = null;
+
+    var toselect = $(".snode[xxx=newnode]").first();
+
+    if (rootLevel) {
+        registerNewRootTree(toselect);
+    }
+
+    undoEndTransaction();
+
+    // BUG when making XP and then use context menu: todo XXX
+
+    selectNode(toselect.get(0));
+    toselect.attr("xxx",null);
+    updateSelection();
+    // toselect.mousedown(handleNodeClick);
+}
+
+// ========== Deletion
+
+/**
+ * Delete a node.
+ *
+ * The node can only be deleted if doing so does not affect the text, i.e. it
+ * directly dominates no non-empty terminals.
+ */
+function pruneNode() {
+    if (startnode && !endnode) {
+        var deltext = $(startnode).children().first().text();
+        // if this is a leaf, TODO XXX fix
+        if (isEmpty(deltext)) {
+            // it is ok to delete leaf if is empty/trace
+            touchTree($(startnode));
+            $(startnode).remove();
+            startnode = endnode = null;
+            updateSelection();
+            return;
+        } else if (!isPossibleTarget(startnode)) {
+            // but other leaves are not deleted
+            return;
+        } else if (startnode == document.getElementById("sn0")) {
+            return;
+        }
+
+        var toselect = $(startnode).children().first();
+        touchTree($(startnode));
+        $(startnode).replaceWith($(startnode).children());
+        startnode = endnode = null;
+        selectNode(toselect.get(0));
+        updateSelection();
     }
 }
+
+// ========== Label manipulation
 
 /**
  * Toggle a dash tag on a node
  *
  * If the node bears the given dash tag, remove it.  If not, add it.  This
  * function attempts to put multiple dash tags in the proper order, according
- * to the configuration in the `vextensions`, `extensions`, and
+ * to the configuration in the `leaf_extensions`, `extensions`, and
  * `clause_extensions` variables in the `settings.js` file.
  *
  * @param {String} extension the dash tag to toggle
@@ -1366,7 +1392,7 @@ function toggleExtension(extension, extensionList) {
 
     if (!extensionList) {
         if (guessLeafNode(startnode)) {
-            extensionList = vextensions;
+            extensionList = leaf_extensions;
         } else if (getLabel($(startnode)).split("-")[0] == "IP" ||
                    getLabel($(startnode)).split("-")[0] == "CP") {
             // TODO: should FRAG be a clause?
@@ -1381,7 +1407,7 @@ function toggleExtension(extension, extensionList) {
         return false;
     }
 
-    stackTree();
+    touchTree($(startnode));
     var textnode = textNode($(startnode));
     var oldlabel = $.trim(textnode.text());
     // Extension is not de-dashed here.  toggleStringExtension handles it.
@@ -1391,41 +1417,6 @@ function toggleExtension(extension, extensionList) {
     $(startnode).removeClass(oldlabel).addClass(newlabel);
 
     return true;
-}
-
-// added by JEB
-// alias for compatibility
-function toggleVerbalExtension(extension) {
-    toggleExtension(extension);
-}
-
-function lookupNextLabel(oldlabel, labels) {
-    // labels is either: an array, an object
-    var newlabel = null;
-    // TODO(AWE): make this more robust!
-    if (!(labels instanceof Array)) {
-        var prefix = oldlabel.split("-")[0];
-        var new_labels = labels[prefix];
-        if (!new_labels) {
-            new_labels = _.values(labels)[0];
-        }
-        labels = new_labels;
-    }
-    for (var i = 0; i < labels.length; i++ ) {
-        if (labels[i] == parseLabel(oldlabel)) {
-            if (i < labels.length - 1) {
-                newlabel = labels[i + 1];
-            } else {
-                newlabel = labels[0];
-            }
-        }
-    }
-    if (!newlabel) {
-        newlabel = labels[0];
-    }
-    newlabel = changeJustLabel(oldlabel,newlabel);
-
-    return newlabel;
 }
 
 /**
@@ -1447,7 +1438,6 @@ function setLabel(labels) {
         return false;
     }
 
-    stackTree();
     var textnode = textNode($(startnode));
     var oldlabel = $.trim(textnode.text());
     var newlabel = lookupNextLabel(oldlabel, labels);
@@ -1466,318 +1456,15 @@ function setLabel(labels) {
         }
     }
 
+    touchTree($(startnode));
+
     textnode.replaceWith(newlabel + " ");
     $(startnode).removeClass(parseLabel(oldlabel)).addClass(parseLabel(newlabel));
 
     return true;
 }
 
-/**
- * Create a phrasal node.
- *
- * The node will dominate the selected node or (if two sisters are selected)
- * the selection and all intervening sisters.
- *
- * @param {String} [label] the label to give the new node (default: XP)
- */
-function makeNode(label) {
-    // check if something is selected
-    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
-    if (!startnode) {
-        return;
-    }
-    var parent_before = parent_ip.clone();
-    // FIX, note one node situation
-    //if( (startnode.id == "sn0") || (endnode.id == "sn0") ){
-    // can't make node above root
-    //        return;
-    //}
-    // make end = start if only one node is selected
-    if (!endnode) {
-        // if only one node, wrap around that one
-        stackTree();
-        $(startnode).wrapAll('<div xxx="newnode" class="snode ' + label + '">'
-                             + label + ' </div>\n');
-    } else {
-        if (startnode.compareDocumentPosition(endnode) & 0x2) {
-            // startnode and endnode in wrong order, reverse them
-            var temp = startnode;
-            startnode = endnode;
-            endnode = temp;
-        }
-
-        // check if they are really sisters XXXXXXXXXXXXXXX
-        if ($(startnode).siblings().is(endnode)) {
-            // then, collect startnode and its sister up until endnode
-            var oldtext = currentText(parent_ip);
-            stackTree();
-            $(startnode).add($(startnode).nextUntil(endnode)).add(
-                endnode).wrapAll('<div xxx="newnode" class="snode ' +
-                                        label + '">' + label + ' </div>\n');
-            // undo if this messed up the text order
-            if(currentText(parent_ip) != oldtext) {
-                // TODO: is this plausible? can we remove the check?
-                parent_ip.replaceWith(parent_before);
-            }
-        }
-    }
-
-    startnode = null;
-    endnode = null;
-
-    resetIds();
-    var toselect = $(".snode[xxx=newnode]").first();
-
-    // BUG when making XP and then use context menu: todo XXX
-
-    selectNode(toselect.get(0));
-    toselect.attr("xxx",null);
-    updateSelection();
-    resetIds();
-
-    // toselect.mousedown(handleNodeClick);
-}
-
-/**
- * Delete a node.
- *
- * The node can only be deleted if doing so does not affect the text, i.e. it
- * directly dominates no non-empty terminals.
- */
-function pruneNode() {
-    if (startnode && !endnode) {
-        var deltext = $(startnode).children().first().text();
-        // if this is a leaf, todo XXX fix
-        if (isEmpty(deltext)) {
-            // it is ok to delete leaf if is empty/trace
-            stackTree();
-            $(startnode).remove();
-            startnode = endnode = null;
-            resetIds();
-            updateSelection();
-            return;
-        } else if (!isPossibleTarget(startnode)) {
-            // but other leaves are not deleted
-            return;
-        } else if (startnode == document.getElementById("sn0")) {
-            return;
-        }
-
-        stackTree();
-
-        var toselect = $(startnode).children().first();
-        $(startnode).replaceWith($(startnode).children());
-        startnode = endnode = null;
-        // not needed, strictly removing
-        // resetIds();
-        selectNode(toselect.get(0));
-        updateSelection();
-    }
-}
-
-/**
- * Sets the label of a node
- *
- * Contains none of the heuristics of {@link setLabel}.
- *
- * @param {JQuery Node} node the target node
- * @param {String} label the new label
- * @param {Boolean} noUndo whether to record this operation for later undo
- */
-function setNodeLabel(node, label, noUndo) {
-    // TODO: fold this and setLabelLL together...
-    if (!noUndo) {
-        stackTree();
-    }
-    setLabelLL(node, label);
-}
-
-function setLeafLabel(node, label) {
-    if (!node.hasClass(".wnode")) {
-        node = node.children(".wnode").first();
-    }
-    textNode(node).replaceWith($.trim(label));
-}
-
-// TODO: need a setLemma function as well
-
-function appendExtension(node, extension, type) {
-    if (!type) {
-        type="-";
-    }
-    if (shouldIndexLeaf(node) && !isNaN(extension)) {
-        // Adding an index to an empty category, and the EC is not an
-        // empty operator.  The final proviso is needed because of
-        // things like the empty WADJP in comparatives.
-        var oldLabel = textNode(node.children(".wnode").first()).text();;
-        setLeafLabel(node, oldLabel + type + extension);
-    } else {
-        setNodeLabel(node, getLabel(node) + type + extension, true);
-    }
-}
-
-function getTokenRoot(node) {
-    return $(node).parents().andSelf().filter("#sn0>.snode").get(0);
-}
-
-/*
- * returns value of lowest index if there are any indices, returns -1 otherwise
-*/
-function minIndex (tokenRoot, offset) {
-    var allSNodes = $("#" + tokenRoot + " .snode,#" + tokenRoot + " .wnode");
-    var highnumber = 9000000;
-    var index = highnumber;
-    var label, lastpart;
-    for (var i=0; i < allSNodes.length; i++){
-        label = getLabel($(allSNodes[i]));
-        lastpart = parseInt(label.substr(label.lastIndexOf("-")+1));
-        if (!isNaN(parseInt(lastpart))) {
-            if (lastpart != 0 && lastpart >=offset) {
-                index = Math.min(lastpart, index);
-            }
-        }
-    }
-    if (index == highnumber) {
-        return -1;
-    }
-
-    if (index < offset) {
-        return -1;
-    }
-
-    return index;
-}
-
-function parseIndex (label) {
-    var index = -1;
-    var lastindex = Math.max(label.lastIndexOf("-"),label.lastIndexOf("="));
-    if (lastindex == -1) {
-        return -1;
-    }
-    var lastpart = parseInt(label.substr(lastindex+1));
-    if(!isNaN(parseInt(lastpart))) {
-        index = Math.max(lastpart, index);
-    }
-    if (index == 0) {
-        return -1;
-    }
-    return index;
-}
-
-function parseLabel (label) {
-    var index = parseIndex(label);
-    if (index > 0) {
-        var lastindex = Math.max(label.lastIndexOf("-"),
-                                 label.lastIndexOf("="));
-        var out = $.trim("" + label.substr(0,lastindex));
-        return out;
-    }
-    return $.trim(label);
-}
-
-function shouldIndexLeaf(node) {
-    // The below check bogusly returns true if the leftmost node in a tree is
-    // a trace, even if it is not a direct daughter.  Only do the more
-    // complicated check if we are at a POS label, otherwise short circuit
-    if (node.children(".wnode").size() == 0) return false;
-    var str = wnodeString(node);
-    return (str.substring(0,3) == "*T*" ||
-            str.substring(0,5) == "*ICH*" ||
-            str.substring(0,4) == "*CL*" ||
-            $.trim(str) == "*");
-}
-
-function getIndex(node) {
-    if (shouldIndexLeaf(node)) {
-        return parseIndex(textNode(node.children(".wnode").first()).text());
-    } else {
-        return parseIndex(getLabel(node));
-    }
-}
-
-function parseIndexType(label){
-    var lastindex = Math.max(label.lastIndexOf("-"), label.lastIndexOf("="));
-    return label.charAt(lastindex);
-}
-
-function getIndexType (node) {
-    if (getIndex(node) < 0) {
-        return -1;
-    }
-    var label;
-    if (shouldIndexLeaf(node)) {
-        label = wnodeString(node);
-    } else {
-        label = getLabel(node);
-    }
-    var lastpart = parseIndexType(label);
-    return lastpart;
-}
-
-
-function getNodesByIndex(tokenRoot, ind) {
-    var nodes = $("#" + tokenRoot + " .snode,#" + tokenRoot + " .wnode").filter(
-        function(index) {
-            // TODO(AWE): is this below correct?  optimal?
-            return getIndex($(this)) == ind;
-        });
-    return nodes;
-}
-
-function addToIndices(tokenRoot, numberToAdd) {
-    var ind = 1;
-    var maxindex = maxIndex(tokenRoot);
-    var nodes = tokenRoot.find(".snode,.wnode").andSelf();
-    nodes.each(function(index) {
-        var curNode = $(this);
-        var nindex = getIndex(curNode);
-        if (nindex > 0) {
-            if (shouldIndexLeaf(curNode)) {
-                var leafText = wnodeString(curNode);
-                leafText = parseLabel(leafText) + parseIndexType(leafText);
-                textNode(curNode.children(".wnode").first()).text(
-                    leafText + (nindex + numberToAdd));
-            } else {
-                var label = getLabel(curNode);
-                label = parseLabel(label) + parseIndexType(label);
-                label = label + (nindex + numberToAdd);
-                setNodeLabel(curNode, label, true);
-            }
-        }
-    });
-}
-
-function maxIndex(token) {
-    var allSNodes = $(token).find(".snode,.wnode");
-    var temp = "";
-    var ind = 0;
-    var label;
-
-    for (var i = 0; i < allSNodes.length; i++) {
-        label = getLabel($(allSNodes[i]));
-        ind = Math.max(parseIndex(label), ind);
-    }
-    return ind;
-}
-
-function removeIndex(node) {
-    node = $(node);
-    if (getIndex(node) == -1) {
-        return;
-    }
-    var label, setLabelFn;
-    if (shouldIndexLeaf(node)) {
-        label = wnodeString(node);
-        setLabelFn = setLeafLabel;
-    } else {
-        label = getLabel(node);
-        setLabelFn = setNodeLabel;
-    }
-    setLabelFn(node,
-               label.substr(0, Math.max(label.lastIndexOf("-"),
-                                        label.lastIndexOf("="))),
-               true);
-}
+// ========== Coindexation
 
 /**
  * Coindex nodes.
@@ -1789,7 +1476,7 @@ function removeIndex(node) {
 function coIndex() {
     if (startnode && !endnode) {
         if (getIndex($(startnode)) > 0) {
-            stackTree();
+            touchTree($(startnode));
             removeIndex(startnode);
         }
     } else if (startnode && endnode) {
@@ -1799,6 +1486,8 @@ function coIndex() {
         if (startRoot != endRoot) {
             return;
         }
+
+        touchTree($(startnode));
         // if both nodes already have an index
         if (getIndex($(startnode)) > 0 && getIndex($(endnode)) > 0) {
             // and if it is the same index
@@ -1807,7 +1496,6 @@ function coIndex() {
                 var types = "" + getIndexType($(startnode)) +
                     "" + getIndexType($(endnode));
                 // remove it
-                stackTree();
 
                 if (types == "=-") {
                     removeIndex(startnode);
@@ -1827,60 +1515,27 @@ function coIndex() {
                     removeIndex(endnode);
                 }
             }
-
         } else if (getIndex($(startnode)) > 0 && getIndex($(endnode)) == -1) {
-            stackTree();
             appendExtension($(endnode), getIndex($(startnode)));
         } else if (getIndex($(startnode)) == -1 && getIndex($(endnode)) > 0) {
-            stackTree();
             appendExtension( $(startnode), getIndex($(endnode)) );
         } else { // no indices here, so make them
-            // if start and end are within the same token, do coindexing
-            if(startRoot == endRoot) {
-                var index = maxIndex(startRoot) + 1;
-                stackTree();
-                appendExtension($(startnode), index);
-                appendExtension($(endnode), index);
-            }
+            var index = maxIndex(startRoot) + 1;
+            appendExtension($(startnode), index);
+            appendExtension($(endnode), index);
         }
     }
 }
 
-function resetIds(really) {
-    if (really){
-        var snodes = $(".snode");
-        for (var i = 0; i < snodes.length; i++) {
-            snodes[i].id = "sn" + i;
-        }
-    }
-}
+// ===== Server-side operations
 
-function wnodeString(node) {
-    var text = $(node).find('.wnode').text();
-    return text;
-}
+// ========== Saving
 
-function jsonToTree(json) {
-    var d = JSON.parse(json);
-    return objectToTree(d);
-}
+// =============== Save helper function
 
-function objectToTree(o) {
-    var res = "";
-    for (var p in o) {
-        if (o.hasOwnProperty(p)) {
-            res += "(" + p + " ";
-            if (typeof o[p] == "string") { // One of life's grosser hacks
-                res += o[p];
-            } else {
-                res += objectToTree(o[p]);
-            }
-            res += ")";
-        }
-    }
-    return res;
-}
-
+// TODO: move to utils?
+// TODO: this is not very general, in fact only works when called with
+// #editpane as arg
 function toLabeledBrackets(node) {
     var out = node.clone();
 
@@ -1919,74 +1574,53 @@ function toLabeledBrackets(node) {
     return out;
 }
 
-var lemmaClass = "lemmaHide";
+var saveInProgress = false;
 
-/**
- * Toggle display of lemmata.
- */
-function toggleLemmata() {
-    $('.lemma').toggleClass('lemmaShow');
-    $('.lemma').toggleClass('lemmaHide');
-    lemmaClass = lemmaClass == "lemmaHide" ? "lemmaShow" : "lemmaHide";
-}
-
-var lastsavedstate = $("#editpane").html();
-
-function quitServer() {
-    if ($("#editpane").html() != lastsavedstate) {
-        alert("Cannot exit, unsaved changes exist.");
+function saveHandler (data) {
+    if (data['result'] == "success") {
+        // TODO(AWE): add time of last successful save
+        // TODO(AWE): add filename to avoid overwriting another file
+        displayInfo("Save success.");
     } else {
-        $.post("/doExit");
-        window.onbeforeunload = undefined;
-        setTimeout(function(res) {
-                       // I have no idea why this works, but it does
-                       window.open('', '_self', '');
-                       window.close();
-               }, 100);
-    }
-}
-
-function getLabel(node) {
-    return $.trim(textNode(node).text());
-}
-
-// A low-level (LL) version of setLabel.  It is only responsible for changing
-// the label; not doing any kind of matching/changing/other crap.
-function setLabelLL(node, label) {
-    // TODO: don't add numeric indices to the CSS class
-    if (node.hasClass("snode")) {
-        if (label[label.length - 1] != " ") {
-            // Some other spots in the code depend on the label ending with a
-            // space...
-            label += " ";
+        lastsavedstate = "";
+        var extraInfo = "";
+        // TODO: let force saving sync the annotald instances, so it's only necessary once?
+        if (safeGet(data, 'reasonCode', 0) == 1) {
+            extraInfo = " <a href='#' id='forceSave' " +
+                "onclick='javascript:save(null, true)'>Force save</a>";
         }
-    } else if (node.hasClass("wnode")) {
-        // Words cannot have a trailing space, or CS barfs on save.
-        label = $.trim(label);
-    } else {
-        return;
+        displayError("Save FAILED!!!: " + data['reason'] + extraInfo);
     }
-    var oldLabel = $.trim(textNode(node).text());
-    textNode(node).replaceWith(label);
-    if (node.hasClass("snode")) {
-        node.removeClass(oldLabel);
-        node.addClass($.trim(label));
+    saveInProgress = false;
+}
+
+function save(e, force) {
+    if (!saveInProgress) {
+        if (force) {
+            force = true;
+        } else {
+            force = false;
+        }
+        displayInfo("Saving...");
+        saveInProgress = true;
+        setTimeout(function () {
+            var tosave = toLabeledBrackets($("#editpane"));
+            $.post("/doSave", { trees: tosave,
+                                startTime: startTime,
+                                force: force
+                              }, saveHandler).error(function () {
+                                  lastsavedstate = "";
+                                  saveInProgress = false;
+                              });
+            if ($("#idlestatus").html().search("IDLE") != -1) {
+                idle();
+            }
+            lastsavedstate = $("#editpane").html();
+        }, 0);
     }
 }
 
-function textNode(node) {
-    return node.contents().filter(function() {
-                                         return this.nodeType == 3;
-                                     }).first();
-}
-
-function isLeafNode(node) {
-    // TODO (AWE): for certain purposes, it would be desirable to treat leaf
-    // nodes as non-leaves.  e.g. for dash tag toggling, a trace should be
-    // "not a leaf"
-    return $(node).children(".wnode").size() > 0 &&
-        !($(node).children(".wnode").text()[0] == "*");
-}
+// ========== Validating
 
 var validatingCurrently = false;
 
@@ -2041,230 +1675,24 @@ function nextValidationError() {
     }
 }
 
-function hasDashTag(node, tag) {
-    var label = getLabel(node);
-    var tags = label.split("-").slice(1);
-    return (tags.indexOf(tag) > -1);
-}
-
-// TODO: something is wrong with this fn -- it also turns FLAG on
-function fixError() {
-    if (!startnode || endnode) return;
-    var sn = $(startnode);
-    if (hasDashTag(sn, "FLAG")) {
-        toggleExtension("FLAG", ["FLAG"]);
-    }
-    updateSelection();
-}
-
-function zeroDashTags() {
-    if (!startnode || endnode) return;
-    stackTree();
-    var label = getLabel($(startnode));
-    var idx = parseIndex(label),
-        idxType = parseIndexType(label),
-        lab = parseLabel(label);
-    if (idx == -1) {
-        idx = idxType = "";
-    }
-    setLabelLL($(startnode), lab.split("-")[0] + idxType + idx);
-}
-
-function getMetadata(node) {
-    var m = node.attr("data-metadata");
-    if (m) {
-        return JSON.parse(m);
-    } else {
-        return undefined;
-    }
-}
-
-// TODO(AWE): add getMetadataTU fn, to also do trickle-up of metadata.
-
-function dictionaryToForm(dict, level) {
-    if (!level) {
-        level = 0;
-    }
-    var res = "";
-    if (dict) {
-        res = '<table class="metadataTable"><thead><tr><td>Key</td>' +
-            '<td>Value</td></tr></thead>';
-        for (var k in dict) {
-            if (dict.hasOwnProperty(k)) {
-                if (typeof dict[k] == "string") {
-                    res += '<tr class="strval" data-level="' + level +
-                        '"><td class="key">' + '<span style="width:"' +
-                        4*level + 'px;"></span>' + k +
-                        '</td><td class="val"><input class="metadataField" ' +
-                        'type="text" name="' + k + '" value="' + dict[k] +
-                        '" /></td></tr>';
-                } else if (typeof dict[k] == "object") {
-                    res += '<tr class="tabhead"><td colspan=2>' + k +
-                        '</td></tr>';
-                    res += dictionaryToForm(dict[k], level + 1);
-                }
-            }
-        }
-        res += '</table>';
-    }
-    return res;
-}
-
-function saveMetadata() {
-    if ($("#metadata").html() != "") {
-        $(startnode).attr("data-metadata",
-                          JSON.stringify(formToDictionary($("#metadata"))));
-    }
-}
-
-function updateMetadataEditor() {
-    if (!startnode || endnode) {
-        $("#metadata").html("");
-        return;
-    }
-    var addButtonHtml = '<input type="button" id="addMetadataButton" ' +
-            'value="Add" />';
-    $("#metadata").html(dictionaryToForm(getMetadata($(startnode))) +
-                        addButtonHtml);
-    $("#metadata").find(".metadataField").change(saveMetadata).
-        focusout(saveMetadata).keydown(function (e) {
-            if (e.keyCode == 13) {
-                $(e.target).blur();
-            }
-            e.stopPropagation();
-            return true;
-        });
-    $("#metadata").find(".key").click(metadataKeyClick);
-    $("#addMetadataButton").click(addMetadataDialog);
-}
-
-function formToDictionary(form) {
-    var d = {},
-        dstack = [],
-        curlevel = 0,
-        namestack = [];
-    form.find("tr").each(function() {
-        if ($(this).hasClass("strval")) {
-            var key = $(this).children(".key").text();
-            var val = $(this).find(".val>.metadataField").val();
-            d[key] = val;
-            if ($(this).attr("data-level") < curlevel) {
-                var new_d = dstack.pop();
-                var next_name = namestack.pop();
-                new_d[next_name] = d;
-                d = new_d;
-            }
-        } else if ($(this).hasClass("tabhead")) {
-            namestack.push($(this).text());
-            curlevel = $(this).attr("data-level");
-            dstack.push(d);
-            d = {};
-        }
-    });
-    if (dstack.length > 0) {
-        var len = dstack.length;
-        for (var i = 0; i < len; i++) {
-            var new_d = dstack.pop();
-            var next_name = namestack.pop();
-            new_d[next_name] = d;
-            d = new_d;
-        }
-    }
-    return d;
-}
-
-function metadataKeyClick(e) {
-    var keyNode = e.target;
-    var html = 'Name: <input type="text" ' +
-            'id="metadataNewName" value="' + $(keyNode).text() +
-            '" /><div id="dialogButtons"><input type="button" value="Save" ' +
-        'id="metadataKeySave" /><input type="button" value="Delete" ' +
-        'id="metadataKeyDelete" /></div>';
-    showDialogBox("Edit Metadata", html);
-    // TODO: make focus go to end, or select whole thing?
-    $("#metadataNewName").focus();
-    function saveMetadataInner() {
-        $(keyNode).text($("#metadataNewName").val());
-        hideDialogBox();
-        saveMetadata();
-    }
-    function deleteMetadata() {
-        $(keyNode).parent().remove();
-        hideDialogBox();
-        saveMetadata();
-    }
-    $("#metadataKeySave").click(saveMetadataInner);
-    setInputFieldEnter($("#metadataNewName"), saveMetadataInner);
-    $("#metadataKeyDelete").click(deleteMetadata);
-}
-
-function addMetadataDialog() {
-    // TODO: allow specifying value too in initial dialog?
-    var html = 'New Name: <input type="text" id="metadataNewName" value="NEW" />' +
-            '<div id="dialogButtons"><input type="button" id="addMetadata" ' +
-            'value="Add" /></div>';
-    showDialogBox("Add Metatata", html);
-    function addMetadata() {
-        var oldMetadata = formToDictionary($("#metadata"));
-        oldMetadata[$("#metadataNewName").val()] = "NEW";
-        $(startnode).attr("data-metadata", JSON.stringify(oldMetadata));
-        updateMetadataEditor();
-        hideDialogBox();
-    }
-    $("#addMetadata").click(addMetadata);
-    setInputFieldEnter($("#metadataNewName"), addMetadata);
-}
-
-function setInputFieldEnter(field, fn) {
-    field.keydown(function (e) {
-        if (e.keyCode == 13) {
-            fn();
-            return false;
-        } else {
-            return true;
-        }
-    });
-}
-
-function displayWarning(text) {
-    $("#messageBoxInner").text(text).css("color", "orange");
-}
-
-function displayInfo(text) {
-    $("#messageBoxInner").text(text).css("color", "green");
-}
-
-function displayError(text) {
-    $("#messageBoxInner").text(text).css("color", "red");
-}
-
-// TODO: should allow numeric indices
-function basesAndDashes(bases, dashes) {
-    function _basesAndDashes(string) {
-        var spl = string.split("-");
-        var b = spl.shift();
-        return (bases.indexOf(b) > -1) &&
-            _.all(spl, function (x) { return (dashes.indexOf(x) > -1); });
-    }
-    return _basesAndDashes;
-}
+// ========== Advancing through the file
 
 function nextTree(e) {
     var find = undefined;
     if (e.shiftKey) find = "-FLAG";
-    advanceTree("/nextTree", find, false);
+    advanceTree(find, false, 1);
 }
 
 function prevTree(e) {
     var find = undefined;
     if (e.shiftKey) find = "-FLAG";
-    advanceTree("/prevTree", find, false);
+    advanceTree(find, false, -1);
 }
 
-function advanceTree(where, find, async) {
+function advanceTree(find, async, offset) {
     var theTrees = toLabeledBrackets($("#editpane"));
     displayInfo("Fetching tree...");
-    return $.ajax(where,
+    return $.ajax("/advanceTree",
                   { async: async,
                     success: function(res) {
                         if (res['result'] == "failure") {
@@ -2279,59 +1707,301 @@ function advanceTree(where, find, async) {
                     },
                     dataType: "json",
                     type: "POST",
-                    data: {trees: theTrees, find: find}});
+                    data: { trees: theTrees,
+                            find: find,
+                            offset: offset
+                          }});
 }
 
-function splitWord() {
+// ========== Idle/resume
+
+function idle() {
+    if ($("#idlestatus").html().search("IDLE") != -1) {
+        $.post("/doIdle");
+        $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
+    }
+    else {
+        $.post("/doIdle");
+        $("#idlestatus").html("");
+        $("#idlestatus").html("<div style='color:red'>Status: IDLE.</div>");
+    }
+}
+
+// ========== Quitting
+
+function quitServer() {
+    if ($("#editpane").html() != lastsavedstate) {
+        alert("Cannot exit, unsaved changes exist.");
+    } else {
+        $.post("/doExit");
+        window.onbeforeunload = undefined;
+        setTimeout(function(res) {
+                       // I have no idea why this works, but it does
+                       window.open('', '_self', '');
+                       window.close();
+               }, 100);
+    }
+}
+
+// ===== Undo/redo
+
+function stackTree() {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
+        return;
+    } else {
+        undostack.push($("#editpane").clone());
+        // Keep this small, for memory reasons
+        undostack = undostack.slice(-15);
+    }
+}
+
+/**
+ * Invoke redo, if not disabled.
+ */
+function redo() {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
+        return;
+    } else {
+        var nextstate = redostack.pop();
+        if (!(nextstate == undefined)) {
+            var editPane = $("#editpane");
+            var currentstate = editPane.clone();
+            undostack.push(currentstate);
+            editPane.replaceWith(nextstate);
+            clearSelection();
+            // next line maybe not needed
+            $("#sn0").mousedown(handleNodeClick);
+        }
+    }
+}
+
+/**
+ * Invoke undo, if not enabled
+ */
+function undo() {
+    if (typeof disableUndo !== "undefined" && disableUndo) {
+        return;
+    } else {
+        // lots of slowness in the event-handler handling part of jquery.  Perhaps
+        // replace that with doing it by hand in the DOM (but with the potential
+        // for memory leaks)
+        // MDN references:
+        // https://developer.mozilla.org/en/DOM/Node.cloneNode
+        // https://developer.mozilla.org/En/DOM/Node.replaceChild
+        var prevstate = undostack.pop();
+        if (!(prevstate == undefined)) {
+            var editPane = $("#editpane");
+            var currentstate = $("#editpane").clone();
+            redostack.push(currentstate);
+            editPane.replaceWith(prevstate);
+            clearSelection();
+            // next line may not be needed
+            $("#sn0").mousedown(handleNodeClick);
+        }
+    }
+}
+
+// New undo system below this line
+
+var undoMap,
+    undoNewTrees,
+    undoDeletedTrees,
+    undoStack = [],
+    redoStack = [],
+    undoTransactionStack = [];
+
+var idNumber = 1;
+
+addStartupHook(function () {
+    $("#sn0>.snode").map(function () {
+        $(this).attr("id", "id" + idNumber);
+        idNumber++;
+    });
+    resetUndo();
+});
+
+function resetUndo() {
+    undoMap = {};
+    undoNewTrees = [];
+    undoDeletedTrees = [];
+    undoTransactionStack = [];
+}
+
+function undoBarrier() {
+    if (_.size(undoMap) == 0 &&
+        _.size(undoNewTrees) == 0 &&
+        _.size(undoDeletedTrees) == 0) {
+        return;
+    }
+    undoStack.push({
+        map: undoMap,
+        newTr: undoNewTrees,
+        delTr: undoDeletedTrees
+    });
+    resetUndo();
+}
+
+function undoBeginTransaction() {
+    undoTransactionStack.push({
+        map: undoMap,
+        newTr: undoNewTrees,
+        delTr: undoDeletedTrees
+    });
+}
+
+function undoEndTransaction() {
+    undoTransactionStack.pop();
+}
+
+function undoAbortTransaction() {
+    var t = undoTransactionStack.pop();
+    undoMap = t["map"];
+    undoNewTrees = t["newTr"];
+    undoDeletedTrees = t["delTr"];
+}
+
+function touchTree(node) {
+    var root = $(getTokenRoot(node));
+    if (!undoMap[root.attr("id")]) {
+        undoMap[root.attr("id")] = root.clone();
+    }
+}
+
+function registerNewRootTree(tree) {
+    var newid = "id" + idNumber;
+    idNumber++;
+    undoNewTrees.push(newid);
+    tree.attr("id", newid);
+}
+
+function registerDeletedRootTree(tree) {
+    var prev = tree.prev();
+    if (prev.length == 0) {
+        prev = null;
+    }
+    undoDeletedTrees.push({
+        tree: tree,
+        before: prev
+    });
+}
+
+function doUndo(undoData) {
+    var map = {},
+        newTr = [],
+        delTr = [];
+
+    _.each(undoData["map"], function(v, k) {
+        var theNode = $("#" + k);
+        map[k] = theNode.clone();
+        theNode.replaceWith(v);
+    });
+
+    // Add back the deleted trees before removing the new trees, just in case
+    // the insertion point of one of these is going to get zapped.  This
+    // shouldn't happen, though.
+    _.each(undoData["delTr"], function(v) {
+        var prev = v["prev"];
+        if (prev) {
+            v["tree"].insertAfter(prev);
+        } else {
+            v["tree"].prependTo($("#sn0"));
+        }
+    });
+
+    _.each(undoData["newTr"], function(v) {
+        var theNode = $("#" + v);
+        var prev = theNode.prev();
+        if (prev.length == 0) {
+            prev = null;
+        }
+        delTr.push({
+            tree: theNode.clone(),
+            before: prev
+        });
+        theNode.remove();
+    });
+
+    return {
+        map: map,
+        newTr: newTr,
+        delTr: delTr
+    };
+}
+
+function newUndo() {
+    if (undoStack.length == 0) {
+        displayWarning("No further undo information");
+        return;
+    }
+    redoStack.push(doUndo(undoStack.pop()));
+    startnode = endnode = undefined;
+    updateSelection();
+}
+
+function newRedo () {
+    if (redoStack.length == 0) {
+        displayWarning("No further redo information");
+        return;
+    }
+    undoStack.push(doUndo(redoStack.pop()));
+    startnode = endnode = undefined;
+    updateSelection();
+}
+
+// ===== Misc
+
+/**
+ * Toggle display of lemmata.
+ */
+function toggleLemmata() {
+    if (lemmataHidden) {
+        lemmataStyleNode.innerHTML = "";
+    } else {
+        lemmataStyleNode.innerHTML = ".lemma { display: none; }";
+    }
+    lemmataHidden = !lemmataHidden;
+}
+
+// TODO: something is wrong with this fn -- it also turns FLAG on
+function fixError() {
     if (!startnode || endnode) return;
-    if (!isLeafNode($(startnode))) return;
-    var wordSplit = wnodeString($(startnode)).split("-");
-    var origWord = wordSplit[0];
-    var origLemma = "XXX";
-    if (wordSplit.length == 2) {
-        origLemma = "@" + wordSplit[1] + "@";
+    var sn = $(startnode);
+    if (hasDashTag(sn, "FLAG")) {
+        toggleExtension("FLAG", ["FLAG"]);
     }
-    var origLabel = getLabel($(startnode));
-    function doSplit() {
-        var words = $("#splitWordInput").val().split("@");
-        if (words.join("") != origWord) {
-            displayWarning("The two new words don't match the original.  Aborting");
-            return;
-        }
-        if (words.length != 2) {
-            displayWarning("You can only split in one place at a time.");
-            return;
-        }
-        var labelSplit = origLabel.split("+");
-        var secondLabel = "X";
-        if (labelSplit.length == 2) {
-            setLeafLabel($(startnode), labelSplit[0]);
-            secondLabel = labelSplit[1];
-        }
-        setLeafLabel($(startnode), words[0] + "@");
-        var hasLemma = $(startnode).find(".lemma").size() > 0;
-        makeLeaf(false, secondLabel, "@" + words[1]);
-        if (hasLemma) {
-            // TODO: move to something like foo@1 and foo@2 for the two pieces
-            // of the lemmata
-            addLemma(origLemma);
-        }
-        hideDialogBox();
+    updateSelection();
+}
+
+function zeroDashTags() {
+    if (!startnode || endnode) return;
+    var label = getLabel($(startnode));
+    var idx = parseIndex(label),
+        idxType = parseIndexType(label),
+        lab = parseLabel(label);
+    if (idx == -1) {
+        idx = idxType = "";
     }
-    var html = "Enter an at-sign at the place to split the word: \
-<input type='text' id='splitWordInput' value='" + origWord +
-"' /><div id='dialogButtons'><input type='button' id='splitWordButton'\
- value='Split' /></div>";
-    showDialogBox("Split word", html, doSplit);
-    $("#splitWordButton").click(doSplit);
-    $("#splitWordInput").focus();
+    touchTree($(startnode));
+    setLabelLL($(startnode), lab.split("-")[0] + idxType + idx);
+}
+
+// TODO: should allow numeric indices; document
+function basesAndDashes(bases, dashes) {
+    function _basesAndDashes(string) {
+        var spl = string.split("-");
+        var b = spl.shift();
+        return (bases.indexOf(b) > -1) &&
+            _.all(spl, function (x) { return (dashes.indexOf(x) > -1); });
+    }
+    return _basesAndDashes;
 }
 
 function addLemma(lemma) {
-    // This only makes sense for dash-format corpora
+    // TODO: This only makes sense for dash-format corpora
     if (!startnode || endnode) return;
     if (!isLeafNode($(startnode))) return;
-    var theLemma = $("<span class='lemma " + lemmaClass + "'>-" + lemma +
+    touchTree($(startnode));
+    var theLemma = $("<span class='lemma'>-" + lemma +
                      "</span>");
     $(startnode).children(".wnode").append(theLemma);
 }
@@ -2347,12 +2017,137 @@ function untilSuccess() {
     }
 }
 
+// ===== Misc (candidates to move to utils)
+
+// TODO: move to utils?
+function setLeafLabel(node, label) {
+    if (!node.hasClass(".wnode")) {
+        // why do we do this?  We should be less fault-tolerant.
+        node = node.children(".wnode").first();
+    }
+    textNode(node).replaceWith($.trim(label));
+}
+// TODO: need a setLemma function as well
+
+// TODO: only called from one place, with indices: possibly specialize name?
+function appendExtension(node, extension, type) {
+    if (!type) {
+        type="-";
+    }
+    if (shouldIndexLeaf(node) && !isNaN(extension)) {
+        // Adding an index to an empty category, and the EC is not an
+        // empty operator.  The final proviso is needed because of
+        // things like the empty WADJP in comparatives.
+        var oldLabel = textNode(node.children(".wnode").first()).text();;
+        setLeafLabel(node, oldLabel + type + extension);
+    } else {
+        setNodeLabel(node, getLabel(node) + type + extension, true);
+    }
+}
+
+function removeIndex(node) {
+    node = $(node);
+    if (getIndex(node) == -1) {
+        return;
+    }
+    var label, setLabelFn;
+    if (shouldIndexLeaf(node)) {
+        label = wnodeString(node);
+        setLabelFn = setLeafLabel;
+    } else {
+        label = getLabel(node);
+        setLabelFn = setNodeLabel;
+    }
+    setLabelFn(node,
+               label.substr(0, Math.max(label.lastIndexOf("-"),
+                                        label.lastIndexOf("="))),
+               true);
+}
+
+// A low-level (LL) version of setLabel.  It is only responsible for changing
+// the label; not doing any kind of matching/changing/other crap.
+function setLabelLL(node, label) {
+    if (node.hasClass("snode")) {
+        if (label[label.length - 1] != " ") {
+            // Some other spots in the code depend on the label ending with a
+            // space...
+            label += " ";
+        }
+    } else if (node.hasClass("wnode")) {
+        // Words cannot have a trailing space, or CS barfs on save.
+        label = $.trim(label);
+    } else {
+        // should never happen
+        return;
+    }
+    var oldLabel = $.trim(textNode(node).text());
+    textNode(node).replaceWith(label);
+    if (node.hasClass("snode")) {
+        node.removeClass(oldLabel);
+        node.addClass(parseLabel($.trim(label)));
+    }
+}
+
+//================================================== Obsolete/other
+
+/**
+ * Sets the label of a node
+ *
+ * Contains none of the heuristics of {@link setLabel}.
+ *
+ * @param {JQuery Node} node the target node
+ * @param {String} label the new label
+ * @param {Boolean} noUndo whether to record this operation for later undo
+ */
+function setNodeLabel(node, label, noUndo) {
+    // TODO: fold this and setLabelLL together...
+    if (!noUndo) {
+        //stackTree();
+    }
+    setLabelLL(node, label);
+}
+
+// TODO: calc labels in util.py, suppress this code
+// TODO(AWE): I think that updating labels on changing nodes works, but
+// this fn should be interactively called with debugging arg to test this
+// supposition.  When I am confident of the behavior of the code, the
+// debugging branch will be optimized/removed.
+function resetLabelClasses(alertOnError) {
+    var nodes = $(".snode").each(
+        function() {
+            var node = $(this);
+            var label = $.trim(getLabel(node));
+            if (alertOnError) { // TODO(AWE): optimize test inside loop
+                var classes = node.attr("class").split(" ");
+                // This incantation removes a value from an array.
+                classes.indexOf("snode") >= 0 &&
+                    classes.splice(classes.indexOf("snode"), 1);
+                classes.indexOf(label) >= 0 &&
+                    classes.splice(classes.indexOf(label), 1);
+                if (classes.length > 0) {
+                    alert("Spurious classes '" + classes.join() +
+                          "' detected on node id'" + node.attr("id") + "'");
+                }
+            }
+        node.attr("class", "snode " + label);
+        });
+}
+
+
 // TODO: badly need a DSL for forms
 
 // Local Variables:
 // js2-additional-externs: ("$" "setTimeout" "customCommands\
-// " "customConLeafBefore" "customConMenuGroups" "extensions" "vextensions\
+// " "customConLeafBefore" "customConMenuGroups" "extensions" "leaf_extensions\
 // " "clause_extensions" "JSON" "testValidLeafLabel" "testValidPhraseLabel\
-// " "_" "startTime" "console" "loadContextMenu" "disableUndo")
+// " "_" "startTime" "console" "loadContextMenu" "disableUndo" "safeGet\
+// " "jsonToTree" "objectToTree" "dictionaryToForm" "formToDictionary\
+// " "displayWarning" "displayInfo" "displayError" "isEmpty" "isPossibleTarget\
+// " "isRootNode" "isLeafNode" "guessLeafNode" "getTokenRoot" "wnodeString\
+// " "currentText" "getLabel" "textNode" "getMetadata" "hasDashTag\
+// " "parseIndex" "parseLabel" "parseIndexType" "getIndex" "getIndexType\
+// " "shouldIndexLeaf" "maxIndex" "addToIndices" "changeJustLabel\
+// " "toggleStringExtension" "lookupNextLabel" "commentTypes\
+// " "invisibleCategories" "invisibleRootCategories" "ipnodes")
 // indent-tabs-mode: nil
 // End:

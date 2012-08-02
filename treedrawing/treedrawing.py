@@ -66,6 +66,8 @@ class Treedraw(object):
         else:
             self.conversionFn = util.treeToHtml
             self.useMetadata = False
+        self.showingPartialFile = self.options.oneTree or \
+                                  self.options.numTrees > 1
         self.pythonOptions = runpy.run_path(args.pythonSettings)
         cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
@@ -76,10 +78,10 @@ class Treedraw(object):
                    }
 
     def integrateTrees(self, trees):
-        if self.options.oneTree:
-            del self.trees[self.treeIndex]
+        if self.showingPartialFile:
             trees = trees.strip().split("\n\n")
-            self.trees[self.treeIndex:self.treeIndex] = trees
+            self.trees[self.treeIndexStart:self.treeIndexEnd] = trees
+            self.treeIndexEnd = self.treeIndexStart + len(trees)
             return "\n\n".join(self.trees)
         else:
             return trees.strip()
@@ -89,7 +91,8 @@ class Treedraw(object):
         cherrypy.response.headers['Content-Type'] = 'application/json'
         if (startTime != self.startTime) and not (force == "true"):
             return json.dumps(dict(result = "failure",
-                                   reason = "non-matching invocations of Annotald"))
+                                   reason = "non-matching invocations of Annotald",
+                                   reasonCode = 1))
         tosave = self.integrateTrees(trees)
         tosave = tosave.replace("-FLAG", "")
         try:
@@ -130,7 +133,7 @@ class Treedraw(object):
         # during validate
         cherrypy.response.headers['Content-Type'] = 'application/json'
         try:
-            if self.options.oneTree and shift == "true":
+            if self.showingPartialFile and shift == "true":
                 tovalidate = self.integrateTrees(trees)
             else:
                 tovalidate = trees.strip()
@@ -138,9 +141,10 @@ class Treedraw(object):
                 self.versionCookie, tovalidate
                 ).split("\n\n")
 
-            if self.options.oneTree and shift == "true":
+            if self.showingPartialFile and shift == "true":
                 self.trees = validatedTrees
-                validatedHtml = self.treesToHtml([self.trees[self.treeIndex]])
+                validatedHtml = self.treesToHtml(self.trees[
+                    self.treeIndexStart:self.treeIndexEnd])
             else:
                 validatedHtml = self.treesToHtml(validatedTrees)
 
@@ -277,7 +281,7 @@ class Treedraw(object):
                                     usetimelog = self.options.timelog,
                                     usemetadata = self.useMetadata,
                                     test = test,
-                                    oneTree = self.options.oneTree,
+                                    partialFile = self.showingPartialFile,
                                     extraScripts = self.pythonOptions['extraJavascripts'],
                                     startTime = self.startTime,
                                     debugJs = self.pythonOptions['debugJs'],
@@ -290,51 +294,53 @@ class Treedraw(object):
         cherrypy.lib.caching.expires(0, force = True)
         currentSettings = open(self.options.settings).read()
         currentTrees = self.readTrees(self.thefile)
-        if self.options.oneTree:
+        if self.showingPartialFile:
             self.trees = currentTrees
-            self.treeIndex = 0
-            currentHtml = self.treesToHtml([self.trees[self.treeIndex]])
+            self.treeIndexStart = 0
+            self.treeIndexEnd = self.options.numTrees
+            currentHtml = self.treesToHtml(
+                self.trees[self.treeIndexStart:self.treeIndexEnd])
         else:
             currentHtml = self.treesToHtml(currentTrees)
 
         return self.renderIndex(currentHtml, currentSettings, False)
 
     @cherrypy.expose
-    def nextTree(self, trees = None, find = None):
+    def advanceTree(self, offset = None, trees = None, find = None):
         cherrypy.response.headers['Content-Type'] = 'application/json'
-        return self.advanceTree(1, trees, find)
-
-    @cherrypy.expose
-    def prevTree(self, trees = None, find = None):
-        cherrypy.response.headers['Content-Type'] = 'application/json'
-        return self.advanceTree(-1, trees, find)
-
-    def advanceTree(self, offset, trees = None, find = None):
-        if not self.options.oneTree:
+        offset = int(offset)
+        if not self.showingPartialFile:
             return json.dumps(dict(result = 'failure',
-                                   reason = 'Not in one-tree mode.'))
+                                   reason = 'Not in partial-file mode.'))
         else:
-            oldindex = self.treeIndex
+            oldindex = (self.treeIndexStart, self.treeIndexEnd)
             self.integrateTrees(trees)
             while True:
-                self.treeIndex = self.treeIndex + offset
-                if self.treeIndex >= len(self.trees):
-                    self.treeIndex = oldindex
+                self.treeIndexStart = self.treeIndexStart + \
+                                      offset * self.options.numTrees
+                self.treeIndexEnd = self.treeIndexStart + \
+                                    self.options.numTrees
+                if self.treeIndexEnd >= len(self.trees):
+                    self.treeIndexEnd = len(self.trees)
+                if self.treeIndexStart >= len(self.trees):
+                    self.treeIndexStart, self.treeIndexEnd = oldindex
                     return json.dumps(dict(result = 'failure',
                                        reason = 'At end of file.'))
-                elif self.treeIndex < 0:
-                    self.treeIndex = oldindex
+                elif self.treeIndexStart < 0:
+                    self.treeIndexStart, self.treeIndexEnd = oldindex
                     return json.dumps(dict(result = 'failure',
                                            reason = 'At beginning of file.'))
                 if not find:
                     # my kingdom for a do...while loop
                     break
-                if find in self.trees[self.treeIndex]:
+                if find in "".join(self.trees[
+                        self.treeIndexStart:self.treeIndexEnd]):
                     break
 
             return json.dumps(
                 dict(result = 'success',
-                     tree = self.treesToHtml([self.trees[self.treeIndex]])))
+                     tree = self.treesToHtml(self.trees[
+                         self.treeIndexStart:self.treeIndexEnd])))
 
 
 
@@ -357,11 +363,17 @@ parser.add_argument("-S", "--python-settings", dest = "pythonSettings",
 parser.add_argument("-1", "--one-tree-mode", dest = "oneTree",
                      action = "store_true",
                      help = "start Annotald in one-tree mode")
+# TODO: this will not be handled properly if the arg is greater than the
+# number of trees in the file.
+parser.add_argument("-n", "--n-trees-mode", dest = "numTrees",
+                     type = int, action = "store",
+                     help = "number of trees to show at a time")
 parser.add_argument("psd", nargs='+')
 parser.set_defaults(port = 8080,
                     settings = sys.path[0] + "/settings.js",
                     pythonSettings = sys.path[0] + "/settings.py",
-                    oneTree = False)
+                    oneTree = False,
+                    numTrees = 1)
 args = parser.parse_args()
 shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
 
