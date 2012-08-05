@@ -51,6 +51,8 @@ def unicode_pprint_flat(tree, nodesep, parens, quotes):
                                  STR.join(childstrs), parens[1])
 
 def queryVersionCookie(tree, key):
+    if tree == "" or not tree:
+        return None
     t = T.Tree(tree)[0]
     if t.node != "VERSION":
         return

@@ -36,6 +36,10 @@ class UtilTest(unittest.TestCase):
                                                  "BAR"),
                          "quux")
 
+        # Empty input gives null result
+        self.assertIsNone(util.queryVersionCookie("", "FOO"))
+        self.assertIsNone(util.queryVersionCookie(None, "FOO"))
+
 
         
 
