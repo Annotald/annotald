@@ -1,4 +1,4 @@
-.PHONY: api-doc private-doc deploy-docs
+.PHONY: api-doc private-doc deploy-docs test
 
 api-doc:
 	jsdoc -v -d=api-doc treedrawing/data/scripts/treedrawing.js \
@@ -15,4 +15,6 @@ private-doc:
 	jsdoc -v -p -d=priv-doc treedrawing/data/scripts/treedrawing.js \
 		treedrawing/data/scripts/treedrawing.utils.js
 
-
+test:
+	nosetests2 -w treedrawing --with-coverage --cover-erase --cover-package=util
+	coverage2 html
