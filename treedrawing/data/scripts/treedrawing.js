@@ -1010,7 +1010,9 @@ function editLemma() {
  *
  * The movement operation must not change the text of the token.
  *
- * @param {DOM Node} parent the parent node to move selection under.
+ * @param {DOM Node} parent the parent node to move selection under
+ *
+ * @returns {Boolean} whether the operation was successful
  */
 function moveNode(parent) {
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
@@ -1025,15 +1027,17 @@ function moveNode(parent) {
     if (!isPossibleTarget(parent) || // can't move under a tag node
         $(startnode).parent().children().length == 1 || // cant move an only child
         $(parent).parents().is(startnode) // can't move under one's own child
-       ) {
+       )
+    {
         clearSelection();
-        return;
+        return false;
     } else if ($(startnode).parents().is(parent)) {
         // move up if moving to a node that is already my parent
         if ($(startnode).parent().children().first().is(startnode)) {
             if ($(startnode).parentsUntil(parent).slice(0,-1).
                 filter(":not(:first-child)").size() > 0) {
-                return;
+                clearSelection();
+                return false;
             }
             if (parent == document.getElementById("sn0")) {
                 touchTree($(startnode));
@@ -1049,7 +1053,8 @@ function moveNode(parent) {
         } else if ($(startnode).parent().children().last().is(startnode)) {
             if ($(startnode).parentsUntil(parent).slice(0,-1).
                 filter(":not(:last-child)").size() > 0) {
-                return;
+                clearSelection();
+                return false;
             }
             if (parent == document.getElementById("sn0")) {
                 touchTree($(startnode));
@@ -1065,7 +1070,7 @@ function moveNode(parent) {
         } else {
             // cannot move from this position
             clearSelection();
-            return;
+            return false;
         }
     } else {
         // otherwise move under my sister
@@ -1113,6 +1118,8 @@ function moveNode(parent) {
                 if (parent_ip.attr("id") == "sn0") {
                     $("#sn0").mousedown(handleNodeClick);
                 }
+                clearSelection();
+                return false;
             } else {
                 undoEndTransaction();
             }
@@ -1138,12 +1145,15 @@ function moveNode(parent) {
                 if (parent_ip == "sn0") {
                     $("#sn0").mousedown(handleNodeClick);
                 }
+                clearSelection();
+                return false;
             } else {
                 undoEndTransaction();
             }
         } // TODO: conditional branches not exhaustive
     }
     clearSelection();
+    return true;
 }
 
 /**
