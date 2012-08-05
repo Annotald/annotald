@@ -318,13 +318,13 @@ function handleNodeClick(e) {
                 e.stopPropagation();
                 moveNode(element);
             } else {
-                showContextMenu();
+                showContextMenu(e);
             }
         } else if (startnode && endnode) {
             e.stopPropagation();
             moveNodes(element);
         } else {
-            showContextMenu();
+            showContextMenu(e);
         }
     } else {
         // leftclick
@@ -348,17 +348,15 @@ function handleNodeClick(e) {
 
 // ========== Context Menu
 
-function showContextMenu() {
-    var e = window.event;
+function showContextMenu(e) {
     var element = e.target || e.srcElement;
     if (element == document.getElementById("sn0")) {
         clearSelection();
         return;
     }
 
-    // TODO(AWE): make this relative to mouse posn?
-    var left = $(element).offset().left + 4;
-    var top = $(element).offset().top + 17;
+    var left = e.pageX;
+    var top = e.pageY;
     left = left + "px";
     top = top + "px";
 
