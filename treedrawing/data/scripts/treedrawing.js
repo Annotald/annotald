@@ -797,7 +797,6 @@ function leafEditorReplacement(label, word, lemma) {
  * available for editing if it is an empty node (trace, comment, etc.).  If a
  * non-terminal, edit the node label.
  */
-// TODO: make undo-aware
 function displayRename() {
     // Inner functions
     function space(event) {
@@ -823,6 +822,8 @@ function displayRename() {
     if (!startnode || endnode) {
         return;
     }
+    undoBeginTransaction();
+    touchTree($(startnode));
     document.body.onkeydown = null;
     $("#sn0").unbind('mousedown');
     $("#undo").attr("disabled", true);
@@ -857,6 +858,7 @@ function displayRename() {
                     replNode = leafEditorReplacement(label, word, lemma);
                     $("#leafeditor").replaceWith(replNode);
                     postChange(replNode);
+                    undoAbortTransaction();
                 }
                 if (event.keyCode == 13) {
                     var newlabel = $("#leafphrasebox").val();
@@ -891,6 +893,7 @@ function displayRename() {
                                                      newlemma);
                     $("#leafeditor").replaceWith(replNode);
                     postChange(replNode);
+                    undoEndTransaction();
                 }
             });
         setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
@@ -913,6 +916,7 @@ function displayRename() {
                 if (event.keyCode == 27) {
                     $("#labelbox").replaceWith(label + " ");
                     postChange(origNode);
+                    undoAbortTransaction();
                 }
                 if (event.keyCode == 13) {
                     var newphrase = $("#labelbox").val().toUpperCase();
@@ -928,6 +932,7 @@ function displayRename() {
                     }
                     $("#labelbox").replaceWith(newphrase + " ");
                     postChange(origNode);
+                    undoEndTransaction();
                 }
             });
         setTimeout(function(){ $("#labelbox").focus(); }, 10);
