@@ -272,6 +272,57 @@ test))) (ID test-01))\n\n");
                    testValidLeafLabel("FOO-AAA-1"), true);
     });
 
+    suite("Undo/redo", function () {
+        // TODO: coverage is still not total
+        loadTrees("( (IP-MAT (NP-SBJ (D this) (BEP is) (NP-PRD (D a) (N test)))))\n\n" +
+                  "( (IP-MAT (NP-SBJ (D that) (BEP is) (NP-PRD (D an) (N other)))))");
+        var origHtml = $("#editpane").html();
+
+        resetUndo();
+
+        selectWord("other");
+
+        makeNode("FOO");
+        undoBarrier();
+        newUndo();
+        expectEqualText("undo makeNode",
+                        $("#editpane").html(), origHtml);
+
+        selectWord("other");
+        makeNode("FOO");
+        undoBarrier();
+        selectNodeByLabel("FOO");
+        pruneNode();
+        undoBarrier();
+        newUndo();
+        newUndo();
+        expectEqualText("undo pruneNode",
+                        $("#editpane").html(), origHtml);
+
+        selectWord("other");
+        toggleExtension("FOO", ["FOO"]);
+        undoBarrier();
+        newUndo();
+        expectEqualText("undo toggleExtension",
+                        $("#editpane").html(), origHtml);
+
+        selectWord("other");
+        setLabel(["FOO"]);
+        undoBarrier();
+        newUndo();
+        expectEqualText("undo setLabel",
+                        $("#editpane").html(), origHtml);
+
+        selectWord("other");
+        selectWord("that", true);
+        coIndex();
+        undoBarrier();
+        newUndo();
+        expectEqualText("undo coIndex",
+                        $("#editpane").html(), origHtml);
+
+    });
+
     logTest("");
     logTest("Test results: " + (numtests - testfailures) + "/" + numtests +
             " passed (" +
