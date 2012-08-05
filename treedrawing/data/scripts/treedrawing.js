@@ -1850,6 +1850,7 @@ function undoBarrier() {
         delTr: undoDeletedTrees
     });
     resetUndo();
+    redoStack = [];
 }
 
 /**
