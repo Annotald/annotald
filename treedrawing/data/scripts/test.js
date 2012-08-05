@@ -335,7 +335,8 @@ test))) (ID test-01))\n\n");
 // dictionaryToForm" "_" "toLabeledBrackets" "startnode" "endnode" "\
 // wnodeString" "updateSelection" "leafBefore" "resetIds" "\
 // resetLabelClasses" "getLabel" "testValidLeafLabel" "basesAndDashes" "\
-// getIndex" "coIndex" "getIndextype" "makeNode" "newUndo" "pruneNode" "\
-// undoBarrier" "idNumber" "displayInfo" "displayWarning" "displayError")
+// getIndex" "coIndex" "getIndexType" "makeNode" "newUndo" "pruneNode" "\
+// undoBarrier" "idNumber" "displayInfo" "displayWarning" "displayError" "\
+// setLabel" "toggleExtension" "resetUndo")
 // indent-tabs-mode: nil
 // End:
