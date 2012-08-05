@@ -1913,6 +1913,21 @@ function undoAbortTransaction() {
 }
 
 /**
+ * Execute a function, discarding whatever effects it has on the undo system.
+ *
+ * @param {Function} fn a function to execute
+ *
+ * @returns the result of `fn`
+ */
+function ignoringUndo(fn) {
+    // a bit of a grim hack, but it works
+    undoBeginTransaction();
+    var res = fn();
+    undoAbortTransaction();
+    return res;
+}
+
+/**
  * Inform the undo system that changes are being made.
  *
  * @param {JQuery Node} node the node in which changes are being made
