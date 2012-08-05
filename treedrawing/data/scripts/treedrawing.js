@@ -1920,7 +1920,7 @@ function registerDeletedRootTree(tree) {
     }
     undoDeletedTrees.push({
         tree: tree,
-        before: prev
+        before: prev.attr("id")
     });
 }
 
@@ -1945,12 +1945,13 @@ function doUndo(undoData) {
     // the insertion point of one of these is going to get zapped.  This
     // shouldn't happen, though.
     _.each(undoData["delTr"], function(v) {
-        var prev = v["prev"];
+        var prev = v["before"];
         if (prev) {
-            v["tree"].insertAfter(prev);
+            v["tree"].insertAfter($("#" + prev));
         } else {
             v["tree"].prependTo($("#sn0"));
         }
+        newTr.push(v["tree"].attr("id"));
     });
 
     _.each(undoData["newTr"], function(v) {
@@ -1961,7 +1962,7 @@ function doUndo(undoData) {
         }
         delTr.push({
             tree: theNode.clone(),
-            before: prev
+            before: prev.attr("id")
         });
         theNode.remove();
     });
