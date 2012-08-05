@@ -266,6 +266,10 @@ test))) (ID test-01))\n\n");
                     testValidLeafLabel("FOO-AAA-CCC"), true);
         expectEqual("incorrect label",
                     testValidLeafLabel("NP-SBJ"), false);
+
+        failingTest();
+        expectEqual("correct label with index",
+                   testValidLeafLabel("FOO-AAA-1"), true);
     });
 
     logTest("");
