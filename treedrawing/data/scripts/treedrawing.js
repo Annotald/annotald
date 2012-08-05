@@ -813,6 +813,9 @@ function displayRename() {
             updateSelection();
             document.body.onkeydown = handleKeyDown;
             $("#sn0").mousedown(handleNodeClick);
+            $("#undo").attr("disabled", false);
+            $("#redo").attr("disabled", false);
+            $("#save").attr("disabled", false);
         }
     }
 
@@ -822,6 +825,9 @@ function displayRename() {
     }
     document.body.onkeydown = null;
     $("#sn0").unbind('mousedown');
+    $("#undo").attr("disabled", true);
+    $("#redo").attr("disabled", true);
+    $("#save").attr("disabled", true);
     // TODO: will no longer be accurate when labels don't include e.g. mov't index
     var oldClass = getLabel($(startnode));
 
