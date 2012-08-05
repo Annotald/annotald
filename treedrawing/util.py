@@ -50,12 +50,22 @@ def unicode_pprint_flat(tree, nodesep, parens, quotes):
         return u'%s%r%s %s%s' % (parens[0], tree.node, nodesep,
                                  STR.join(childstrs), parens[1])
 
-# TODO: this will be much easier when we use nltk.tree...
-def queryVersionCookie(string, fmt):
-    versionRe = re.compile("\\(FORMAT (" + fmt + ")\\)")
-    temp = versionRe.search(string)
-    if temp:
-        return temp.group(1)
+def queryVersionCookie(tree, key):
+    t = T.Tree(tree)[0]
+    if t.node != "VERSION":
+        return
+    return _queryVersionCookieInner(t, key)
+
+def _queryVersionCookieInner(tree, key):
+    # TODO: maybe we should just convert the version cookie into a dict
+    # and use that
+    keys = key.split(".")
+    f = filter(lambda n: n.node == keys[0], tree)
+    if len(f) == 1:
+        if len(keys) == 1:
+            return f[0][0]
+        else:
+            return _queryVersionCookieInner(f[0], ".".join(keys[1:]))
     else:
         return None
 
