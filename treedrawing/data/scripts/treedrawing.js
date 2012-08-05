@@ -740,6 +740,57 @@ function editComment() {
 }
 
 /**
+ * Return the JQuery object with the editor for a leaf node.
+ * @private
+ */
+function leafEditorHtml(label, word, lemma) {
+    // Single quotes mess up the HTML code.
+    if (lemma) lemma = lemma.replace(/'/g, "&#39;");
+    word = word.replace(/'/g, "&#39;");
+    label = label.replace(/'/g, "&#39;");
+
+    var editorHtml = "<div id='leafeditor' class='snode'>" +
+            "<input id='leafphrasebox' class='labeledit' type='text' value='" +
+            label +
+            "' /><input id='leaftextbox' class='labeledit' type='text' value='" +
+            word +
+            "' " + (isEmpty(word) ? "disabled='disabled'" : "") + " />";
+    if (lemma) {
+        editorHtml += "<input id='leaflemmabox' class='labeledit' " +
+            "type='text' value='" + lemma + "' />";
+    }
+    editorHtml += "</div>";
+
+    return $(editorHtml);
+}
+
+/**
+ * Return the JQuery object with the replacement after editing a leaf node.
+ * @private
+ */
+function leafEditorReplacement(label, word, lemma) {
+    lemma = lemma.replace(/</g,"&lt;");
+    lemma = lemma.replace(/>/g,"&gt;");
+    lemma = lemma.replace(/'/g,"&#39;");
+
+    word = word.replace(/</g,"&lt;");
+    word = word.replace(/>/g,"&gt;");
+    word = word.replace(/'/g,"&#39;");
+
+    // TODO: test for illegal chars in label
+    label = label.toUpperCase();
+
+    var replText = "<div class='snode'>" + label +
+            " <span class='wnode'>" + word;
+    if (lemma) {
+        replText += "<span class='lemma'>-" +
+            lemma + "</span>";
+    }
+    replText += "</span></div>";
+    return $(replText);
+}
+
+/**
  * Edit the selected node
  *
  * If the selected node is a terminal, edit its label, and lemma.  The text is
@@ -748,176 +799,132 @@ function editComment() {
  */
 // TODO: make undo-aware
 function displayRename() {
-    if (startnode && !endnode) {
-        document.body.onkeydown = null;
-        $("#sn0").unbind('mousedown');
-        var oldClass = getLabel($(startnode));
-        function space(event) {
-            var element = (event.target || event.srcElement);
-            $(element).val($(element).val());
-            event.preventDefault();
+    // Inner functions
+    function space(event) {
+        var element = (event.target || event.srcElement);
+        $(element).val($(element).val());
+        event.preventDefault();
+    }
+    function postChange(newNode) {
+        if (newNode) {
+            newNode.removeClass(oldClass);
+            newNode.addClass(getLabel(newNode));
+            startnode = endnode = null;
+            updateSelection();
+            document.body.onkeydown = handleKeyDown;
+            $("#sn0").mousedown(handleNodeClick);
         }
-        function postChange(newNode) {
-            if (newNode) {
-                newNode.removeClass(oldClass);
-                newNode.addClass(getLabel(newNode));
-                startnode = endnode = null;
-                updateSelection();
-                document.body.onkeydown = handleKeyDown;
-                $("#sn0").mousedown(handleNodeClick);
-            }
-            // TODO(AWE): check that theNewPhrase id gets removed...it
-            // doesn't seem to?
-        }
-        var label = getLabel($(startnode));
-        label = label.replace(/'/g, "&#39;");
-        var editor;
-        if ($(startnode).children(".wnode").size() > 0) {
-            // this is a terminal
-            var word, lemma, useLemma;
-            var isLeafNode = guessLeafNode($(startnode));
-            if ($(startnode).children(".wnode").children(".lemma").size() > 0) {
-                var preword = $.trim($(startnode).children().first().text());
-                preword = preword.split("-");
-                lemma = preword.pop();
-                word = preword.join("-");
-                useLemma = true;
-            } else {
-                word = $.trim($(startnode).children().first().text());
-                useLemma = false;
-            }
+    }
 
-            // Single quotes mess up the HTML code.
-            if (lemma) lemma = lemma.replace(/'/g, "&#39;");
-            word = word.replace(/'/g, "&#39;");
+    // Begin code
+    if (!startnode || endnode) {
+        return;
+    }
+    document.body.onkeydown = null;
+    $("#sn0").unbind('mousedown');
+    // TODO: will no longer be accurate when labels don't include e.g. mov't index
+    var oldClass = getLabel($(startnode));
 
-            var editorHtml = "<div id='leafeditor' class='snode'>" +
-                "<input id='leafphrasebox' class='labeledit' type='text' value='" +
-                label +
-                "' /><input id='leaftextbox' class='labeledit' type='text' value='" +
-                word +
-                "' />";
-            if (useLemma) {
-                editorHtml += "<input id='leaflemmabox' class='labeledit' " +
-                    "type='text' value='" + lemma + "' />";
-            }
-            editorHtml += "</div>";
-
-            editor = $(editorHtml);
-            $(startnode).replaceWith(editor);
-            if (!isEmpty(word)) {
-                $("#leaftextbox").attr("disabled", true);
-            }
-            $("#leafphrasebox,#leaftextbox,#leaflemmabox").keydown(
-                function(event) {
-                    var replText, replNode;
-                    // if (event.keyCode == 9) {
-                    //       var elementId = (event.target || event.srcElement);
-                    // }
-                    if (event.keyCode == 32) {
-                        space(event);
-                    }
-                    if (event.keyCode == 27) {
-                        replText = "<div class='snode'>" +
-                            label + " <span class='wnode'>" + word;
-                        if (useLemma) {
-                            replText += "<span class='lemma'>-" +
-                                lemma + "</span>";
-                        }
-                        replText += "</span></div>";
-                        replNode = $(replText);
-                        $("#leafeditor").replaceWith(replNode);
-                        postChange(replNode);
-                    }
-                    if (event.keyCode == 13) {
-                        var newphrase =
-                                $("#leafphrasebox").val().toUpperCase();
-                        if (isLeafNode) {
-                            if (typeof testValidLeafLabel !== "undefined") {
-                                if (!testValidLeafLabel(newphrase)) {
-                                    displayWarning("Not a valid leaf label: '" +
-                                                   newphrase + "'.");
-                                    return;
-                                }
-                            }
-                        } else {
-                            if (typeof testValidPhraseLabel !== "undefined") {
-                                if (!testValidPhraseLabel(newphrase)) {
-                                    displayWarning("Not a valid phrase label: '" +
-                                                   newphrase + "'.");
-                                    return;
-                                }
-                            }
-                        }
-                        var newtext = $("#leaftextbox").val();
-                        var newlemma = "";
-                        if (useLemma) {
-                            newlemma = $('#leaflemmabox').val();
-                            newlemma = newlemma.replace(/</g,"&lt;");
-                            newlemma = newlemma.replace(/>/g,"&gt;");
-                            newlemma = newlemma.replace(/'/g,"&#39;");
-                        }
-                        newtext = newtext.replace(/</g,"&lt;");
-                        newtext = newtext.replace(/>/g,"&gt;");
-                        newtext = newtext.replace(/'/g,"&#39;");
-                        if (newtext + newlemma == "") {
-                            displayWarning("Cannot create an empty leaf.");
-                            return;
-                        }
-                        replText = "<div class='snode'>" +
-                            newphrase + " <span class='wnode'>" + newtext;
-                        if (useLemma) {
-                            replText += "<span class='lemma'>-" +
-                                newlemma + "</span>";
-                        }
-                        replText += "</span></div>";
-                        replNode = $(replText);
-                        $("#leafeditor").replaceWith(replNode);
-                        postChange(replNode);
-                    }
-                });
-            setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
+    var label = getLabel($(startnode));
+    if ($(startnode).children(".wnode").size() > 0) {
+        // this is a terminal
+        var word, lemma;
+        var isLeafNode = guessLeafNode($(startnode));
+        if ($(startnode).children(".wnode").children(".lemma").size() > 0) {
+            var preword = $.trim($(startnode).children().first().text());
+            preword = preword.split("-");
+            lemma = preword.pop();
+            word = preword.join("-");
         } else {
-            // this is not a terminal
-            editor = $("<input id='labelbox' class='labeledit' " +
-                           "type='text' value='" + label + "' />");
-            var origNode = $(startnode);
-            var isWordLevelConj =
-                    origNode.children(".snode").children(".snode").size() == 0 &&
-                    // TODO: make configurable
-                    origNode.children(".CONJ") .size() > 0;
-            textNode(origNode).replaceWith(editor);
-            $("#labelbox").keydown(
-                function(event) {
-                    // if (event.keyCode == 9) {
-                    //     // tab, do nothing
-                    //       var elementId = (event.target || event.srcElement).id;
-                    // }
-                    if (event.keyCode == 32) {
-                        space(event);
+            word = $.trim($(startnode).children().first().text());
+        }
+
+        $(startnode).replaceWith(leafEditorHtml(label, word, lemma));
+
+        $("#leafphrasebox,#leaftextbox,#leaflemmabox").keydown(
+            function(event) {
+                var replText, replNode;
+                if (event.keyCode == 32) {
+                    space(event);
+                }
+                if (event.keyCode == 27) {
+                    replNode = leafEditorReplacement(label, word, lemma);
+                    $("#leafeditor").replaceWith(replNode);
+                    postChange(replNode);
+                }
+                if (event.keyCode == 13) {
+                    var newlabel = $("#leafphrasebox").val();
+                    var newword = $("#leaftextbox").val();
+                    var newlemma;
+                    if (lemma) {
+                        newlemma = $('#leaflemmabox').val();
                     }
-                    if (event.keyCode == 27) {
-                        $("#labelbox").replaceWith(label + " ");
-                        postChange(origNode);
-                    }
-                    if (event.keyCode == 13) {
-                        var newphrase = $("#labelbox").val().toUpperCase();
-                        if (typeof testValidPhraseLabel !== "undefined") {
-                            if (!(testValidPhraseLabel(newphrase) ||
-                                  (typeof testValidLeafLabel !== "undefined" &&
-                                   isWordLevelConj &&
-                                   testValidLeafLabel(newphrase)))) {
-                                displayWarning("Not a valid phrase label: '" +
-                                              newphrase + "'.");
+
+                    if (isLeafNode) {
+                        if (typeof testValidLeafLabel !== "undefined") {
+                            if (!testValidLeafLabel(newlabel)) {
+                                displayWarning("Not a valid leaf label: '" +
+                                               newlabel + "'.");
                                 return;
                             }
                         }
-                        $("#labelbox").replaceWith(newphrase + " ");
-                        postChange(origNode);
+                    } else {
+                        if (typeof testValidPhraseLabel !== "undefined") {
+                            if (!testValidPhraseLabel(newlabel)) {
+                                displayWarning("Not a valid phrase label: '" +
+                                               newlabel + "'.");
+                                return;
+                            }
+                        }
                     }
-                });
-            setTimeout(function(){ $("#labelbox").focus(); }, 10);
-        }
+                    if (newword + newlemma == "") {
+                        displayWarning("Cannot create an empty leaf.");
+                        return;
+                    }
+                    replNode = leafEditorReplacement(newlabel, newword,
+                                                     newlemma);
+                    $("#leafeditor").replaceWith(replNode);
+                    postChange(replNode);
+                }
+            });
+        setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
+    } else {
+        // this is not a terminal
+        var editor = $("<input id='labelbox' class='labeledit' " +
+                       "type='text' value='" + label + "' />");
+        var origNode = $(startnode);
+        var isWordLevelConj =
+                origNode.children(".snode").children(".snode").size() == 0 &&
+                // TODO: make configurable
+                origNode.children(".CONJ") .size() > 0;
+        textNode(origNode).replaceWith(editor);
+        $("#labelbox").keydown(
+            function(event) {
+                // make tab do nothing?
+                if (event.keyCode == 32) {
+                    space(event);
+                }
+                if (event.keyCode == 27) {
+                    $("#labelbox").replaceWith(label + " ");
+                    postChange(origNode);
+                }
+                if (event.keyCode == 13) {
+                    var newphrase = $("#labelbox").val().toUpperCase();
+                    if (typeof testValidPhraseLabel !== "undefined") {
+                        if (!(testValidPhraseLabel(newphrase) ||
+                              (typeof testValidLeafLabel !== "undefined" &&
+                               isWordLevelConj &&
+                               testValidLeafLabel(newphrase)))) {
+                            displayWarning("Not a valid phrase label: '" +
+                                           newphrase + "'.");
+                            return;
+                        }
+                    }
+                    $("#labelbox").replaceWith(newphrase + " ");
+                    postChange(origNode);
+                }
+            });
+        setTimeout(function(){ $("#labelbox").focus(); }, 10);
     }
 }
 
