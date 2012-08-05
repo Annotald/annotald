@@ -86,8 +86,12 @@ function loadTrees(trees) {
            { async: false,
              success: function(res) {
                  $("#editpane").html(res['trees']);
-                 resetIds(true);
                  resetLabelClasses(false);
+                 $("#editpane>.snode").attr("id", "sn0");
+                 $("#sn0>.snode").map(function () {
+                     $(this).attr("id", "id" + idNumber);
+                     idNumber++;
+                 });
              },
              dataType: "json",
              type: "POST",
@@ -128,6 +132,16 @@ function selectNodeByLabel(label, end) {
     updateSelection();
 }
 
+function logMsg(type) {
+    return function (msg) {
+        logTest("Got message of type '" + type + "': '" + msg + "'");
+    };
+}
+
+displayInfo = logMsg("info");
+displayWarning = logMsg("warning");
+displayError = logMsg("error");
+
 function runTests() {
     numtests = testfailures = 0;
     showDialogBox("Test Results", '<textarea id="testMsgBox" style="' +
@@ -137,12 +151,12 @@ function runTests() {
         expectEqualText("initial test HTML",
                         $("#editpane").html(),
                         "<divclass=\"snode\"id=\"sn0\"><divclass=\"snodeIP-MAT\
-\"data-metadata=\"{&quot;ID&quot;:&quot;test-01&quot;}\"id=\"sn1\">IP-MA\
-T<divclass=\"snodeNP-SBJ\"id=\"sn2\">NP-SBJ<divclass=\"snodeD\"id=\"sn3\">D<sp\
-anclass=\"wnode\">This</span></div></div><divclass=\"snodeBEP\"id=\"sn4\">BEP<\
-spanclass=\"wnode\">is</span></div><divclass=\"snodeNP-PRD\"id=\"sn5\">NP-PRD<\
-divclass=\"snodeD\"id=\"sn6\">D<spanclass=\"wnode\">a</span></div><divclass=\"\
-snodeN\"id=\"sn7\">N<spanclass=\"wnode\">test</span></div></div></div></div>");
+\"data-metadata=\"{&quot;ID&quot;:&quot;test-01&quot;}\"id=\"id1\">IP-MA\
+T<divclass=\"snodeNP-SBJ\">NP-SBJ<divclass=\"snodeD\">D<sp\
+anclass=\"wnode\">This</span></div></div><divclass=\"snodeBEP\">BEP<\
+spanclass=\"wnode\">is</span></div><divclass=\"snodeNP-PRD\">NP-PRD<\
+divclass=\"snodeD\">D<spanclass=\"wnode\">a</span></div><divclass=\"\
+snodeN\">N<spanclass=\"wnode\">test</span></div></div></div></div>");
 
         // don't use -Text here, b/c whitespace is significant to the backend
         expectEqual("totrees is correct",
@@ -266,6 +280,7 @@ test))) (ID test-01))\n\n");
 // dictionaryToForm" "_" "toLabeledBrackets" "startnode" "endnode" "\
 // wnodeString" "updateSelection" "leafBefore" "resetIds" "\
 // resetLabelClasses" "getLabel" "testValidLeafLabel" "basesAndDashes" "\
-// getIndex" "coIndex")
+// getIndex" "coIndex" "getIndextype" "makeNode" "newUndo" "pruneNode" "\
+// undoBarrier" "idNumber" "displayInfo" "displayWarning" "displayError")
 // indent-tabs-mode: nil
 // End:
