@@ -99,9 +99,6 @@ def treeToHtml(tree, version, extra_data = None):
     else:
         res = '<div class="snode"'
         if extra_data:
-            if "\"" in extra_data:
-                # TODO(AWE): relax this restriction
-                raise Exception("can't cope with ID/METADATA containing double-quote yet!")
             res += ' data-metadata="' + safe_json(nodeListToDict(extra_data)) + '"'
         res += '>' + tree.node + ' '
         res += "\n".join(map(lambda x: treeToHtml(x, version), tree))
