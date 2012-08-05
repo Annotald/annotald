@@ -942,51 +942,62 @@ function displayRename() {
 /**
  * Edit the lemma of a terminal node.
  */
-// TODO: make undo-aware
 function editLemma() {
-    var childLemmata = $(startnode).children(".wnode").children(".lemma");
-    if (startnode && !endnode && childLemmata.size() > 0) {
-        document.body.onkeydown = null;
-        $("#sn0").unbind('mousedown');
-        function space(event) {
-            var element = (event.target || event.srcElement);
-            $(element).val($(element).val());
-            event.preventDefault();
-        }
-        function postChange() {
-            startnode = null; endnode = null;
-            updateSelection();
-            document.body.onkeydown = handleKeyDown;
-            $("#sn0").mousedown(handleNodeClick);
-        }
-        var lemma = $(startnode).children(".wnode").children(".lemma").text();
-        lemma = lemma.substring(1);
-        var editor=$("<span id='leafeditor' class='wnode'><input " +
-                     "id='leaflemmabox' class='labeledit' type='text' value='" +
-                     lemma + "' /></span>");
-        $(startnode).children(".wnode").children(".lemma").replaceWith(editor);
-        $("#leaflemmabox").keydown(
-            function(event) {
-                if (event.keyCode == '9') {
-                    // var elementId = (event.target || event.srcElement).id;
-                    event.preventDefault();
-                }
-                if (event.keyCode == '32') {
-                    space(event);
-                }
-                if (event.keyCode == '13') {
-                    var newlemma = $('#leaflemmabox').val();
-                    newlemma = newlemma.replace("<","&lt;");
-                    newlemma = newlemma.replace(">","&gt;");
-                    newlemma = newlemma.replace(/'/g,"&#39;");
-
-                    $("#leafeditor").replaceWith("<span class='lemma'>-" +
-                                                 newlemma + "</span>");
-                    postChange();
-                }
-            });
-        setTimeout(function(){ $("#leaflemmabox").focus(); }, 10);
+    // Inner functions
+    function space(event) {
+        var element = (event.target || event.srcElement);
+        $(element).val($(element).val());
+        event.preventDefault();
     }
+    function postChange() {
+        startnode = null; endnode = null;
+        updateSelection();
+        document.body.onkeydown = handleKeyDown;
+        $("#sn0").mousedown(handleNodeClick);
+        $("#undo").attr("disabled", false);
+        $("#redo").attr("disabled", false);
+        $("#save").attr("disabled", false);
+    }
+
+    // Begin code
+    var childLemmata = $(startnode).children(".wnode").children(".lemma");
+    if (!startnode || endnode || childLemmata.size() != 1) {
+        return;
+    }
+    document.body.onkeydown = null;
+    $("#sn0").unbind('mousedown');
+    undoBeginTransaction();
+    touchTree($(startnode));
+    $("#undo").attr("disabled", true);
+    $("#redo").attr("disabled", true);
+    $("#save").attr("disabled", true);
+
+    var lemma = $(startnode).children(".wnode").children(".lemma").text();
+    lemma = lemma.substring(1);
+    var editor=$("<span id='leafeditor' class='wnode'><input " +
+                 "id='leaflemmabox' class='labeledit' type='text' value='" +
+                 lemma + "' /></span>");
+    $(startnode).children(".wnode").children(".lemma").replaceWith(editor);
+    $("#leaflemmabox").keydown(
+        function(event) {
+            if (event.keyCode == 9) {
+                event.preventDefault();
+            }
+            if (event.keyCode == 32) {
+                space(event);
+            }
+            if (event.keyCode == 13) {
+                var newlemma = $('#leaflemmabox').val();
+                newlemma = newlemma.replace("<","&lt;");
+                newlemma = newlemma.replace(">","&gt;");
+                newlemma = newlemma.replace(/'/g,"&#39;");
+
+                $("#leafeditor").replaceWith("<span class='lemma'>-" +
+                                             newlemma + "</span>");
+                postChange();
+            }
+        });
+    setTimeout(function(){ $("#leaflemmabox").focus(); }, 10);
 }
 
 
