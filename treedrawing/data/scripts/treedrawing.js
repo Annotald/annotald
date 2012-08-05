@@ -1025,8 +1025,8 @@ function moveNode(parent) {
                 return;
             }
             if (parent == document.getElementById("sn0")) {
-                registerNewRootTree($(startnode));
                 touchTree($(startnode));
+                registerNewRootTree($(startnode));
             } else {
                 touchTree($(startnode));
             }
