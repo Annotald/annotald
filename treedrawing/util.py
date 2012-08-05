@@ -164,8 +164,8 @@ def deepTreeToHtml(tree, *args):
                 # Find this tree's metadata; we will need it later
                 metadata = t
             elif isinstance(t[0], T.Tree):
-                # if this tree has branching daughters, other than META, then it
-                # is not a leaf.
+                # if this tree has branching daughters, other than META,
+                # then it is not a leaf.
                 isLeaf = False
 
     # Find out what to call this node
@@ -174,7 +174,6 @@ def deepTreeToHtml(tree, *args):
     res = '<div class="snode ' + \
         cssClassFromLabel(theLabel) + '"'
     if metadata:
-        # TODO: json encode
         res += ' data-metadata="' + safe_json(metadataToDict(metadata)) + '"'
     res += '>' + theLabel + ' '
     if isSimpleLeaf:
