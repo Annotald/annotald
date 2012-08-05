@@ -385,6 +385,19 @@ function hideContextMenu() {
     $("#conMenu").css("visibility","hidden");
 }
 
+// ========== Messages
+
+/**
+ * Show the message history.
+ */
+function showMessageHistory() {
+    showDialogBox("Messages", "<textarea style='width:100%;height:100%;'>" +
+                  messageHistory + "</textarea>");
+}
+addStartupHook(function () {
+    $("#messagesTitle").click(showMessageHistory);
+});
+
 // ========== Dialog boxes
 
 /**
@@ -1623,8 +1636,6 @@ var saveInProgress = false;
 
 function saveHandler (data) {
     if (data['result'] == "success") {
-        // TODO(AWE): add time of last successful save
-        // TODO(AWE): add filename to avoid overwriting another file
         displayInfo("Save success.");
     } else {
         lastsavedstate = "";
@@ -2261,6 +2272,7 @@ function resetLabelClasses(alertOnError) {
 // " "parseIndex" "parseLabel" "parseIndexType" "getIndex" "getIndexType\
 // " "shouldIndexLeaf" "maxIndex" "addToIndices" "changeJustLabel\
 // " "toggleStringExtension" "lookupNextLabel" "commentTypes\
-// " "invisibleCategories" "invisibleRootCategories" "ipnodes")
+// " "invisibleCategories" "invisibleRootCategories" "ipnodes" "messageHistory\
+// ")
 // indent-tabs-mode: nil
 // End:

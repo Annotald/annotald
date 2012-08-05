@@ -146,12 +146,26 @@ function formToDictionary(form) {
 
 // ===== UI helper functions
 
+var messageHistory = "";
+
+/**
+ * Log the message in the message history.
+ * @private
+ */
+function logMessage(msg) {
+    var d = new Date();
+    messageHistory += d.toUTCString() + ": " + $("<div>" + msg +
+                                                 "</div>").text() +
+        "\n";
+}
+
 /**
  * Display a warning message in the Annotald UI.
  *
  * @param {String} html the html code of the warning to display
  */
 function displayWarning(html) {
+    logMessage(html);
     $("#messageBoxInner").html(html).css("color", "orange");
 }
 
@@ -161,6 +175,7 @@ function displayWarning(html) {
  * @param {String} html the html code of the information to display
  */
 function displayInfo(html) {
+    logMessage(html);
     $("#messageBoxInner").html(html).css("color", "green");
 }
 
@@ -170,6 +185,7 @@ function displayInfo(html) {
  * @param {String} html the html code of the error to display
  */
 function displayError(html) {
+    logMessage(html);
     $("#messageBoxInner").html(html).css("color", "red");
 }
 
