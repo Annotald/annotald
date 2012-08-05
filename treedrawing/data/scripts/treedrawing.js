@@ -820,6 +820,7 @@ function displayRename() {
     function postChange(newNode) {
         if (newNode) {
             newNode.removeClass(oldClass);
+            // TODO: make this not add numbers etc.
             newNode.addClass(getLabel(newNode));
             startnode = endnode = null;
             updateSelection();
