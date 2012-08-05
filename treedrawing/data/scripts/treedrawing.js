@@ -53,7 +53,7 @@
 // ** Movement
 // ** Creation
 // ** Deletion
-// ** Label editing
+// ** Label manipulation
 // ** Coindexation
 // * Server-side operations
 // ** Saving
@@ -1864,7 +1864,7 @@ function undoBarrier() {
  * This function MUST be matched by a call to either `undoEndTransaction`
  * (which keeps all intermediate steps since the start call) or
  * `undoAbortTransaction` (which discards said steps).
- */ 
+ */
 function undoBeginTransaction() {
     undoTransactionStack.push({
         map: undoMap,
