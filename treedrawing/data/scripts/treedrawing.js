@@ -1164,8 +1164,11 @@ function moveNode(parent) {
  *
  * @param {DOM Node} parent the parent to move the selection under
  */
-// TODO: make undo aware
 function moveNodes(parent) {
+    if (!startnode || !endnode) {
+        return;
+    }
+    undoBeginTransaction();
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
     if (parent == document.getElementById("sn0")) {
         parent_ip = $("#sn0");
@@ -1190,7 +1193,12 @@ function moveNodes(parent) {
     // BUG when making XP and then use context menu: TODO XXX
 
     startnode = toselect;
-    moveNode(parent);
+    var res = ignoringUndo(function () { moveNode(parent); });
+    if (res) {
+        undoEndTransaction();
+    } else {
+        undoAbortTransaction();
+    }
     startnode = $(".snode[xxx=newnode]").first().get(0);
     endnode = undefined;
     pruneNode();
