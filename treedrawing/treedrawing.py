@@ -17,7 +17,7 @@ Lesser General Public License for more details.
 VERSION = "12.03-dev"
 
 import os.path
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+# CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 import re
 import sys, subprocess
@@ -72,7 +72,7 @@ class Treedraw(object):
         cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
     _cp_config = { 'tools.staticdir.on'    : True,
-                   'tools.staticdir.dir'   : CURRENT_DIR + '/data',
+                   'tools.staticdir.dir'   : util.get_main_dir() + '/data',
                    'tools.staticdir.index' : 'index.html',
                    'tools.caching.on'      : False
                    }
@@ -106,8 +106,8 @@ class Treedraw(object):
             f.write(self.versionCookie + "\n\n")
             f.write(tosave)
             f.close()
-            cmdline = 'java -classpath ' + CURRENT_DIR + '/../CS_Tony_oct19.jar' + \
-                ' csearch.CorpusSearch ' + CURRENT_DIR + '/nothing.q ' + \
+            cmdline = 'java -classpath ' + util.get_main_dir() + '/../CS_Tony_oct19.jar' + \
+                ' csearch.CorpusSearch ' + util.get_main_dir() + '/nothing.q ' + \
                 self.thefile
             # check_call throws on child error exit
             subprocess.check_call(cmdline.split(" "))
@@ -261,7 +261,7 @@ class Treedraw(object):
 
     def renderIndex(self, currentTree, currentSettings, test):
         # The CURRENT_DIR below is a bit of a hack
-        indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
+        indexTemplate = Template(filename = util.get_main_dir() + "/data/html/index.mako",
                                  strict_undefined = True)
 
         validators = {}
@@ -342,47 +342,53 @@ class Treedraw(object):
                      tree = self.treesToHtml(self.trees[
                          self.treeIndexStart:self.treeIndexEnd])))
 
+def _main(argv):
+    parser = argparse.ArgumentParser(description = "A program for annotating parsed corpora",
+                                     version = "Annotald " + VERSION,
+                                     conflict_handler = "resolve")
+    parser.add_argument("-s", "--settings", action = "store", dest = "settings",
+                        help = "path to settings.js file")
+    parser.add_argument("-p", "--port", action = "store",
+                        type = int, dest = "port",
+                        help = "port to run server on")
+    parser.add_argument("-o", "--out", dest = "outFile", action = "store_true",
+                        help = "boolean for identifying CorpusSearch output files")
+    parser.add_argument("-q", "--quiet", dest = "timelog", action = "store_false",
+                        help = "boolean for specifying whether you'd like to \
+    silence the timelogging")
+    parser.add_argument("-S", "--python-settings", dest = "pythonSettings",
+                        action = "store", help = "path to Python settings file")
+    parser.add_argument("-1", "--one-tree-mode", dest = "oneTree",
+                         action = "store_true",
+                         help = "start Annotald in one-tree mode")
+    # TODO: this will not be handled properly if the arg is greater than the
+    # number of trees in the file.
+    parser.add_argument("-n", "--n-trees-mode", dest = "numTrees",
+                         type = int, action = "store",
+                         help = "number of trees to show at a time")
+    parser.add_argument("psd", nargs='+')
+    parser.set_defaults(port = 8080,
+                        settings = sys.path[0] + "/settings.js",
+                        pythonSettings = sys.path[0] + "/settings.py",
+                        oneTree = False,
+                        numTrees = 1)
+    
+    args = parser.parse_args(argv)
+    shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
+    
+    
+    if args.timelog:
+        with open("timelog.txt", "a") as timelog:
+            timelog.write(shortfile + ": Started at " + \
+                              str(datetime.now().isoformat()) + ".\n")
+    
+    cherrypy.config.update({'server.socket_port': args.port})
+    
+    treedraw = Treedraw(args, shortfile)
+    cherrypy.quickstart(treedraw)
+    print('test')
+    
+if __name__ == '__main__':
+    _main(sys.argv[1:])
 
 
-#index.exposed = True
-parser = argparse.ArgumentParser(description = "A program for annotating parsed corpora",
-                                 version = "Annotald " + VERSION,
-                                 conflict_handler = "resolve")
-parser.add_argument("-s", "--settings", action = "store", dest = "settings",
-                    help = "path to settings.js file")
-parser.add_argument("-p", "--port", action = "store",
-                    type = int, dest = "port",
-                    help = "port to run server on")
-parser.add_argument("-o", "--out", dest = "outFile", action = "store_true",
-                    help = "boolean for identifying CorpusSearch output files")
-parser.add_argument("-q", "--quiet", dest = "timelog", action = "store_false",
-                    help = "boolean for specifying whether you'd like to \
-silence the timelogging")
-parser.add_argument("-S", "--python-settings", dest = "pythonSettings",
-                    action = "store", help = "path to Python settings file")
-parser.add_argument("-1", "--one-tree-mode", dest = "oneTree",
-                     action = "store_true",
-                     help = "start Annotald in one-tree mode")
-# TODO: this will not be handled properly if the arg is greater than the
-# number of trees in the file.
-parser.add_argument("-n", "--n-trees-mode", dest = "numTrees",
-                     type = int, action = "store",
-                     help = "number of trees to show at a time")
-parser.add_argument("psd", nargs='+')
-parser.set_defaults(port = 8080,
-                    settings = sys.path[0] + "/settings.js",
-                    pythonSettings = sys.path[0] + "/settings.py",
-                    oneTree = False,
-                    numTrees = 1)
-args = parser.parse_args()
-shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
-
-
-if args.timelog:
-    with open("timelog.txt", "a") as timelog:
-        timelog.write(shortfile + ": Started at " + \
-                          str(datetime.now().isoformat()) + ".\n")
-
-cherrypy.config.update({'server.socket_port': args.port})
-
-cherrypy.quickstart(Treedraw(args, shortfile))
