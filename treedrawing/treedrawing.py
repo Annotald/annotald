@@ -60,7 +60,7 @@ class Treedraw(object):
         self.startTime = str(int(time.time()))
 
         # TODO: this needs to come from an IO library, not ad hoc
-        if util.queryVersionCookie(self.versionCookie, "deep"):
+        if util.queryVersionCookie(self.versionCookie, "FORMAT") == "deep":
             self.conversionFn = util.deepTreeToHtml
             self.useMetadata = True
         else:
@@ -224,7 +224,8 @@ class Treedraw(object):
         return trees
 
     def treesToHtml(self, trees):
-        useLemmata = util.queryVersionCookie(self.versionCookie, fmt = "dash")
+        useLemmata = util.queryVersionCookie(self.versionCookie, "FORMAT") \
+                     == "dash"
         alltrees = '<div class="snode">'
         for tree in trees:
             tree = tree.strip()

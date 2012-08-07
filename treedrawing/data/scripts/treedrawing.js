@@ -53,7 +53,7 @@
 // ** Movement
 // ** Creation
 // ** Deletion
-// ** Label editing
+// ** Label manipulation
 // ** Coindexation
 // * Server-side operations
 // ** Saving
@@ -318,13 +318,13 @@ function handleNodeClick(e) {
                 e.stopPropagation();
                 moveNode(element);
             } else {
-                showContextMenu();
+                showContextMenu(e);
             }
         } else if (startnode && endnode) {
             e.stopPropagation();
             moveNodes(element);
         } else {
-            showContextMenu();
+            showContextMenu(e);
         }
     } else {
         // leftclick
@@ -348,17 +348,15 @@ function handleNodeClick(e) {
 
 // ========== Context Menu
 
-function showContextMenu() {
-    var e = window.event;
+function showContextMenu(e) {
     var element = e.target || e.srcElement;
     if (element == document.getElementById("sn0")) {
         clearSelection();
         return;
     }
 
-    // TODO(AWE): make this relative to mouse posn?
-    var left = $(element).offset().left + 4;
-    var top = $(element).offset().top + 17;
+    var left = e.pageX;
+    var top = e.pageY;
     left = left + "px";
     top = top + "px";
 
@@ -386,6 +384,19 @@ function showContextMenu() {
 function hideContextMenu() {
     $("#conMenu").css("visibility","hidden");
 }
+
+// ========== Messages
+
+/**
+ * Show the message history.
+ */
+function showMessageHistory() {
+    showDialogBox("Messages", "<textarea style='width:100%;height:100%;'>" +
+                  messageHistory + "</textarea>");
+}
+addStartupHook(function () {
+    $("#messagesTitle").click(showMessageHistory);
+});
 
 // ========== Dialog boxes
 
@@ -742,235 +753,265 @@ function editComment() {
 }
 
 /**
+ * Return the JQuery object with the editor for a leaf node.
+ * @private
+ */
+function leafEditorHtml(label, word, lemma) {
+    // Single quotes mess up the HTML code.
+    if (lemma) lemma = lemma.replace(/'/g, "&#39;");
+    word = word.replace(/'/g, "&#39;");
+    label = label.replace(/'/g, "&#39;");
+
+    var editorHtml = "<div id='leafeditor' class='snode'>" +
+            "<input id='leafphrasebox' class='labeledit' type='text' value='" +
+            label +
+            "' /><input id='leaftextbox' class='labeledit' type='text' value='" +
+            word +
+            "' " + (isEmpty(word) ? "disabled='disabled'" : "") + " />";
+    if (lemma) {
+        editorHtml += "<input id='leaflemmabox' class='labeledit' " +
+            "type='text' value='" + lemma + "' />";
+    }
+    editorHtml += "</div>";
+
+    return $(editorHtml);
+}
+
+/**
+ * Return the JQuery object with the replacement after editing a leaf node.
+ * @private
+ */
+function leafEditorReplacement(label, word, lemma) {
+    lemma = lemma.replace(/</g,"&lt;");
+    lemma = lemma.replace(/>/g,"&gt;");
+    lemma = lemma.replace(/'/g,"&#39;");
+
+    word = word.replace(/</g,"&lt;");
+    word = word.replace(/>/g,"&gt;");
+    word = word.replace(/'/g,"&#39;");
+
+    // TODO: test for illegal chars in label
+    label = label.toUpperCase();
+
+    var replText = "<div class='snode'>" + label +
+            " <span class='wnode'>" + word;
+    if (lemma) {
+        replText += "<span class='lemma'>-" +
+            lemma + "</span>";
+    }
+    replText += "</span></div>";
+    return $(replText);
+}
+
+/**
  * Edit the selected node
  *
  * If the selected node is a terminal, edit its label, and lemma.  The text is
  * available for editing if it is an empty node (trace, comment, etc.).  If a
  * non-terminal, edit the node label.
  */
-// TODO: make undo-aware
 function displayRename() {
-    if (startnode && !endnode) {
-        document.body.onkeydown = null;
-        $("#sn0").unbind('mousedown');
-        var oldClass = getLabel($(startnode));
-        function space(event) {
-            var element = (event.target || event.srcElement);
-            $(element).val($(element).val());
-            event.preventDefault();
+    // Inner functions
+    function space(event) {
+        var element = (event.target || event.srcElement);
+        $(element).val($(element).val());
+        event.preventDefault();
+    }
+    function postChange(newNode) {
+        if (newNode) {
+            newNode.removeClass(oldClass);
+            // TODO: make this not add numbers etc.
+            newNode.addClass(getLabel(newNode));
+            startnode = endnode = null;
+            updateSelection();
+            document.body.onkeydown = handleKeyDown;
+            $("#sn0").mousedown(handleNodeClick);
+            $("#undo").attr("disabled", false);
+            $("#redo").attr("disabled", false);
+            $("#save").attr("disabled", false);
         }
-        function postChange(newNode) {
-            if (newNode) {
-                newNode.removeClass(oldClass);
-                newNode.addClass(getLabel(newNode));
-                startnode = endnode = null;
-                updateSelection();
-                document.body.onkeydown = handleKeyDown;
-                $("#sn0").mousedown(handleNodeClick);
-            }
-            // TODO(AWE): check that theNewPhrase id gets removed...it
-            // doesn't seem to?
-        }
-        var label = getLabel($(startnode));
-        label = label.replace(/'/g, "&#39;");
-        var editor;
-        if ($(startnode).children(".wnode").size() > 0) {
-            // this is a terminal
-            var word, lemma, useLemma;
-            var isLeafNode = guessLeafNode($(startnode));
-            if ($(startnode).children(".wnode").children(".lemma").size() > 0) {
-                var preword = $.trim($(startnode).children().first().text());
-                preword = preword.split("-");
-                lemma = preword.pop();
-                word = preword.join("-");
-                useLemma = true;
-            } else {
-                word = $.trim($(startnode).children().first().text());
-                useLemma = false;
-            }
+    }
 
-            // Single quotes mess up the HTML code.
-            if (lemma) lemma = lemma.replace(/'/g, "&#39;");
-            word = word.replace(/'/g, "&#39;");
+    // Begin code
+    if (!startnode || endnode) {
+        return;
+    }
+    undoBeginTransaction();
+    touchTree($(startnode));
+    document.body.onkeydown = null;
+    $("#sn0").unbind('mousedown');
+    $("#undo").attr("disabled", true);
+    $("#redo").attr("disabled", true);
+    $("#save").attr("disabled", true);
+    // TODO: will no longer be accurate when labels don't include e.g. mov't index
+    var oldClass = getLabel($(startnode));
 
-            var editorHtml = "<div id='leafeditor' class='snode'>" +
-                "<input id='leafphrasebox' class='labeledit' type='text' value='" +
-                label +
-                "' /><input id='leaftextbox' class='labeledit' type='text' value='" +
-                word +
-                "' />";
-            if (useLemma) {
-                editorHtml += "<input id='leaflemmabox' class='labeledit' " +
-                    "type='text' value='" + lemma + "' />";
-            }
-            editorHtml += "</div>";
-
-            editor = $(editorHtml);
-            $(startnode).replaceWith(editor);
-            if (!isEmpty(word)) {
-                $("#leaftextbox").attr("disabled", true);
-            }
-            $("#leafphrasebox,#leaftextbox,#leaflemmabox").keydown(
-                function(event) {
-                    var replText, replNode;
-                    // if (event.keyCode == 9) {
-                    //       var elementId = (event.target || event.srcElement);
-                    // }
-                    if (event.keyCode == 32) {
-                        space(event);
-                    }
-                    if (event.keyCode == 27) {
-                        replText = "<div class='snode'>" +
-                            label + " <span class='wnode'>" + word;
-                        if (useLemma) {
-                            replText += "<span class='lemma'>-" +
-                                lemma + "</span>";
-                        }
-                        replText += "</span></div>";
-                        replNode = $(replText);
-                        $("#leafeditor").replaceWith(replNode);
-                        postChange(replNode);
-                    }
-                    if (event.keyCode == 13) {
-                        var newphrase =
-                                $("#leafphrasebox").val().toUpperCase();
-                        if (isLeafNode) {
-                            if (typeof testValidLeafLabel !== "undefined") {
-                                if (!testValidLeafLabel(newphrase)) {
-                                    displayWarning("Not a valid leaf label: '" +
-                                                   newphrase + "'.");
-                                    return;
-                                }
-                            }
-                        } else {
-                            if (typeof testValidPhraseLabel !== "undefined") {
-                                if (!testValidPhraseLabel(newphrase)) {
-                                    displayWarning("Not a valid phrase label: '" +
-                                                   newphrase + "'.");
-                                    return;
-                                }
-                            }
-                        }
-                        var newtext = $("#leaftextbox").val();
-                        var newlemma = "";
-                        if (useLemma) {
-                            newlemma = $('#leaflemmabox').val();
-                            newlemma = newlemma.replace(/</g,"&lt;");
-                            newlemma = newlemma.replace(/>/g,"&gt;");
-                            newlemma = newlemma.replace(/'/g,"&#39;");
-                        }
-                        newtext = newtext.replace(/</g,"&lt;");
-                        newtext = newtext.replace(/>/g,"&gt;");
-                        newtext = newtext.replace(/'/g,"&#39;");
-                        if (newtext + newlemma == "") {
-                            displayWarning("Cannot create an empty leaf.");
-                            return;
-                        }
-                        replText = "<div class='snode'>" +
-                            newphrase + " <span class='wnode'>" + newtext;
-                        if (useLemma) {
-                            replText += "<span class='lemma'>-" +
-                                newlemma + "</span>";
-                        }
-                        replText += "</span></div>";
-                        replNode = $(replText);
-                        $("#leafeditor").replaceWith(replNode);
-                        postChange(replNode);
-                    }
-                });
-            setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
+    var label = getLabel($(startnode));
+    if ($(startnode).children(".wnode").size() > 0) {
+        // this is a terminal
+        var word, lemma;
+        var isLeafNode = guessLeafNode($(startnode));
+        if ($(startnode).children(".wnode").children(".lemma").size() > 0) {
+            var preword = $.trim($(startnode).children().first().text());
+            preword = preword.split("-");
+            lemma = preword.pop();
+            word = preword.join("-");
         } else {
-            // this is not a terminal
-            editor = $("<input id='labelbox' class='labeledit' " +
-                           "type='text' value='" + label + "' />");
-            var origNode = $(startnode);
-            var isWordLevelConj =
-                    origNode.children(".snode").children(".snode").size() == 0 &&
-                    // TODO: make configurable
-                    origNode.children(".CONJ") .size() > 0;
-            textNode(origNode).replaceWith(editor);
-            $("#labelbox").keydown(
-                function(event) {
-                    // if (event.keyCode == 9) {
-                    //     // tab, do nothing
-                    //       var elementId = (event.target || event.srcElement).id;
-                    // }
-                    if (event.keyCode == 32) {
-                        space(event);
+            word = $.trim($(startnode).children().first().text());
+        }
+
+        $(startnode).replaceWith(leafEditorHtml(label, word, lemma));
+
+        $("#leafphrasebox,#leaftextbox,#leaflemmabox").keydown(
+            function(event) {
+                var replText, replNode;
+                if (event.keyCode == 32) {
+                    space(event);
+                }
+                if (event.keyCode == 27) {
+                    replNode = leafEditorReplacement(label, word, lemma);
+                    $("#leafeditor").replaceWith(replNode);
+                    postChange(replNode);
+                    undoAbortTransaction();
+                }
+                if (event.keyCode == 13) {
+                    var newlabel = $("#leafphrasebox").val();
+                    var newword = $("#leaftextbox").val();
+                    var newlemma;
+                    if (lemma) {
+                        newlemma = $('#leaflemmabox').val();
                     }
-                    if (event.keyCode == 27) {
-                        $("#labelbox").replaceWith(label + " ");
-                        postChange(origNode);
-                    }
-                    if (event.keyCode == 13) {
-                        var newphrase = $("#labelbox").val().toUpperCase();
-                        if (typeof testValidPhraseLabel !== "undefined") {
-                            if (!(testValidPhraseLabel(newphrase) ||
-                                  (typeof testValidLeafLabel !== "undefined" &&
-                                   isWordLevelConj &&
-                                   testValidLeafLabel(newphrase)))) {
-                                displayWarning("Not a valid phrase label: '" +
-                                              newphrase + "'.");
+
+                    if (isLeafNode) {
+                        if (typeof testValidLeafLabel !== "undefined") {
+                            if (!testValidLeafLabel(newlabel)) {
+                                displayWarning("Not a valid leaf label: '" +
+                                               newlabel + "'.");
                                 return;
                             }
                         }
-                        $("#labelbox").replaceWith(newphrase + " ");
-                        postChange(origNode);
+                    } else {
+                        if (typeof testValidPhraseLabel !== "undefined") {
+                            if (!testValidPhraseLabel(newlabel)) {
+                                displayWarning("Not a valid phrase label: '" +
+                                               newlabel + "'.");
+                                return;
+                            }
+                        }
                     }
-                });
-            setTimeout(function(){ $("#labelbox").focus(); }, 10);
-        }
+                    if (newword + newlemma == "") {
+                        displayWarning("Cannot create an empty leaf.");
+                        return;
+                    }
+                    replNode = leafEditorReplacement(newlabel, newword,
+                                                     newlemma);
+                    $("#leafeditor").replaceWith(replNode);
+                    postChange(replNode);
+                    undoEndTransaction();
+                }
+            });
+        setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
+    } else {
+        // this is not a terminal
+        var editor = $("<input id='labelbox' class='labeledit' " +
+                       "type='text' value='" + label + "' />");
+        var origNode = $(startnode);
+        var isWordLevelConj =
+                origNode.children(".snode").children(".snode").size() == 0 &&
+                // TODO: make configurable
+                origNode.children(".CONJ") .size() > 0;
+        textNode(origNode).replaceWith(editor);
+        $("#labelbox").keydown(
+            function(event) {
+                // make tab do nothing?
+                if (event.keyCode == 32) {
+                    space(event);
+                }
+                if (event.keyCode == 27) {
+                    $("#labelbox").replaceWith(label + " ");
+                    postChange(origNode);
+                    undoAbortTransaction();
+                }
+                if (event.keyCode == 13) {
+                    var newphrase = $("#labelbox").val().toUpperCase();
+                    if (typeof testValidPhraseLabel !== "undefined") {
+                        if (!(testValidPhraseLabel(newphrase) ||
+                              (typeof testValidLeafLabel !== "undefined" &&
+                               isWordLevelConj &&
+                               testValidLeafLabel(newphrase)))) {
+                            displayWarning("Not a valid phrase label: '" +
+                                           newphrase + "'.");
+                            return;
+                        }
+                    }
+                    $("#labelbox").replaceWith(newphrase + " ");
+                    postChange(origNode);
+                    undoEndTransaction();
+                }
+            });
+        setTimeout(function(){ $("#labelbox").focus(); }, 10);
     }
 }
 
 /**
  * Edit the lemma of a terminal node.
  */
-// TODO: make undo-aware
 function editLemma() {
-    var childLemmata = $(startnode).children(".wnode").children(".lemma");
-    if (startnode && !endnode && childLemmata.size() > 0) {
-        document.body.onkeydown = null;
-        $("#sn0").unbind('mousedown');
-        function space(event) {
-            var element = (event.target || event.srcElement);
-            $(element).val($(element).val());
-            event.preventDefault();
-        }
-        function postChange() {
-            startnode = null; endnode = null;
-            updateSelection();
-            document.body.onkeydown = handleKeyDown;
-            $("#sn0").mousedown(handleNodeClick);
-        }
-        var lemma = $(startnode).children(".wnode").children(".lemma").text();
-        lemma = lemma.substring(1);
-        var editor=$("<span id='leafeditor' class='wnode'><input " +
-                     "id='leaflemmabox' class='labeledit' type='text' value='" +
-                     lemma + "' /></span>");
-        $(startnode).children(".wnode").children(".lemma").replaceWith(editor);
-        $("#leaflemmabox").keydown(
-            function(event) {
-                if (event.keyCode == '9') {
-                    // var elementId = (event.target || event.srcElement).id;
-                    event.preventDefault();
-                }
-                if (event.keyCode == '32') {
-                    space(event);
-                }
-                if (event.keyCode == '13') {
-                    var newlemma = $('#leaflemmabox').val();
-                    newlemma = newlemma.replace("<","&lt;");
-                    newlemma = newlemma.replace(">","&gt;");
-                    newlemma = newlemma.replace(/'/g,"&#39;");
-
-                    $("#leafeditor").replaceWith("<span class='lemma'>-" +
-                                                 newlemma + "</span>");
-                    postChange();
-                }
-            });
-        setTimeout(function(){ $("#leaflemmabox").focus(); }, 10);
+    // Inner functions
+    function space(event) {
+        var element = (event.target || event.srcElement);
+        $(element).val($(element).val());
+        event.preventDefault();
     }
+    function postChange() {
+        startnode = null; endnode = null;
+        updateSelection();
+        document.body.onkeydown = handleKeyDown;
+        $("#sn0").mousedown(handleNodeClick);
+        $("#undo").attr("disabled", false);
+        $("#redo").attr("disabled", false);
+        $("#save").attr("disabled", false);
+    }
+
+    // Begin code
+    var childLemmata = $(startnode).children(".wnode").children(".lemma");
+    if (!startnode || endnode || childLemmata.size() != 1) {
+        return;
+    }
+    document.body.onkeydown = null;
+    $("#sn0").unbind('mousedown');
+    undoBeginTransaction();
+    touchTree($(startnode));
+    $("#undo").attr("disabled", true);
+    $("#redo").attr("disabled", true);
+    $("#save").attr("disabled", true);
+
+    var lemma = $(startnode).children(".wnode").children(".lemma").text();
+    lemma = lemma.substring(1);
+    var editor=$("<span id='leafeditor' class='wnode'><input " +
+                 "id='leaflemmabox' class='labeledit' type='text' value='" +
+                 lemma + "' /></span>");
+    $(startnode).children(".wnode").children(".lemma").replaceWith(editor);
+    $("#leaflemmabox").keydown(
+        function(event) {
+            if (event.keyCode == 9) {
+                event.preventDefault();
+            }
+            if (event.keyCode == 32) {
+                space(event);
+            }
+            if (event.keyCode == 13) {
+                var newlemma = $('#leaflemmabox').val();
+                newlemma = newlemma.replace("<","&lt;");
+                newlemma = newlemma.replace(">","&gt;");
+                newlemma = newlemma.replace(/'/g,"&#39;");
+
+                $("#leafeditor").replaceWith("<span class='lemma'>-" +
+                                             newlemma + "</span>");
+                postChange();
+            }
+        });
+    setTimeout(function(){ $("#leaflemmabox").focus(); }, 10);
 }
 
 
@@ -983,7 +1024,9 @@ function editLemma() {
  *
  * The movement operation must not change the text of the token.
  *
- * @param {DOM Node} parent the parent node to move selection under.
+ * @param {DOM Node} parent the parent node to move selection under
+ *
+ * @returns {Boolean} whether the operation was successful
  */
 function moveNode(parent) {
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
@@ -998,15 +1041,17 @@ function moveNode(parent) {
     if (!isPossibleTarget(parent) || // can't move under a tag node
         $(startnode).parent().children().length == 1 || // cant move an only child
         $(parent).parents().is(startnode) // can't move under one's own child
-       ) {
+       )
+    {
         clearSelection();
-        return;
+        return false;
     } else if ($(startnode).parents().is(parent)) {
         // move up if moving to a node that is already my parent
         if ($(startnode).parent().children().first().is(startnode)) {
             if ($(startnode).parentsUntil(parent).slice(0,-1).
                 filter(":not(:first-child)").size() > 0) {
-                return;
+                clearSelection();
+                return false;
             }
             if (parent == document.getElementById("sn0")) {
                 touchTree($(startnode));
@@ -1022,11 +1067,12 @@ function moveNode(parent) {
         } else if ($(startnode).parent().children().last().is(startnode)) {
             if ($(startnode).parentsUntil(parent).slice(0,-1).
                 filter(":not(:last-child)").size() > 0) {
-                return;
+                clearSelection();
+                return false;
             }
             if (parent == document.getElementById("sn0")) {
-                registerNewRootTree($(startnode));
                 touchTree($(startnode));
+                registerNewRootTree($(startnode));
             } else {
                 touchTree($(startnode));
             }
@@ -1038,7 +1084,7 @@ function moveNode(parent) {
         } else {
             // cannot move from this position
             clearSelection();
-            return;
+            return false;
         }
     } else {
         // otherwise move under my sister
@@ -1086,6 +1132,8 @@ function moveNode(parent) {
                 if (parent_ip.attr("id") == "sn0") {
                     $("#sn0").mousedown(handleNodeClick);
                 }
+                clearSelection();
+                return false;
             } else {
                 undoEndTransaction();
             }
@@ -1111,12 +1159,15 @@ function moveNode(parent) {
                 if (parent_ip == "sn0") {
                     $("#sn0").mousedown(handleNodeClick);
                 }
+                clearSelection();
+                return false;
             } else {
                 undoEndTransaction();
             }
         } // TODO: conditional branches not exhaustive
     }
     clearSelection();
+    return true;
 }
 
 /**
@@ -1127,8 +1178,11 @@ function moveNode(parent) {
  *
  * @param {DOM Node} parent the parent to move the selection under
  */
-// TODO: make undo aware
 function moveNodes(parent) {
+    if (!startnode || !endnode) {
+        return;
+    }
+    undoBeginTransaction();
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
     if (parent == document.getElementById("sn0")) {
         parent_ip = $("#sn0");
@@ -1153,7 +1207,12 @@ function moveNodes(parent) {
     // BUG when making XP and then use context menu: TODO XXX
 
     startnode = toselect;
-    moveNode(parent);
+    var res = ignoringUndo(function () { moveNode(parent); });
+    if (res) {
+        undoEndTransaction();
+    } else {
+        undoAbortTransaction();
+    }
     startnode = $(".snode[xxx=newnode]").first().get(0);
     endnode = undefined;
     pruneNode();
@@ -1578,8 +1637,6 @@ var saveInProgress = false;
 
 function saveHandler (data) {
     if (data['result'] == "success") {
-        // TODO(AWE): add time of last successful save
-        // TODO(AWE): add filename to avoid overwriting another file
         displayInfo("Save success.");
     } else {
         lastsavedstate = "";
@@ -1820,6 +1877,13 @@ addStartupHook(function () {
     resetUndo();
 });
 
+/**
+ * Reset the undo system.
+ *
+ * This function removes any intermediate state the undo system has stored; it
+ * does not affect the undo history.
+ * @private
+ */
 function resetUndo() {
     undoMap = {};
     undoNewTrees = [];
@@ -1827,6 +1891,10 @@ function resetUndo() {
     undoTransactionStack = [];
 }
 
+/**
+ * Record an undo step.
+ * @private
+ */
 function undoBarrier() {
     if (_.size(undoMap) == 0 &&
         _.size(undoNewTrees) == 0 &&
@@ -1839,8 +1907,16 @@ function undoBarrier() {
         delTr: undoDeletedTrees
     });
     resetUndo();
+    redoStack = [];
 }
 
+/**
+ * Begin an undo transaction.
+ *
+ * This function MUST be matched by a call to either `undoEndTransaction`
+ * (which keeps all intermediate steps since the start call) or
+ * `undoAbortTransaction` (which discards said steps).
+ */
 function undoBeginTransaction() {
     undoTransactionStack.push({
         map: undoMap,
@@ -1849,10 +1925,16 @@ function undoBeginTransaction() {
     });
 }
 
+/**
+ * End an undo transaction, keeping its changes
+ */
 function undoEndTransaction() {
     undoTransactionStack.pop();
 }
 
+/**
+ * End an undo transaction, discarding its changes
+ */
 function undoAbortTransaction() {
     var t = undoTransactionStack.pop();
     undoMap = t["map"];
@@ -1860,6 +1942,26 @@ function undoAbortTransaction() {
     undoDeletedTrees = t["delTr"];
 }
 
+/**
+ * Execute a function, discarding whatever effects it has on the undo system.
+ *
+ * @param {Function} fn a function to execute
+ *
+ * @returns the result of `fn`
+ */
+function ignoringUndo(fn) {
+    // a bit of a grim hack, but it works
+    undoBeginTransaction();
+    var res = fn();
+    undoAbortTransaction();
+    return res;
+}
+
+/**
+ * Inform the undo system that changes are being made.
+ *
+ * @param {JQuery Node} node the node in which changes are being made
+ */
 function touchTree(node) {
     var root = $(getTokenRoot(node));
     if (!undoMap[root.attr("id")]) {
@@ -1867,6 +1969,11 @@ function touchTree(node) {
     }
 }
 
+/**
+ * Inform the undo system of the addition of a new tree at the root level.
+ *
+ * @param {JQuery Node} tree the tree being added
+ */
 function registerNewRootTree(tree) {
     var newid = "id" + idNumber;
     idNumber++;
@@ -1874,6 +1981,11 @@ function registerNewRootTree(tree) {
     tree.attr("id", newid);
 }
 
+/**
+ * Inform the undo system of a tree's removal at the root level
+ *
+ * @param {JQuery Node} tree the tree being removed
+ */
 function registerDeletedRootTree(tree) {
     var prev = tree.prev();
     if (prev.length == 0) {
@@ -1881,10 +1993,16 @@ function registerDeletedRootTree(tree) {
     }
     undoDeletedTrees.push({
         tree: tree,
-        before: prev
+        before: prev.attr("id")
     });
 }
 
+/**
+ * Perform an undo operation.
+ *
+ * This is a worker function, wrapped by `newUndo` and `newRedo`.
+ * @private
+ */
 function doUndo(undoData) {
     var map = {},
         newTr = [],
@@ -1900,12 +2018,13 @@ function doUndo(undoData) {
     // the insertion point of one of these is going to get zapped.  This
     // shouldn't happen, though.
     _.each(undoData["delTr"], function(v) {
-        var prev = v["prev"];
+        var prev = v["before"];
         if (prev) {
-            v["tree"].insertAfter(prev);
+            v["tree"].insertAfter($("#" + prev));
         } else {
             v["tree"].prependTo($("#sn0"));
         }
+        newTr.push(v["tree"].attr("id"));
     });
 
     _.each(undoData["newTr"], function(v) {
@@ -1916,7 +2035,7 @@ function doUndo(undoData) {
         }
         delTr.push({
             tree: theNode.clone(),
-            before: prev
+            before: prev.attr("id")
         });
         theNode.remove();
     });
@@ -1928,6 +2047,9 @@ function doUndo(undoData) {
     };
 }
 
+/**
+ * Perform undo.
+ */
 function newUndo() {
     if (undoStack.length == 0) {
         displayWarning("No further undo information");
@@ -1938,6 +2060,9 @@ function newUndo() {
     updateSelection();
 }
 
+/**
+ * Perform redo.
+ */
 function newRedo () {
     if (redoStack.length == 0) {
         displayWarning("No further redo information");
@@ -2148,6 +2273,7 @@ function resetLabelClasses(alertOnError) {
 // " "parseIndex" "parseLabel" "parseIndexType" "getIndex" "getIndexType\
 // " "shouldIndexLeaf" "maxIndex" "addToIndices" "changeJustLabel\
 // " "toggleStringExtension" "lookupNextLabel" "commentTypes\
-// " "invisibleCategories" "invisibleRootCategories" "ipnodes")
+// " "invisibleCategories" "invisibleRootCategories" "ipnodes" "messageHistory\
+// ")
 // indent-tabs-mode: nil
 // End:

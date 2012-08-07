@@ -7,3 +7,5 @@ test-files/
 *.pyc
 api-doc/
 priv-doc/
+htmlcov/
+.coverage

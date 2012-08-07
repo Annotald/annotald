@@ -86,7 +86,7 @@ any later version.  See the LICENSE file for more information. -->
       </div>
 
       <div id="messageBox" class="menuPane">
-        <div class="menuTitle">Messages</div>
+        <div class="menuTitle" id="messagesTitle">Messages</div>
         <div id="messageBoxInner">----</div>
       </div>
     </div>

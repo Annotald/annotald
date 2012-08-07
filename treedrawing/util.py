@@ -52,12 +52,24 @@ def unicode_pprint_flat(tree, nodesep, parens, quotes):
         return u'%s%r%s %s%s' % (parens[0], tree.node, nodesep,
                                  STR.join(childstrs), parens[1])
 
-# TODO: this will be much easier when we use nltk.tree...
-def queryVersionCookie(string, fmt):
-    versionRe = re.compile("\\(FORMAT (" + fmt + ")\\)")
-    temp = versionRe.search(string)
-    if temp:
-        return temp.group(1)
+def queryVersionCookie(tree, key):
+    if tree == "" or not tree:
+        return None
+    t = T.Tree(tree)[0]
+    if t.node != "VERSION":
+        return
+    return _queryVersionCookieInner(t, key)
+
+def _queryVersionCookieInner(tree, key):
+    # TODO: maybe we should just convert the version cookie into a dict
+    # and use that
+    keys = key.split(".")
+    f = filter(lambda n: n.node == keys[0], tree)
+    if len(f) == 1:
+        if len(keys) == 1:
+            return f[0][0]
+        else:
+            return _queryVersionCookieInner(f[0], ".".join(keys[1:]))
     else:
         return None
 
@@ -101,9 +113,6 @@ def treeToHtml(tree, version, extra_data = None):
     else:
         res = '<div class="snode"'
         if extra_data:
-            if "\"" in extra_data:
-                # TODO(AWE): relax this restriction
-                raise Exception("can't cope with ID/METADATA containing double-quote yet!")
             res += ' data-metadata="' + safe_json(nodeListToDict(extra_data)) + '"'
         res += '>' + tree.node + ' '
         res += "\n".join(map(lambda x: treeToHtml(x, version), tree))
@@ -159,8 +168,8 @@ def deepTreeToHtml(tree, *args):
                 # Find this tree's metadata; we will need it later
                 metadata = t
             elif isinstance(t[0], T.Tree):
-                # if this tree has branching daughters, other than META, then it
-                # is not a leaf.
+                # if this tree has branching daughters, other than META,
+                # then it is not a leaf.
                 isLeaf = False
 
     # Find out what to call this node
@@ -169,7 +178,6 @@ def deepTreeToHtml(tree, *args):
     res = '<div class="snode ' + \
         cssClassFromLabel(theLabel) + '"'
     if metadata:
-        # TODO: json encode
         res += ' data-metadata="' + safe_json(metadataToDict(metadata)) + '"'
     res += '>' + theLabel + ' '
     if isSimpleLeaf:
