@@ -19,22 +19,28 @@ VERSION = "12.03-dev"
 import os.path
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Python standard library
+import codecs
+from datetime import datetime
+import json
 import re
-import sys, subprocess
-import cherrypy, json
-import nltk.tree as T
-import argparse
-from mako.template import Template
-import util
 import runpy
+import subprocess
+import sys
 import time
-import cherrypy.lib.caching
 import traceback
 
-# JB: codecs necessary for Unicode Greek support
-import codecs
+# Part of the standard library as of 2.7
+import argparse
 
-from datetime import datetime
+# External libraries
+import cherrypy
+import cherrypy.lib.caching
+from mako.template import Template
+import nltk.tree as T
+
+# Local libraries
+import util
 
 class Treedraw(object):
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
