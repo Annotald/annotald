@@ -1,4 +1,4 @@
-.PHONY: api-doc private-doc deploy-docs test
+.PHONY: api-doc private-doc deploy-docs test all-docs doc
 
 api-doc:
 	jsdoc -v -d=api-doc treedrawing/data/scripts/treedrawing.js \
@@ -11,9 +11,14 @@ api-doc:
 deploy-docs: api-doc
 	cp -r api-doc ../annotald-doc
 
-private-doc:
+priv-doc:
 	jsdoc -v -p -d=priv-doc treedrawing/data/scripts/treedrawing.js \
 		treedrawing/data/scripts/treedrawing.utils.js
+
+doc:
+	a2x --verbose -f xhtml doc/devel.adoc
+
+all-docs: api-doc priv-docs doc
 
 test:
 	nosetests2 -w treedrawing --with-coverage --cover-erase --cover-package=util
