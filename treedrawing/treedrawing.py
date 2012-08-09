@@ -14,6 +14,7 @@ Lesser General Public License for more details.
 @contact: jana.eliz.beck@gmail.com
 """
 
+
 VERSION = "12.03-dev"
 
 import os.path
@@ -31,12 +32,19 @@ import time
 import cherrypy.lib.caching
 import traceback
 
+import win32process
+
 # JB: codecs necessary for Unicode Greek support
 import codecs
 
 from datetime import datetime
 
 class Treedraw(object):
+    
+    pythonOptions = {'extraJavascripts' : [],
+                 'debugJs' : False,
+                 'validators' : {} }
+    
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
     # object has no attribute 'thefile'
     def __init__(self, args, shortfile):
@@ -68,7 +76,7 @@ class Treedraw(object):
             self.useMetadata = False
         self.showingPartialFile = self.options.oneTree or \
                                   self.options.numTrees > 1
-        self.pythonOptions = runpy.run_path(args.pythonSettings)
+        #self.pythonOptions = runpy.run_path(args.pythonSettings)
         cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
     _cp_config = { 'tools.staticdir.on'    : True,
@@ -106,11 +114,19 @@ class Treedraw(object):
             f.write(self.versionCookie + "\n\n")
             f.write(tosave)
             f.close()
-            cmdline = 'java -classpath ' + util.get_main_dir() + '/../CS_Tony_oct19.jar' + \
+            cmdline = 'java -classpath ' + util.get_main_dir() + '/CS_Tony_oct19.jar' + \
                 ' csearch.CorpusSearch ' + util.get_main_dir() + '/nothing.q ' + \
                 self.thefile
-            # check_call throws on child error exit
-            subprocess.check_call(cmdline.split(" "))
+            # add startupinfo for win
+            #if os.name == "nt":
+            #startupinfo = subprocess.STARTUPINFO()
+            #startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                # check_call throws on child error exit
+            #subprocess.STARTF_USESHOWWINDOW = 1
+            subprocess.check_call(cmdline.split(" "),creationflags = win32process.CREATE_NO_WINDOW)
+            #else:    
+            #    subprocess.check_call(cmdline.split(" "))
+                                
             if os.name == "nt":
                 # Windows cannot do atomic file renames
                 os.unlink(self.thefile)
