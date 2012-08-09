@@ -32,7 +32,10 @@ import time
 import cherrypy.lib.caching
 import traceback
 
-import win32process
+try:
+    import win32process
+except:
+    pass
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -123,7 +126,10 @@ class Treedraw(object):
             #startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                 # check_call throws on child error exit
             #subprocess.STARTF_USESHOWWINDOW = 1
-            subprocess.check_call(cmdline.split(" "),creationflags = win32process.CREATE_NO_WINDOW)
+            if os.name == "nt":
+                subprocess.check_call(cmdline.split(" "),creationflags = win32process.CREATE_NO_WINDOW)
+            else:
+                subprocess.check_call(cmdline.split(" "))
             #else:    
             #    subprocess.check_call(cmdline.split(" "))
                                 
