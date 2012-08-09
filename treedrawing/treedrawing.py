@@ -120,18 +120,12 @@ class Treedraw(object):
             cmdline = 'java -classpath ' + util.get_main_dir() + '/CS_Tony_oct19.jar' + \
                 ' csearch.CorpusSearch ' + util.get_main_dir() + '/nothing.q ' + \
                 self.thefile
-            # add startupinfo for win
-            #if os.name == "nt":
-            #startupinfo = subprocess.STARTUPINFO()
-            #startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                # check_call throws on child error exit
-            #subprocess.STARTF_USESHOWWINDOW = 1
+
+            # make sure console is hidden in windows py2exe version
             if os.name == "nt":
                 subprocess.check_call(cmdline.split(" "),creationflags = win32process.CREATE_NO_WINDOW)
             else:
                 subprocess.check_call(cmdline.split(" "))
-            #else:    
-            #    subprocess.check_call(cmdline.split(" "))
                                 
             if os.name == "nt":
                 # Windows cannot do atomic file renames
