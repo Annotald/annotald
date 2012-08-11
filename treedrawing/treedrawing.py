@@ -37,6 +37,8 @@ try:
 except:
     pass
 
+sys.stderr = open( os.path.expanduser("~/annotald.err.log.txt"), "w" )
+
 # JB: codecs necessary for Unicode Greek support
 import codecs
 
