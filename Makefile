@@ -15,8 +15,13 @@ priv-doc:
 	jsdoc -v -p -d=priv-doc treedrawing/data/scripts/treedrawing.js \
 		treedrawing/data/scripts/treedrawing.utils.js
 
-doc:
+doc: doc/devel.html doc/user.html
+
+doc/devel.html: doc/devel.adoc
 	a2x --verbose -f xhtml doc/devel.adoc
+
+doc/user.html: doc/user.adoc
+	a2x --verbose -f xhtml -k doc/user.adoc
 
 all-docs: api-doc priv-doc doc
 

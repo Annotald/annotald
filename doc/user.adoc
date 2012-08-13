@@ -1,0 +1,531 @@
+// Copyright 2012 Aaron Ecay
+
+// This work is licensed under a Creative Commons
+// Attribution-NonCommercial-NoDerivs 3.0 Unported License
+// http://creativecommons.org/licenses/by-nc-nd/3.0/deed.en_US
+
+// License to be changed to something less restrictive once this is
+// release-ready
+
+// Include the file with author info:
+//   a2x: --asciidoc-opts="-a docinfo"
+// Include the default stylesheet and our customizations:
+//   a2x: --stylesheet="docbook-xsl.css annotald-manual.css"
+
+
+= Annotald User’s Guide
+
+// TODO: once this is reasonably complete, add links to and from
+// various parts of the documentation
+
+// TODO: centering pictures doesn’t work
+
+== Introduction
+
+This manual is designed to teach users how to use the Annotald program
+for annotating parsed corpora according to (a version of) the Penn
+treebank standards.
+// TODO: link, also our labgroup updates (incorp. latter into this doc?)
+In that vein, it consists of both documentation relating to the
+configuration and use of Annotald, as well as instruction on the
+application of the Penn treebank standards to corpus data.  For
+simplicity, the annotation examples in this guide will be based on
+modern English.  The principles illustrated should be applicable to
+annotation in all languages, however.
+
+// eventually: availability of annotation seminars etc.
+
+// annotald history, acknowledgments
+
+== Installation
+
+In order to use Annotald, it is necessary to install several programs
+that Annotald depends on in order to function.  Like Annotald itself,
+all of these programs are Free Software.footnote:[There are two meanings
+of the term “Free Software.”  The first refers to the software being
+provided free of charge.  The second means that the software’s source
+code is freely available to its users for them to inspect, modify, and
+reuse.  The second of these definitions is the most important to
+ensuring scientific openness; as it happens Annotald and its
+dependencies fulfil both definitions.]
+
+1. Download and install the latest stable version of
+   https://www.google.com/intl/en/chrome/browser/?hl=en&lr=all[Google’s
+   Chrome web browser]
+2. Install the latest stable version of Python 2, if necessary.
+   Macintosh computers have a sufficient version of Python
+   pre-installed.  (If you use Linux, it is also very likely that Python
+   2 is already installed on your computer.)
+3. Install the NTLK Python package.
+   http://nltk.org/install.html[Instructions to do so] are provided by
+   NLTK’s developer.
+4. Install the python packages Mako, CherryPy, and
+   argparse.footnote:[argparse only needs to be installed if your
+   system’s Python version is 2.6, as on some older Macs.  It is
+   included with Python 2.7.]  This can be done using the `pip` command,
+   which you should have installed as a prerequisite for NLTK in the
+   previous step.  For Mac, enter `sudo pip install mako cherrypy
+   argparse` in the Terminal program’s command line.  For Windows,
+   choose “Run...” from the start menu, and enter
+   `c:\Python27\Scripts\pip install mako cherrypy argparse`
+
+Then you must download Annotald itself.  Navigate to
+https://github.com/janabeck/Annotald/tags[the Annotald release page] and
+download the zip file corresponding to the latest Annotald stable
+release.
+// TODO: a rigorous system to differentiate between devel and release
+// tags
+// also: maybe put this link on the website somewhere, to make it
+// simpler. (maybe have people download the latest zip of the release
+// branch?)
+Uncompress the file, and open a command line.
+
+// TODO: this will eventually be graphicalized by Anton; put off writing
+// this until we know how that will work.
+
+// “getting started section to encompass ui+phil, customization, other things?
+
+== Annotald UI and Philosophy
+
+The Annotald user interface (UI) is shown in the following screenshot:
+
+image::images/annotald-hello.png[The Annotald UI at startup,align="center"]
+
+On the left-hand side of the screen, the following are present, from top
+to bottom:
+- The control panel.  This contains buttons for functions such as
+  saving, undo/redo, and clocking in/out from a timelog file.
+- The tools panel.  Empty in this screenshot, this contains advanced
+  functionality when enabled, such as external validation.
+- The messages pane.  This area displays messages messages from the
+  program to the user.
+
+Various Annotald functions involve showing a dialog box to the user.
+For example, the following image demonstrates the message history dialog
+(accessed by clicking “Messages” above the message area).  To dismiss a
+dialog, press the escape key.  (Different dialogs may also display
+buttons allowing you to close them).
+
+image::images/annotald-dialog.png[An example of a dialog box in Annotald,align="center"]
+
+The right-hand portion of the screen is devoted to showing the contents
+of the file being edited.  The tree structure of the annotation is
+represented as a series of concentric boxes.  Clauses are highlighted in
+dark pink, in order to make them more salient, and provide an additional visual
+reference to the structure of the sentences being edited.  The box which
+represents the file itself is dark brown.
+
+// editing operations cannot change the text
+
+There are three ways of interacting with Annotald’s user interface.  
+
+=== Mouse
+
+It is recommended that Annotald users have a full-sized mouse with at least
+two buttons.  Because of Annotald’s heavy reliance on mousing, neither a
+laptop trackpad nor a single-button mouse will prove satisfactory from an
+ergonomic point of view.
+
+The mouse serves to select nodes in the UI.  Click anywhere in the box
+corresponding to a node in order to select it.  The horizontal mouse
+motion necessary can be reduced by clicking on the left edge of the
+node; the left side of each node’s box is padded in order ot facilitate
+this.  An example of a selected node is shown here, notice that the
+selected node has been highlighted in blue:
+
+image::images/annotald-select.png[Selection in the Annotald UI,align="center"]
+
+Up to two nodes may be selected at a time.  If a node is selected,
+clicking another node will also highlight that node:
+
+image::images/annotald-select2.png[Dual selection in the Annotald UI,align="center"]
+
+Further clicks after two nodes are selected will de-highlight the
+previous second selection, and highlight the clicked node.  To clear any
+selection in effect, use the space bar.
+
+Selected nodes form the basis for many keyboard commands (TODO: link).
+Node selection is also the basis of movement commands, of a certain
+type.  The mouse is used for movement commands that edit the structure
+of the tree.  In order to annotate movement in the sense of linguistic
+movement (wh-movement, etc.), see the `leafAfter` and `leafBefore`
+functions.
+// TODO: link
+
+In order to move a selected node, right click on the desired
+destination.  Movements must satisfy certain structural (e.g. a node
+cannot be moved into its own daughter) as well as extrinsic conditions
+(no movement operation may change the text of the sentence, e.g. by
+reordering two words).  Assuming these conditions are met, the movement
+operation will take place.  Right clicking with two selected nodes will
+move those nodes, as well as any intervening material, to the desired
+destination.  The two selected nodes must be sisters of each other.
+
+// TODO: ctrl click -> new xp
+
+// TODO: mouse wheel...document, or remove the code
+
+=== Context menu
+
+Right-clicking a node when no selection is present will summon the
+context menu, which is illustrated here:
+
+image::images/annotald-context.png[The Annotald context menu,align="center"]
+
+The context menu has three columns.  The first has suggested label
+changes for the node; clicking any of these will change the node’s label
+to the chosen option.  The second contains options for adding a sister
+before the node; clicking any of these will insert a node with the given
+label and text.  The third column contains options for toggling certain
+dash tags.
+
+// TODO: split context menu dash tags from all dash tags in config file
+// TODO: case menu
+
+The context menu can be dismissed by left-clicking outside of it.
+
+=== Keyboard
+
+Annotald operations other than movement are controlled by the keyboard.
+Annotald users should keep their right hand on the mouse at all times;
+thus, only keys on the left hand side of the keyboard are used as key
+shortcuts (with a small number of exceptions for commands which require
+full keyborad use).footnote:[Left handed users may wish to use the left
+hand for mousing and the right hand for the keyboard, but the principle
+of using one hand exclusively for each operation remains the same.
+Additionally, the default configuration will have to be adjusted for
+users of non-English keyboard layouts.]
+
+// TODO: link to section about customizing keybindings
+
+
+== Customization
+
+There are two files which are relavant to the customization of Annotald:
+`settings.js` and `settings.py`.  The former is written in Javascript,
+and contains the bulk of Annotald’s user interface settings.  The latter
+is written in Python, and (generally speaking) contains customizations
+that are very pervasive or advanced.  A commented sample version of both
+files is included in the Annotald download, which it is recommended for
+users to base their customizations on.
+
+By default, the `annotald` command loads the included sample
+configurations.  To pass a customized Javascript settings file to the
+command, use the `-s` command line option.  For a Python settings file,
+the option is `-S` (note capitalization).
+
+=== Javascript customization options
+
+In this section, the options in `settings.js` will be discussed.  Options
+specifiable in `settings.py` on the other hand will be discussed in
+other sections where they are implicated.
+
+// TODO: case menu
+// TODO: discussion assumes familiarity with penn treebank conventions,
+// include note to read intro to annotation section first if reader is
+// not familiar
+[horizontal]
+`testValidPhraseLabel`/`testValidLeafLabel`:: See the discussion of
+these options at TODO: link
+
+`disableUndo`:: Deprecated
+
+`extensions`:: Specify the list and order of dash tags available in the
+corpus.  There are three variants of this variable:
+- `leaf_extensions`: Dash tags applicable to leaf (terminal) nodes
+- `clause_extensions`: Dash tags applicable to clausal nodes (of
+  category CP or IP)
+- `extensions`: Dash tags applicable to non-clausal non-leaf nodes
+
++
+Not every dash tag needs to appear in this list, only those which need to
+be toggled on and off in a binary fashion.  Thus, for example, the dash
+tag “OB1” (for direct objects) is never toggled in a binary fashion, but
+rather as part of a cycle that includes setting the category to “NP” and
+moving through “NP-SBJ”, “NP-OB2”, etc.  Thus, it need not appear in this
+list.  However, the “SPE” dash tag (for reported speech) is toggled on
+and off – changing an IP-XXX to IP-XXX-SPE, and potentially back to
+IP-XXX.
+// TODO: this is a bad explanation.  Maybe require to list all dash
+// tags?  but that gets tedious.
+
+`ipnodes`:: A list of categories which are clauses.  These are
+highlighted (with a tan shade) to make it clear where the “floor” of a
+clause is, for the purpose of rearranging nodes in the user interface.
+
+`invisibleCategories`:: TODO: what to do about these?
+// TODO: different quotes for code, corpus text, etc.
+
+`commentTypes`:: Types of comments.  Comments are nodes of the form
+`(CODE \{XXX:words_words_words})` For every value of “XXX” is in this
+list, when editing the contents of the comment with one of the editing
+functions (TODO: link), a dialog box will appear allowing the comment to
+be edited as text, instead of the default editing interface.
+
+`customCommands`:: A Javascript function containing code to configure
+the keybindings.  This should be a series of calls to the `addCommand`
+function. (TODO: link to doc)
+
+`defaultConMenuGroup`:: The label suggestions to display in the
+context (right-click) menu, when no suggestion can be deduced from
+the already-present label.
+
+`customConMenuGroups`:: a Javascript function to configure the context
+menu suggestions.  This should be a series of calls to the
+`addConMenuGroup` function (TODO: link to doc)
+
+`customConLeafBefore`:: a Javascript function to configure the new node
+options in the context menu.  This should be a series of calls to the
+`addConLeafBefore` function (TODO: link to doc)
+
+// TODO: styleTag
+
+=== Custom keybindings
+
+The Annotald keybindings provided by default are adapted from those used
+by the IcePaHC project.
+// TODO: link to icepahc
+For other corpora, it is virtually certain that users will want to adapt
+the key bindings, to adapt the tags used and the most common use patterns of
+the annotators.  The keybindings of Annotald are customized by placing
+calls to the `addCommand` function inside the `customCommands` block.  This
+function has 2 required arguments; any further arguments are determined by
+the command being bound.
+
+The first argument to the function should be a Javascript dictionary
+(also known as an object).  This has the format `{key: value, key2:
+value2}`.  The following keys are recognized:
+- `keycode` the numeric Javascript keycode of the key you wish to bind.
+  You can navigate to
+  http://www.asquare.net/javascript/tests/KeyCode.html[this website] to
+  determine interactively the code for any key on your keyboard.
+- `ctrl` the value `true` if this binding is for a shortcut with the
+  control key pressed.  Ergonomically, it is much easier to actuate such
+  shortcuts if you remap the “Caps Lock” key on your keyboard to
+  control, so that it can be pressed with the pinky without needing to
+  reach very far.  A panoply of methods to do so are presented at
+  http://emacswiki.org/emacs/MovingTheCtrlKey[this website].
+- `shift` the value true if this binding is for a shortcut with the
+  shift key pressed.
+
+The `ctrl` and `shift` options are mutually exclusive.
+
+The second argument to the `addCommand` function is the name of the
+function which the key will be bound to.  Any further arguments will be
+passed to the function given.  A list of functions provided by Annotald
+follows:
+
+// TODO: add default bindings to these (or list default bindings elsewhere?)
+
+`clearSelection`:: Remove any selected node(s).  No arguments.
+
+`coIndex`:: Various effects related to the numeric suffixes that
+indicate movement/coreference/etc. chains:
+- If called with only one node selected: remove this node’s numeric
+  index.
+- If called with two nodes selected, only one of which has an index:
+  add an index matching the indexed node to the non-indexed node.
+- If called with two nodes selected, neither of which has an index: add
+  matching indices to both nodes.
+- If called with two nodes selected whose indices match: cycle through
+  different index types.  The cycle is: regular indices (both indices
+  appended with `-`) -> gapping (first index appended with `=`) ->
+  backwards gaping (second index appended with `=`) -> double gapping
+  (both indices appended with `=`) -> remove indices.
+
++
+No arguments.
+
+// TODO: better name
+`displayRename`:: Edit the text of the currently selected node.  If this
+is a non-terminal, edit its label.  If this is a terminal, allow editing
+its label, lemma (if present) and text (iff the text is an “empty
+element” – trace, comment, etc.)  This function handles comment nodes
+specially.
+// TODO: link to commentTypes
+No arguments.
+
+// editLemmaOrLabel – do we want this fn?
+
+`leafAfter`, `leafBefore`:: Create a leaf node after or before the
+(first-)selected node.  A heuristic is used to determine the type of node to
+create.  If only one node is selected, the default is to create an empty
+conjoined subject (i.e. `(NP-SBJ *con*)`)  If there are two nodes
+selected, the second-selected node determines the type of leaf to make.
+If this node is:
+- a wh-phrase (label begins with “W”), a wh-trace (`*T*`) is created
+- a clitic (label contains the dash tag “CL”), a clitic trace (`*CL*`)
+  is created
+- otherwise, an extraposition trace (`*ICH*`) is created
+
++
+The label of the created node in these cases is determined by the label
+of the second-selected node.  Generally, the label of that node is
+copied, except:
+- in the case of a wh-trace, the leading “W” is stripped (so the trace
+  of a WNP is an NP, etc.)
+- in the case of a clitic trace, the “CL” dash tag is stripped and “PRO”
+  is transformed to “NP” (so the trace of PRO-CL is an NP, and the trace
+  of ADVP-CL is ADVP).
++
+Additionally, the trace and its antecedent (the second-selected node)
+are coindexed.  No arguments.
+
+`makeNode`:: Create a new node dominating the selected node,
+or the span between the two selected nodes (inclusive).  This function
+takes an optional argument specifying the label of the node to create;
+if not present, the label of the new node will be “XP”.  One optional argument.
+
+`pruneNode`:: Delete the selected node.  If a non-terminal node is
+selected, the operation always succeeds, and the daughters of the
+deleted node become daughters of the deleted node’s parent.  If a
+terminal node is selected, the operation can succeed only if the node is
+empty of textual content.  No arguments.
+// TODO: add definition of empty text (philosophy section?), link to it
+
+`setLabel`:: Set the label of the selected node.  The argument must be a
+list of labels.  If the node’s current label is not present in the list,
+it is set to the first entry in the list.  Otherwise, it is set to the
+node immediately following its current label in the list (wrapping
+around at the end of the list).  To illustrate, if the “f” key is bound
+to `setLabel` with an argument of `["FOO","BAR"]`, selecting a node with
+label “QUUX” and pressing the “f” key sequentially will yield:
+1. the label being set to “FOO” (since “QUUX” is not in the provided
+   list)
+2. the label being set to “BAR” (since “BAR” follows “FOO” in the list)
+3. the label being set to “FOO” (since “BAR” is at the end of the list,
+   wrap to the beginning)
+4. etc.
+
++
+One argument.
+
+`toggleExtension`:: Toggle a dash tag on the selected node.  If the
+(first) argument exists as a dash tag on the node, remove it.
+Otherwise, add it.  The optional second argument gives a list of
+extensions in the order they should appear from the base category out;
+if not given, it is filled from one of the `extensions`-family variables
+// TODO: link
+based on a heuristic as to the type of node which is selected.  One
+mandatory and one optional argument.
+
+`toggleLemmata`:: Toggle whether lemmata are shown or hidden in the
+UI.  No arguments.
+
+`undo`/`redo`:: Undo the most recent editing operations, or redo after
+undoing something.  No arguments.
+
+
+== Advanced features
+
+In this section, some advanced features of Annotald are described.
+These are not required to use Annotald (and in fact are deactivated by
+default).  However, for proficient users, their use may make possible
+grater annotation efficiency and accuracy.
+
+=== Tagset validation
+
+// TODO: make sure that annotald uses this info everywhere it can.
+
+By default, Annotald does not contain a mechanism to ensure that tags
+created through editing conform to any sort of schema.  At the same
+time, there are various parts of Annotald’s code that would benefit from
+knowing whether a node corresponds to a leaf or not, which is not always
+a purely structural decision (for example, a node of the form `(NP-SBJ
+*pro*)` is structurally a leaf, but in fact corresponds to a phrasal
+node, an NP).  Supplying this information to Annotald improves its
+functioning, as well as preventing nonsense tags from being added to the
+corpus during editing.
+
+You can do this however you like – the only requirement that Annotald
+imposes is that you assign to the configuration variables `testValidLeafLabel`
+and `testValidPhraseLabel` Javascript functions that return true iff its
+argument is a valid label for a leaf node or phrase node
+(respectively).  One useful way of doing this is described below.
+
+It is possible to write a grammar to validate tags.  Just as the grammar
+of a natrual language accepts only those sentences which are well-formed
+in that language, this grammar should accept only the tags which are
+valid in a particular corpus.  In particular, this manual will describe
+how to use the http://waxeye.org/[Waxeye Parser Generator] to do so.  In
+addition to being Free Software, this program uses a relatively
+intuitive notation for its grammars.  Additionally, it can generate
+grammars not only in Javascript, but also in Python and several other
+computer languages.  This allows the same grammar specification to be
+used in Annotald as well as in a validation script for the corpus.
+
+Grammars written in waxeys consist of a series of rules.  The first rule
+in the file constitutes the grammar – it must match.  A rule has the
+form `name <- content`.  The name of a rule can consist of letters,
+numbers, and underscores.  The content of the rule can be as follows:
+
+- `'string'` matches string in the input, literally
+- the name of another rule forces that rule to match
+- `(...)` is a groupung construct
+- `A B` matches A followed by B
+- `A | B` matches either A or B
+- `?A` matches maybe A – that is, if A matches, the parser’s input
+  advances over it, but if A does not match, the parser does not fail.
+- `*A` matches 0 or more A
+- `+A` matches 1 or more A
+
+Using these rules, it is possible to build up a grammar.  As an
+illustration, here is a grammar that matches
+http://www.ling.upenn.edu/histcorpora/annotation/labels.htm#pos_tags[the
+tagset from the PPCEME] (without, for simplicity, the numbered word splitting).
+
+// TODO: test this
+
+----------
+/* Subdivide types of tag, for simplicity */
+word_tag <-
+ ( verbal | nominal | punct | other_word | fn_cat )
+
+/* TODO: comments! */
+
+nominal <-
+ ('NUM' ?'$') | ('N' ?'PR' ?'S' ?'$') | ('ADJ' ?('R' | 'S')) | 'D' |
+ ('PRO' ?'$') | ('Q' ?('R' | 'S' | '$'))
+
+verbal <-
+ verb | verb_modifier
+
+verb <-
+ (('DO' | 'BE' | 'HV' | 'VB') ?('D' | 'P' | 'N' | 'I')) |
+ (('D' | 'B' | 'H' | 'V') 'A' ('G' | 'N')) |
+ ('MD' ?'0')
+
+verb_modifier <-
+ ('ADV' ?('R' | 'S')) | 'NEG'
+
+punct <-
+ '\'' | '"' |',' | '.' | '`'
+
+fn_cat <-
+ 'C' | 'CONJ' | 'P' | ('W' ('ADV' | 'D' | ('PRO' ?'$'))) |
+ 'INTJ' | 'ALSO' | 'ELSE' | 'EX' | 'FP' | 'RP' | 'LB' | 'LS' |
+ 'MAN' | 'ONE' | ('OTHER' ?'S' ?'$') | 'SUCH' | 'TO' | 'WARD'
+
+other_word <-
+ 'CODE' | 'FW' | 'X' | 'FP' | 'META'
+----------
+
+// TODO: num before n
+// TODO: matching dashes in phrasal rules
+
+=== External validation
+
+foo
+   
+// Things to talk about:
+// - annotation philosophy (useful annotation vs. correct annotation, some
+//   of beatrices ideas, etc)
+// - the annotation itself (building up from nps to pps to verbs to
+//   sentences/clauses)
+// - extensions (morpho/semantic information, lemmatization, ...)
+
+// corpus formats – old, dash, and deep
+
+// what else???
+
+
