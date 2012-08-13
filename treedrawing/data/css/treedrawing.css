@@ -264,6 +264,10 @@ body {
     width: 15%;
 }
 
+#messagesTitle {
+    cursor: pointer;
+}
+
 /* Misc */
 .shown {
     visibility: visible;
