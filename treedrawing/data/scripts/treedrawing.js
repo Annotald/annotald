@@ -850,6 +850,7 @@ function displayRename() {
     if ($(startnode).children(".wnode").size() > 0) {
         // this is a terminal
         var word, lemma;
+        // is this right? we still want to allow editing of index, maybe?
         var isLeafNode = guessLeafNode($(startnode));
         if ($(startnode).children(".wnode").children(".lemma").size() > 0) {
             var preword = $.trim($(startnode).children().first().text());
@@ -1447,7 +1448,7 @@ function pruneNode() {
  *
  * @param {String} extension the dash tag to toggle
  * @param {Array of String} [extensionList] override the guess as to the
- * appropriate ordered list of possible extensions is.
+ * appropriate ordered list of possible extensions.
  */
 function toggleExtension(extension, extensionList) {
     if (!startnode || endnode) return false;
@@ -1458,6 +1459,7 @@ function toggleExtension(extension, extensionList) {
         } else if (getLabel($(startnode)).split("-")[0] == "IP" ||
                    getLabel($(startnode)).split("-")[0] == "CP") {
             // TODO: should FRAG be a clause?
+            // TODO: make configurable
             extensionList = clause_extensions;
         } else {
             extensionList = extensions;
