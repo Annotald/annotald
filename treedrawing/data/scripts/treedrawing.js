@@ -1338,6 +1338,9 @@ function makeNode(label) {
     if (!startnode) {
         return;
     }
+    if (!label) {
+        label = "XP";
+    }
     var rootLevel = isRootNode($(startnode));
     undoBeginTransaction();
     if (rootLevel) {
