@@ -318,6 +318,15 @@ function undo() {
     }
 }
 
+// TODO: move this function to a "utils" section
+function safeGet (obj, key, def) {
+    if (_.has(obj, key)) {
+        return obj[key];
+    } else {
+        return def;
+    }
+}
+
 var saveInProgress = false;
 
 function saveHandler (data) {
@@ -327,7 +336,13 @@ function saveHandler (data) {
         displayInfo("Save success.");
     } else {
         lastsavedstate = "";
-        displayError("Save FAILED!!!: " + data['reason']);
+        var extraInfo = "";
+        // TODO: let force saving sync the annotald instances, so it's only necessary once?
+        if (safeGet(data, 'reasonCode', 0) == 1) {
+            extraInfo = " <a href='#' id='forceSave' " +
+                "onclick='javascript:save(null, true)'>Force save</a>";
+        }
+        displayError("Save FAILED!!!: " + data['reason'] + extraInfo);
     }
     saveInProgress = false;
 }
@@ -891,7 +906,7 @@ function makeLeaf(before, label, word, target) {
     var newleaf = "<div class='snode " + label + "'>" + label +
         "<span class='wnode'>" + word;
     if (lemma) {
-        newleaf += "<span class='lemma " + lemmaClass + "'>-" + lemma +
+        newleaf += "<span class='lemma'>-" + lemma +
             "</span>";
     }
     newleaf += "</span></div>\n";
@@ -939,7 +954,7 @@ function emergencyExitEdit() {
     var replText = "<div class='snode'>" +
             newphrase + " <span class='wnode'>" + newtext;
     if (useLemma) {
-        replText += "<span class='lemma " + lemmaClass + "'>-" +
+        replText += "<span class='lemma'>-" +
             newlemma + "</span>";
     }
     replText += "</span></div>";
@@ -1129,7 +1144,7 @@ function displayRename() {
                         replText = "<div class='snode'>" +
                             label + " <span class='wnode'>" + word;
                         if (useLemma) {
-                            replText += "<span class='lemma " + lemmaClass + "'>-" +
+                            replText += "<span class='lemma'>-" +
                                 lemma + "</span>";
                         }
                         replText += "</span></div>";
@@ -1158,7 +1173,7 @@ function displayRename() {
                             }
                         }
                         var newtext = $("#leaftextbox").val();
-                        var newlemma;
+                        var newlemma = "";
                         if (useLemma) {
                             newlemma = $('#leaflemmabox').val();
                             newlemma = newlemma.replace(/</g,"&lt;");
@@ -1168,10 +1183,14 @@ function displayRename() {
                         newtext = newtext.replace(/</g,"&lt;");
                         newtext = newtext.replace(/>/g,"&gt;");
                         newtext = newtext.replace(/'/g,"&#39;");
+                        if (newtext + newlemma == "") {
+                            displayWarning("Cannot create an empty leaf.");
+                            return;
+                        }
                         replText = "<div class='snode'>" +
                             newphrase + " <span class='wnode'>" + newtext;
                         if (useLemma) {
-                            replText += "<span class='lemma " + lemmaClass + "'>-" +
+                            replText += "<span class='lemma'>-" +
                                 newlemma + "</span>";
                         }
                         replText += "</span></div>";
@@ -1268,8 +1287,7 @@ function editLemma() {
                     newlemma = newlemma.replace(">","&gt;");
                     newlemma = newlemma.replace(/'/g,"&#39;");
 
-                    $("#leafeditor").replaceWith("<span class='lemma " +
-                                                 lemmaClass + "'>-" +
+                    $("#leafeditor").replaceWith("<span class='lemma'>-" +
                                                  newlemma + "</span>");
                     postChange();
                 }
@@ -1929,15 +1947,24 @@ function toLabeledBrackets(node) {
     return out;
 }
 
-var lemmaClass = "lemmaHide";
+var lemmataStyleNode, lemmataHidden = false;
+(function () {
+    lemmataStyleNode = document.createElement("style");
+    lemmataStyleNode.setAttribute("type", "text/css");
+    document.getElementsByTagName("head")[0].appendChild(lemmataStyleNode);
+    lemmataStyleNode.innerHTML = ".lemma { display: none; }";
+})();
 
 /**
  * Toggle display of lemmata.
  */
 function toggleLemmata() {
-    $('.lemma').toggleClass('lemmaShow');
-    $('.lemma').toggleClass('lemmaHide');
-    lemmaClass = lemmaClass == "lemmaHide" ? "lemmaShow" : "lemmaHide";
+    if (lemmataHidden) {
+        lemmataStyleNode.innerHTML = "";
+    } else {
+        lemmataStyleNode.innerHTML = ".lemma { display: none; }";
+    }
+    lemmataHidden = !lemmataHidden;
 }
 
 var lastsavedstate = $("#editpane").html();
@@ -2236,16 +2263,16 @@ function setInputFieldEnter(field, fn) {
     });
 }
 
-function displayWarning(text) {
-    $("#messageBoxInner").text(text).css("color", "orange");
+function displayWarning(html) {
+    $("#messageBoxInner").html(html).css("color", "orange");
 }
 
-function displayInfo(text) {
-    $("#messageBoxInner").text(text).css("color", "green");
+function displayInfo(html) {
+    $("#messageBoxInner").html(html).css("color", "green");
 }
 
-function displayError(text) {
-    $("#messageBoxInner").text(text).css("color", "red");
+function displayError(html) {
+    $("#messageBoxInner").html(html).css("color", "red");
 }
 
 function displayTreeIndex(text) {
@@ -2292,19 +2319,19 @@ function goToTree() {
 function nextTree(e) {
     var find = undefined;
     if (e.shiftKey) find = "-FLAG";
-    advanceTree("/nextTree", find, false);
+    advanceTree(find, false, 1);
 }
 
 function prevTree(e) {
     var find = undefined;
     if (e.shiftKey) find = "-FLAG";
-    advanceTree("/prevTree", find, false);
+    advanceTree(find, false, -1);
 }
 
-function advanceTree(where, find, async) {
+function advanceTree(find, async, offset) {
     var theTrees = toLabeledBrackets($("#editpane"));
     displayInfo("Fetching tree...");
-    return $.ajax(where,
+    return $.ajax("/advanceTree",
                   { async: async,
                     success: function(res) {
                         if (res['result'] == "failure") {
@@ -2314,14 +2341,17 @@ function advanceTree(where, find, async) {
                             $("#editpane").html(res['tree']);
                             documentReadyHandler();
                             undostack = new Array();
-                            currentIndex = res['treeIndex'] + 1;
+                            currentIndex = res['treeIndexStart'] + 1;
                             displayInfo("Tree " + currentIndex + " fetched.");
                             displayTreeIndex("Editing tree #" + currentIndex + " out of " + res['totalTrees']);
                         }
                     },
                     dataType: "json",
                     type: "POST",
-                    data: {trees: theTrees, find: find}});
+                    data: { trees: theTrees,
+                            find: find,
+                            offset: offset
+                          }});
 }
 
 function splitWord() {
@@ -2373,7 +2403,7 @@ function addLemma(lemma) {
     // This only makes sense for dash-format corpora
     if (!startnode || endnode) return;
     if (!isLeafNode($(startnode))) return;
-    var theLemma = $("<span class='lemma " + lemmaClass + "'>-" + lemma +
+    var theLemma = $("<span class='lemma'>-" + lemma +
                      "</span>");
     $(startnode).children(".wnode").append(theLemma);
 }
