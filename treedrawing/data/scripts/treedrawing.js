@@ -1030,6 +1030,8 @@ function editLemma() {
 
 // TODO: anchor right end of string, so that NP does not match NPR, only NP or NP-X (???)
 
+// TODO: profile this and optimize like crazy.
+
 // =============== HTML strings and other globals
 
 /**
@@ -1270,6 +1272,7 @@ function saveSearch() {
  * @private
  */
 function doSearch () {
+    // TODO: need to save val of incremental acorss searches
     clearSearchMatches();
     var searchnodes = $("#searchnodes");
     saveSearch();
@@ -1280,6 +1283,7 @@ function doSearch () {
     if (incremental) {
         var lastMatchTop = $(".searchmatch").last().offset().top;
         searchCtx.filter(function () {
+            // TODO: do this with faster document position dom call
             return $(this).offset().top > lastMatchTop;
         });
     }
