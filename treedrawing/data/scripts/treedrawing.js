@@ -44,11 +44,18 @@
 // * UI functions
 // ** Event handlers
 // ** Context Menu
+// ** Messages
 // ** Dialog boxes
 // ** Selection
 // ** Metadata editor
 // ** Splitting words
 // ** Editing parts of the tree
+// ** Search
+// *** HTML strings and other globals
+// *** Event handlers
+// *** Helper functions
+// *** Search interpretation function
+// *** The core search function
 // * Tree manipulations
 // ** Movement
 // ** Creation
@@ -1019,6 +1026,378 @@ function editLemma() {
     setTimeout(function(){ $("#leaflemmabox").focus(); }, 10);
 }
 
+// ========== Search
+
+// TODO: anchor right end of string, so that NP does not match NPR, only NP or NP-X (???)
+
+// =============== HTML strings and other globals
+
+/**
+ * The HTML code for a regular search node
+ * @private
+ * @constant
+ */
+var searchnodehtml = "<div class='searchnode'>" +
+        "<div class='searchadddelbuttons'>" +
+        "<input type='button' class='searchornodebut' " +
+        "value='|' />" +
+        "<input type='button' class='searchdeepnodebut' " +
+        "value='D' />" +
+        "<input type='button' class='searchprecnodebut' " +
+        "value='>' />" +
+        "<input type='button' class='searchdelnodebut' " +
+        "value='-' />" +
+        "<input type='button' class='searchnewnodebut' " +
+        "value='+' />" +
+        "</div>" +
+        "<select class='searchtype'><option>Label</option>" +
+        "<option>Text</option></select>: " +
+        "<input type='text' class='searchtext' />" +
+        "</div>";
+
+/**
+ * The HTML code for an "or" search node
+ * @private
+ * @constant
+ */
+var searchornodehtml = "<div class='searchnode searchornode'>" +
+        "<div class='searchadddelbuttons'>" +
+        "<input type='button' class='searchdelnodebut' value='-' />" +
+        "</div>" +
+        "<input type='hidden' class='searchtype' value='Or' />OR<br />" +
+        searchnodehtml + "</div>";
+
+/**
+ * The HTML code for a "deep" search node
+ * @private
+ * @constant
+ */
+var searchdeepnodehtml = "<div class='searchnode searchdeepnode'>" +
+        "<div class='searchadddelbuttons'>" +
+        "<input type='button' class='searchdelnodebut' value='-' />" +
+        "</div>" +
+        "<input type='hidden' class='searchtype' value='Deep' />...<br />" +
+        searchnodehtml + "</div>";
+
+/**
+ * The HTML code for a "precedes" search node
+ * @private
+ * @constant
+ */
+var searchprecnodehtml = "<div class='searchnode searchprecnode'>" +
+        "<div class='searchadddelbuttons'>" +
+        "<input type='button' class='searchdelnodebut' value='-' />" +
+        "</div>" +
+        "<input type='hidden' class='searchtype' value='Prec' />&gt;<br />" +
+        searchnodehtml + "</div>";
+
+/**
+ * The HTML code for a node to add new search nodes
+ * @private
+ * @constant
+ */
+var addsearchnodehtml = "<div class='searchnode newsearchnode'>" +
+        "<input type='hidden' class='searchtype' value='NewNode' />+" +
+        "</div>";
+
+/**
+ * The HTML code for the default starting search node
+ * @private
+ * @constant
+ */
+var searchhtml = "<div id='searchnodes' class='searchnode'><input type='hidden' " +
+        "class='searchtype' value='Root' />" + searchnodehtml + "</div>";
+
+/**
+ * The last search
+ *
+ * So that it can be restored next time the dialog is opened.
+ * @private
+ */
+var savedsearch = $(searchhtml);
+
+addStartupHook(function () {
+    $("#butsearch").click(search);
+    $("#butnextmatch").click(nextSearchMatch);
+    $("#butclearmatch").click(clearSearchMatches);
+    $("#matchcommands").hide();
+});
+
+// =============== Event handlers
+
+/**
+ * Indicate that a node matches a search
+ *
+ * @param {DOM node} node the node to flag
+ */
+function flagSearchMatch(node) {
+    $(node).addClass("searchmatch");
+    $("#matchcommands").show();
+}
+
+/**
+ * Clear the highlighting from search matches.
+ */
+function clearSearchMatches() {
+    $(".searchmatch").removeClass("searchmatch");
+    $("#matchcommands").hide();
+}
+
+/**
+ * Scroll down to the next node that matched a search.
+ */
+function nextSearchMatch() {
+    scrollToNext(".searchmatch");
+}
+
+/**
+ * Add a sibling search node
+ * @private
+ */
+function addSearchDaughter(e) {
+    var node = $(e.target).parents(".searchnode").first();
+    var newnode = $(searchnodehtml);
+    node.append(newnode);
+    searchNodePostAdd(newnode);
+}
+
+/**
+ * Add a sibling search node
+ * @private
+ */
+function addSearchSibling(e) {
+    var node = $(e.target);
+    var newnode = $(searchnodehtml);
+    node.before(newnode);
+    searchNodePostAdd(newnode);
+}
+
+/**
+ * Delete a search node
+ * @private
+ */
+function searchDelNode(e) {
+    var node = $(e.target).parents(".searchnode").first();
+    var tmp = $("#searchnodes").children(".searchnode:not(.newsearchnode)");
+    if (tmp.length == 1 && tmp.is(node) &&
+        node.children(".searchnode").length == 0) {
+        displayWarning("Cannot remove only search term!");
+        return;
+    }
+    var child = node.children(".searchnode").first();
+    if (child.length == 1) {
+        node.contents(":not(.searchnode)").remove();
+        child.unwrap();
+    } else {
+        node.remove();
+    }
+    rejiggerSearchSiblingAdd();
+}
+
+/**
+ * Add an "or" search node
+ * @private
+ */
+function searchOrNode(e) {
+    var node = $(e.target).parents(".searchnode").first();
+    var newnode = $(searchornodehtml);
+    node.replaceWith(newnode);
+    newnode.children(".searchnode").replaceWith(node);
+    searchNodePostAdd(newnode);
+}
+
+/**
+ * Add a "deep" search node
+ * @private
+ */
+function searchDeepNode(e) {
+    var node = $(e.target).parents(".searchnode").first();
+    var newnode = $(searchdeepnodehtml);
+    node.append(newnode);
+    searchNodePostAdd(newnode);
+}
+
+/**
+ * Add a "precedes" search node
+ * @private
+ */
+function searchPrecNode(e) {
+    var node = $(e.target).parents(".searchnode").first();
+    var newnode = $(searchprecnodehtml);
+    node.after(newnode);
+    searchNodePostAdd(newnode);
+}
+
+// =============== Helper functions
+
+/**
+ * Hook up event handlers after adding a node to the search dialog
+ */
+function searchNodePostAdd(node) {
+    $(".searchnewnodebut").unbind("click").click(addSearchDaughter);
+    $(".searchdelnodebut").unbind("click").click(searchDelNode);
+    $(".searchdeepnodebut").unbind("click").click(searchDeepNode);
+    $(".searchornodebut").unbind("click").click(searchOrNode);
+    $(".searchprecnodebut").unbind("click").click(searchPrecNode);
+    rejiggerSearchSiblingAdd();
+    var nodeToFocus = (node && node.find(".searchtext")) ||
+            $(".searchtext").first();
+    nodeToFocus.focus();
+}
+
+/**
+ * Recalculate the position of nodes that add siblings in the search dialog.
+ * @private
+ */
+function rejiggerSearchSiblingAdd() {
+    $(".newsearchnode").remove();
+    $(".searchnode").map(function() {
+        $(this).children(".searchnode").last().after(addsearchnodehtml);
+    });
+    $(".newsearchnode").click(addSearchSibling);
+}
+
+/**
+ * Remember the currently-entered search, in order to restore it subsequently.
+ * @private
+ */
+function saveSearch() {
+    savedsearch = $("#searchnodes").clone();
+}
+
+/**
+ * Perform the search as entered in the dialog
+ * @private
+ */
+function doSearch () {
+    clearSearchMatches();
+    var searchnodes = $("#searchnodes");
+    saveSearch();
+    hideDialogBox();
+    var searchCtx = $(".snode,.wnode"); // TODO: remove sn0
+    var incremental = $("#searchInc").attr("checked");
+
+    if (incremental) {
+        var lastMatchTop = $(".searchmatch").last().offset().top;
+        searchCtx.filter(function () {
+            return $(this).offset().top > lastMatchTop;
+        });
+    }
+
+    for (var i = 0; i < searchCtx.length; i++) {
+        var res = interpretSearchNode(searchnodes, searchCtx[i]);
+        if (res) {
+            flagSearchMatch(res);
+            if (incremental) {
+                break;
+            }
+        }
+    }
+    nextSearchMatch();
+}
+
+/**
+ * Clear any previous search, reverting the dialog back to its default state.
+ * @private
+ */
+function clearSearch() {
+    savedsearch = $(searchhtml);
+    $("#searchnodes").replaceWith(savedsearch);
+    searchNodePostAdd();
+}
+
+// =============== Search interpretation function
+
+/**
+ * Interpret the DOM nodes comprising the search dialog.
+ *
+ * This function is treponsible for transforming the representation of a
+ * search query as HTML into an executable query, and matching it against a
+ * node.
+ * @private
+ *
+ * @param {DOM node} node the search node to interpret
+ * @param {DOM node} target the tree node to match it against
+ * @returns {DOM node} `target` if it matched the query, otherwise `undefined`
+ */
+ 
+function interpretSearchNode(node, target) {
+    // TODO: optimize to remove jquery calls, only use regex matching if needed
+    var searchtype = $(node).children(".searchtype").val();
+    var rx, hasMatch, i, j;
+    var newTarget = $(target).children();
+    var childSearches = $(node).children(".searchnode");
+
+    if (searchtype == "Label") {
+        rx = RegExp("^" + $(node).children(".searchtext").val());
+        hasMatch = $(target).hasClass("snode") && rx.test(getLabel($(target)));
+        if (!hasMatch) {
+            return undefined;
+        }
+    } else if (searchtype == "Text") {
+        rx = RegExp("^" + $(node).children(".searchtext").val());
+        hasMatch = $(target).hasClass("wnode") && rx.test($(target).text());
+        if (!hasMatch) {
+            return undefined;
+        }
+    } else if (searchtype == "Root") {
+        newTarget = $(target);
+    } else if (searchtype == "Or") {
+        for (i = 0; i < childSearches.length; i++) {
+            for (j = 0; j < newTarget.length; j++) {
+                if (interpretSearchNode(childSearches[i], newTarget[j])) {
+                    return target;
+                }
+            }
+        }
+        return undefined;
+    } else if (searchtype == "Deep") {
+        newTarget = $(target).find(".snode,.wnode");
+    } else if (searchtype == "Prec") {
+        newTarget = $(target).nextAll();
+    } else if (searchtype == "NewNode") {
+        // vacuous pass
+        return target;
+    }
+
+    for (i = 0; i < childSearches.length; i++) {
+        var succ = false;
+        for (j = 0; j < newTarget.length; j++) {
+            if (interpretSearchNode(childSearches[i], newTarget[j])) {
+                succ = true;
+                break;
+            }
+        }
+        if (!succ) {
+            return undefined;
+        }
+    }
+
+    return target;
+}
+
+// =============== The core search function
+
+/**
+ * Display a search dialog.
+ */
+function search() {
+    var html = "<div id='searchnodes' />" +
+            "<div id='dialogButtons'><label for='searchInc'>Incremental: " +
+            "</label><input id='searchInc' name='searchInc' type='checkbox' />" +
+            // TODO: it seems that any plausible implementation of search is
+            // going to use rx, so it doesn't make sense to turn it off
+            // "<label for='searchRE'>Regex: </label>" +
+            // "<input id='searchRE' name='searchRE' type='checkbox' />" +
+            "<input id='clearSearch' type='button' value='Clear' />" +
+            "<input id='doSearch' type='button' value='Search' /></div>";
+    // TODO: save search on esc
+    showDialogBox("Search", html, doSearch, saveSearch);
+    $("#searchnodes").replaceWith(savedsearch);
+    $("#doSearch").click(doSearch);
+    $("#clearSearch").click(clearSearch);
+    searchNodePostAdd();
+}
 
 // ===== Tree manipulations
 

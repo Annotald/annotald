@@ -268,6 +268,29 @@ body {
     cursor: pointer;
 }
 
+/* Search dialog */
+.searchnode {
+    margin-left: 20px;
+    border: 1px solid silver;
+    border-left: 4px solid #4682B4;
+    background-color: #EFEFEF;
+    padding: 2px;
+    color: black;
+}
+
+.searchadddelbuttons {
+    float: right;
+}
+
+.searchadddelbuttons input {
+    font-size: small;
+}
+
+.searchmatch {
+    border: 1px solid yellow !important;
+    border-left: 4px solid yellow !important;
+}
+
 /* Misc */
 .shown {
     visibility: visible;

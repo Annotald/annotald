@@ -66,6 +66,12 @@ any later version.  See the LICENSE file for more information. -->
 
       <div id="toolsMenu" class="menuPane">
         <div class="menuTitle">Tools</div>
+        <input class="menubutton" type="button" value="Search"
+               id="butsearch" style="margin-top:4px;" /><br />
+        <div id="matchcommands">
+          <input class="menubutton" type="button" value="Next Match" id="butnextmatch" /><br />
+          <input class="menubutton" type="button" value="Clear Matches" id="butclearmatch" /><br />
+        </div>
 %if useValidator:
         <select name="validators" id="validatorsSelect">
 %for v in validators:
