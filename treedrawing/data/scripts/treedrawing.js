@@ -928,6 +928,25 @@ function displayRename() {
                     undoEndTransaction();
                     undoBarrier();
                 }
+                if (event.keyCode == 9) {
+                    var element = (event.target || event.srcElement);
+                    if ($("#leafphrasebox").is(element)) {
+                        if (!$("#leaftextbox").attr("disabled")) {
+                            $("#leaftextbox").focus();
+                        } else if ($("#leaflemmabox").length == 1) {
+                            $("#leaflemmabox").focus();
+                        }
+                    } else if ($("#leaftextbox").is(element)) {
+                        if ($("#leaflemmabox").length == 1) {
+                            $("#leaflemmabox").focus();
+                        } else {
+                            $("#leafphrasebox").focus();
+                        }
+                    } else if ($("#leaflemmabox").is(element)) {
+                        $("#leafphrasebox").focus();
+                    }
+                    event.preventDefault();
+                }
             });
         setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
     } else {
@@ -942,7 +961,9 @@ function displayRename() {
         textNode(origNode).replaceWith(editor);
         $("#labelbox").keydown(
             function(event) {
-                // make tab do nothing?
+                if (event.keyCode == 9) {
+                    event.preventDefault();
+                }
                 if (event.keyCode == 32) {
                     space(event);
                 }
