@@ -37,7 +37,8 @@ try:
 except:
     pass
 
-sys.stderr = open( os.path.expanduser("~/annotald.err.log.txt"), "w" )
+# needed for py2exe to work properly
+#sys.stderr = open( os.path.expanduser("~/annotald.err.log.txt"), "w" )
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -198,7 +199,9 @@ class Treedraw(object):
                 timelog.write(self.shortfile + ": Stopped at " +
                               str(datetime.now().isoformat()) + ".\n")
                 self.justexited = True
-        raise SystemExit(0)
+        #forceful exit to make up for lack of proper thread management
+        os._exit(0)
+        #raise SystemExit(0)
 
     @cherrypy.expose
     def test(self):
@@ -385,17 +388,17 @@ def _main(argv):
     parser.add_argument("-n", "--n-trees-mode", dest = "numTrees",
                          type = int, action = "store",
                          help = "number of trees to show at a time")
+
     parser.add_argument("psd", nargs='+')
+
     parser.set_defaults(port = 8080,
                         settings = sys.path[0] + "/settings.js",
                         pythonSettings = sys.path[0] + "/settings.py",
                         oneTree = False,
                         numTrees = 1)
-    
     args = parser.parse_args(argv)
     shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
-    
-    
+            
     if args.timelog:
         with open("timelog.txt", "a") as timelog:
             timelog.write(shortfile + ": Started at " + \
@@ -405,7 +408,6 @@ def _main(argv):
     
     treedraw = Treedraw(args, shortfile)
     cherrypy.quickstart(treedraw)
-    print('test')
     
 if __name__ == '__main__':
     _main(sys.argv[1:])
