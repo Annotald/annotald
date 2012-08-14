@@ -841,6 +841,7 @@ function displayRename() {
             updateSelection();
             document.body.onkeydown = handleKeyDown;
             $("#sn0").mousedown(handleNodeClick);
+            $("#editpane").mousedown(clearSelection);
             $("#undo").attr("disabled", false);
             $("#redo").attr("disabled", false);
             $("#save").attr("disabled", false);
@@ -855,6 +856,7 @@ function displayRename() {
     touchTree($(startnode));
     document.body.onkeydown = null;
     $("#sn0").unbind('mousedown');
+    $("#editpane").unbind('mousedown');
     $("#undo").attr("disabled", true);
     $("#redo").attr("disabled", true);
     $("#save").attr("disabled", true);
