@@ -72,7 +72,7 @@ class TaskBarApp(wx.Frame):
                 time.sleep(2)
                 self.startChrome()
                 self.tbopen.Enable(False)
-                treedrawing._main(args,self)
+                treedrawing._main(args)
                 self.tbopen.Enable(True)
             except:
                 print('>>> traceback <<<')
