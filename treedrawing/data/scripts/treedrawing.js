@@ -1280,7 +1280,7 @@ function doSearch () {
     var searchCtx = $(".snode,.wnode"); // TODO: remove sn0
     var incremental = $("#searchInc").attr("checked");
 
-    if (incremental) {
+    if (incremental && $(".searchmatch").length > 0) {
         var lastMatchTop = $(".searchmatch").last().offset().top;
         searchCtx.filter(function () {
             // TODO: do this with faster document position dom call
