@@ -2314,7 +2314,7 @@ function advanceTree(where, find, async) {
                             $("#editpane").html(res['tree']);
                             documentReadyHandler();
                             undostack = new Array();
-                            currentIndex = res['treeIndex'] + 1
+                            currentIndex = res['treeIndex'] + 1;
                             displayInfo("Tree " + currentIndex + " fetched.");
                             displayTreeIndex("Editing tree #" + currentIndex + " out of " + res['totalTrees']);
                         }
