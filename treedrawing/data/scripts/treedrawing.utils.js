@@ -189,6 +189,26 @@ function displayError(html) {
     $("#messageBoxInner").html(html).css("color", "red");
 }
 
+/**
+ * Scroll to display the next place in the document matching a selector.
+ *
+ * If no matches, do nothing.
+ *
+ * @returns {Boolean} an indicator of whether scrolling was performed
+ */
+function scrollToNext(selector) {
+    var docViewTop = $(window).scrollTop();
+    var docViewMiddle = docViewTop + $(window).height() / 2;
+    var nextError = $(selector).filter(
+        function () {
+            return $(this).offset().top > docViewMiddle;
+        }).first();
+    if (nextError) {
+        window.scroll(0, nextError.offset().top - $(window).height() * 0.25);
+    }
+    return !!nextError; // convert to boolean and return
+}
+
 // ===== Functions on node representation
 
 // ========== Predicates

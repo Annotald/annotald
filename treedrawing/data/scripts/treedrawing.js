@@ -1726,15 +1726,7 @@ function validateHandler(data) {
 }
 
 function nextValidationError() {
-    var docViewTop = $(window).scrollTop();
-    var docViewMiddle = docViewTop + $(window).height() / 2;
-    var nextError = $(".snode[class*=\"FLAG\"],.snode[class$=\"FLAG\"]").filter(
-        function () {
-            return $(this).offset().top > docViewMiddle;
-        }).first();
-    if (nextError) {
-        window.scroll(0, nextError.offset().top - $(window).height() * 0.25);
-    }
+    scrollToNext(".snode[class*=\"FLAG\"],.snode[class$=\"FLAG\"]");
 }
 
 // ========== Advancing through the file
@@ -2279,6 +2271,6 @@ function resetLabelClasses(alertOnError) {
 // " "shouldIndexLeaf" "maxIndex" "addToIndices" "changeJustLabel\
 // " "toggleStringExtension" "lookupNextLabel" "commentTypes\
 // " "invisibleCategories" "invisibleRootCategories" "ipnodes" "messageHistory\
-// ")
+// " "scrollToNext")
 // indent-tabs-mode: nil
 // End:
