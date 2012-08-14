@@ -8,7 +8,7 @@ import glob
 
 annotald_data_files = []
 
-annotald_data_files.append( ('', ['settings.js','CS_Tony_oct19.jar','nothing.q']) )
+annotald_data_files.append( ('', ['settings.js','CS_Tony_oct19.jar','nothing.q','user-plain-red.png','user-plain-blue.png']) )
 
 html_files =  glob.glob('data/html/*.mako')
 annotald_data_files.append( ('data/html', html_files) )
@@ -27,7 +27,7 @@ annotald_data_files.append( ('data/css', css_files) )
 #script_files = find_data_files('data/scripts','',['data/*.css'])
 #image_files = find_data_files('data/images','',['data/*.png'])
 
-setup(windows=['treedrawing.py'],
+setup(windows=['annotald-win.py'],
       data_files = annotald_data_files,
       options={ "py2exe":{ "skip_archive": True } })  
 #shutil.copy('settings.py','dist')
