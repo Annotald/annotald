@@ -230,8 +230,7 @@ class Treedraw(object):
         return trees
 
     def treesToHtml(self, trees):
-        useLemmata = util.queryVersionCookie(self.versionCookie, "FORMAT") \
-                     == "dash"
+        version = util.queryVersionCookie(self.versionCookie, "FORMAT")
         alltrees = '<div class="snode">'
         for tree in trees:
             tree = tree.strip()
@@ -239,7 +238,7 @@ class Treedraw(object):
             tree = tree.replace(">","&gt;")
             if not tree == "":
                 nltk_tree = T.Tree(tree)
-                alltrees = alltrees + self.conversionFn(nltk_tree, useLemmata)
+                alltrees = alltrees + self.conversionFn(nltk_tree, version)
 
         alltrees = alltrees + '</div>'
         return alltrees
