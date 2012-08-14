@@ -291,6 +291,8 @@ body {
     border-left: 4px solid yellow !important;
 }
 
+/* TODO: special styles for the root node, or/deep/etc nodes */
+
 /* Misc */
 .shown {
     visibility: visible;
