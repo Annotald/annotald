@@ -2291,8 +2291,8 @@ function basesAndDashes(bases, dashes) {
 }
 
 function goToTree() {
-
     function goTo() {
+        var i;
         var treeIndex = $("#gotoInput").val();
         if (treeIndex > currentIndex) {
             for (i = currentIndex; i < treeIndex; i++) {
@@ -2341,7 +2341,7 @@ function advanceTree(find, async, offset) {
                             $("#editpane").html(res['tree']);
                             documentReadyHandler();
                             undostack = new Array();
-                            currentIndex = res['treeIndex'] + 1
+                            currentIndex = res['treeIndexStart'] + 1;
                             displayInfo("Tree " + currentIndex + " fetched.");
                             displayTreeIndex("Editing tree #" + currentIndex + " out of " + res['totalTrees']);
                         }
