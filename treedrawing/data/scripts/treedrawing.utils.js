@@ -203,7 +203,7 @@ function scrollToNext(selector) {
         function () {
             return $(this).offset().top > docViewMiddle;
         }).first();
-    if (nextError) {
+    if (nextError.length == 1) {
         window.scroll(0, nextError.offset().top - $(window).height() * 0.25);
     }
     return !!nextError; // convert to boolean and return
