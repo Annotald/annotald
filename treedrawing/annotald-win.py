@@ -30,8 +30,6 @@ class TaskBarApp(wx.Frame):
 
         self.Show(True)
 
-                           
-             
     def ShowMenu(self, event):
         self.tbicon.PopupMenu(self.tbmenu)
         #self.startChrome()
