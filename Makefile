@@ -18,7 +18,7 @@ priv-doc:
 doc:
 	a2x --verbose -f xhtml doc/devel.adoc
 
-all-docs: api-doc priv-docs doc
+all-docs: api-doc priv-doc doc
 
 test:
 	nosetests2 -w treedrawing --with-coverage --cover-erase --cover-package=util
