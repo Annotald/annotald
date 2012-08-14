@@ -170,9 +170,10 @@ function addStartupHook(fn) {
 }
 
 function documentReadyHandler() {
+    // TODO: something is very slow here; profile
     $("#editpane>.snode").attr("id", "sn0");
     // TODO: move some of this into hooks
-    resetLabelClasses(false);
+    resetLabelClasses(false); // TODO: this shld come alrdy done frm the server
     assignEvents();
     styleIpNodes();
     hideCategories();
