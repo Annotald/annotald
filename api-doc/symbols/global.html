@@ -245,6 +245,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#clearSearchMatches">clearSearchMatches</a></b>()
+								</div>
+								<div class="description">Clear the highlighting from search matches.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/global.html#clearSelection">clearSelection</a></b>()
 								</div>
 								<div class="description">Remove any selection of nodes.</div>
@@ -328,6 +337,15 @@ If the selected node is a terminal, edit its label, and lemma.</div>
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#flagSearchMatch">flagSearchMatch</a></b>(node)
+								</div>
+								<div class="description">Indicate that a node matches a search</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/global.html#getIndex">getIndex</a></b>(node)
 								</div>
 								<div class="description">Return the movement index associated with a node.</div>
@@ -385,6 +403,15 @@ If the selected node is a terminal, edit its label, and lemma.</div>
 								<div class="fixedFont"><b><a href="../symbols/global.html#hideDialogBox">hideDialogBox</a></b>()
 								</div>
 								<div class="description">Hide the displayed dialog box.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#ignoringUndo">ignoringUndo</a></b>(fn)
+								</div>
+								<div class="description">Execute a function, discarding whatever effects it has on the undo system.</div>
 							</td>
 						</tr>
 					
@@ -490,6 +517,33 @@ If the selected node is a terminal, edit its label, and lemma.</div>
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#newRedo">newRedo</a></b>()
+								</div>
+								<div class="description">Perform redo.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#newUndo">newUndo</a></b>()
+								</div>
+								<div class="description">Perform undo.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#nextSearchMatch">nextSearchMatch</a></b>()
+								</div>
+								<div class="description">Scroll down to the next node that matched a search.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/global.html#pruneNode">pruneNode</a></b>()
 								</div>
 								<div class="description">Delete a node.</div>
@@ -508,9 +562,54 @@ If the selected node is a terminal, edit its label, and lemma.</div>
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#registerDeletedRootTree">registerDeletedRootTree</a></b>(tree)
+								</div>
+								<div class="description">Inform the undo system of a tree's removal at the root level</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#registerNewRootTree">registerNewRootTree</a></b>(tree)
+								</div>
+								<div class="description">Inform the undo system of the addition of a new tree at the root level.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#scrollToNext">scrollToNext</a></b>(selector)
+								</div>
+								<div class="description">Scroll to display the next place in the document matching a selector.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/global.html#scrollToShowSel">scrollToShowSel</a></b>()
 								</div>
 								<div class="description">Scroll the page so that the first selected node is visible.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#search">search</a></b>()
+								</div>
+								<div class="description">Display a search dialog.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#searchNodePostAdd">searchNodePostAdd</a></b>(node)
+								</div>
+								<div class="description">Hook up event handlers after adding a node to the search dialog</div>
 							</td>
 						</tr>
 					
@@ -558,9 +657,18 @@ Contains none of the heuristics of <a href="../symbols/global.html#setLabel">set
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/global.html#showDialogBox">showDialogBox</a></b>(title, html, returnFn)
+								<div class="fixedFont"><b><a href="../symbols/global.html#showDialogBox">showDialogBox</a></b>(title, html, returnFn, hideHook)
 								</div>
 								<div class="description">Show a dialog box.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#showMessageHistory">showMessageHistory</a></b>()
+								</div>
+								<div class="description">Show the message history.</div>
 							</td>
 						</tr>
 					
@@ -614,9 +722,45 @@ If the node bears the given dash tag, remove it.</div>
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#touchTree">touchTree</a></b>(node)
+								</div>
+								<div class="description">Inform the undo system that changes are being made.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/global.html#undo">undo</a></b>()
 								</div>
 								<div class="description">Invoke undo, if not enabled</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#undoAbortTransaction">undoAbortTransaction</a></b>()
+								</div>
+								<div class="description">End an undo transaction, discarding its changes</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#undoBeginTransaction">undoBeginTransaction</a></b>()
+								</div>
+								<div class="description">Begin an undo transaction.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#undoEndTransaction">undoEndTransaction</a></b>()
+								</div>
+								<div class="description">End an undo transaction, keeping its changes</div>
 							</td>
 						</tr>
 					
@@ -694,6 +838,34 @@ further arguments to the `addCommand` function are passed to `fn` on each
 invocation.</dd>
 							
 							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="clearSearchMatches"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>clearSearchMatches</b>()
+					
+					</div>
+					<div class="description">
+						Clear the highlighting from search matches.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
 						
 						
 						
@@ -1011,6 +1183,45 @@ non-terminal, edit the node label.
 
 					<hr />
 				
+					<a name="flagSearchMatch"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>flagSearchMatch</b>(node)
+					
+					</div>
+					<div class="description">
+						Indicate that a node matches a search
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{DOM node}</span> <b>node</b>
+									
+								</dt>
+								<dd>the node to flag</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name="getIndex"> </a>
 					<div class="fixedFont">
 					
@@ -1151,7 +1362,7 @@ non-terminal, edit the node label.
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<span class="light fixedFont">{DOM node}</span> <b>node</b>
+									<span class="light fixedFont">{JQuery Node}</span> <b>node</b>
 									
 								</dt>
 								<dd>the node to operate on</dd>
@@ -1276,6 +1487,52 @@ This function respects the results of the `testValidLeafLabel` and
 						
 						
 						
+						
+						
+						
+
+					<hr />
+				
+					<a name="ignoringUndo"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>ignoringUndo</b>(fn)
+					
+					</div>
+					<div class="description">
+						Execute a function, discarding whatever effects it has on the undo system.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Function}</span> <b>fn</b>
+									
+								</dt>
+								<dd>a function to execute</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>the result of `fn`</dd>
+							
+							</dl>
 						
 						
 						
@@ -1642,7 +1899,7 @@ the selection and all intervening sisters.
 					<a name="moveNode"> </a>
 					<div class="fixedFont">
 					
-					
+					<span class="light">{Boolean}</span>
 					<b>moveNode</b>(parent)
 					
 					</div>
@@ -1667,13 +1924,20 @@ The movement operation must not change the text of the token.
 									<span class="light fixedFont">{DOM Node}</span> <b>parent</b>
 									
 								</dt>
-								<dd>the parent node to move selection under.</dd>
+								<dd>the parent node to move selection under</dd>
 							
 							</dl>
 						
 						
 						
 						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Boolean}</span> whether the operation was successful</dd>
+							
+							</dl>
 						
 						
 						
@@ -1712,6 +1976,90 @@ will be moved as a unit.  Calls <a href="../symbols/global.html#moveNode">moveNo
 								<dd>the parent to move the selection under</dd>
 							
 							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="newRedo"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>newRedo</b>()
+					
+					</div>
+					<div class="description">
+						Perform redo.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="newUndo"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>newUndo</b>()
+					
+					</div>
+					<div class="description">
+						Perform undo.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="nextSearchMatch"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>nextSearchMatch</b>()
+					
+					</div>
+					<div class="description">
+						Scroll down to the next node that matched a search.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
 						
 						
 						
@@ -1781,6 +2129,132 @@ directly dominates no non-empty terminals.
 
 					<hr />
 				
+					<a name="registerDeletedRootTree"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>registerDeletedRootTree</b>(tree)
+					
+					</div>
+					<div class="description">
+						Inform the undo system of a tree's removal at the root level
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{JQuery Node}</span> <b>tree</b>
+									
+								</dt>
+								<dd>the tree being removed</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="registerNewRootTree"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>registerNewRootTree</b>(tree)
+					
+					</div>
+					<div class="description">
+						Inform the undo system of the addition of a new tree at the root level.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{JQuery Node}</span> <b>tree</b>
+									
+								</dt>
+								<dd>the tree being added</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="scrollToNext"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{Boolean}</span>
+					<b>scrollToNext</b>(selector)
+					
+					</div>
+					<div class="description">
+						Scroll to display the next place in the document matching a selector.
+
+If no matches, do nothing.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.utils.js.html">treedrawing.utils.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>selector</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Boolean}</span> an indicator of whether scrolling was performed</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name="scrollToShowSel"> </a>
 					<div class="fixedFont">
 					
@@ -1799,6 +2273,73 @@ directly dominates no non-empty terminals.
 					
 					
 					
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="search"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>search</b>()
+					
+					</div>
+					<div class="description">
+						Display a search dialog.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="searchNodePostAdd"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>searchNodePostAdd</b>(node)
+					
+					</div>
+					<div class="description">
+						Hook up event handlers after adding a node to the search dialog
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>node</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
 						
 						
 						
@@ -1992,7 +2533,7 @@ Contains none of the heuristics of <a href="../symbols/global.html#setLabel">set
 					<div class="fixedFont">
 					
 					
-					<b>showDialogBox</b>(title, html, returnFn)
+					<b>showDialogBox</b>(title, html, returnFn, hideHook)
 					
 					</div>
 					<div class="description">
@@ -2031,7 +2572,41 @@ return (caller-specified behavior) keys.
 								</dt>
 								<dd>a function to call when return is pressed</dd>
 							
+								<dt>
+									<span class="light fixedFont">{Function}</span> <b>hideHook</b>
+									
+								</dt>
+								<dd>a function to run when hiding the dialog box</dd>
+							
 							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="showMessageHistory"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>showMessageHistory</b>()
+					
+					</div>
+					<div class="description">
+						Show the message history.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
 						
 						
 						
@@ -2217,7 +2792,7 @@ to the configuration in the `leaf_extensions`, `extensions`, and
 									<i>Optional</i>
 								</dt>
 								<dd>override the guess as to the
-appropriate ordered list of possible extensions is.</dd>
+appropriate ordered list of possible extensions.</dd>
 							
 							</dl>
 						
@@ -2258,6 +2833,45 @@ appropriate ordered list of possible extensions is.</dd>
 
 					<hr />
 				
+					<a name="touchTree"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>touchTree</b>(node)
+					
+					</div>
+					<div class="description">
+						Inform the undo system that changes are being made.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{JQuery Node}</span> <b>node</b>
+									
+								</dt>
+								<dd>the node in which changes are being made</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name="undo"> </a>
 					<div class="fixedFont">
 					
@@ -2267,6 +2881,94 @@ appropriate ordered list of possible extensions is.</dd>
 					</div>
 					<div class="description">
 						Invoke undo, if not enabled
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="undoAbortTransaction"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>undoAbortTransaction</b>()
+					
+					</div>
+					<div class="description">
+						End an undo transaction, discarding its changes
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="undoBeginTransaction"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>undoBeginTransaction</b>()
+					
+					</div>
+					<div class="description">
+						Begin an undo transaction.
+
+This function MUST be matched by a call to either `undoEndTransaction`
+(which keeps all intermediate steps since the start call) or
+`undoAbortTransaction` (which discards said steps).
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="undoEndTransaction"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>undoEndTransaction</b>()
+					
+					</div>
+					<div class="description">
+						End an undo transaction, keeping its changes
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
@@ -2337,7 +3039,7 @@ appropriate ordered list of possible extensions is.</dd>
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Mon Jul 30 2012 20:39:46 GMT-0400 (EDT)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Tue Aug 14 2012 17:23:42 GMT-0400 (EDT)
 		</div>
 	</body>
 </html>
