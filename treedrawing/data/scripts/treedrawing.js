@@ -172,11 +172,11 @@ function documentReadyHandler() {
     setupCommentTypes();
     globalStyle.appendTo("head");
 
-    lastsavedstate = $("#editpane").html();
-
     _.each(startuphooks, function (hook) {
         hook();
     });
+
+    lastsavedstate = $("#editpane").html();
 }
 
 $(document).ready(function () {
