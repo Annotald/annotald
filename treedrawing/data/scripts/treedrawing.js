@@ -310,7 +310,9 @@ function handleKeyDown(e) {
     var theFn = commandMap[e.keyCode].func;
     var theArgs = commandMap[e.keyCode].args;
     theFn.apply(undefined, theArgs);
-    undoBarrier();
+    if (!theFn.async) {
+        undoBarrier();
+    }
     return false;
 }
 
@@ -922,6 +924,7 @@ function displayRename() {
                     $("#leafeditor").replaceWith(replNode);
                     postChange(replNode);
                     undoEndTransaction();
+                    undoBarrier();
                 }
             });
         setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
@@ -961,11 +964,13 @@ function displayRename() {
                     $("#labelbox").replaceWith(newphrase + " ");
                     postChange(origNode);
                     undoEndTransaction();
+                    undoBarrier();
                 }
             });
         setTimeout(function(){ $("#labelbox").focus(); }, 10);
     }
 }
+displayRename.async = true;
 
 /**
  * Edit the lemma of a terminal node.
@@ -985,6 +990,7 @@ function editLemma() {
         $("#undo").attr("disabled", false);
         $("#redo").attr("disabled", false);
         $("#save").attr("disabled", false);
+        undoBarrier();
     }
 
     // Begin code
@@ -1024,9 +1030,11 @@ function editLemma() {
                                              newlemma + "</span>");
                 postChange();
             }
+            // TODO: escape
         });
     setTimeout(function(){ $("#leaflemmabox").focus(); }, 10);
 }
+editLemma.async = true;
 
 // ========== Search
 
