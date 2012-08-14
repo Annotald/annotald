@@ -38,7 +38,8 @@ except:
     pass
 
 # needed for py2exe to work properly
-#sys.stderr = open( os.path.expanduser("~/annotald.err.log.txt"), "w" )
+if os.name == "nt":
+    sys.stderr = open( os.path.expanduser("~/annotald.err.log.txt"), "w" )
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
