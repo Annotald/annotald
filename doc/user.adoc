@@ -89,6 +89,8 @@ Uncompress the file, and open a command line.
 
 The Annotald user interface (UI) is shown in the following screenshot:
 
+// TODO: is it necessary to redo this since search has been added? ugh.
+
 image::images/annotald-hello.png[The Annotald UI at startup,align="center"]
 
 On the left-hand side of the screen, the following are present, from top
@@ -515,7 +517,46 @@ other_word <-
 
 === External validation
 
-foo
+TODO
+
+=== Searching
+
+Annotald has a structural search engine built in.  While it cannot
+replicate the flexibility or (perhaps especially) speed of a dedicated
+search program such as
+http://corpussearch.sourceforge.net/[CorpusSearch], it is useful to be
+able to search within the Annotald interface itself.  The search dialog
+is accessed by clicking the “Search” button in the Tools menu.
+// TODO: or via slash key
+Within the dialog box, you will construct a visual representation of
+your query, similar to the representation of trees in the Annotald
+interface.
+
+The simplest query tree contains only one leaf node.  The leaf has a
+text box, into which the search string can be entered.  The string is
+interpreted as a case-insensitive Javascript regular expression.  The
+Javascript regular expression format is very similar to that used by
+many programming languages.  A full description fo the format is outside
+the scope of this document, but is available via
+https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp[this
+reference manual].  The leaf also has a drop-down box, which indicates
+whether the search string is to match against the node labels or the
+text of the corpus.  The search string is additionally left-anchored –
+that is, the beginning of the regular expression is constrained to match
+the beginning of a node label or word.  Pressing the “Search” button
+will execute the search.  Matches will be highlighted with a yellow box,
+and the document will be scrolled to display the next match.  A very
+simple query and its result is illustrated in the following screenshots:
+
+image::images/annotald-search-simple.png[A simple Annotald search,align="center"]
+
+image::images/annotald-search-simple-result.png[Results of a simple Annotald search,align="center"]
+
+In addition to the search node where text can be entered, there is a
+node consisting only of a plus sign (“+”).  Clicking this node adds a
+sister to the search node.  Search nodes which are sisters are
+interpreted as the (unordered) sisterhood relation.
+
    
 // Things to talk about:
 // - annotation philosophy (useful annotation vs. correct annotation, some
