@@ -778,7 +778,7 @@ function leafEditorHtml(label, word, lemma) {
             label +
             "' /><input id='leaftextbox' class='labeledit' type='text' value='" +
             word +
-            "' " + (isEmpty(word) ? "disabled='disabled'" : "") + " />";
+            "' " + (!isEmpty(word) ? "disabled='disabled'" : "") + " />";
     if (lemma) {
         editorHtml += "<input id='leaflemmabox' class='labeledit' " +
             "type='text' value='" + lemma + "' />";
@@ -793,9 +793,11 @@ function leafEditorHtml(label, word, lemma) {
  * @private
  */
 function leafEditorReplacement(label, word, lemma) {
-    lemma = lemma.replace(/</g,"&lt;");
-    lemma = lemma.replace(/>/g,"&gt;");
-    lemma = lemma.replace(/'/g,"&#39;");
+    if (lemma) {
+        lemma = lemma.replace(/</g,"&lt;");
+        lemma = lemma.replace(/>/g,"&gt;");
+        lemma = lemma.replace(/'/g,"&#39;");
+    }
 
     word = word.replace(/</g,"&lt;");
     word = word.replace(/>/g,"&gt;");
