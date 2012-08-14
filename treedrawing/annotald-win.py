@@ -17,7 +17,7 @@ class TaskBarApp(wx.Frame):
             style=wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE)
 
         self.tbicon = wx.TaskBarIcon()
-        self.tbicon.SetIcon(wx.Icon('user-plain-blue.png', wx.BITMAP_TYPE_PNG), "AnnotaldRunner")
+        self.tbicon.SetIcon(wx.Icon('user-plain-red.png', wx.BITMAP_TYPE_PNG), "Annotald")
 
         self.tbicon.Bind(wx.EVT_TASKBAR_RIGHT_UP,self.ShowMenu)    
         self.tbicon.Bind(wx.EVT_MENU, self.startServer, id=ID_LAUNCH_SERVER)      
@@ -72,7 +72,9 @@ class TaskBarApp(wx.Frame):
                 time.sleep(2)
                 self.startChrome()
                 self.tbopen.Enable(False)
+                self.tbicon.SetIcon(wx.Icon('user-plain-blue.png', wx.BITMAP_TYPE_PNG), "Annotald")
                 treedrawing._main(args)
+                self.tbicon.SetIcon(wx.Icon('user-plain-red.png', wx.BITMAP_TYPE_PNG), "Annotald")
                 self.tbopen.Enable(True)
             except:
                 print('>>> traceback <<<')
