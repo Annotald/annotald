@@ -1040,7 +1040,7 @@ function moveNode(parent) {
     var textbefore = currentText(parent_ip);
     var nodeMoved;
     if (!isPossibleTarget(parent) || // can't move under a tag node
-        $(startnode).parent().children().length == 1 || // cant move an only child
+        $(startnode).parent().children().length == 1 || // can't move an only child
         $(parent).parents().is(startnode) // can't move under one's own child
        )
     {
