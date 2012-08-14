@@ -1128,16 +1128,6 @@ addStartupHook(function () {
 // =============== Event handlers
 
 /**
- * Indicate that a node matches a search
- *
- * @param {DOM node} node the node to flag
- */
-function flagSearchMatch(node) {
-    $(node).addClass("searchmatch");
-    $("#matchcommands").show();
-}
-
-/**
  * Clear the highlighting from search matches.
  */
 function clearSearchMatches() {
@@ -1231,6 +1221,16 @@ function searchPrecNode(e) {
 }
 
 // =============== Helper functions
+
+/**
+ * Indicate that a node matches a search
+ *
+ * @param {DOM node} node the node to flag
+ */
+function flagSearchMatch(node) {
+    $(node).addClass("searchmatch");
+    $("#matchcommands").show();
+}
 
 /**
  * Hook up event handlers after adding a node to the search dialog
