@@ -1356,24 +1356,40 @@ function clearSearch() {
  *
  * @param {DOM node} node the search node to interpret
  * @param {DOM node} target the tree node to match it against
+ * @param {Object} options search options
  * @returns {DOM node} `target` if it matched the query, otherwise `undefined`
  */
  
-function interpretSearchNode(node, target) {
+function interpretSearchNode(node, target, options) {
     // TODO: optimize to remove jquery calls, only use regex matching if needed
+    // TODO: make case sensitivity an option?
+    options = options || {};
     var searchtype = $(node).children(".searchtype").val();
     var rx, hasMatch, i, j;
     var newTarget = $(target).children();
     var childSearches = $(node).children(".searchnode");
 
+    if ($(node).parent().is("#searchnodes") &&
+        !$("#searchnodes").children(".searchnode").first().is(node) &&
+        !options['norecurse']) {
+        // special case siblings at root level
+        // What an ugly hack, can it be improved?
+        newTarget = $(target).siblings();
+        for (j = 0; j < newTarget.length; j++) {
+            if (interpretSearchNode(node, newTarget[j], { norecurse: true })) {
+                return target;
+            }
+        }
+    }
+
     if (searchtype == "Label") {
-        rx = RegExp("^" + $(node).children(".searchtext").val());
+        rx = RegExp("^" + $(node).children(".searchtext").val(), "i");
         hasMatch = $(target).hasClass("snode") && rx.test(getLabel($(target)));
         if (!hasMatch) {
             return undefined;
         }
     } else if (searchtype == "Text") {
-        rx = RegExp("^" + $(node).children(".searchtext").val());
+        rx = RegExp("^" + $(node).children(".searchtext").val(), "i");
         hasMatch = $(target).hasClass("wnode") && rx.test($(target).text());
         if (!hasMatch) {
             return undefined;
