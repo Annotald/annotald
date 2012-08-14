@@ -18,8 +18,6 @@ Lesser General Public License for more details.
 VERSION = "12.03-dev"
 
 import os.path
-# CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-
 import re
 import sys, subprocess
 import cherrypy, json
@@ -45,6 +43,8 @@ if os.name == "nt":
 import codecs
 
 from datetime import datetime
+
+CURRENT_DIR = util.get_main_dir()
 
 class Treedraw(object):
     
@@ -87,7 +87,7 @@ class Treedraw(object):
         cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
     _cp_config = { 'tools.staticdir.on'    : True,
-                   'tools.staticdir.dir'   : util.get_main_dir() + '/data',
+                   'tools.staticdir.dir'   : CURRENT_DIR + '/data',
                    'tools.staticdir.index' : 'index.html',
                    'tools.caching.on'      : False
                    }
@@ -121,8 +121,8 @@ class Treedraw(object):
             f.write(self.versionCookie + "\n\n")
             f.write(tosave)
             f.close()
-            cmdline = 'java -classpath ' + util.get_main_dir() + '/CS_Tony_oct19.jar' + \
-                ' csearch.CorpusSearch ' + util.get_main_dir() + '/nothing.q ' + \
+            cmdline = 'java -classpath ' + CURRENT_DIR + '/CS_Tony_oct19.jar' + \
+                ' csearch.CorpusSearch ' + CURRENT_DIR + '/nothing.q ' + \
                 self.thefile
 
             # make sure console is hidden in windows py2exe version
@@ -284,7 +284,7 @@ class Treedraw(object):
 
     def renderIndex(self, currentTree, currentSettings, test):
         # The CURRENT_DIR below is a bit of a hack
-        indexTemplate = Template(filename = util.get_main_dir() + "/data/html/index.mako",
+        indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
                                  strict_undefined = True)
 
         validators = {}
