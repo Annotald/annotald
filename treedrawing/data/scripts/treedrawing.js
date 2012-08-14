@@ -2291,8 +2291,8 @@ function basesAndDashes(bases, dashes) {
 }
 
 function goToTree() {
-
     function goTo() {
+        var i;
         var treeIndex = $("#gotoInput").val();
         if (treeIndex > currentIndex) {
             for (i = currentIndex; i < treeIndex; i++) {
