@@ -409,10 +409,14 @@ addStartupHook(function () {
  * @param {String} title the title of the dialog box
  * @param {String} html the html to display in the dialog box
  * @param {Function} returnFn a function to call when return is pressed
+ * @param {Function} hideHook a function to run when hiding the dialog box
  */
-function showDialogBox(title, html, returnFn) {
+function showDialogBox(title, html, returnFn, hideHook) {
     document.body.onkeydown = function (e) {
         if (e.keyCode == 27) { // escape
+            if (hideHook) {
+                hideHook();
+            }
             hideDialogBox();
         } else if (e.keyCode == 13 && returnFn) {
             returnFn();
