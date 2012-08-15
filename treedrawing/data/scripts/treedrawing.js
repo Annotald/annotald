@@ -1563,6 +1563,7 @@ function moveNode(parent) {
                 addToIndices(movednode, maxindex);
             } else {
                 touchTree($(startnode));
+                touchTree($(parent));
             }
             movednode.appendTo(parent);
             if (currentText(parent_ip) != textbefore)  {
@@ -1590,6 +1591,7 @@ function moveNode(parent) {
                 addToIndices(movednode, maxindex);
             } else {
                 touchTree($(startnode));
+                touchTree($(parent));
             }
             movednode.insertBefore($(parent).children().first());
             if (currentText(parent_ip) != textbefore) {
@@ -1622,10 +1624,8 @@ function moveNodes(parent) {
         return;
     }
     undoBeginTransaction();
-    var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
-    if (parent == document.getElementById("sn0")) {
-        parent_ip = $("#sn0");
-    }
+    touchTree($(startnode));
+    touchTree($(parent));
     if (startnode.compareDocumentPosition(endnode) & 0x2) {
         // endnode precedes startnode, reverse them
         var temp = startnode;
