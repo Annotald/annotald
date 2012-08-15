@@ -9,3 +9,4 @@ api-doc/
 priv-doc/
 htmlcov/
 .coverage
+/doc/user.xml
