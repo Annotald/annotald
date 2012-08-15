@@ -552,12 +552,61 @@ image::images/annotald-search-simple.png[A simple Annotald search,align="center"
 
 image::images/annotald-search-simple-result.png[Results of a simple Annotald search,align="center"]
 
+Once the search has completed, two buttons will appear below the
+“Search” button.  The first of these scrolls the document down to
+display the next match.  The second removes teh hithlighting from serach
+matches.
+
 In addition to the search node where text can be entered, there is a
 node consisting only of a plus sign (“+”).  Clicking this node adds a
 sister to the search node.  Search nodes which are sisters are
-interpreted as the (unordered) sisterhood relation.
+interpreted as the (unordered) sisterhood relation.  An exampl of such a
+search is given in the following two screenshots:
 
-   
+image::images/annotald-search-sister.png[A sisterhood Annotald search,align="center"]
+
+image::images/annotald-search-sister-result.png[Results of a sisterhood Annotald search,align="center"]
+
+Each search node has some buttons in the upper-right hand corner.  From
+left to right, these are:
+
+// TODO: add screen shot examples to all of these
+
+Or (vertical bar):: This creates an “OR” node as the parent of the node
+from which it is clicked.  The daughters of an “OR” node are interpreted
+disjunctively, instead of conjunctively (the default).  An example of
+such a search is shown in the follwoing screenshots:footnote:[Note that
+the results are the same as the previously illustrated sisterhood
+search, though the queries are distinct.]
+
+image::images/annotald-search-or.png[A disjunctive Annotald search,align="center"]
+
+image::images/annotald-search-or-result.png[Results of a disjunctive Annotald search,align="center"]
+
+Deep (“D”):: This creates a deep search node as a daughter of the node
+from which it is clicked.  By default, child search nodes require direct
+daughterhood.  The children of deep nodes, in contrast, can match at any
+depth.
+
+Precedes (“>”):: This creates a precedes node as a sister of the node from
+which it ic clicked.  By default, as mentioned above (and illustrated in
+the screenshots), the sisterhood relation among search nodes in
+interpreted without regard to directionality.  Precedes nodes, on the
+other hand, impose a precedence relation on their daughter (whih is not
+in fact interpreted as a daughter, but rather as a sister, of the
+original node.)
+
+Remove (“-”):: This removes the node from which it is clicked.  Any
+daughters of this node are promoted to the node’s parent; if the node
+has no daughters it simply disappears.
+
+Add daughter (“+”):: This adds a daughter search node to the node from
+which it is clicked.  The defaultinterpretation is direct daughterhood,
+which can be changed by using a deep node, as already mentioned.
+
+// TODO: allow drag and drop of nodes?  or buttons to move them?
+
+
 // Things to talk about:
 // - annotation philosophy (useful annotation vs. correct annotation, some
 //   of beatrices ideas, etc)
