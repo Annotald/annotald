@@ -1,0 +1,580 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Annotald User’s Guide</title><link rel="stylesheet" type="text/css" href="docbook-xsl.css" /><link rel="stylesheet" type="text/css" href="annotald-manual.css" /><meta name="generator" content="DocBook XSL Stylesheets V1.77.1" /></head><body><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="idp183968"></a>Annotald User’s Guide</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Aaron</span> <span class="surname">Ecay</span></h3><code class="email">&lt;<a class="email" href="mailto:ecay@babel.ling.upenn.edu">ecay@babel.ling.upenn.edu</a>&gt;</code></div></div></div><div><p class="copyright">Copyright © 2012 Aaron Ecay</p></div><div><div class="legalnotice"><a id="idp929600"></a><p>
+    This work is licensed under a Creative Commons
+    Attribution-NonCommercial-NoDerivs 3.0 Unported License
+    http://creativecommons.org/licenses/by-nc-nd/3.0/deed.en_US
+  </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl><dt><span class="section"><a href="#_introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#_installation">2. Installation</a></span></dt><dt><span class="section"><a href="#_annotald_ui_and_philosophy">3. Annotald UI and Philosophy</a></span></dt><dd><dl><dt><span class="section"><a href="#_mouse">3.1. Mouse</a></span></dt><dt><span class="section"><a href="#_context_menu">3.2. Context menu</a></span></dt><dt><span class="section"><a href="#_keyboard">3.3. Keyboard</a></span></dt></dl></dd><dt><span class="section"><a href="#_customization">4. Customization</a></span></dt><dd><dl><dt><span class="section"><a href="#_javascript_customization_options">4.1. Javascript customization options</a></span></dt><dt><span class="section"><a href="#keycmds">4.2. Default keybindings</a></span></dt><dt><span class="section"><a href="#_custom_keybindings">4.3. Custom keybindings</a></span></dt></dl></dd><dt><span class="section"><a href="#_advanced_features">5. Advanced features</a></span></dt><dd><dl><dt><span class="section"><a href="#tagset-validate">5.1. Tagset validation</a></span></dt><dt><span class="section"><a href="#_external_validation">5.2. External validation</a></span></dt><dt><span class="section"><a href="#_searching">5.3. Searching</a></span></dt></dl></dd></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_introduction"></a>1. Introduction</h2></div></div></div><p>This manual is designed to teach users how to use the Annotald program
+for annotating parsed corpora according to (a version of) the Penn
+treebank standards.
+
+In that vein, it consists of both documentation relating to the
+configuration and use of Annotald, as well as instruction on the
+application of the Penn treebank standards to corpus data.  For
+simplicity, the annotation examples in this guide will be based on
+modern English.  The principles illustrated should be applicable to
+annotation in all languages, however.</p><p>Annotald was originally written as part of the
+<a class="ulink" href="http://www.linguist.is/icelandic_treebank/Icelandic_Parsed_Historical_Corpus_%28IcePaHC%29" target="_top">Icelandic
+Parsed Historical Corpus</a> (IcePaHC) project.  Development of the program
+has been funded by:
+- The Icelandic Research Fund (RANNÍS)
+- The US’s National Science Foundation
+- The University of Iceland Research Fund
+- Research funds at the University of Pennsylvania</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_installation"></a>2. Installation</h2></div></div></div><p>In order to use Annotald, it is necessary to install several programs
+that Annotald depends on in order to function.  Like Annotald itself,
+all of these programs are Free Software.<a xmlns="" href="#ftn.idp3450848" class="footnote" name="idp3450848" id="idp3450848"><sup class="footnote">[1]</sup></a></p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+Download and install the latest stable version of
+   <a class="ulink" href="https://www.google.com/intl/en/chrome/browser/?hl=en&amp;lr=all" target="_top">Google’s
+   Chrome web browser</a>
+</li><li class="listitem">
+Install the latest stable version of Python 2, if necessary.
+   Macintosh computers have a sufficient version of Python
+   pre-installed.  (If you use Linux, it is also very likely that Python
+   2 is already installed on your computer.)
+</li><li class="listitem">
+Install the NTLK Python package.
+   <a class="ulink" href="http://nltk.org/install.html" target="_top">Instructions to do so</a> are provided by
+   NLTK’s developer.
+</li><li class="listitem">
+Install the python packages Mako, CherryPy, and
+   argparse.<a xmlns="" href="#ftn.idp3162576" class="footnote" name="idp3162576" id="idp3162576"><sup class="footnote">[2]</sup></a>  This can be done using the <code class="literal">pip</code> command,
+   which you should have installed as a prerequisite for NLTK in the
+   previous step.  For Mac, enter <code class="literal">sudo pip install mako cherrypy
+   argparse</code> in the Terminal program’s command line.  For Windows,
+   choose “Run…” from the start menu, and enter
+   <code class="literal">c:\Python27\Scripts\pip install mako cherrypy argparse</code>
+</li></ol></div><p>Then you must download Annotald itself.  Navigate to
+<a class="ulink" href="https://github.com/janabeck/Annotald/tags" target="_top">the Annotald release page</a> and
+download the zip file corresponding to the latest Annotald stable
+release.
+
+
+
+
+
+Uncompress the file, and open a command line.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_annotald_ui_and_philosophy"></a>3. Annotald UI and Philosophy</h2></div></div></div><p>The Annotald user interface (UI) is shown in the following screenshot:</p><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-hello.png" alt="The Annotald UI at startup" /></div></div><p>On the left-hand side of the screen, the following are present, from top
+to bottom:
+- The control panel.  This contains buttons for functions such as
+  saving, undo/redo, and clocking in/out from a timelog file.
+- The tools panel.  Empty in this screenshot, this contains advanced
+  functionality when enabled, such as external validation.
+- The messages pane.  This area displays messages messages from the
+  program to the user.</p><p>Various Annotald functions involve showing a dialog box to the user.
+For example, the following image demonstrates the message history dialog
+(accessed by clicking “Messages” above the message area).  To dismiss a
+dialog, press the escape key.  (Different dialogs may also display
+buttons allowing you to close them).</p><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-dialog.png" alt="An example of a dialog box in Annotald" /></div></div><p>The right-hand portion of the screen is devoted to showing the contents
+of the file being edited.  The tree structure of the annotation is
+represented as a series of concentric boxes.  Clauses are highlighted in
+dark pink, in order to make them more salient, and provide an additional visual
+reference to the structure of the sentences being edited.  The box which
+represents the file itself is dark brown.</p><p>There are three ways of interacting with Annotald’s user interface.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_mouse"></a>3.1. Mouse</h3></div></div></div><p>It is recommended that Annotald users have a full-sized mouse with at least
+two buttons.  Because of Annotald’s heavy reliance on mousing, neither a
+laptop trackpad nor a single-button mouse will prove satisfactory from an
+ergonomic point of view.</p><p>The mouse serves to select nodes in the UI.  Click anywhere in the box
+corresponding to a node in order to select it.  The horizontal mouse
+motion necessary can be reduced by clicking on the left edge of the
+node; the left side of each node’s box is padded in order ot facilitate
+this.  An example of a selected node is shown here, notice that the
+selected node has been highlighted in blue:</p><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-select.png" alt="Selection in the Annotald UI" /></div></div><p>Up to two nodes may be selected at a time.  If a node is selected,
+clicking another node will also highlight that node:</p><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-select2.png" alt="Dual selection in the Annotald UI" /></div></div><p>Further clicks after two nodes are selected will de-highlight the
+previous second selection, and highlight the clicked node.  To clear any
+selection in effect, use the space bar.</p><p>Selected nodes form the basis for many <a class="link" href="#keycmds" title="4.2. Default keybindings">keyboard commands</a>.
+Node selection is also the basis of movement commands, of a certain
+type.  The mouse is used for movement commands that edit the structure
+of the tree.  In order to annotate movement in the sense of linguistic
+movement (wh-movement, etc.), see the <a class="link" href="#leafAfter"><code class="literal">leafAfter</code></a> and
+<a class="link" href="#leafBefore"><code class="literal">leafBefore</code></a> functions.</p><p>In order to move a selected node, right click on the desired
+destination.  Movements must satisfy certain structural (e.g. a node
+cannot be moved into its own daughter) as well as extrinsic conditions
+(no movement operation may change the text of the sentence, e.g. by
+reordering two words).  Assuming these conditions are met, the movement
+operation will take place.  Right clicking with two selected nodes will
+move those nodes, as well as any intervening material, to the desired
+destination.  The two selected nodes must be sisters of each other.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_context_menu"></a>3.2. Context menu</h3></div></div></div><p>Right-clicking a node when no selection is present will summon the
+context menu, which is illustrated here:</p><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-context.png" alt="The Annotald context menu" /></div></div><p>The context menu has three columns.  The first has suggested label
+changes for the node; clicking any of these will change the node’s label
+to the chosen option.  The second contains options for adding a sister
+before the node; clicking any of these will insert a node with the given
+label and text.  The third column contains options for toggling certain
+dash tags.</p><p>The context menu can be dismissed by left-clicking outside of it.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_keyboard"></a>3.3. Keyboard</h3></div></div></div><p>Annotald operations other than movement are controlled by the keyboard.
+Annotald users should keep their right hand on the mouse at all times;
+thus, only keys on the left hand side of the keyboard are used as key
+shortcuts (with a small number of exceptions for commands which require
+full keyborad use).<a xmlns="" href="#ftn.idp85696" class="footnote" name="idp85696" id="idp85696"><sup class="footnote">[3]</sup></a></p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_customization"></a>4. Customization</h2></div></div></div><p>There are two files which are relavant to the customization of Annotald:
+<code class="literal">settings.js</code> and <code class="literal">settings.py</code>.  The former is written in Javascript,
+and contains the bulk of Annotald’s user interface settings.  The latter
+is written in Python, and (generally speaking) contains customizations
+that are very pervasive or advanced.  A commented sample version of both
+files is included in the Annotald download, which it is recommended for
+users to base their customizations on.</p><p>By default, the <code class="literal">annotald</code> command loads the included sample
+configurations.  To pass a customized Javascript settings file to the
+command, use the <code class="literal">-s</code> command line option.  For a Python settings file,
+the option is <code class="literal">-S</code> (note capitalization).</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_javascript_customization_options"></a>4.1. Javascript customization options</h3></div></div></div><p>In this section, the options in <code class="literal">settings.js</code> will be discussed.  Options
+specifiable in <code class="literal">settings.py</code> on the other hand will be discussed in
+other sections where they are implicated.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+<code class="literal">testValidPhraseLabel</code>/<code class="literal">testValidLeafLabel</code>
+</span></dt><dd>
+See the discussion of
+these options <a class="link" href="#tagset-validate" title="5.1. Tagset validation">below</a>
+</dd><dt><span class="term">
+<code class="literal">disableUndo</code>
+</span></dt><dd>
+Deprecated
+</dd><dt><span class="term">
+<code class="literal">extensions</code>
+</span></dt><dd><p class="simpara">
+Specify the list and order of dash tags available in the
+corpus.  There are three variants of this variable:
+</p><div class="itemizedlist"><a id="extensions-vars"></a><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+<code class="literal">leaf_extensions</code>: Dash tags applicable to leaf (terminal) nodes
+</li><li class="listitem">
+<code class="literal">clause_extensions</code>: Dash tags applicable to clausal nodes (of
+  category CP or IP)
+</li><li class="listitem">
+<code class="literal">extensions</code>: Dash tags applicable to non-clausal non-leaf nodes
+</li></ul></div><p class="simpara">Not every dash tag needs to appear in this list, only those which need to
+be toggled on and off in a binary fashion.  Thus, for example, the dash
+tag <span class="corpustext">OB1</span> (for direct objects) is never toggled in a binary fashion, but
+rather as part of a cycle that includes setting the category to <span class="corpustext">NP</span> and
+moving through <span class="corpustext">NP-SBJ</span>, <span class="corpustext">NP-OB2</span>, etc.  Thus, it need not appear in this
+list.  However, the <span class="corpustext">SPE</span> dash tag (for reported speech) is toggled on
+and off – changing an <span class="corpustext">IP-XXX</span> to <span class="corpustext">IP-XXX-SPE</span>, and potentially back to
+IP-XXX.</p></dd><dt><span class="term">
+<code class="literal">ipnodes</code>
+</span></dt><dd>
+A list of categories which are clauses.  These are
+highlighted (with a tan shade) to make it clear where the “floor” of a
+clause is, for the purpose of rearranging nodes in the user interface.
+</dd><dt><span class="term">
+<code class="literal">invisibleCategories</code>
+</span></dt><dd>
+TODO: what to do about these?
+</dd><dt><span class="term">
+<code class="literal">commentTypes</code>
+</span></dt><dd>
+<a id="commenttypes-vars"></a> Types of comments.  Comments
+are nodes of the form <span class="corpustext">(CODE {XXX:words_words_words})</span> For every
+value of “XXX” is in this list, when editing the contents of the
+comment with one of the editing functions (TODO: link), a dialog box
+will appear allowing the comment to be edited as text, instead of the
+default editing interface.
+</dd><dt><span class="term">
+<code class="literal">customCommands</code>
+</span></dt><dd>
+A Javascript function containing code to configure
+the keybindings.  This should be a series of calls to the
+<a class="ulink" href="../api-doc/symbols/global.html#addCommand" target="_top"><code class="literal">addCommand</code> function</a>.
+</dd><dt><span class="term">
+<code class="literal">defaultConMenuGroup</code>
+</span></dt><dd>
+The label suggestions to display in the
+context (right-click) menu, when no suggestion can be deduced from
+the already-present label.
+</dd><dt><span class="term">
+<code class="literal">customConMenuGroups</code>
+</span></dt><dd>
+a Javascript function to configure the context
+menu suggestions.  This should be a series of calls to the
+<a class="ulink" href="../api-doc/symbols/global.html#addConMenuGroup" target="_top"><code class="literal">addConMenuGroup</code> function</a>.
+</dd><dt><span class="term">
+<code class="literal">customConLeafBefore</code>
+</span></dt><dd>
+a Javascript function to configure the new node
+options in the context menu.  This should be a series of calls to the
+<a class="ulink" href="../api-doc/symbols/global.html#addConLeafBefore" target="_top"><code class="literal">addConLeafBefore</code> function</a>.
+</dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="keycmds"></a>4.2. Default keybindings</h3></div></div></div><p>The Annotald keybindings provided by default are adapted from those used
+by the IcePaHC project.  It is highly recommended that users make a copy
+of this file in the working directory for their corpus, and customize it
+to their needs.  The procedure to do so is described in the following
+section.  The default keybindings are as follows (from left to
+right and top to bottom of a US keyboard layout):<a xmlns="" href="#ftn.idp5612112" class="footnote" name="idp5612112" id="idp5612112"><sup class="footnote">[4]</sup></a></p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+Backquote (`)
+</span></dt><dd>
+Toggle the display of lemmata on or off
+</dd><dt><span class="term">
+1
+</span></dt><dd>
+Unbound
+</dd><dt><span class="term">
+2
+</span></dt><dd>
+Cycle between tags for non-argument NPs
+</dd><dt><span class="term">
+3
+</span></dt><dd>
+Unbound
+</dd><dt><span class="term">
+4
+</span></dt><dd>
+Toggle the <span class="corpustext">-PRN</span> dash tag (parentheticals)
+</dd><dt><span class="term">
+5
+</span></dt><dd>
+Toggle the <span class="corpustext">-SPE</span> dash tag (direct speech)
+</dd><dt><span class="term">
+Q
+</span></dt><dd>
+Cycle between tags for miscellaneous phrase types
+</dd><dt><span class="term">
+W
+</span></dt><dd>
+Cycle between tags for argumental NPs
+</dd><dt><span class="term">
+E
+</span></dt><dd>
+Cycle between tags for miscellaneous CPs
+</dd><dt><span class="term">
+R
+</span></dt><dd>
+Cycle between tags for relative clauses
+</dd><dt><span class="term">
+T
+</span></dt><dd>
+Cycle between tags for that-clauses and other types of CP
+</dd><dt><span class="term">
+A
+</span></dt><dd>
+Add a leaf after the selected node
+</dd><dt><span class="term">
+S
+</span></dt><dd>
+Cycle between tags for different types of sentential IP
+</dd><dt><span class="term">
+D
+</span></dt><dd>
+Delete a node
+</dd><dt><span class="term">
+F
+</span></dt><dd>
+Cycle between tags for PPs and ADVPs
+</dd><dt><span class="term">
+G
+</span></dt><dd>
+Cycle between tags for ADJPs and QPs
+</dd><dt><span class="term">
+Z
+</span></dt><dd>
+Undo
+</dd><dt><span class="term">
+X
+</span></dt><dd>
+Create a new node (labeled XP)
+</dd><dt><span class="term">
+C
+</span></dt><dd>
+Coindex nodes
+</dd><dt><span class="term">
+V
+</span></dt><dd>
+Cycle between tags for non-sentential IPs
+</dd><dt><span class="term">
+Spacebar
+</span></dt><dd>
+Clear the selection
+</dd><dt><span class="term">
+L
+</span></dt><dd>
+Edit the Label and/or text of a node
+</dd><dt><span class="term">
+Shift + L
+</span></dt><dd>
+The same (included as an example of a keybinding with modifier)
+</dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_custom_keybindings"></a>4.3. Custom keybindings</h3></div></div></div><p>It is virtually certain that users will want to adapt the default key
+bindings, to adapt the tags used and the most common use patterns of the
+annotators.  It is possible to merely change the specific tags used
+while maintaining the default conceptual categories (argumental NP,
+non-sentential IP, etc.); it is also possible to come up with an
+entirely new scheme.  The default bindings do not use the shift or
+control modifiers, which opens up a large space of additional keys for
+user customization.</p><p>The keybindings of Annotald are customized by placing calls to the
+<code class="literal">addCommand</code> function inside the <code class="literal">customCommands</code> block.  This function
+has 2 required arguments; any further arguments are determined by the
+command being bound.  The first argument to the function should be a
+Javascript dictionary (also known as an object).  This has the format
+<code class="literal">{key: value, key2: value2}</code>.  The following keys are recognized:
+- <code class="literal">keycode</code> the numeric Javascript keycode of the key you wish to bind.
+  You can navigate to
+  <a class="ulink" href="http://www.asquare.net/javascript/tests/KeyCode.html" target="_top">this website</a> to
+  determine interactively the code for any key on your keyboard.
+- <code class="literal">ctrl</code> the value <code class="literal">true</code> if this binding is for a shortcut with the
+  control key pressed.  Ergonomically, it is much easier to actuate such
+  shortcuts if you remap the “Caps Lock” key on your keyboard to
+  control, so that it can be pressed with the pinky without needing to
+  reach very far.  A panoply of methods to do so are presented at
+  <a class="ulink" href="http://emacswiki.org/emacs/MovingTheCtrlKey" target="_top">this website</a>.
+- <code class="literal">shift</code> the value true if this binding is for a shortcut with the
+  shift key pressed.</p><p>The <code class="literal">ctrl</code> and <code class="literal">shift</code> options are mutually exclusive.</p><p>The second argument to the <code class="literal">addCommand</code> function is the name of the
+function which the key will be bound to.  Any further arguments will be
+passed to the function given.  A list of functions provided by Annotald
+follows:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+<code class="literal">clearSelection</code>
+</span></dt><dd>
+Remove any selected node(s).  No arguments.
+</dd><dt><span class="term">
+<code class="literal">coIndex</code>
+</span></dt><dd><p class="simpara">
+Various effects related to the numeric suffixes that
+indicate movement/coreference/etc. chains:
+</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+If called with only one node selected: remove this node’s numeric
+  index.
+</li><li class="listitem">
+If called with two nodes selected, only one of which has an index:
+  add an index matching the indexed node to the non-indexed node.
+</li><li class="listitem">
+If called with two nodes selected, neither of which has an index: add
+  matching indices to both nodes.
+</li><li class="listitem">
+If called with two nodes selected whose indices match: cycle through
+  different index types.  The cycle is: regular indices (both indices
+  appended with <code class="literal">-</code>) → gapping (first index appended with <code class="literal">=</code>) →
+  backwards gaping (second index appended with <code class="literal">=</code>) → double gapping
+  (both indices appended with <code class="literal">=</code>) → remove indices.
+</li></ul></div><p class="simpara">No arguments.</p></dd></dl></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+<code class="literal">displayRename</code>
+</span></dt><dd>
+Edit the text of the currently selected node.  If this
+is a non-terminal, edit its label.  If this is a terminal, allow editing
+its label, lemma (if present) and text (iff the text is an “empty element”
+– trace, comment, etc.)  This function handles <a class="link" href="#commenttypes-vars">comment nodes</a> specially.  No arguments.
+</dd></dl></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+<code class="literal">leafAfter</code>, <code class="literal">leafBefore</code>
+</span></dt><dd><p class="simpara">
+<a id="leafBefore"></a> <a id="leafAfter"></a> Create a leaf node
+after or before the (first-)selected node.  A heuristic is used to
+determine the type of node to create.  If only one node is selected, the
+default is to create an empty conjoined subject (i.e. <span class="corpustext">(NP-SBJ *con*)</span>)
+If there are two nodes selected, the second-selected node determines the
+type of leaf to make.  If this node is:
+</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+a wh-phrase (label begins with <span class="corpustext">W</span>), a wh-trace (<span class="corpustext">*T*</span>) is created
+</li><li class="listitem">
+a clitic (label contains the dash tag <span class="corpustext">CL</span>), a clitic trace (<span class="corpustext">*CL*</span>)
+  is created
+</li><li class="listitem">
+otherwise, an extraposition trace (<span class="corpustext">*ICH*</span>) is created
+</li></ul></div><p class="simpara">The label of the created node in these cases is determined by the label
+of the second-selected node.  Generally, the label of that node is
+copied, except:
+- in the case of a wh-trace, the leading <span class="corpustext">W</span> is stripped (so the trace
+  of a <span class="corpustext">WNP</span> is an <span class="corpustext">NP</span>, etc.)
+- in the case of a clitic trace, the <span class="corpustext">CL</span> dash tag is stripped and <span class="corpustext">PRO</span>
+  is transformed to <span class="corpustext">NP</span> (so the trace of <span class="corpustext">PRO-CL</span> is an <span class="corpustext">NP</span>, and the trace
+  of <span class="corpustext">ADVP-CL</span> is <span class="corpustext">ADVP</span>).</p><p class="simpara">Additionally, the trace and its antecedent (the second-selected node)
+are coindexed.  No arguments.</p></dd><dt><span class="term">
+<code class="literal">makeNode</code>
+</span></dt><dd>
+Create a new node dominating the selected node,
+or the span between the two selected nodes (inclusive).  This function
+takes an optional argument specifying the label of the node to create;
+if not present, the label of the new node will be “XP”.  One optional argument.
+</dd><dt><span class="term">
+<code class="literal">pruneNode</code>
+</span></dt><dd>
+Delete the selected node.  If a non-terminal node is
+selected, the operation always succeeds, and the daughters of the
+deleted node become daughters of the deleted node’s parent.  If a
+terminal node is selected, the operation can succeed only if the node is
+empty of textual content.  No arguments.
+</dd><dt><span class="term">
+<code class="literal">setLabel</code>
+</span></dt><dd><p class="simpara">
+Set the label of the selected node.  The argument must be a
+list of labels.  If the node’s current label is not present in the list,
+it is set to the first entry in the list.  Otherwise, it is set to the
+node immediately following its current label in the list (wrapping
+around at the end of the list).  To illustrate, if the “f” key is bound
+to <code class="literal">setLabel</code> with an argument of <code class="literal">["FOO","BAR"]</code>, selecting a node with
+label “QUUX” and pressing the “f” key sequentially will yield:
+</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+the label being set to <span class="corpustext">FOO</span> (since “QUUX” is not in the provided
+   list)
+</li><li class="listitem">
+the label being set to <span class="corpustext">BAR</span> (since “BAR” follows “FOO” in the list)
+</li><li class="listitem">
+the label being set to <span class="corpustext">FOO</span> (since “BAR” is at the end of the list,
+   wrap to the beginning)
+</li><li class="listitem">
+etc.
+</li></ol></div><p class="simpara">One argument.</p></dd><dt><span class="term">
+<code class="literal">toggleExtension</code>
+</span></dt><dd>
+Toggle a dash tag on the selected node.  If the (first)
+argument exists as a dash tag on the node, remove it.  Otherwise, add it.
+The optional second argument gives a list of extensions in the order they
+should appear from the base category out; if not given, it is filled from
+one of <a class="link" href="#extensions-vars">the <code class="literal">extensions</code>-family variables</a> based on a
+heuristic as to the type of node which is selected.  One mandatory and one
+optional argument.
+</dd><dt><span class="term">
+<code class="literal">toggleLemmata</code>
+</span></dt><dd>
+Toggle whether lemmata are shown or hidden in the
+UI.  No arguments.
+</dd><dt><span class="term">
+<code class="literal">undo</code>/<code class="literal">redo</code>
+</span></dt><dd>
+Undo the most recent editing operations, or redo after
+undoing something.  No arguments.
+</dd></dl></div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_advanced_features"></a>5. Advanced features</h2></div></div></div><p>In this section, some advanced features of Annotald are described.
+These are not required to use Annotald (and in fact are deactivated by
+default).  However, for proficient users, their use may make possible
+grater annotation efficiency and accuracy.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="tagset-validate"></a>5.1. Tagset validation</h3></div></div></div><p>By default, Annotald does not contain a mechanism to ensure that tags
+created through editing conform to any sort of schema.  At the same
+time, there are various parts of Annotald’s code that would benefit from
+knowing whether a node corresponds to a leaf or not, which is not always
+a purely structural decision (for example, a node of the form <span class="corpustext">(NP-SBJ
+*pro*)</span> is structurally a leaf, but in fact corresponds to a phrasal
+node, an NP).  Supplying this information to Annotald improves its
+functioning, as well as preventing nonsense tags from being added to the
+corpus during editing.</p><p>You can do this however you like – the only requirement that Annotald
+imposes is that you assign to the configuration variables <code class="literal">testValidLeafLabel</code>
+and <code class="literal">testValidPhraseLabel</code> Javascript functions that return true iff its
+argument is a valid label for a leaf node or phrase node
+(respectively).  One useful way of doing this is described below.</p><p>It is possible to write a grammar to validate tags.  Just as the grammar
+of a natrual language accepts only those sentences which are well-formed
+in that language, this grammar should accept only the tags which are
+valid in a particular corpus.  In particular, this manual will describe
+how to use the <a class="ulink" href="http://waxeye.org/" target="_top">Waxeye Parser Generator</a> to do so.  In
+addition to being Free Software, this program uses a relatively
+intuitive notation for its grammars.  Additionally, it can generate
+grammars not only in Javascript, but also in Python and several other
+computer languages.  This allows the same grammar specification to be
+used in Annotald as well as in a validation script for the corpus.</p><p>Grammars written in waxeys consist of a series of rules.  The first rule
+in the file constitutes the grammar – it must match.  A rule has the
+form <code class="literal">name &lt;- content</code>.  The name of a rule can consist of letters,
+numbers, and underscores.  The content of the rule can be as follows:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+<code class="literal">'string'</code> matches string in the input, literally
+</li><li class="listitem">
+the name of another rule forces that rule to match
+</li><li class="listitem">
+<code class="literal">(...)</code> is a groupung construct
+</li><li class="listitem">
+<code class="literal">A B</code> matches A followed by B
+</li><li class="listitem">
+<code class="literal">A | B</code> matches either A or B
+</li><li class="listitem">
+<code class="literal">?A</code> matches maybe A – that is, if A matches, the parser’s input
+  advances over it, but if A does not match, the parser does not fail.
+</li><li class="listitem">
+<code class="literal">*A</code> matches 0 or more A
+</li><li class="listitem">
+<code class="literal">+A</code> matches 1 or more A
+</li></ul></div><p>Using these rules, it is possible to build up a grammar.  As an
+illustration, here is a grammar that matches
+<a class="ulink" href="http://www.ling.upenn.edu/histcorpora/annotation/labels.htm#pos_tags" target="_top">the
+tagset from the PPCEME</a> (without, for simplicity, the numbered word splitting).</p><pre class="screen">/* Subdivide types of tag, for simplicity */
+word_tag &lt;-
+ ( verbal | nominal | punct | other_word | fn_cat )
+
+/* TODO: comments! */
+
+nominal &lt;-
+ ('NUM' ?'$') | ('N' ?'PR' ?'S' ?'$') | ('ADJ' ?('R' | 'S')) | 'D' |
+ ('PRO' ?'$') | ('Q' ?('R' | 'S' | '$'))
+
+verbal &lt;-
+ verb | verb_modifier
+
+verb &lt;-
+ (('DO' | 'BE' | 'HV' | 'VB') ?('D' | 'P' | 'N' | 'I')) |
+ (('D' | 'B' | 'H' | 'V') 'A' ('G' | 'N')) |
+ ('MD' ?'0')
+
+verb_modifier &lt;-
+ ('ADV' ?('R' | 'S')) | 'NEG'
+
+punct &lt;-
+ '\'' | '"' |',' | '.' | '`'
+
+fn_cat &lt;-
+ 'C' | 'CONJ' | 'P' | ('W' ('ADV' | 'D' | ('PRO' ?'$'))) |
+ 'INTJ' | 'ALSO' | 'ELSE' | 'EX' | 'FP' | 'RP' | 'LB' | 'LS' |
+ 'MAN' | 'ONE' | ('OTHER' ?'S' ?'$') | 'SUCH' | 'TO' | 'WARD'
+
+other_word &lt;-
+ 'CODE' | 'FW' | 'X' | 'FP' | 'META'</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_external_validation"></a>5.2. External validation</h3></div></div></div><p>TODO</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_searching"></a>5.3. Searching</h3></div></div></div><p>Annotald has a structural search engine built in.  While it cannot
+replicate the flexibility or (perhaps especially) speed of a dedicated
+search program such as
+<a class="ulink" href="http://corpussearch.sourceforge.net/" target="_top">CorpusSearch</a>, it is useful to be
+able to search within the Annotald interface itself.  The search dialog
+is accessed by clicking the “Search” button in the Tools menu.
+
+Within the dialog box, you will construct a visual representation of
+your query, similar to the representation of trees in the Annotald
+interface.</p><p>The simplest query tree contains only one leaf node.  The leaf has a
+text box, into which the search string can be entered.  The string is
+interpreted as a case-insensitive Javascript regular expression.  The
+Javascript regular expression format is very similar to that used by
+many programming languages.  A full description fo the format is outside
+the scope of this document, but is available via
+<a class="ulink" href="https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp" target="_top">this
+reference manual</a>.  The leaf also has a drop-down box, which indicates
+whether the search string is to match against the node labels or the
+text of the corpus.  The search string is additionally left-anchored –
+that is, the beginning of the regular expression is constrained to match
+the beginning of a node label or word.  Pressing the “Search” button
+will execute the search.  Matches will be highlighted with a yellow box,
+and the document will be scrolled to display the next match.  A very
+simple query and its result is illustrated in the following screenshots:</p><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-search-simple.png" alt="A simple Annotald search" /></div></div><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-search-simple-result.png" alt="Results of a simple Annotald search" /></div></div><p>Once the search has completed, two buttons will appear below the
+“Search” button.  The first of these scrolls the document down to
+display the next match.  The second removes teh hithlighting from serach
+matches.</p><p>In addition to the search node where text can be entered, there is a
+node consisting only of a plus sign (“+”).  Clicking this node adds a
+sister to the search node.  Search nodes which are sisters are
+interpreted as the (unordered) sisterhood relation.  An exampl of such a
+search is given in the following two screenshots:</p><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-search-sister.png" alt="A sisterhood Annotald search" /></div></div><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-search-sister-result.png" alt="Results of a sisterhood Annotald search" /></div></div><p>Each search node has some buttons in the upper-right hand corner.  From
+left to right, these are:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+Or (vertical bar)
+</span></dt><dd>
+This creates an “OR” node as the parent of the node
+from which it is clicked.  The daughters of an “OR” node are interpreted
+disjunctively, instead of conjunctively (the default).  An example of
+such a search is shown in the follwoing screenshots:<a xmlns="" href="#ftn.idp5773088" class="footnote" name="idp5773088" id="idp5773088"><sup class="footnote">[5]</sup></a>
+</dd></dl></div><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-search-or.png" alt="A disjunctive Annotald search" /></div></div><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-search-or-result.png" alt="Results of a disjunctive Annotald search" /></div></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+Deep (“D”)
+</span></dt><dd>
+This creates a deep search node as a daughter of the node
+from which it is clicked.  By default, child search nodes require direct
+daughterhood.  The children of deep nodes, in contrast, can match at any
+depth.
+</dd><dt><span class="term">
+Precedes (“&gt;”)
+</span></dt><dd>
+This creates a precedes node as a sister of the node from
+which it ic clicked.  By default, as mentioned above (and illustrated in
+the screenshots), the sisterhood relation among search nodes in
+interpreted without regard to directionality.  Precedes nodes, on the
+other hand, impose a precedence relation on their daughter (whih is not
+in fact interpreted as a daughter, but rather as a sister, of the
+original node.)
+</dd><dt><span class="term">
+Remove (“-”)
+</span></dt><dd>
+This removes the node from which it is clicked.  Any
+daughters of this node are promoted to the node’s parent; if the node
+has no daughters it simply disappears.
+</dd><dt><span class="term">
+Add daughter (“+”)
+</span></dt><dd>
+This adds a daughter search node to the node from
+which it is clicked.  The defaultinterpretation is direct daughterhood,
+which can be changed by using a deep node, as already mentioned.
+</dd></dl></div></div></div><div xmlns="" class="footnotes"><br /><hr style="width:100; align:left;" /><div id="ftn.idp3450848" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp3450848" class="simpara"><sup class="simpara">[1] </sup></a>There are two meanings
+of the term “Free Software.”  The first refers to the software being
+provided free of charge.  The second means that the software’s source
+code is freely available to its users for them to inspect, modify, and
+reuse.  The second of these definitions is the most important to
+ensuring scientific openness; as it happens Annotald and its
+dependencies fulfil both definitions.</p></div><div id="ftn.idp3162576" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp3162576" class="simpara"><sup class="simpara">[2] </sup></a>argparse only needs to be installed if your
+   system’s Python version is 2.6, as on some older Macs.  It is
+   included with Python 2.7.</p></div><div id="ftn.idp85696" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp85696" class="simpara"><sup class="simpara">[3] </sup></a>Left handed users may wish to use the left
+hand for mousing and the right hand for the keyboard, but the principle
+of using one hand exclusively for each operation remains the same.
+Additionally, the default configuration will have to be adjusted for
+users of non-English keyboard layouts.</p></div><div id="ftn.idp5612112" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp5612112" class="simpara"><sup class="simpara">[4] </sup></a>To see an
+exact listing of the tags included in each category described below, you
+should consult the configuration file itself.</p></div><div id="ftn.idp5773088" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp5773088" class="simpara"><sup class="simpara">[5] </sup></a>Note that
+the results are the same as the previously illustrated sisterhood
+search, though the queries are distinct.</p></div></div></div></body></html>

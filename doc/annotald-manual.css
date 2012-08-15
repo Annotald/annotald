@@ -1,0 +1,25 @@
+body {
+    width: 800px;
+    font: serif;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    font-family: serif !important;
+    text-align: justify;
+}
+
+.corpustext {
+    font-family: monospace;
+    background-color: #FFCC99;
+    color: #6600CC;
+}
+
+code {
+    font-family: monospace;
+}
+
+/* For now, we don't want these to be displayed.  Including them in the
+ * source is sufficient.
+ */
+.copyright,.legalnotice {
+    display: none;
+}
