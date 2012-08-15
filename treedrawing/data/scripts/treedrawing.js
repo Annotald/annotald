@@ -1299,6 +1299,11 @@ function rejiggerSearchSiblingAdd() {
  */
 function saveSearch() {
     savedsearch = $("#searchnodes").clone();
+    var savedselects = savedsearch.find("select");
+    var origselects = $("#searchnodes").find("select");
+    savedselects.map(function (i) {
+        $(this).val(origselects.eq(i).val());
+    });
 }
 
 /**
