@@ -1316,7 +1316,7 @@ function doSearch () {
     var searchnodes = $("#searchnodes");
     saveSearch();
     hideDialogBox();
-    var searchCtx = $(".snode,.wnode"); // TODO: remove sn0
+    var searchCtx = $(".snode"); // TODO: remove sn0
     var incremental = $("#searchInc").attr("checked");
 
     if (incremental && $(".searchmatch").length > 0) {
@@ -1395,7 +1395,8 @@ function interpretSearchNode(node, target, options) {
         }
     } else if (searchtype == "Text") {
         rx = RegExp("^" + $(node).children(".searchtext").val(), "i");
-        hasMatch = $(target).hasClass("wnode") && rx.test($(target).text());
+        hasMatch = $(target).children(".wnode").length == 1 &&
+            rx.test(wnodeString($(target)));
         if (!hasMatch) {
             return undefined;
         }
