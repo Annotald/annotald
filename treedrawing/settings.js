@@ -89,20 +89,27 @@ function customCommands() {
     addCommand({ keycode: 88 }, makeNode, "XP"); // x
     addCommand({ keycode: 88, shift: true }, setLabel, ["XP"]);
     addCommand({ keycode: 67 }, coIndex); // c
-    addCommand({ keycode: 82 }, setLabel, ["CP-REL","CP-FRL","CP-CAR","CP-CLF"]); // r
+    addCommand({ keycode: 82 }, setLabel, ["CP-REL","CP-FRL","CP-CAR",
+                                           "CP-CLF"]); // r
     addCommand({ keycode: 83 }, setLabel, ["IP-SUB","IP-MAT","IP-IMP"]); // s
-    addCommand({ keycode: 86 }, setLabel, ["IP-SMC","IP-INF","IP-INF-PRP"]); // v
-    addCommand({ keycode: 84 }, setLabel, ["CP-THT","CP-THT-PRN","CP-DEG","CP-QUE"]); // t
-    addCommand({ keycode: 71 }, setLabel, ["ADJP","ADJP-SPR","NP-MSR","QP"]); // g
-    addCommand({ keycode: 70 }, setLabel, ["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR"]); // f
-    addCommand({ keycode: 50 }, setLabel, ["NP","NP-PRN","NP-POS","NP-COM"]); // 2
+    addCommand({ keycode: 86 }, setLabel, ["IP-SMC","IP-INF",
+                                           "IP-INF-PRP"]); // v
+    addCommand({ keycode: 84 }, setLabel, ["CP-THT","CP-THT-PRN","CP-DEG",
+                                           "CP-QUE"]); // t
+    addCommand({ keycode: 71 }, setLabel, ["ADJP","ADJP-SPR","NP-MSR",
+                                           "QP"]); // g
+    addCommand({ keycode: 70 }, setLabel, ["PP","ADVP","ADVP-TMP","ADVP-LOC",
+                                           "ADVP-DIR"]); // f
+    addCommand({ keycode: 50 }, setLabel, ["NP","NP-PRN","NP-POS",
+                                           "NP-COM"]); // 2
     addCommand({ keycode: 52 }, toggleExtension, "PRN"); // 4
     addCommand({ keycode: 53 }, toggleExtension, "SPE"); // 5
     addCommand({ keycode: 81 }, setLabel, ["CONJP","ALSO","FP"]); // q
-    addCommand({ keycode: 87 }, setLabel, ["NP-SBJ","NP-OB1","NP-OB2","NP-PRD"]); // w
+    addCommand({ keycode: 87 }, setLabel, ["NP-SBJ","NP-OB1","NP-OB2",
+                                           "NP-PRD"]); // w
     addCommand({ keycode: 68 }, pruneNode); // d
     addCommand({ keycode: 90 }, undo); // z
-    addCommand({ keycode: 76 }, editLemmaOrLabel); // l
+    addCommand({ keycode: 76 }, displayRename); // l
     addCommand({ keycode: 32 }, clearSelection); // spacebar
     addCommand({ keycode: 192 }, toggleLemmata); // `
     addCommand({ keycode: 76, ctrl: true }, displayRename); // ctrl + l
