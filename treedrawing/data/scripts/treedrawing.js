@@ -1132,7 +1132,7 @@ var searchprecnodehtml = "<div class='searchnode searchprecnode'>" +
  * @private
  * @constant
  */
-var addsearchnodehtml = "<div class='searchnode newsearchnode'>" +
+var addsearchnodehtml = "<div class='newsearchnode'>" +
         "<input type='hidden' class='searchtype' value='NewNode' />+" +
         "</div>";
 
@@ -1412,9 +1412,6 @@ function interpretSearchNode(node, target, options) {
         newTarget = $(target).find(".snode,.wnode");
     } else if (searchtype == "Prec") {
         newTarget = $(target).nextAll();
-    } else if (searchtype == "NewNode") {
-        // vacuous pass
-        return target;
     }
 
     for (i = 0; i < childSearches.length; i++) {
