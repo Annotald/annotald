@@ -36,6 +36,15 @@ function addConLeaf(suggestion, before, label, word) {
     conleafs.push(conleaf);
 }
 
+/**
+ * Add a group of labels to the context menu.
+ *
+ * When activating the context menu, if the label of the targeted node belongs
+ * to one of these groups, the other entries in the group will be suggested as
+ * new labels.
+ *
+ * @param {Array of String} group
+ */
 function addConMenuGroup(group) {
     for(var i = 0; i < group.length; i++){
         addConMenu(group[i],group);
@@ -45,6 +54,14 @@ function addConMenuGroup(group) {
 // Load the custom context menu groups from user settings file
 customConMenuGroups();
 
+/**
+ * Add a terminal node to the context menu.
+ *
+ * Add a terminal node that the context menu will allow inserting in the tree.
+ *
+ * @param {String} phrase the label of the leaf
+ * @param {String} terminal the text of the leaf
+ */
 function addConLeafBefore(phrase, terminal) {
     addConLeaf("&lt; (" + phrase + " " + terminal + ")",
                true, phrase, terminal);
