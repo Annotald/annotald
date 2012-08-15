@@ -674,6 +674,23 @@ function minIndex (tokenRoot, offset) {
 }
  */
 
+/* something I wrote long ago, and never used, but might be useful someday
+function nextNodeSuchThat(node, pred) {
+    var next = node.nextElementSibling;
+    if (next) {
+        if (pred(next)) {
+            return next;
+        } else {
+            return nextNodeSuchThat(next, pred);
+        }
+    } else if (node.parentNode) {
+        return nextNodeSuchThat(node.parentNode, pred);
+    } else {
+        return null;
+    }
+}
+*/
+
 // Local Variables:
 // js2-additional-externs: ("$" "_" "JSON" "testValidLeafLabel" "\
 // testValidPhraseLabel")
