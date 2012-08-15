@@ -345,8 +345,8 @@ class Treedraw(object):
 
             return json.dumps(
                 dict(result = 'success',
-                     tree = self.treesToHtml([self.trees[
-                         self.treeIndexStart:self.treeIndexEnd]]),
+                     tree = self.treesToHtml(self.trees[
+                         self.treeIndexStart:self.treeIndexEnd]),
                      treeIndexStart = self.treeIndexStart,
                      treeIndexEnd = self.treeIndexEnd,
                      totalTrees = len(self.trees)))

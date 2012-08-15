@@ -2294,18 +2294,7 @@ function goToTree() {
     function goTo() {
         var i;
         var treeIndex = $("#gotoInput").val();
-        if (treeIndex > currentIndex) {
-            for (i = currentIndex; i < treeIndex; i++) {
-                advanceTree("/nextTree", undefined, false);
-            }
-        }
-        else if (treeIndex === currentIndex) {
-        }
-        else {
-            for (i = currentIndex; i > treeIndex; i--) {
-                advanceTree("/prevTree", undefined, false);
-            }
-        }
+        advanceTree(undefined, false, treeIndex - currentIndex);
         hideDialogBox();
     }
     var html = "Enter the index of the tree you'd like to jump to: \
