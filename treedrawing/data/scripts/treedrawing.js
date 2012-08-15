@@ -1398,10 +1398,8 @@ function interpretSearchNode(node, target, options) {
         newTarget = $(target);
     } else if (searchtype == "Or") {
         for (i = 0; i < childSearches.length; i++) {
-            for (j = 0; j < newTarget.length; j++) {
-                if (interpretSearchNode(childSearches[i], newTarget[j])) {
-                    return target;
-                }
+            if (interpretSearchNode(childSearches[i], target)) {
+                return target;
             }
         }
         return undefined;
