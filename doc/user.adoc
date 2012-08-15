@@ -5,18 +5,28 @@
 // http://creativecommons.org/licenses/by-nc-nd/3.0/deed.en_US
 
 // License to be changed to something less restrictive once this is
-// release-ready
+// release-ready (either CC-BY-SA or CC-BY-SA-NC)
 
-// Include the file with author info:
-//   a2x: --asciidoc-opts="-a docinfo"
+// Include the file with author info, and use our custom configuration:
+//   a2x: --asciidoc-opts="-f user.conf -a docinfo"
 // Include the default stylesheet and our customizations:
 //   a2x: --stylesheet="docbook-xsl.css annotald-manual.css"
 
 
+// Notes to contributors:
+// Please add yourself to the user-docinfo.xml file and the copyright
+// line (unless you wish to assign copyright to your contributions to
+// the other authors)
+// In addition to standard Asciidoc formatting, the following
+// conventions are used in this file:
+// - text which corresponds to the contents of a parse (.psd file)
+//   should be surrounded with =equals signs=
+
+
 = Annotald User’s Guide
 
-// TODO: once this is reasonably complete, add links to and from
-// various parts of the documentation
+// TODO: once this is reasonably complete, add internal links to and
+// from various parts of the documentation
 
 // TODO: centering pictures doesn’t work
 
@@ -33,9 +43,16 @@ simplicity, the annotation examples in this guide will be based on
 modern English.  The principles illustrated should be applicable to
 annotation in all languages, however.
 
-// eventually: availability of annotation seminars etc.
+Annotald was originally written as part of the
+http://www.linguist.is/icelandic_treebank/Icelandic_Parsed_Historical_Corpus_%28IcePaHC%29[Icelandic
+Parsed Historical Corpus] (IcePaHC) project.  Development of the program
+has been funded by:
+- The Icelandic Research Fund (RANNÍS)
+- The US’s National Science Foundation
+- The University of Iceland Research Fund
+- Research funds at the University of Pennsylvania
 
-// annotald history, acknowledgments
+// eventually: availability of annotation seminars etc.
 
 == Installation
 
@@ -82,8 +99,6 @@ Uncompress the file, and open a command line.
 
 // TODO: this will eventually be graphicalized by Anton; put off writing
 // this until we know how that will work.
-
-// “getting started section to encompass ui+phil, customization, other things?
 
 == Annotald UI and Philosophy
 
@@ -146,13 +161,12 @@ Further clicks after two nodes are selected will de-highlight the
 previous second selection, and highlight the clicked node.  To clear any
 selection in effect, use the space bar.
 
-Selected nodes form the basis for many keyboard commands (TODO: link).
+Selected nodes form the basis for many <<keycmds,keyboard commands>>.
 Node selection is also the basis of movement commands, of a certain
 type.  The mouse is used for movement commands that edit the structure
 of the tree.  In order to annotate movement in the sense of linguistic
-movement (wh-movement, etc.), see the `leafAfter` and `leafBefore`
-functions.
-// TODO: link
+movement (wh-movement, etc.), see the <<leafAfter,`leafAfter`>> and
+<<leafBefore,`leafBefore`>> functions.
 
 In order to move a selected node, right click on the desired
 destination.  Movements must satisfy certain structural (e.g. a node
@@ -201,6 +215,9 @@ users of non-English keyboard layouts.]
 // TODO: link to section about customizing keybindings
 
 
+// TODO: command line options
+
+
 == Customization
 
 There are two files which are relavant to the customization of Annotald:
@@ -226,12 +243,13 @@ other sections where they are implicated.
 // TODO: discussion assumes familiarity with penn treebank conventions,
 // include note to read intro to annotation section first if reader is
 // not familiar
-[horizontal]
+
 `testValidPhraseLabel`/`testValidLeafLabel`:: See the discussion of
-these options at TODO: link
+these options <<tagset-validate,below>>
 
 `disableUndo`:: Deprecated
 
+[[extensions-vars]]
 `extensions`:: Specify the list and order of dash tags available in the
 corpus.  There are three variants of this variable:
 - `leaf_extensions`: Dash tags applicable to leaf (terminal) nodes
@@ -242,11 +260,11 @@ corpus.  There are three variants of this variable:
 +
 Not every dash tag needs to appear in this list, only those which need to
 be toggled on and off in a binary fashion.  Thus, for example, the dash
-tag “OB1” (for direct objects) is never toggled in a binary fashion, but
-rather as part of a cycle that includes setting the category to “NP” and
-moving through “NP-SBJ”, “NP-OB2”, etc.  Thus, it need not appear in this
-list.  However, the “SPE” dash tag (for reported speech) is toggled on
-and off – changing an IP-XXX to IP-XXX-SPE, and potentially back to
+tag =OB1= (for direct objects) is never toggled in a binary fashion, but
+rather as part of a cycle that includes setting the category to =NP= and
+moving through =NP-SBJ=, =NP-OB2=, etc.  Thus, it need not appear in this
+list.  However, the =SPE= dash tag (for reported speech) is toggled on
+and off – changing an =IP-XXX= to =IP-XXX-SPE=, and potentially back to
 IP-XXX.
 // TODO: this is a bad explanation.  Maybe require to list all dash
 // tags?  but that gets tedious.
@@ -256,17 +274,17 @@ highlighted (with a tan shade) to make it clear where the “floor” of a
 clause is, for the purpose of rearranging nodes in the user interface.
 
 `invisibleCategories`:: TODO: what to do about these?
-// TODO: different quotes for code, corpus text, etc.
 
-`commentTypes`:: Types of comments.  Comments are nodes of the form
-`(CODE \{XXX:words_words_words})` For every value of “XXX” is in this
-list, when editing the contents of the comment with one of the editing
-functions (TODO: link), a dialog box will appear allowing the comment to
-be edited as text, instead of the default editing interface.
+`commentTypes`:: [[commenttypes-vars]] Types of comments.  Comments
+are nodes of the form =(CODE \{XXX:words_words_words})= For every
+value of “XXX” is in this list, when editing the contents of the
+comment with one of the editing functions (TODO: link), a dialog box
+will appear allowing the comment to be edited as text, instead of the
+default editing interface.
 
 `customCommands`:: A Javascript function containing code to configure
-the keybindings.  This should be a series of calls to the `addCommand`
-function. (TODO: link to doc)
+the keybindings.  This should be a series of calls to the
+link:../api-doc/symbols/global.html#addCommand[`addCommand` function].
 
 `defaultConMenuGroup`:: The label suggestions to display in the
 context (right-click) menu, when no suggestion can be deduced from
@@ -274,29 +292,90 @@ the already-present label.
 
 `customConMenuGroups`:: a Javascript function to configure the context
 menu suggestions.  This should be a series of calls to the
-`addConMenuGroup` function (TODO: link to doc)
+link:../api-doc/symbols/global.html#addConMenuGroup[`addConMenuGroup` function].
 
 `customConLeafBefore`:: a Javascript function to configure the new node
 options in the context menu.  This should be a series of calls to the
-`addConLeafBefore` function (TODO: link to doc)
+link:../api-doc/symbols/global.html#addConLeafBefore[`addConLeafBefore` function].
 
 // TODO: styleTag
 
-=== Custom keybindings
+[[keycmds]]
+=== Default keybindings
 
 The Annotald keybindings provided by default are adapted from those used
-by the IcePaHC project.
-// TODO: link to icepahc
-For other corpora, it is virtually certain that users will want to adapt
-the key bindings, to adapt the tags used and the most common use patterns of
-the annotators.  The keybindings of Annotald are customized by placing
-calls to the `addCommand` function inside the `customCommands` block.  This
-function has 2 required arguments; any further arguments are determined by
-the command being bound.
+by the IcePaHC project.  It is highly recommended that users make a copy
+of this file in the working directory for their corpus, and customize it
+to their needs.  The procedure to do so is described in the following
+section.  The default keybindings are as follows (from left to
+right and top to bottom of a US keyboard layout):footnote:[To see an
+exact listing of the tags included in each category described below, you
+should consult the configuration file itself.]
 
-The first argument to the function should be a Javascript dictionary
-(also known as an object).  This has the format `{key: value, key2:
-value2}`.  The following keys are recognized:
+Backquote (`):: Toggle the display of lemmata on or off
+
+1:: Unbound
+
+2:: Cycle between tags for non-argument NPs
+
+3:: Unbound
+
+4:: Toggle the =-PRN= dash tag (parentheticals)
+
+5:: Toggle the =-SPE= dash tag (direct speech)
+
+Q:: Cycle between tags for miscellaneous phrase types
+
+W:: Cycle between tags for argumental NPs
+
+E:: Cycle between tags for miscellaneous CPs
+
+R:: Cycle between tags for relative clauses
+
+T:: Cycle between tags for that-clauses and other types of CP
+
+A:: Add a leaf after the selected node
+
+S:: Cycle between tags for different types of sentential IP
+
+D:: Delete a node
+
+F:: Cycle between tags for PPs and ADVPs
+
+G:: Cycle between tags for ADJPs and QPs
+
+Z:: Undo
+
+X:: Create a new node (labeled XP)
+
+C:: Coindex nodes
+
+V:: Cycle between tags for non-sentential IPs
+
+Spacebar:: Clear the selection
+
+L:: Edit the Label and/or text of a node
+
+Shift + L:: The same (included as an example of a keybinding with modifier)
+
+
+=== Custom keybindings
+
+It is virtually certain that users will want to adapt the default key
+bindings, to adapt the tags used and the most common use patterns of the
+annotators.  It is possible to merely change the specific tags used
+while maintaining the default conceptual categories (argumental NP,
+non-sentential IP, etc.); it is also possible to come up with an
+entirely new scheme.  The default bindings do not use the shift or
+control modifiers, which opens up a large space of additional keys for
+user customization.
+
+The keybindings of Annotald are customized by placing calls to the
+`addCommand` function inside the `customCommands` block.  This function
+has 2 required arguments; any further arguments are determined by the
+command being bound.  The first argument to the function should be a
+Javascript dictionary (also known as an object).  This has the format
+`{key: value, key2: value2}`.  The following keys are recognized:
 - `keycode` the numeric Javascript keycode of the key you wish to bind.
   You can navigate to
   http://www.asquare.net/javascript/tests/KeyCode.html[this website] to
@@ -316,8 +395,6 @@ The second argument to the `addCommand` function is the name of the
 function which the key will be bound to.  Any further arguments will be
 passed to the function given.  A list of functions provided by Annotald
 follows:
-
-// TODO: add default bindings to these (or list default bindings elsewhere?)
 
 `clearSelection`:: Remove any selected node(s).  No arguments.
 
@@ -341,34 +418,32 @@ No arguments.
 // TODO: better name
 `displayRename`:: Edit the text of the currently selected node.  If this
 is a non-terminal, edit its label.  If this is a terminal, allow editing
-its label, lemma (if present) and text (iff the text is an “empty
-element” – trace, comment, etc.)  This function handles comment nodes
-specially.
-// TODO: link to commentTypes
-No arguments.
+its label, lemma (if present) and text (iff the text is an “empty element”
+– trace, comment, etc.)  This function handles <<commenttypes-vars,comment
+nodes>> specially.  No arguments.
 
-// editLemmaOrLabel – do we want this fn?
+// editLemmaOrLabel – do we want to document this fn?  remove from source?
 
-`leafAfter`, `leafBefore`:: Create a leaf node after or before the
-(first-)selected node.  A heuristic is used to determine the type of node to
-create.  If only one node is selected, the default is to create an empty
-conjoined subject (i.e. `(NP-SBJ *con*)`)  If there are two nodes
-selected, the second-selected node determines the type of leaf to make.
-If this node is:
-- a wh-phrase (label begins with “W”), a wh-trace (`*T*`) is created
-- a clitic (label contains the dash tag “CL”), a clitic trace (`*CL*`)
+`leafAfter`, `leafBefore`:: [[leafBefore]] [[leafAfter]] Create a leaf node
+after or before the (first-)selected node.  A heuristic is used to
+determine the type of node to create.  If only one node is selected, the
+default is to create an empty conjoined subject (i.e. =(NP-SBJ \*con*)=)
+If there are two nodes selected, the second-selected node determines the
+type of leaf to make.  If this node is:
+- a wh-phrase (label begins with =W=), a wh-trace (=\*T*=) is created
+- a clitic (label contains the dash tag =CL=), a clitic trace (=\*CL*=)
   is created
-- otherwise, an extraposition trace (`*ICH*`) is created
+- otherwise, an extraposition trace (=\*ICH*=) is created
 
 +
 The label of the created node in these cases is determined by the label
 of the second-selected node.  Generally, the label of that node is
 copied, except:
-- in the case of a wh-trace, the leading “W” is stripped (so the trace
-  of a WNP is an NP, etc.)
-- in the case of a clitic trace, the “CL” dash tag is stripped and “PRO”
-  is transformed to “NP” (so the trace of PRO-CL is an NP, and the trace
-  of ADVP-CL is ADVP).
+- in the case of a wh-trace, the leading =W= is stripped (so the trace
+  of a =WNP= is an =NP=, etc.)
+- in the case of a clitic trace, the =CL= dash tag is stripped and =PRO=
+  is transformed to =NP= (so the trace of =PRO-CL= is an =NP=, and the trace
+  of =ADVP-CL= is =ADVP=).
 +
 Additionally, the trace and its antecedent (the second-selected node)
 are coindexed.  No arguments.
@@ -392,24 +467,23 @@ node immediately following its current label in the list (wrapping
 around at the end of the list).  To illustrate, if the “f” key is bound
 to `setLabel` with an argument of `["FOO","BAR"]`, selecting a node with
 label “QUUX” and pressing the “f” key sequentially will yield:
-1. the label being set to “FOO” (since “QUUX” is not in the provided
+1. the label being set to =FOO= (since “QUUX” is not in the provided
    list)
-2. the label being set to “BAR” (since “BAR” follows “FOO” in the list)
-3. the label being set to “FOO” (since “BAR” is at the end of the list,
+2. the label being set to =BAR= (since “BAR” follows “FOO” in the list)
+3. the label being set to =FOO= (since “BAR” is at the end of the list,
    wrap to the beginning)
 4. etc.
 
 +
 One argument.
 
-`toggleExtension`:: Toggle a dash tag on the selected node.  If the
-(first) argument exists as a dash tag on the node, remove it.
-Otherwise, add it.  The optional second argument gives a list of
-extensions in the order they should appear from the base category out;
-if not given, it is filled from one of the `extensions`-family variables
-// TODO: link
-based on a heuristic as to the type of node which is selected.  One
-mandatory and one optional argument.
+`toggleExtension`:: Toggle a dash tag on the selected node.  If the (first)
+argument exists as a dash tag on the node, remove it.  Otherwise, add it.
+The optional second argument gives a list of extensions in the order they
+should appear from the base category out; if not given, it is filled from
+one of <<extensions-vars,the `extensions`-family variables>> based on a
+heuristic as to the type of node which is selected.  One mandatory and one
+optional argument.
 
 `toggleLemmata`:: Toggle whether lemmata are shown or hidden in the
 UI.  No arguments.
@@ -425,6 +499,7 @@ These are not required to use Annotald (and in fact are deactivated by
 default).  However, for proficient users, their use may make possible
 grater annotation efficiency and accuracy.
 
+[[tagset-validate]]
 === Tagset validation
 
 // TODO: make sure that annotald uses this info everywhere it can.
@@ -433,8 +508,8 @@ By default, Annotald does not contain a mechanism to ensure that tags
 created through editing conform to any sort of schema.  At the same
 time, there are various parts of Annotald’s code that would benefit from
 knowing whether a node corresponds to a leaf or not, which is not always
-a purely structural decision (for example, a node of the form `(NP-SBJ
-*pro*)` is structurally a leaf, but in fact corresponds to a phrasal
+a purely structural decision (for example, a node of the form =(NP-SBJ
+\*pro*)= is structurally a leaf, but in fact corresponds to a phrasal
 node, an NP).  Supplying this information to Annotald improves its
 functioning, as well as preventing nonsense tags from being added to the
 corpus during editing.
