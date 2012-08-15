@@ -9,6 +9,7 @@ This manual documents how to work on developing Annotald
 
 In addition to installing the prerequisites for Annotald itself, you
 should install the following software packages:
+
 - For running unit tests: the python packages
   http://pypi.python.org/pypi/nose/[nose] and http://pypi.python.org/pypi/coverage[coverage].
 - For generating documentation, the
@@ -37,7 +38,7 @@ run one of the following commands, from the root directory of the
 Annotald source tree:
 
 - to generate public API docs: `make api-doc`
-- to generate all API docs (including private APIs): `make private-doc`
+- to generate all API docs (including private APIs): `make priv-doc`
 - to generate the HTML versions of the user’s and developer’s manual:
   `make doc`
 - to generate all of the above: `make all-docs`
@@ -66,7 +67,7 @@ TODO: maybe write some things about how the python source is laid out
 The javascript code is split into three files, found in the
 `treedrawing/data/scripts` subdirectory:
 
-- `treedrawing.contextmenu.js` which contains code for the context
+- `treedrawing.contextMenu.js` which contains code for the context
   (right-click) menu
 - `treedrawing.utils.js` which contains utility functions
 - `treedrawing.js` which contains the main UI code
