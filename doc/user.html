@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Annotald User’s Guide</title><link rel="stylesheet" type="text/css" href="docbook-xsl.css" /><link rel="stylesheet" type="text/css" href="annotald-manual.css" /><meta name="generator" content="DocBook XSL Stylesheets V1.77.1" /></head><body><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="idp183968"></a>Annotald User’s Guide</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Aaron</span> <span class="surname">Ecay</span></h3><code class="email">&lt;<a class="email" href="mailto:ecay@babel.ling.upenn.edu">ecay@babel.ling.upenn.edu</a>&gt;</code></div></div></div><div><p class="copyright">Copyright © 2012 Aaron Ecay</p></div><div><div class="legalnotice"><a id="idp929600"></a><p>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Annotald User’s Guide</title><link rel="stylesheet" type="text/css" href="docbook-xsl.css" /><link rel="stylesheet" type="text/css" href="annotald-manual.css" /><meta name="generator" content="DocBook XSL Stylesheets V1.77.1" /></head><body><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="idp185296"></a>Annotald User’s Guide</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Aaron</span> <span class="surname">Ecay</span></h3><code class="email">&lt;<a class="email" href="mailto:ecay@babel.ling.upenn.edu">ecay@babel.ling.upenn.edu</a>&gt;</code></div></div></div><div><p class="copyright">Copyright © 2012 Aaron Ecay</p></div><div><div class="legalnotice"><a id="idp928896"></a><p>
     This work is licensed under a Creative Commons
     Attribution-NonCommercial-NoDerivs 3.0 Unported License
     http://creativecommons.org/licenses/by-nc-nd/3.0/deed.en_US
@@ -16,13 +16,17 @@ modern English.  The principles illustrated should be applicable to
 annotation in all languages, however.</p><p>Annotald was originally written as part of the
 <a class="ulink" href="http://www.linguist.is/icelandic_treebank/Icelandic_Parsed_Historical_Corpus_%28IcePaHC%29" target="_top">Icelandic
 Parsed Historical Corpus</a> (IcePaHC) project.  Development of the program
-has been funded by:
-- The Icelandic Research Fund (RANNÍS)
-- The US’s National Science Foundation
-- The University of Iceland Research Fund
-- Research funds at the University of Pennsylvania</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_installation"></a>2. Installation</h2></div></div></div><p>In order to use Annotald, it is necessary to install several programs
+has been funded by:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+The Icelandic Research Fund (RANNÍS)
+</li><li class="listitem">
+The US’s National Science Foundation
+</li><li class="listitem">
+The University of Iceland Research Fund
+</li><li class="listitem">
+Research funds at the University of Pennsylvania
+</li></ul></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_installation"></a>2. Installation</h2></div></div></div><p>In order to use Annotald, it is necessary to install several programs
 that Annotald depends on in order to function.  Like Annotald itself,
-all of these programs are Free Software.<a xmlns="" href="#ftn.idp3450848" class="footnote" name="idp3450848" id="idp3450848"><sup class="footnote">[1]</sup></a></p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+all of these programs are Free Software.<a xmlns="" href="#ftn.idp3475968" class="footnote" name="idp3475968" id="idp3475968"><sup class="footnote">[1]</sup></a></p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
 Download and install the latest stable version of
    <a class="ulink" href="https://www.google.com/intl/en/chrome/browser/?hl=en&amp;lr=all" target="_top">Google’s
    Chrome web browser</a>
@@ -37,7 +41,7 @@ Install the NTLK Python package.
    NLTK’s developer.
 </li><li class="listitem">
 Install the python packages Mako, CherryPy, and
-   argparse.<a xmlns="" href="#ftn.idp3162576" class="footnote" name="idp3162576" id="idp3162576"><sup class="footnote">[2]</sup></a>  This can be done using the <code class="literal">pip</code> command,
+   argparse.<a xmlns="" href="#ftn.idp3089504" class="footnote" name="idp3089504" id="idp3089504"><sup class="footnote">[2]</sup></a>  This can be done using the <code class="literal">pip</code> command,
    which you should have installed as a prerequisite for NLTK in the
    previous step.  For Mac, enter <code class="literal">sudo pip install mako cherrypy
    argparse</code> in the Terminal program’s command line.  For Windows,
@@ -52,7 +56,7 @@ release.
 
 
 
-Uncompress the file, and open a command line.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_annotald_ui_and_philosophy"></a>3. Annotald UI and Philosophy</h2></div></div></div><p>The Annotald user interface (UI) is shown in the following screenshot:</p><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-hello.png" alt="The Annotald UI at startup" /></div></div><p>On the left-hand side of the screen, the following are present, from top
+Uncompress the file, and open a command line.  TODO</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_annotald_ui_and_philosophy"></a>3. Annotald UI and Philosophy</h2></div></div></div><p>The Annotald user interface (UI) is shown in the following screenshot:</p><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-hello.png" alt="The Annotald UI at startup" /></div></div><p>On the left-hand side of the screen, the following are present, from top
 to bottom:
 - The control panel.  This contains buttons for functions such as
   saving, undo/redo, and clocking in/out from a timelog file.
@@ -101,7 +105,7 @@ dash tags.</p><p>The context menu can be dismissed by left-clicking outside of i
 Annotald users should keep their right hand on the mouse at all times;
 thus, only keys on the left hand side of the keyboard are used as key
 shortcuts (with a small number of exceptions for commands which require
-full keyborad use).<a xmlns="" href="#ftn.idp85696" class="footnote" name="idp85696" id="idp85696"><sup class="footnote">[3]</sup></a></p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_customization"></a>4. Customization</h2></div></div></div><p>There are two files which are relavant to the customization of Annotald:
+full keyborad use).<a xmlns="" href="#ftn.idp86192" class="footnote" name="idp86192" id="idp86192"><sup class="footnote">[3]</sup></a></p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_customization"></a>4. Customization</h2></div></div></div><p>There are two files which are relavant to the customization of Annotald:
 <code class="literal">settings.js</code> and <code class="literal">settings.py</code>.  The former is written in Javascript,
 and contains the bulk of Annotald’s user interface settings.  The latter
 is written in Python, and (generally speaking) contains customizations
@@ -117,10 +121,6 @@ other sections where they are implicated.</p><div class="variablelist"><dl class
 </span></dt><dd>
 See the discussion of
 these options <a class="link" href="#tagset-validate" title="5.1. Tagset validation">below</a>
-</dd><dt><span class="term">
-<code class="literal">disableUndo</code>
-</span></dt><dd>
-Deprecated
 </dd><dt><span class="term">
 <code class="literal">extensions</code>
 </span></dt><dd><p class="simpara">
@@ -188,7 +188,7 @@ by the IcePaHC project.  It is highly recommended that users make a copy
 of this file in the working directory for their corpus, and customize it
 to their needs.  The procedure to do so is described in the following
 section.  The default keybindings are as follows (from left to
-right and top to bottom of a US keyboard layout):<a xmlns="" href="#ftn.idp5612112" class="footnote" name="idp5612112" id="idp5612112"><sup class="footnote">[4]</sup></a></p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+right and top to bottom of a US keyboard layout):<a xmlns="" href="#ftn.idp5613648" class="footnote" name="idp5613648" id="idp5613648"><sup class="footnote">[4]</sup></a></p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
 Backquote (`)
 </span></dt><dd>
 Toggle the display of lemmata on or off
@@ -531,7 +531,7 @@ Or (vertical bar)
 This creates an “OR” node as the parent of the node
 from which it is clicked.  The daughters of an “OR” node are interpreted
 disjunctively, instead of conjunctively (the default).  An example of
-such a search is shown in the follwoing screenshots:<a xmlns="" href="#ftn.idp5773088" class="footnote" name="idp5773088" id="idp5773088"><sup class="footnote">[5]</sup></a>
+such a search is shown in the follwoing screenshots:<a xmlns="" href="#ftn.idp5783376" class="footnote" name="idp5783376" id="idp5783376"><sup class="footnote">[5]</sup></a>
 </dd></dl></div><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-search-or.png" alt="A disjunctive Annotald search" /></div></div><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-search-or-result.png" alt="Results of a disjunctive Annotald search" /></div></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">
 Deep (“D”)
 </span></dt><dd>
@@ -561,20 +561,20 @@ Add daughter (“+”)
 This adds a daughter search node to the node from
 which it is clicked.  The defaultinterpretation is direct daughterhood,
 which can be changed by using a deep node, as already mentioned.
-</dd></dl></div></div></div><div xmlns="" class="footnotes"><br /><hr style="width:100; align:left;" /><div id="ftn.idp3450848" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp3450848" class="simpara"><sup class="simpara">[1] </sup></a>There are two meanings
+</dd></dl></div></div></div><div xmlns="" class="footnotes"><br /><hr style="width:100; align:left;" /><div id="ftn.idp3475968" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp3475968" class="simpara"><sup class="simpara">[1] </sup></a>There are two meanings
 of the term “Free Software.”  The first refers to the software being
 provided free of charge.  The second means that the software’s source
 code is freely available to its users for them to inspect, modify, and
 reuse.  The second of these definitions is the most important to
 ensuring scientific openness; as it happens Annotald and its
-dependencies fulfil both definitions.</p></div><div id="ftn.idp3162576" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp3162576" class="simpara"><sup class="simpara">[2] </sup></a>argparse only needs to be installed if your
+dependencies fulfil both definitions.</p></div><div id="ftn.idp3089504" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp3089504" class="simpara"><sup class="simpara">[2] </sup></a>argparse only needs to be installed if your
    system’s Python version is 2.6, as on some older Macs.  It is
-   included with Python 2.7.</p></div><div id="ftn.idp85696" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp85696" class="simpara"><sup class="simpara">[3] </sup></a>Left handed users may wish to use the left
+   included with Python 2.7.</p></div><div id="ftn.idp86192" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp86192" class="simpara"><sup class="simpara">[3] </sup></a>Left handed users may wish to use the left
 hand for mousing and the right hand for the keyboard, but the principle
 of using one hand exclusively for each operation remains the same.
 Additionally, the default configuration will have to be adjusted for
-users of non-English keyboard layouts.</p></div><div id="ftn.idp5612112" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp5612112" class="simpara"><sup class="simpara">[4] </sup></a>To see an
+users of non-English keyboard layouts.</p></div><div id="ftn.idp5613648" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp5613648" class="simpara"><sup class="simpara">[4] </sup></a>To see an
 exact listing of the tags included in each category described below, you
-should consult the configuration file itself.</p></div><div id="ftn.idp5773088" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp5773088" class="simpara"><sup class="simpara">[5] </sup></a>Note that
+should consult the configuration file itself.</p></div><div id="ftn.idp5783376" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp5783376" class="simpara"><sup class="simpara">[5] </sup></a>Note that
 the results are the same as the previously illustrated sisterhood
 search, though the queries are distinct.</p></div></div></div></body></html>

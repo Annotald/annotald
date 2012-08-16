@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Developer’s manual for Annotald</title><link rel="stylesheet" type="text/css" href="docbook-xsl.css" /><meta name="generator" content="DocBook XSL Stylesheets V1.77.1" /></head><body><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="idp187504"></a>Developer’s manual for Annotald</h2></div><div><div class="author"><h3 class="author"><span class="firstname">Aaron</span> <span class="surname">Ecay</span></h3><code class="email">&lt;<a class="email" href="mailto:ecay@babel.ling.upenn.edu">ecay@babel.ling.upenn.edu</a>&gt;</code></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl><dt><span class="section"><a href="#_introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#_prerequisites">2. Prerequisites</a></span></dt><dt><span class="section"><a href="#_version_control">3. Version control</a></span></dt><dt><span class="section"><a href="#_documentation">4. Documentation</a></span></dt><dt><span class="section"><a href="#_architecture">5. Architecture</a></span></dt><dd><dl><dt><span class="section"><a href="#_python_architecture">5.1. Python architecture</a></span></dt><dt><span class="section"><a href="#_javascript_architecture">5.2. Javascript architecture</a></span></dt></dl></dd><dt><span class="section"><a href="#_testing">6. Testing</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_introduction"></a>1. Introduction</h2></div></div></div><p>This manual documents how to work on developing Annotald</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_prerequisites"></a>2. Prerequisites</h2></div></div></div><p>In addition to installing the prerequisites for Annotald itself, you
-should install the following software packages:
-- For running unit tests: the python packages
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Developer’s manual for Annotald</title><link rel="stylesheet" type="text/css" href="docbook-xsl.css" /><meta name="generator" content="DocBook XSL Stylesheets V1.77.1" /></head><body><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="idp196176"></a>Developer’s manual for Annotald</h2></div><div><div class="author"><h3 class="author"><span class="firstname">Aaron</span> <span class="surname">Ecay</span></h3><code class="email">&lt;<a class="email" href="mailto:ecay@babel.ling.upenn.edu">ecay@babel.ling.upenn.edu</a>&gt;</code></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl><dt><span class="section"><a href="#_introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#_prerequisites">2. Prerequisites</a></span></dt><dt><span class="section"><a href="#_version_control">3. Version control</a></span></dt><dt><span class="section"><a href="#_documentation">4. Documentation</a></span></dt><dt><span class="section"><a href="#_architecture">5. Architecture</a></span></dt><dd><dl><dt><span class="section"><a href="#_python_architecture">5.1. Python architecture</a></span></dt><dt><span class="section"><a href="#_javascript_architecture">5.2. Javascript architecture</a></span></dt></dl></dd><dt><span class="section"><a href="#_testing">6. Testing</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_introduction"></a>1. Introduction</h2></div></div></div><p>This manual documents how to work on developing Annotald</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_prerequisites"></a>2. Prerequisites</h2></div></div></div><p>In addition to installing the prerequisites for Annotald itself, you
+should install the following software packages:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+For running unit tests: the python packages
   <a class="ulink" href="http://pypi.python.org/pypi/nose/" target="_top">nose</a> and <a class="ulink" href="http://pypi.python.org/pypi/coverage" target="_top">coverage</a>.
-- For generating documentation, the
+</li><li class="listitem">
+For generating documentation, the
   <a class="ulink" href="https://code.google.com/p/jsdoc-toolkit/" target="_top">jsdoc-toolkit</a> and
-  <a class="ulink" href="http://www.methods.co.nz/asciidoc/" target="_top">asciidoc</a>.</p><p>You should install the python packages in your system’s Python 2.x tree,
+  <a class="ulink" href="http://www.methods.co.nz/asciidoc/" target="_top">asciidoc</a>.
+</li></ul></div><p>You should install the python packages in your system’s Python 2.x tree,
 not the Python 3.x tree.  Additionally, this project assumes that the
 Python 2 versions of python programs (<code class="literal">python2</code>, <code class="literal">nosetests2</code> and
 <code class="literal">coverage2</code>) are accessible with a “ <code class="literal">2</code> ” appended to explicitly indicate
@@ -18,7 +20,7 @@ run one of the following commands, from the root directory of the
 Annotald source tree:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
 to generate public API docs: <code class="literal">make api-doc</code>
 </li><li class="listitem">
-to generate all API docs (including private APIs): <code class="literal">make private-doc</code>
+to generate all API docs (including private APIs): <code class="literal">make priv-doc</code>
 </li><li class="listitem">
 to generate the HTML versions of the user’s and developer’s manual:
   <code class="literal">make doc</code>
@@ -35,7 +37,7 @@ edits to the structure to be made.  The Javascript communicates back to
 the server for tasks requiring access to the filesystem, such as saving
 the edited file or validating it with an external program.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_python_architecture"></a>5.1. Python architecture</h3></div></div></div><p>TODO: maybe write some things about how the python source is laid out</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_javascript_architecture"></a>5.2. Javascript architecture</h3></div></div></div><p>The javascript code is split into three files, found in the
 <code class="literal">treedrawing/data/scripts</code> subdirectory:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
-<code class="literal">treedrawing.contextmenu.js</code> which contains code for the context
+<code class="literal">treedrawing.contextMenu.js</code> which contains code for the context
   (right-click) menu
 </li><li class="listitem">
 <code class="literal">treedrawing.utils.js</code> which contains utility functions

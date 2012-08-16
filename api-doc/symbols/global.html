@@ -535,27 +535,18 @@ If the selected node is a terminal, edit its label, and lemma.</div>
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/global.html#newRedo">newRedo</a></b>()
-								</div>
-								<div class="description">Perform redo.</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/global.html#newUndo">newUndo</a></b>()
-								</div>
-								<div class="description">Perform undo.</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/global.html#nextSearchMatch">nextSearchMatch</a></b>()
 								</div>
 								<div class="description">Scroll down to the next node that matched a search.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#nukeUndo">nukeUndo</a></b>()
+								</div>
+								<div class="description">Reset the undo system entirely.</div>
 							</td>
 						</tr>
 					
@@ -573,7 +564,7 @@ If the selected node is a terminal, edit its label, and lemma.</div>
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/global.html#redo">redo</a></b>()
 								</div>
-								<div class="description">Invoke redo, if not disabled.</div>
+								<div class="description">Perform redo.</div>
 							</td>
 						</tr>
 					
@@ -751,7 +742,7 @@ If the node bears the given dash tag, remove it.</div>
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/global.html#undo">undo</a></b>()
 								</div>
-								<div class="description">Invoke undo, if not enabled</div>
+								<div class="description">Perform undo.</div>
 							</td>
 						</tr>
 					
@@ -779,6 +770,15 @@ If the node bears the given dash tag, remove it.</div>
 								<div class="fixedFont"><b><a href="../symbols/global.html#undoEndTransaction">undoEndTransaction</a></b>()
 								</div>
 								<div class="description">End an undo transaction, keeping its changes</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/global.html#updateCssClass">updateCssClass</a></b>(node, oldlabel)
+								</div>
+								<div class="description">Update the CSS class of a node to reflect its label.</div>
 							</td>
 						</tr>
 					
@@ -2094,62 +2094,6 @@ will be moved as a unit.  Calls <a href="../symbols/global.html#moveNode">moveNo
 
 					<hr />
 				
-					<a name="newRedo"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>newRedo</b>()
-					
-					</div>
-					<div class="description">
-						Perform redo.
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-						
-						
-						
-						
-						
-						
-
-					<hr />
-				
-					<a name="newUndo"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>newUndo</b>()
-					
-					</div>
-					<div class="description">
-						Perform undo.
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-						
-						
-						
-						
-						
-						
-
-					<hr />
-				
 					<a name="nextSearchMatch"> </a>
 					<div class="fixedFont">
 					
@@ -2159,6 +2103,36 @@ will be moved as a unit.  Calls <a href="../symbols/global.html#moveNode">moveNo
 					</div>
 					<div class="description">
 						Scroll down to the next node that matched a search.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="nukeUndo"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>nukeUndo</b>()
+					
+					</div>
+					<div class="description">
+						Reset the undo system entirely.
+
+This function zeroes out any undo history.
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
@@ -2217,7 +2191,7 @@ directly dominates no non-empty terminals.
 					
 					</div>
 					<div class="description">
-						Invoke redo, if not disabled.
+						Perform redo.
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
@@ -2988,7 +2962,7 @@ appropriate ordered list of possible extensions.</dd>
 					
 					</div>
 					<div class="description">
-						Invoke undo, if not enabled
+						Perform undo.
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
@@ -3096,6 +3070,51 @@ This function MUST be matched by a call to either `undoEndTransaction`
 
 					<hr />
 				
+					<a name="updateCssClass"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>updateCssClass</b>(node, oldlabel)
+					
+					</div>
+					<div class="description">
+						Update the CSS class of a node to reflect its label.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/treedrawing_data_scripts_treedrawing.js.html">treedrawing.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{JQuery Node}</span> <b>node</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>oldlabel</b>
+									
+								</dt>
+								<dd>(optional) the former label of this node</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name="wnodeString"> </a>
 					<div class="fixedFont">
 					
@@ -3147,7 +3166,7 @@ This function MUST be matched by a call to either `undoEndTransaction`
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Wed Aug 15 2012 16:31:32 GMT-0400 (EDT)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Thu Aug 16 2012 16:45:33 GMT-0400 (EDT)
 		</div>
 	</body>
 </html>
