@@ -261,8 +261,7 @@ function isRootNode(node) {
  * @param {DOM node} node the node to operate on
  */
 function isLeafNode(node) {
-    return $(node).children(".wnode").size() > 0 &&
-        !($(node).children(".wnode").text()[0] == "*");
+    return $(node).children(".wnode").size() > 0;
 }
 
 /**

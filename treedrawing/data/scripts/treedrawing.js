@@ -633,7 +633,7 @@ function addMetadataDialog() {
 
 function splitWord() {
     if (!startnode || endnode) return;
-    if (!isLeafNode($(startnode))) return;
+    if (!isLeafNode($(startnode)) || isEmpty(startnode)) return;
     touchTree($(startnode));
     var wordSplit = wnodeString($(startnode)).split("-");
     var origWord = wordSplit[0];
@@ -2504,7 +2504,7 @@ function basesAndDashes(bases, dashes) {
 function addLemma(lemma) {
     // TODO: This only makes sense for dash-format corpora
     if (!startnode || endnode) return;
-    if (!isLeafNode($(startnode))) return;
+    if (!isLeafNode($(startnode)) || isEmpty(startnode)) return;
     touchTree($(startnode));
     var theLemma = $("<span class='lemma'>-" + lemma +
                      "</span>");
