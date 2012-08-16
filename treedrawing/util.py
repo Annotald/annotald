@@ -71,13 +71,13 @@ def _queryVersionCookieInner(tree, key):
     else:
         return None
 
-# TODO: calculate the class in here
 def treeToHtml(tree, version, extra_data = None):
     if isinstance(tree[0], str) or isinstance(tree[0], unicode):
         # Leaf node
         if len(tree) > 1:
             raise Exception("Leaf node with more than one daughter!: %s" % tree)
-        res = '<div class="snode">' + tree.node + '<span class="wnode">'
+        cssClass = re.sub("[-=][0-9]+$", "", tree.node)
+        res = '<div class="snode ' + cssClass + '">' + tree.node + '<span class="wnode">'
         temp = tree[0].split("-")
         if version == "dash" and len(temp) > 1 and tree.node != "CODE":
             temp = tree[0].split("-")
@@ -109,7 +109,8 @@ def treeToHtml(tree, version, extra_data = None):
         xtra_data = sisters
         return treeToHtml(real_root, version, xtra_data)
     else:
-        res = '<div class="snode"'
+        cssClass = re.sub("[-=][0-9]+$", "", tree.node)
+        res = '<div class="snode ' + cssClass + '"'
         if extra_data:
             res += ' data-metadata="' + safe_json(nodeListToDict(extra_data)) + '"'
         res += '>' + tree.node + ' '

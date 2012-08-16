@@ -5,6 +5,7 @@ import util
 import nltk.tree as T
 
 class UtilTest(unittest.TestCase):
+    maxDiff = None
     def test_queryVersionCookie(self):
         version_string = "( (VERSION (FORMAT dash) (FOO (BAR baz))))"
         self.assertEqual(
@@ -47,19 +48,24 @@ class UtilTest(unittest.TestCase):
         test_tree = T.Tree("( (IP-MAT (NP-SBJ (D this-this)) (BEP is-is) (NP-PRD (D a-a) (N test-test))))")
         self.assertMultiLineEqual(util.treeToHtml(test_tree, None),
                              """
-<div class=\"snode\">IP-MAT <div class=\"snode\">NP-SBJ <div class=\"snode\">D<span class=\"wnode\">this-this</span></div></div>
-<div class=\"snode\">BEP<span class=\"wnode\">is-is</span></div>
-<div class=\"snode\">NP-PRD <div class=\"snode\">D<span class=\"wnode\">a-a</span></div>
-<div class=\"snode\">N<span class=\"wnode\">test-test</span></div></div></div>
+<div class=\"snode IP-MAT\">IP-MAT <div class=\"snode NP-SBJ\">NP-SBJ <div class=\"snode D\">D<span class=\"wnode\">this-this</span></div></div>
+<div class=\"snode BEP\">BEP<span class=\"wnode\">is-is</span></div>
+<div class=\"snode NP-PRD\">NP-PRD <div class=\"snode D\">D<span class=\"wnode\">a-a</span></div>
+<div class=\"snode N\">N<span class=\"wnode\">test-test</span></div></div></div>
                              """.strip())
 
         self.assertMultiLineEqual(util.treeToHtml(test_tree, "dash"),
                                   """
-<div class=\"snode\">IP-MAT <div class=\"snode\">NP-SBJ <div class=\"snode\">D<span class=\"wnode\">this<span class=\"lemma\">-this</span></span></div></div>
-<div class=\"snode\">BEP<span class=\"wnode\">is<span class=\"lemma\">-is</span></span></div>
-<div class=\"snode\">NP-PRD <div class=\"snode\">D<span class=\"wnode\">a<span class=\"lemma\">-a</span></span></div>
-<div class=\"snode\">N<span class=\"wnode\">test<span class=\"lemma\">-test</span></span></div></div></div>
+<div class=\"snode IP-MAT\">IP-MAT <div class=\"snode NP-SBJ\">NP-SBJ <div class=\"snode D\">D<span class=\"wnode\">this<span class=\"lemma\">-this</span></span></div></div>
+<div class=\"snode BEP\">BEP<span class=\"wnode\">is<span class=\"lemma\">-is</span></span></div>
+<div class=\"snode NP-PRD\">NP-PRD <div class=\"snode D\">D<span class=\"wnode\">a<span class=\"lemma\">-a</span></span></div>
+<div class=\"snode N\">N<span class=\"wnode\">test<span class=\"lemma\">-test</span></span></div></div></div>
                                   """.strip())
+
+    def test_treeToHtml_index(self):
+        self.assertMultiLineEqual(util.treeToHtml(T.Tree("(FOO-1 bar)"), None),
+                                  "<div class=\"snode FOO\">FOO-1" +
+                                  "<span class=\"wnode\">bar</span></div>")
 
     def test_deepTreeToHtml(self):
         pass
