@@ -1699,8 +1699,13 @@ function makeLeaf(before, label, word, target) {
         target = startnode;
     }
 
-    // TODO: what happens if you use this to add a new root-level tree?
-    touchTree($(target));
+    undoBeginTransaction();
+    var isRootLevel = false;
+    if (isRootNode($(target))) {
+        isRootLevel = true;
+    } else {
+        touchTree($(target));
+    }
 
     var lemma = false;
     var temp = word.split("-");
@@ -1729,6 +1734,7 @@ function makeLeaf(before, label, word, target) {
             }
             doCoindex = true;
         } else { // abort if selecting from different tokens
+            undoAbortTransaction();
             return;
         }
     }
@@ -1754,6 +1760,10 @@ function makeLeaf(before, label, word, target) {
     endnode = null;
     selectNode(newleaf.get(0));
     updateSelection();
+    if (isRootLevel) {
+        registerNewRootTree(newleaf);
+    }
+    undoEndTransaction();
 }
 
 /**
