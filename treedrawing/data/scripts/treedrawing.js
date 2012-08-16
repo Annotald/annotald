@@ -834,9 +834,7 @@ function displayRename() {
     }
     function postChange(newNode) {
         if (newNode) {
-            newNode.removeClass(oldClass);
-            // TODO: make this not add numbers etc.
-            newNode.addClass(getLabel(newNode));
+            updateCssClass(newNode, oldClass);
             startnode = endnode = null;
             updateSelection();
             document.body.onkeydown = handleKeyDown;
@@ -860,10 +858,9 @@ function displayRename() {
     $("#undo").attr("disabled", true);
     $("#redo").attr("disabled", true);
     $("#save").attr("disabled", true);
-    // TODO: will no longer be accurate when labels don't include e.g. mov't index
-    var oldClass = getLabel($(startnode));
-
     var label = getLabel($(startnode));
+    var oldClass = parseLabel(label);
+
     if ($(startnode).children(".wnode").size() > 0) {
         // this is a terminal
         var word, lemma;
@@ -1915,7 +1912,7 @@ function toggleExtension(extension, extensionList) {
     // The new config format however requires a dash-less extension.
     var newlabel = toggleStringExtension(oldlabel, extension, extensionList);
     textnode.replaceWith(newlabel + " ");
-    $(startnode).removeClass(oldlabel).addClass(newlabel);
+    updateCssClass($(startnode), oldlabel);
 
     return true;
 }
@@ -1960,7 +1957,7 @@ function setLabel(labels) {
     touchTree($(startnode));
 
     textnode.replaceWith(newlabel + " ");
-    $(startnode).removeClass(parseLabel(oldlabel)).addClass(parseLabel(newlabel));
+    updateCssClass($(startnode), oldlabel);
 
     return true;
 }
@@ -2639,12 +2636,31 @@ function setLabelLL(node, label) {
         // should never happen
         return;
     }
-    var oldLabel = $.trim(textNode(node).text());
+    var oldLabel = parseLabel(getLabel(node));
     textNode(node).replaceWith(label);
-    if (node.hasClass("snode")) {
-        node.removeClass(oldLabel);
-        node.addClass(parseLabel($.trim(label)));
+    updateCssClass(node, oldLabel);
+}
+
+/**
+ * Update the CSS class of a node to reflect its label.
+ *
+ * @param {JQuery Node} node
+ * @param {String} oldlabel (optional) the former label of this node
+ */
+function updateCssClass(node, oldlabel) {
+    if (!node.hasClass("snode")) {
+        return;
     }
+    if (oldlabel) {
+        // should never be needed, but a bit of defensiveness can't hurt
+        oldlabel = parseLabel($.trim(oldlabel));
+    } else {
+        // oldlabel wasn't supplied -- try to guess
+        oldlabel = node.attr("class").split(" ");
+        oldlabel = _.find(oldlabel, function (s) { return /[A-Z-]/.match(s); });
+    }
+    node.removeClass(oldlabel);
+    node.addClass(parseLabel(getLabel(node)));
 }
 
 //================================================== Obsolete/other
