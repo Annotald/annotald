@@ -247,8 +247,6 @@ other sections where they are implicated.
 `testValidPhraseLabel`/`testValidLeafLabel`:: See the discussion of
 these options <<tagset-validate,below>>
 
-`disableUndo`:: Deprecated
-
 [[extensions-vars]]
 `extensions`:: Specify the list and order of dash tags available in the
 corpus.  There are three variants of this variable:

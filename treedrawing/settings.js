@@ -42,13 +42,6 @@ var testValidPhraseLabel = undefined;
 var testValidLeafLabel   = undefined;
 
 /*
- * The undo functionality is currently too cumbersome for use in large files.
- * If you are working with a large file (over ~5,000 words), you should set
- * this to true.
- */
-var disableUndo = false;
-
-/*
  * Extensions are treated as not part of the label for various purposes, they
  * are all binary, and they show up in the toggle extension menu.  There are 3
  * classes of extensions: those that apply to leaf nodes, those that apply to
