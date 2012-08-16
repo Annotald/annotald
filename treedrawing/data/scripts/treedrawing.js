@@ -2185,7 +2185,7 @@ function advanceTree(find, async, offset) {
                             // TODO: what to do about the save warning
                             $("#editpane").html(res['tree']);
                             documentReadyHandler();
-                            undostack = new Array();
+                            nukeUndo();
                             displayInfo("Tree fetched.");
                         }
                     },
@@ -2260,6 +2260,17 @@ function resetUndo() {
     undoNewTrees = [];
     undoDeletedTrees = [];
     undoTransactionStack = [];
+}
+
+/**
+ * Reset the undo system entirely.
+ *
+ * This function zeroes out any undo history.
+ */
+function nukeUndo() {
+    resetUndo();
+    undoStack = [];
+    redoStack = [];
 }
 
 /**
