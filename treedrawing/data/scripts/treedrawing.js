@@ -1854,7 +1854,13 @@ function pruneNode() {
         var deltext = $(startnode).children().first().text();
         if (isLeafNode(startnode) && isEmpty(deltext)) {
             // it is ok to delete leaf if it is empty/trace
-            touchTree($(startnode));
+            if (isRootNode($(startnode))) {
+                // perversely, it is possible to have a leaf node at the root
+                // of a file.
+                registerDeletedRootTree($(startnode));
+            } else {
+                touchTree($(startnode));
+            }
             $(startnode).remove();
             startnode = endnode = null;
             updateSelection();
