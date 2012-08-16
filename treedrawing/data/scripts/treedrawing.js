@@ -680,7 +680,7 @@ function splitWord() {
 // ========== Editing parts of the tree
 
 // TODO: document entry points better
-// TODO: split these fns up...they are monsters.  (or split to sep. file?)
+// DONE(?): split these fns up...they are monsters.  (or split to sep. file?)
 
 /**
  * Edit the lemma, if a leaf node is selected, or the label, if a phrasal node is.
@@ -1439,7 +1439,6 @@ function search() {
             // "<input id='searchRE' name='searchRE' type='checkbox' />" +
             "<input id='clearSearch' type='button' value='Clear' />" +
             "<input id='doSearch' type='button' value='Search' /></div>";
-    // TODO: save search on esc
     showDialogBox("Search", html, doSearch, saveSearch);
     $("#searchnodes").replaceWith(savedsearch);
     $("#doSearch").click(doSearch);
@@ -2619,17 +2618,16 @@ function setNodeLabel(node, label, noUndo) {
     setLabelLL(node, label);
 }
 
-// TODO: calc labels in util.py, suppress this code
 // TODO(AWE): I think that updating labels on changing nodes works, but
 // this fn should be interactively called with debugging arg to test this
-// supposition.  When I am confident of the behavior of the code, the
-// debugging branch will be optimized/removed.
+// supposition.  When I am confident of the behavior of the code, this fn will
+// be removed.
 function resetLabelClasses(alertOnError) {
     var nodes = $(".snode").each(
         function() {
             var node = $(this);
             var label = $.trim(getLabel(node));
-            if (alertOnError) { // TODO(AWE): optimize test inside loop
+            if (alertOnError) {
                 var classes = node.attr("class").split(" ");
                 // This incantation removes a value from an array.
                 classes.indexOf("snode") >= 0 &&
