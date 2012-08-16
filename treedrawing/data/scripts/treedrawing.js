@@ -2016,7 +2016,7 @@ function coIndex() {
         } else if (getIndex($(startnode)) > 0 && getIndex($(endnode)) == -1) {
             appendExtension($(endnode), getIndex($(startnode)));
         } else if (getIndex($(startnode)) == -1 && getIndex($(endnode)) > 0) {
-            appendExtension( $(startnode), getIndex($(endnode)) );
+            appendExtension($(startnode), getIndex($(endnode)));
         } else { // no indices here, so make them
             var index = maxIndex(startRoot) + 1;
             appendExtension($(startnode), index);
@@ -2244,7 +2244,7 @@ function stackTree() {
 }
 
 /**
- * Invoke redo, if not disabled.
+ * Invoke redo.
  */
 function redo() {
     if (typeof disableUndo !== "undefined" && disableUndo) {
@@ -2264,7 +2264,7 @@ function redo() {
 }
 
 /**
- * Invoke undo, if not enabled
+ * Invoke undo.
  */
 function undo() {
     if (typeof disableUndo !== "undefined" && disableUndo) {
@@ -2518,7 +2518,6 @@ function toggleLemmata() {
     lemmataHidden = !lemmataHidden;
 }
 
-// TODO: something is wrong with this fn -- it also turns FLAG on
 function fixError() {
     if (!startnode || endnode) return;
     var sn = $(startnode);
