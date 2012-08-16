@@ -1842,15 +1842,14 @@ function makeNode(label) {
 function pruneNode() {
     if (startnode && !endnode) {
         var deltext = $(startnode).children().first().text();
-        // if this is a leaf, TODO XXX fix
-        if (isEmpty(deltext)) {
-            // it is ok to delete leaf if is empty/trace
+        if (isLeafNode(startnode) && isEmpty(deltext)) {
+            // it is ok to delete leaf if it is empty/trace
             touchTree($(startnode));
             $(startnode).remove();
             startnode = endnode = null;
             updateSelection();
             return;
-        } else if (!isPossibleTarget(startnode)) {
+        } else if (isLeafNode(startnode)) {
             // but other leaves are not deleted
             return;
         } else if (startnode == document.getElementById("sn0")) {
