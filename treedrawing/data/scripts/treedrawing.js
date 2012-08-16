@@ -2424,7 +2424,7 @@ function registerDeletedRootTree(tree) {
     }
     undoDeletedTrees.push({
         tree: tree,
-        before: prev.attr("id")
+        before: prev && prev.attr("id")
     });
 }
 
@@ -2466,7 +2466,7 @@ function doUndo(undoData) {
         }
         delTr.push({
             tree: theNode.clone(),
-            before: prev.attr("id")
+            before: prev && prev.attr("id")
         });
         theNode.remove();
     });
