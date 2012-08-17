@@ -21,7 +21,7 @@ var conleafs = new Array();
 
 function addConMenu(label, suggestions) {
     conmenus[label] = {
-	suggestions : suggestions
+        suggestions : suggestions
     };
 }
 
@@ -47,7 +47,7 @@ function addConLeaf(suggestion, before, label, word) {
  */
 function addConMenuGroup(group) {
     for(var i = 0; i < group.length; i++){
-        addConMenu(group[i],group);
+        addConMenu(group[i], group);
     }
 }
 
@@ -72,39 +72,31 @@ customConLeafBefore();
 
 var defaultsPhrases = defaultConMenuGroup;
 
-function isCasePhrase(nodeLabel) {
-    if (nodeLabel.startsWith("NP") ||
-        nodeLabel.startsWith("ADJP") ||
-        nodeLabel.startsWith("QP")) {
-	return true;
-    }
-    return false;
-}
-
 function getSuggestions(label) {
-    var indstr = "", indtype = "", extensionstring = "";
-    if (parseIndex(label)>0) {
-	indstr = parseIndex(label);
-	indtype = parseIndexType(label);
+    var indstr = "",
+        indtype = "";
+    if (parseIndex(label) > 0) {
+        indstr = parseIndex(label);
+        indtype = parseIndexType(label);
     }
     label = parseLabel(label);
 
     var suggestions = new Array();
     var menuitems = defaultsPhrases;
     if (conmenus[label] != null) {
-	menuitems = conmenus[label].suggestions;
+        menuitems = conmenus[label].suggestions;
     }
 
     for (var i=0; i < menuitems.length; i++){
-	var menuitem = menuitems[i];
-	suggestions.push(menuitem + extensionstring + indtype + indstr);
+        var menuitem = menuitems[i];
+        suggestions.push(menuitem + indtype + indstr);
 
-	if (conmenus[menuitem] != null) {
-	    var iitems = conmenus[menuitem].suggestions;
-	    for (var j=0; j < iitems.length; j++) {
-		suggestions.push(iitems[j] + extensionstring + indtype + indstr);
-	    }
-	}
+        if (conmenus[menuitem] != null) {
+            var iitems = conmenus[menuitem].suggestions;
+            for (var j=0; j < iitems.length; j++) {
+                suggestions.push(iitems[j] + indtype + indstr);
+            }
+        }
     }
     return suggestions.unique();
 }
@@ -290,6 +282,7 @@ function doConLeaf(idx,conleaf,node) {
 // " "clause_extensions" "JSON" "makeLeaf" "stackTree" "getLabel" "setNodeLabel\
 // " "hideContextMenu" "clearSelection" "toggleExtension" "selectNode\
 // " "parseIndex" "parseLabel" "defaultConMenuGroup" "getIndex" "parseIndexType\
-// " "displayCaseMenu")
+// " "displayCaseMenu" "caseTags" "casePhrases" "hasCase" "touchTree\
+// " "startnode")
 // indent-tabs-mode: nil
 // End:
