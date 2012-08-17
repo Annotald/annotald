@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Source for: treedrawing/data/scripts/treedrawing.contextMenu.js</title>
+    
+    <script src="../scripts/sh_main.js"> </script>
+    <script src="../scripts/sh_javascript.js"> </script>
+    <link type="text/css" rel="stylesheet" href="../styles/github.css">
+</head>
+
+<body>
+
+  <pre>
+<code>
+<a name='L1'></a><span class="comment">// Copyright (c) 2011 Anton Karl Ingason, Aaron Ecay</span>
+<a name='L2'></a>
+<a name='L3'></a><span class="comment">// This file is part of the Annotald program for annotating</span>
+<a name='L4'></a><span class="comment">// phrase-structure treebanks in the Penn Treebank style.</span>
+<a name='L5'></a>
+<a name='L6'></a><span class="comment">// This file is distributed under the terms of the GNU General</span>
+<a name='L7'></a><span class="comment">// Public License as published by the Free Software Foundation, either</span>
+<a name='L8'></a><span class="comment">// version 3 of the License, or (at your option) any later version.</span>
+<a name='L9'></a>
+<a name='L10'></a><span class="comment">// This program is distributed in the hope that it will be useful, but</span>
+<a name='L11'></a><span class="comment">// WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<a name='L12'></a><span class="comment">// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser</span>
+<a name='L13'></a><span class="comment">// General Public License for more details.</span>
+<a name='L14'></a>
+<a name='L15'></a><span class="comment">// You should have received a copy of the GNU Lesser General Public</span>
+<a name='L16'></a><span class="comment">// License along with this program.  If not, see</span>
+<a name='L17'></a><span class="comment">// &lt;http://www.gnu.org/licenses/>.</span>
+<a name='L18'></a>
+<a name='L19'></a><span class="keyword">var</span> conmenus = <span class="keyword">new</span> Object();
+<a name='L20'></a><span class="keyword">var</span> conleafs = <span class="keyword">new</span> <span class="keyword">Array</span>();
+<a name='L21'></a>
+<a name='L22'></a><span class="keyword">function</span> addConMenu(label, suggestions) {
+<a name='L23'></a>    conmenus[label] = {
+<a name='L24'></a>    suggestions : suggestions
+<a name='L25'></a>    };
+<a name='L26'></a>}
+<a name='L27'></a>
+<a name='L28'></a><span class="keyword">function</span> addConLeaf(suggestion, before, label, word) {
+<a name='L29'></a>    <span class="keyword">var</span> conleaf = {
+<a name='L30'></a>        suggestion : suggestion,
+<a name='L31'></a>        before : before,
+<a name='L32'></a>        label : label,
+<a name='L33'></a>        word : word
+<a name='L34'></a>    };
+<a name='L35'></a>
+<a name='L36'></a>    conleafs.push(conleaf);
+<a name='L37'></a>}
+<a name='L38'></a>
+<a name='L39'></a><span class="comment">/**
+<a name='L40'></a> * Add a group of labels to the context menu.
+<a name='L41'></a> *
+<a name='L42'></a> * When activating the context menu, if the label of the targeted node belongs
+<a name='L43'></a> * to one of these groups, the other entries in the group will be suggested as
+<a name='L44'></a> * new labels.
+<a name='L45'></a> *
+<a name='L46'></a> *<span class="phpdoc"> @param</span> {Array of String} group
+<a name='L47'></a> */</span>
+<a name='L48'></a><span class="keyword">function</span> addConMenuGroup(group) {
+<a name='L49'></a>    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; group.length; i++){
+<a name='L50'></a>        addConMenu(group[i],group);
+<a name='L51'></a>    }
+<a name='L52'></a>}
+<a name='L53'></a>
+<a name='L54'></a><span class="comment">// Load the custom context menu groups from user settings file</span>
+<a name='L55'></a>customConMenuGroups();
+<a name='L56'></a>
+<a name='L57'></a><span class="comment">/**
+<a name='L58'></a> * Add a terminal node to the context menu.
+<a name='L59'></a> *
+<a name='L60'></a> * Add a terminal node that the context menu will allow inserting in the tree.
+<a name='L61'></a> *
+<a name='L62'></a> *<span class="phpdoc"> @param</span> {String} phrase the label of the leaf
+<a name='L63'></a> *<span class="phpdoc"> @param</span> {String} terminal the text of the leaf
+<a name='L64'></a> */</span>
+<a name='L65'></a><span class="keyword">function</span> addConLeafBefore(phrase, terminal) {
+<a name='L66'></a>    addConLeaf(<span class="string">"&amp;lt; ("</span> + phrase + <span class="string">" "</span> + terminal + <span class="string">")"</span>,
+<a name='L67'></a>               <span class="keyword">true</span>, phrase, terminal);
+<a name='L68'></a>}
+<a name='L69'></a>
+<a name='L70'></a><span class="comment">// Load the custom context menu "leaf before" items</span>
+<a name='L71'></a>customConLeafBefore();
+<a name='L72'></a>
+<a name='L73'></a><span class="keyword">var</span> defaultsPhrases = defaultConMenuGroup;
+<a name='L74'></a>
+<a name='L75'></a><span class="keyword">function</span> isCasePhrase(nodeLabel) {
+<a name='L76'></a>    <span class="keyword">if</span> (nodeLabel.startsWith(<span class="string">"NP"</span>) ||
+<a name='L77'></a>        nodeLabel.startsWith(<span class="string">"ADJP"</span>) ||
+<a name='L78'></a>        nodeLabel.startsWith(<span class="string">"QP"</span>)) {
+<a name='L79'></a>    <span class="keyword">return</span> <span class="keyword">true</span>;
+<a name='L80'></a>    }
+<a name='L81'></a>    <span class="keyword">return</span> <span class="keyword">false</span>;
+<a name='L82'></a>}
+<a name='L83'></a>
+<a name='L84'></a><span class="keyword">function</span> getSuggestions(label) {
+<a name='L85'></a>    <span class="keyword">var</span> indstr = <span class="string">""</span>, indtype = <span class="string">""</span>, extensionstring = <span class="string">""</span>;
+<a name='L86'></a>    <span class="keyword">if</span> (parseIndex(label)><span class="number">0</span>) {
+<a name='L87'></a>    indstr = parseIndex(label);
+<a name='L88'></a>    indtype = parseIndexType(label);
+<a name='L89'></a>    }
+<a name='L90'></a>    label = parseLabel(label);
+<a name='L91'></a>
+<a name='L92'></a>    <span class="keyword">var</span> suggestions = <span class="keyword">new</span> <span class="keyword">Array</span>();
+<a name='L93'></a>    <span class="keyword">var</span> menuitems = defaultsPhrases;
+<a name='L94'></a>    <span class="keyword">if</span> (conmenus[label] != <span class="keyword">null</span>) {
+<a name='L95'></a>    menuitems = conmenus[label].suggestions;
+<a name='L96'></a>    }
+<a name='L97'></a>
+<a name='L98'></a>    <span class="keyword">for</span> (<span class="keyword">var</span> i=<span class="number">0</span>; i &lt; menuitems.length; i++){
+<a name='L99'></a>    <span class="keyword">var</span> menuitem = menuitems[i];
+<a name='L100'></a>    suggestions.push(menuitem + extensionstring + indtype + indstr);
+<a name='L101'></a>
+<a name='L102'></a>    <span class="keyword">if</span> (conmenus[menuitem] != <span class="keyword">null</span>) {
+<a name='L103'></a>        <span class="keyword">var</span> iitems = conmenus[menuitem].suggestions;
+<a name='L104'></a>        <span class="keyword">for</span> (<span class="keyword">var</span> j=<span class="number">0</span>; j &lt; iitems.length; j++) {
+<a name='L105'></a>        suggestions.push(iitems[j] + extensionstring + indtype + indstr);
+<a name='L106'></a>        }
+<a name='L107'></a>    }
+<a name='L108'></a>    }
+<a name='L109'></a>    <span class="keyword">return</span> suggestions.unique();
+<a name='L110'></a>}
+<a name='L111'></a>
+<a name='L112'></a><span class="keyword">function</span> loadContextMenu(nodeOrig) {
+<a name='L113'></a>    <span class="keyword">var</span> nodeIndex = getIndex( $(nodeOrig) );
+<a name='L114'></a>    <span class="keyword">var</span> indexSep = <span class="string">""</span>, indexString = <span class="string">""</span>;
+<a name='L115'></a>    <span class="keyword">var</span> node = $(nodeOrig).<span class="keyword">clone</span>();
+<a name='L116'></a>    <span class="keyword">var</span> nodelabel = $.trim(getLabel(node));
+<a name='L117'></a>    <span class="keyword">function</span> loadConMenuMousedown () {
+<a name='L118'></a>        <span class="keyword">var</span> e = window.event;
+<a name='L119'></a>    <span class="keyword">var</span> elementId = (e.target || e.srcElement).id;
+<a name='L120'></a>    <span class="keyword">var</span> suggestion = <span class="string">""</span> + $(<span class="keyword">this</span>).text();
+<a name='L121'></a>    setNodeLabel($(nodeOrig), suggestion);
+<a name='L122'></a>    hideContextMenu();
+<a name='L123'></a>    }
+<a name='L124'></a>
+<a name='L125'></a>    <span class="keyword">if</span> (nodeIndex > -<span class="number">1</span>) {
+<a name='L126'></a>    <span class="keyword">var</span> lastindex = Math.max(nodelabel.lastIndexOf(<span class="string">"-"</span>),
+<a name='L127'></a>                                 nodelabel.lastIndexOf(<span class="string">"="</span>));
+<a name='L128'></a>    indexSep = nodelabel.charAt(lastindex);
+<a name='L129'></a>    nodelabel = nodelabel.substr(<span class="number">0</span>, getLabel($(node)).length - <span class="number">2</span>);
+<a name='L130'></a>    indexString = indexSep + <span class="string">""</span> + nodeIndex;
+<a name='L131'></a>    }
+<a name='L132'></a>    $(<span class="string">"#conLeft"</span>).<span class="keyword">empty</span>();
+<a name='L133'></a>    $(<span class="string">"#conLeft"</span>).append($(<span class="string">"&lt;div class='conMenuHeading'>Label&lt;/div>"</span>));
+<a name='L134'></a>
+<a name='L135'></a>    <span class="comment">// TODO(AWE): not portable</span>
+<a name='L136'></a>    <span class="keyword">if</span> (/-[NADG]$/.test(nodelabel)) {
+<a name='L137'></a>    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; caseTags.length; i++) {
+<a name='L138'></a>        <span class="keyword">var</span> theCase = nodelabel.substr(nodelabel.length - <span class="number">1</span>);
+<a name='L139'></a>        <span class="keyword">var</span> suggestion = caseTags[i] + <span class="string">"-"</span> + theCase;
+<a name='L140'></a>        <span class="keyword">if</span> (suggestion != nodelabel) {
+<a name='L141'></a>        <span class="keyword">var</span> newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>"</span> +
+<a name='L142'></a>                                suggestion + <span class="string">"&lt;/a>&lt;/div>"</span>);
+<a name='L143'></a>        $(newnode).mousedown(loadConMenuMousedown);
+<a name='L144'></a>        $(<span class="string">"#conLeft"</span>).append(newnode);
+<a name='L145'></a>        }
+<a name='L146'></a>    }
+<a name='L147'></a>
+<a name='L148'></a>    <span class="keyword">var</span> extraNominalSuggestions=[<span class="string">"ADV"</span>,<span class="string">"ES"</span>];
+<a name='L149'></a>    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; extraNominalSuggestions.length; i++) {
+<a name='L150'></a>        <span class="keyword">var</span> suggestion = extraNominalSuggestions[i];
+<a name='L151'></a>        <span class="comment">// suggest ADV</span>
+<a name='L152'></a>        <span class="keyword">var</span> newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>"</span> +
+<a name='L153'></a>                            suggestion + <span class="string">"&lt;/a>&lt;/div>"</span>);
+<a name='L154'></a>        $(newnode).mousedown(loadConMenuMousedown);
+<a name='L155'></a>        $(<span class="string">"#conLeft"</span>).append(newnode);
+<a name='L156'></a>    }
+<a name='L157'></a>    } <span class="keyword">else</span> {
+<a name='L158'></a>    <span class="keyword">var</span> suggestions = getSuggestions(nodelabel);
+<a name='L159'></a>    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; suggestions.length; i++) {
+<a name='L160'></a>        <span class="keyword">if</span> (suggestions[i] != nodelabel) {
+<a name='L161'></a>        <span class="keyword">var</span> newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>"</span> +
+<a name='L162'></a>                                suggestions[i]+indexString+<span class="string">"&lt;/a>&lt;/div>"</span>);
+<a name='L163'></a>        $(newnode).mousedown(loadConMenuMousedown);
+<a name='L164'></a>        $(<span class="string">"#conLeft"</span>).append(newnode);
+<a name='L165'></a>        }
+<a name='L166'></a>    }
+<a name='L167'></a>    }
+<a name='L168'></a>
+<a name='L169'></a>    <span class="comment">// do the right side context menu</span>
+<a name='L170'></a>    $(<span class="string">"#conRight"</span>).<span class="keyword">empty</span>();
+<a name='L171'></a>
+<a name='L172'></a>    <span class="comment">// Set in user settings file</span>
+<a name='L173'></a>    <span class="keyword">if</span> (displayCaseMenu) {
+<a name='L174'></a>        <span class="comment">// TODO(AWE): not portable</span>
+<a name='L175'></a>    <span class="keyword">if</span> (/-[NADG]$/.test(nodelabel)) {
+<a name='L176'></a>        $(<span class="string">"#conRight"</span>).append($(<span class="string">"&lt;div class='conMenuHeading'>Case&lt;/div>"</span>));
+<a name='L177'></a>        <span class="keyword">var</span> newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>-N&lt;/a>&lt;/div>"</span>);
+<a name='L178'></a>        $(newnode).mousedown(setCaseOnTag(nodeOrig,nodelabel,<span class="string">"N"</span>));
+<a name='L179'></a>        $(<span class="string">"#conRight"</span>).append(newnode);
+<a name='L180'></a>
+<a name='L181'></a>        newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>-A&lt;/a>&lt;/div>"</span>);
+<a name='L182'></a>        $(newnode).mousedown(setCaseOnTag(nodeOrig,nodelabel,<span class="string">"A"</span>));
+<a name='L183'></a>        $(<span class="string">"#conRight"</span>).append(newnode);
+<a name='L184'></a>
+<a name='L185'></a>        newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>-D&lt;/a>&lt;/div>"</span>);
+<a name='L186'></a>        $(newnode).mousedown(setCaseOnTag(nodeOrig,nodelabel,<span class="string">"D"</span>));
+<a name='L187'></a>        $(<span class="string">"#conRight"</span>).append(newnode);
+<a name='L188'></a>
+<a name='L189'></a>        newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>-G&lt;/a>&lt;/div>"</span>);
+<a name='L190'></a>        $(newnode).mousedown(setCaseOnTag(nodeOrig,nodelabel,<span class="string">"G"</span>));
+<a name='L191'></a>        $(<span class="string">"#conRight"</span>).append(newnode);
+<a name='L192'></a>    } <span class="keyword">else</span> <span class="keyword">if</span>(isCasePhrase(nodelabel)) {
+<a name='L193'></a>            <span class="comment">// TODO(AWE): this is almost-but-not-quite dupe of above.  Unify.</span>
+<a name='L194'></a>        $(<span class="string">"#conRight"</span>).append($(<span class="string">"&lt;div class='conMenuHeading'>Case&lt;/div>"</span>));
+<a name='L195'></a>
+<a name='L196'></a>        <span class="keyword">var</span> newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>-N&lt;/a>&lt;/div>"</span>);
+<a name='L197'></a>        $(newnode).mousedown(doSetCase(nodeOrig,<span class="string">"N"</span>));
+<a name='L198'></a>        $(<span class="string">"#conRight"</span>).append(newnode);
+<a name='L199'></a>
+<a name='L200'></a>        newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>-A&lt;/a>&lt;/div>"</span>);
+<a name='L201'></a>        $(newnode).mousedown(doSetCase(nodeOrig,<span class="string">"A"</span>));
+<a name='L202'></a>        $(<span class="string">"#conRight"</span>).append(newnode);
+<a name='L203'></a>
+<a name='L204'></a>        newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>-D&lt;/a>&lt;/div>"</span>);
+<a name='L205'></a>        $(newnode).mousedown(doSetCase(nodeOrig,<span class="string">"D"</span>));
+<a name='L206'></a>        $(<span class="string">"#conRight"</span>).append(newnode);
+<a name='L207'></a>
+<a name='L208'></a>        newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>-G&lt;/a>&lt;/div>"</span>);
+<a name='L209'></a>        $(newnode).mousedown(doSetCase(nodeOrig,<span class="string">"G"</span>));
+<a name='L210'></a>        $(<span class="string">"#conRight"</span>).append(newnode);
+<a name='L211'></a>    }
+<a name='L212'></a>    }
+<a name='L213'></a>
+<a name='L214'></a>    <span class="comment">// do addleafbefore</span>
+<a name='L215'></a>    $(<span class="string">"#conRight"</span>).append($(<span class="string">"&lt;div class='conMenuHeading'>Leaf before&lt;/div>"</span>));
+<a name='L216'></a>    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; conleafs.length; i++) {
+<a name='L217'></a>    stackTree();
+<a name='L218'></a>    <span class="keyword">var</span> newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>"</span> +
+<a name='L219'></a>                        conleafs[i].suggestion + <span class="string">"&lt;/a>&lt;/div>"</span>);
+<a name='L220'></a>    $(newnode).mousedown(doConLeaf(i,conleafs[i],nodeOrig));
+<a name='L221'></a>    $(<span class="string">"#conRight"</span>).append(newnode);
+<a name='L222'></a>    }
+<a name='L223'></a>
+<a name='L224'></a>    $(<span class="string">"#conRightest"</span>).<span class="keyword">empty</span>();
+<a name='L225'></a>    $(<span class="string">"#conRightest"</span>).append($(<span class="string">"&lt;div class='conMenuHeading'>Toggle ext.&lt;/div>"</span>));
+<a name='L226'></a>
+<a name='L227'></a>    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; extensions.length; i++) {
+<a name='L228'></a>    <span class="comment">// do the right side context menu</span>
+<a name='L229'></a>    <span class="keyword">var</span> newnode = $(<span class="string">"&lt;div class='conMenuItem'>&lt;a href='#'>"</span> +
+<a name='L230'></a>                        extensions[i] + <span class="string">"&lt;/a>&lt;/div>"</span>);
+<a name='L231'></a>    $(newnode).mousedown(doToggleExtension(nodeOrig, extensions[i]));
+<a name='L232'></a>    $(<span class="string">"#conRightest"</span>).append(newnode);
+<a name='L233'></a>    }
+<a name='L234'></a>}
+<a name='L235'></a>
+<a name='L236'></a><span class="keyword">function</span> doToggleExtension(node, extension) {
+<a name='L237'></a>    <span class="keyword">return</span> <span class="keyword">function</span>() {
+<a name='L238'></a>    stackTree();
+<a name='L239'></a>    clearSelection();
+<a name='L240'></a>    selectNode(node);
+<a name='L241'></a>    toggleExtension(extension);
+<a name='L242'></a>    hideContextMenu();
+<a name='L243'></a>    clearSelection();
+<a name='L244'></a>    };
+<a name='L245'></a>}
+<a name='L246'></a>
+<a name='L247'></a><span class="comment">/*
+<a name='L248'></a> * set case just on this one tag
+<a name='L249'></a> */</span>
+<a name='L250'></a><span class="keyword">function</span> setCaseOnTag(node, oldLabel, theCase) {
+<a name='L251'></a>    <span class="keyword">return</span> <span class="keyword">function</span>() {
+<a name='L252'></a>    stackTree();
+<a name='L253'></a>    setNodeLabel($(node),
+<a name='L254'></a>                     oldLabel.substr(<span class="number">0</span>, oldLabel.length - <span class="number">2</span>) + <span class="string">"-"</span> + theCase,
+<a name='L255'></a>                     <span class="keyword">true</span>);
+<a name='L256'></a>    };
+<a name='L257'></a>}
+<a name='L258'></a>
+<a name='L259'></a><span class="comment">/*
+<a name='L260'></a> * set case on all case elements that are daughters of this phrase node
+<a name='L261'></a> */</span>
+<a name='L262'></a><span class="keyword">function</span> doSetCase(node, theCase) {
+<a name='L263'></a>    <span class="keyword">return</span> <span class="keyword">function</span>() {
+<a name='L264'></a>    stackTree();
+<a name='L265'></a>    <span class="keyword">var</span> daughters = $(node).children().each(
+<a name='L266'></a>            <span class="keyword">function</span>() {
+<a name='L267'></a>        <span class="keyword">var</span> child = $(<span class="keyword">this</span>);
+<a name='L268'></a>        <span class="keyword">var</span> oldLabel = $.trim(getLabel($(<span class="keyword">this</span>)));
+<a name='L269'></a>                <span class="comment">// TODO(AWE): not portable</span>
+<a name='L270'></a>        <span class="keyword">if</span>(/-[NADG]$/.test(oldLabel)) {
+<a name='L271'></a>            setNodeLabel($(child),
+<a name='L272'></a>                                 oldLabel.substr(<span class="number">0</span>, oldLabel.length - <span class="number">2</span>) +
+<a name='L273'></a>                                 <span class="string">"-"</span> + theCase,
+<a name='L274'></a>                                 <span class="keyword">true</span>);
+<a name='L275'></a>        }
+<a name='L276'></a>        });
+<a name='L277'></a>    };
+<a name='L278'></a>}
+<a name='L279'></a>
+<a name='L280'></a><span class="keyword">function</span> doConLeaf(idx,conleaf,node) {
+<a name='L281'></a>    <span class="keyword">return</span> <span class="keyword">function</span>() {
+<a name='L282'></a>    makeLeaf(conleaf.before, conleaf.label, conleaf.word, node, <span class="keyword">true</span>);
+<a name='L283'></a>    hideContextMenu();
+<a name='L284'></a>    };
+<a name='L285'></a>}
+<a name='L286'></a>
+<a name='L287'></a><span class="comment">// Local Variables:</span>
+<a name='L288'></a><span class="comment">// js2-additional-externs: ("$" "setTimeout" "customCommands\</span>
+<a name='L289'></a><span class="comment">// " "customConLeafBefore" "customConMenuGroups" "extensions" "vextensions\</span>
+<a name='L290'></a><span class="comment">// " "clause_extensions" "JSON" "makeLeaf" "stackTree" "getLabel" "setNodeLabel\</span>
+<a name='L291'></a><span class="comment">// " "hideContextMenu" "clearSelection" "toggleExtension" "selectNode\</span>
+<a name='L292'></a><span class="comment">// " "parseIndex" "parseLabel" "defaultConMenuGroup" "getIndex" "parseIndexType\</span>
+<a name='L293'></a><span class="comment">// " "displayCaseMenu")</span>
+<a name='L294'></a><span class="comment">// indent-tabs-mode: nil</span>
+<a name='L295'></a><span class="comment">// End:</span>
+<a name='L296'></a>
+</code>
+  </pre>
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3</a> on Fri Aug 17 2012 00:15:15 GMT-0400 (EDT)
+</footer>
+
+</body>
+</html>
+
+

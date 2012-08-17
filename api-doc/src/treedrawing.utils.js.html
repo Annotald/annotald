@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Source for: treedrawing/data/scripts/treedrawing.utils.js</title>
+    
+    <script src="../scripts/sh_main.js"> </script>
+    <script src="../scripts/sh_javascript.js"> </script>
+    <link type="text/css" rel="stylesheet" href="../styles/github.css">
+</head>
+
+<body>
+
+  <pre>
+<code>
+<a name='L1'></a><span class="comment">// Copyright (c) 2012 Anton Karl Ingason, Aaron Ecay, Jana Beck</span>
+<a name='L2'></a>
+<a name='L3'></a><span class="comment">// This file is part of the Annotald program for annotating</span>
+<a name='L4'></a><span class="comment">// phrase-structure treebanks in the Penn Treebank style.</span>
+<a name='L5'></a>
+<a name='L6'></a><span class="comment">// This file is distributed under the terms of the GNU General</span>
+<a name='L7'></a><span class="comment">// Public License as published by the Free Software Foundation, either</span>
+<a name='L8'></a><span class="comment">// version 3 of the License, or (at your option) any later version.</span>
+<a name='L9'></a>
+<a name='L10'></a><span class="comment">// This program is distributed in the hope that it will be useful, but</span>
+<a name='L11'></a><span class="comment">// WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<a name='L12'></a><span class="comment">// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser</span>
+<a name='L13'></a><span class="comment">// General Public License for more details.</span>
+<a name='L14'></a>
+<a name='L15'></a><span class="comment">// You should have received a copy of the GNU Lesser General Public</span>
+<a name='L16'></a><span class="comment">// License along with this program.  If not, see</span>
+<a name='L17'></a><span class="comment">// &lt;http://www.gnu.org/licenses/>.</span>
+<a name='L18'></a>
+<a name='L19'></a><span class="comment">/*
+<a name='L20'></a> * Utility functions for Annotald.
+<a name='L21'></a> */</span>
+<a name='L22'></a>
+<a name='L23'></a><span class="comment">// Table of contents:</span>
+<a name='L24'></a><span class="comment">// * Javascript object manipulation</span>
+<a name='L25'></a><span class="comment">// * Interconversion of different representations</span>
+<a name='L26'></a><span class="comment">// * UI helper functions</span>
+<a name='L27'></a><span class="comment">// * Functions on node representation</span>
+<a name='L28'></a><span class="comment">// ** Predicates</span>
+<a name='L29'></a><span class="comment">// ** Accessor functions</span>
+<a name='L30'></a><span class="comment">// ** Index-related functions</span>
+<a name='L31'></a><span class="comment">// **********</span>
+<a name='L32'></a><span class="comment">// End TOC</span>
+<a name='L33'></a>
+<a name='L34'></a>
+<a name='L35'></a>
+<a name='L36'></a><span class="comment">// TODOs: mark @privates appropriately, consider naming scheme for dom vs JQ args</span>
+<a name='L37'></a>
+<a name='L38'></a><span class="comment">// ===== Javascript object manipulation</span>
+<a name='L39'></a>
+<a name='L40'></a><span class="keyword">function</span> safeGet (obj, key, def) {
+<a name='L41'></a>    <span class="keyword">if</span> (_.has(obj, key)) {
+<a name='L42'></a>        <span class="keyword">return</span> obj[key];
+<a name='L43'></a>    } <span class="keyword">else</span> {
+<a name='L44'></a>        <span class="keyword">return</span> def;
+<a name='L45'></a>    }
+<a name='L46'></a>}
+<a name='L47'></a>
+<a name='L48'></a><span class="comment">// ===== Interconversion of different representations</span>
+<a name='L49'></a>
+<a name='L50'></a><span class="keyword">function</span> jsonToTree(json) {
+<a name='L51'></a>    <span class="keyword">var</span> d = JSON.parse(json);
+<a name='L52'></a>    <span class="keyword">return</span> objectToTree(d);
+<a name='L53'></a>}
+<a name='L54'></a>
+<a name='L55'></a><span class="keyword">function</span> objectToTree(o) {
+<a name='L56'></a>    <span class="keyword">var</span> res = <span class="string">""</span>;
+<a name='L57'></a>    <span class="keyword">for</span> (<span class="keyword">var</span> p in o) {
+<a name='L58'></a>        <span class="keyword">if</span> (o.hasOwnProperty(p)) {
+<a name='L59'></a>            res += <span class="string">"("</span> + p + <span class="string">" "</span>;
+<a name='L60'></a>            <span class="keyword">if</span> (typeof o[p] == <span class="string">"string"</span>) { <span class="comment">// One of life's grosser hacks</span>
+<a name='L61'></a>                res += o[p];
+<a name='L62'></a>            } <span class="keyword">else</span> {
+<a name='L63'></a>                res += objectToTree(o[p]);
+<a name='L64'></a>            }
+<a name='L65'></a>            res += <span class="string">")"</span>;
+<a name='L66'></a>        }
+<a name='L67'></a>    }
+<a name='L68'></a>    <span class="keyword">return</span> res;
+<a name='L69'></a>}
+<a name='L70'></a>
+<a name='L71'></a><span class="comment">/**
+<a name='L72'></a> * Convert a JS disctionary to an HTML form.
+<a name='L73'></a> *
+<a name='L74'></a> * For the metadator editing code.
+<a name='L75'></a> *<span class="phpdoc"> @private</span>
+<a name='L76'></a> */</span>
+<a name='L77'></a><span class="keyword">function</span> dictionaryToForm(dict, level) {
+<a name='L78'></a>    <span class="keyword">if</span> (!level) {
+<a name='L79'></a>        level = <span class="number">0</span>;
+<a name='L80'></a>    }
+<a name='L81'></a>    <span class="keyword">var</span> res = <span class="string">""</span>;
+<a name='L82'></a>    <span class="keyword">if</span> (dict) {
+<a name='L83'></a>        res = <span class="string">'&lt;table class="metadataTable">&lt;thead>&lt;tr>&lt;td>Key&lt;/td>'</span> +
+<a name='L84'></a>            <span class="string">'&lt;td>Value&lt;/td>&lt;/tr>&lt;/thead>'</span>;
+<a name='L85'></a>        <span class="keyword">for</span> (<span class="keyword">var</span> k in dict) {
+<a name='L86'></a>            <span class="keyword">if</span> (dict.hasOwnProperty(k)) {
+<a name='L87'></a>                <span class="keyword">if</span> (typeof dict[k] == <span class="string">"string"</span>) {
+<a name='L88'></a>                    res += <span class="string">'&lt;tr class="strval" data-level="'</span> + level +
+<a name='L89'></a>                        <span class="string">'">&lt;td class="key">'</span> + <span class="string">'&lt;span style="width:"'</span> +
+<a name='L90'></a>                        <span class="number">4</span>*level + <span class="string">'px;">&lt;/span>'</span> + k +
+<a name='L91'></a>                        <span class="string">'&lt;/td>&lt;td class="val">&lt;input class="metadataField" '</span> +
+<a name='L92'></a>                        <span class="string">'type="text" name="'</span> + k + <span class="string">'" value="'</span> + dict[k] +
+<a name='L93'></a>                        <span class="string">'" />&lt;/td>&lt;/tr>'</span>;
+<a name='L94'></a>                } <span class="keyword">else</span> <span class="keyword">if</span> (typeof dict[k] == <span class="string">"object"</span>) {
+<a name='L95'></a>                    res += <span class="string">'&lt;tr class="tabhead">&lt;td colspan=2>'</span> + k +
+<a name='L96'></a>                        <span class="string">'&lt;/td>&lt;/tr>'</span>;
+<a name='L97'></a>                    res += dictionaryToForm(dict[k], level + <span class="number">1</span>);
+<a name='L98'></a>                }
+<a name='L99'></a>            }
+<a name='L100'></a>        }
+<a name='L101'></a>        res += <span class="string">'&lt;/table>'</span>;
+<a name='L102'></a>    }
+<a name='L103'></a>    <span class="keyword">return</span> res;
+<a name='L104'></a>}
+<a name='L105'></a>
+<a name='L106'></a><span class="comment">/**
+<a name='L107'></a> * Convert an HTML form into a JS dictionary
+<a name='L108'></a> *
+<a name='L109'></a> * For the metadata editing code
+<a name='L110'></a> *<span class="phpdoc"> @private</span>
+<a name='L111'></a> */</span>
+<a name='L112'></a><span class="keyword">function</span> formToDictionary(form) {
+<a name='L113'></a>    <span class="keyword">var</span> d = {},
+<a name='L114'></a>        dstack = [],
+<a name='L115'></a>        curlevel = <span class="number">0</span>,
+<a name='L116'></a>        namestack = [];
+<a name='L117'></a>    form.find(<span class="string">"tr"</span>).each(<span class="keyword">function</span>() {
+<a name='L118'></a>        <span class="keyword">if</span> ($(<span class="keyword">this</span>).hasClass(<span class="string">"strval"</span>)) {
+<a name='L119'></a>            <span class="keyword">var</span> key = $(<span class="keyword">this</span>).children(<span class="string">".key"</span>).text();
+<a name='L120'></a>            <span class="keyword">var</span> val = $(<span class="keyword">this</span>).find(<span class="string">".val>.metadataField"</span>).val();
+<a name='L121'></a>            d[key] = val;
+<a name='L122'></a>            <span class="keyword">if</span> ($(<span class="keyword">this</span>).attr(<span class="string">"data-level"</span>) &lt; curlevel) {
+<a name='L123'></a>                <span class="keyword">var</span> new_d = dstack.pop();
+<a name='L124'></a>                <span class="keyword">var</span> next_name = namestack.pop();
+<a name='L125'></a>                new_d[next_name] = d;
+<a name='L126'></a>                d = new_d;
+<a name='L127'></a>            }
+<a name='L128'></a>        } <span class="keyword">else</span> <span class="keyword">if</span> ($(<span class="keyword">this</span>).hasClass(<span class="string">"tabhead"</span>)) {
+<a name='L129'></a>            namestack.push($(<span class="keyword">this</span>).text());
+<a name='L130'></a>            curlevel = $(<span class="keyword">this</span>).attr(<span class="string">"data-level"</span>);
+<a name='L131'></a>            dstack.push(d);
+<a name='L132'></a>            d = {};
+<a name='L133'></a>        }
+<a name='L134'></a>    });
+<a name='L135'></a>    <span class="keyword">if</span> (dstack.length > <span class="number">0</span>) {
+<a name='L136'></a>        <span class="keyword">var</span> len = dstack.length;
+<a name='L137'></a>        <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; len; i++) {
+<a name='L138'></a>            <span class="keyword">var</span> new_d = dstack.pop();
+<a name='L139'></a>            <span class="keyword">var</span> next_name = namestack.pop();
+<a name='L140'></a>            new_d[next_name] = d;
+<a name='L141'></a>            d = new_d;
+<a name='L142'></a>        }
+<a name='L143'></a>    }
+<a name='L144'></a>    <span class="keyword">return</span> d;
+<a name='L145'></a>}
+<a name='L146'></a>
+<a name='L147'></a><span class="comment">// ===== UI helper functions</span>
+<a name='L148'></a>
+<a name='L149'></a><span class="keyword">var</span> messageHistory = <span class="string">""</span>;
+<a name='L150'></a>
+<a name='L151'></a><span class="comment">/**
+<a name='L152'></a> * Log the message in the message history.
+<a name='L153'></a> *<span class="phpdoc"> @private</span>
+<a name='L154'></a> */</span>
+<a name='L155'></a><span class="keyword">function</span> logMessage(msg) {
+<a name='L156'></a>    <span class="keyword">var</span> d = <span class="keyword">new</span> Date();
+<a name='L157'></a>    messageHistory += d.toUTCString() + <span class="string">": "</span> + $(<span class="string">"&lt;div>"</span> + msg +
+<a name='L158'></a>                                                 <span class="string">"&lt;/div>"</span>).text() +
+<a name='L159'></a>        <span class="string">"\n"</span>;
+<a name='L160'></a>}
+<a name='L161'></a>
+<a name='L162'></a><span class="comment">/**
+<a name='L163'></a> * Display a warning message in the Annotald UI.
+<a name='L164'></a> *
+<a name='L165'></a> *<span class="phpdoc"> @param</span> {String} html the html code of the warning to display
+<a name='L166'></a> */</span>
+<a name='L167'></a><span class="keyword">function</span> displayWarning(html) {
+<a name='L168'></a>    logMessage(html);
+<a name='L169'></a>    $(<span class="string">"#messageBoxInner"</span>).html(html).css(<span class="string">"color"</span>, <span class="string">"orange"</span>);
+<a name='L170'></a>}
+<a name='L171'></a>
+<a name='L172'></a><span class="comment">/**
+<a name='L173'></a> * Display an informational message in the Annotald UI.
+<a name='L174'></a> *
+<a name='L175'></a> *<span class="phpdoc"> @param</span> {String} html the html code of the information to display
+<a name='L176'></a> */</span>
+<a name='L177'></a><span class="keyword">function</span> displayInfo(html) {
+<a name='L178'></a>    logMessage(html);
+<a name='L179'></a>    $(<span class="string">"#messageBoxInner"</span>).html(html).css(<span class="string">"color"</span>, <span class="string">"green"</span>);
+<a name='L180'></a>}
+<a name='L181'></a>
+<a name='L182'></a><span class="comment">/**
+<a name='L183'></a> * Display an error message in the Annotald UI.
+<a name='L184'></a> *
+<a name='L185'></a> *<span class="phpdoc"> @param</span> {String} html the html code of the error to display
+<a name='L186'></a> */</span>
+<a name='L187'></a><span class="keyword">function</span> displayError(html) {
+<a name='L188'></a>    logMessage(html);
+<a name='L189'></a>    $(<span class="string">"#messageBoxInner"</span>).html(html).css(<span class="string">"color"</span>, <span class="string">"red"</span>);
+<a name='L190'></a>}
+<a name='L191'></a>
+<a name='L192'></a><span class="comment">/**
+<a name='L193'></a> * Scroll to display the next place in the document matching a selector.
+<a name='L194'></a> *
+<a name='L195'></a> * If no matches, do nothing.
+<a name='L196'></a> *
+<a name='L197'></a> *<span class="phpdoc"> @returns</span> {Boolean} an indicator of whether scrolling was performed
+<a name='L198'></a> */</span>
+<a name='L199'></a><span class="keyword">function</span> scrollToNext(selector) {
+<a name='L200'></a>    <span class="keyword">var</span> docViewTop = $(window).scrollTop();
+<a name='L201'></a>    <span class="keyword">var</span> docViewMiddle = docViewTop + $(window).height() / <span class="number">2</span>;
+<a name='L202'></a>    <span class="keyword">var</span> nextError = $(selector).filter(
+<a name='L203'></a>        <span class="keyword">function</span> () {
+<a name='L204'></a>            <span class="keyword">return</span> $(<span class="keyword">this</span>).offset().top > docViewMiddle;
+<a name='L205'></a>        }).first();
+<a name='L206'></a>    <span class="keyword">if</span> (nextError.length == <span class="number">1</span>) {
+<a name='L207'></a>        window.scroll(<span class="number">0</span>, nextError.offset().top - $(window).height() * <span class="number">0.25</span>);
+<a name='L208'></a>    }
+<a name='L209'></a>    <span class="keyword">return</span> !!nextError; <span class="comment">// convert to boolean and return</span>
+<a name='L210'></a>}
+<a name='L211'></a>
+<a name='L212'></a><span class="comment">// ===== Functions on node representation</span>
+<a name='L213'></a>
+<a name='L214'></a><span class="comment">// ========== Predicates</span>
+<a name='L215'></a>
+<a name='L216'></a><span class="comment">/**
+<a name='L217'></a> * Test whether a string is empty, i.e. a trace, comment, or other empty
+<a name='L218'></a> * category.
+<a name='L219'></a> *
+<a name='L220'></a> *<span class="phpdoc"> @param</span> {String} text the text to test
+<a name='L221'></a> */</span>
+<a name='L222'></a><span class="keyword">function</span> isEmpty (text) {
+<a name='L223'></a>    <span class="comment">// TODO(AWE): should this be passed a node instead of a string, and then</span>
+<a name='L224'></a>    <span class="comment">// test whether the node is a leaf or not before giving a return value?  This</span>
+<a name='L225'></a>    <span class="comment">// would simplify the check I had to put in shouldIndexLeafNode, and prevent</span>
+<a name='L226'></a>    <span class="comment">// future such errors.</span>
+<a name='L227'></a>    <span class="keyword">if</span> (text.startsWith(<span class="string">"*"</span>) || text.startsWith(<span class="string">"{"</span>) ||
+<a name='L228'></a>        text.split(<span class="string">"-"</span>)[<span class="number">0</span>] == <span class="string">"0"</span>) {
+<a name='L229'></a>        <span class="keyword">return</span> <span class="keyword">true</span>;
+<a name='L230'></a>    }
+<a name='L231'></a>    <span class="keyword">return</span> <span class="keyword">false</span>;
+<a name='L232'></a>}
+<a name='L233'></a>
+<a name='L234'></a><span class="comment">/**
+<a name='L235'></a> * Test whether a node is a possible target for movement.
+<a name='L236'></a> *
+<a name='L237'></a> *<span class="phpdoc"> @param</span> {DOM node} node the node to operate on
+<a name='L238'></a> */</span>
+<a name='L239'></a><span class="keyword">function</span> isPossibleTarget(node) {
+<a name='L240'></a>    <span class="comment">// cannot move under a tag node</span>
+<a name='L241'></a>    <span class="comment">// TODO(AWE): what is the calling convention?  can we optimize this jquery</span>
+<a name='L242'></a>    <span class="comment">// call?</span>
+<a name='L243'></a>    <span class="keyword">if</span> ($(node).children().first().is(<span class="string">"span"</span>)) {
+<a name='L244'></a>        <span class="keyword">return</span> <span class="keyword">false</span>;
+<a name='L245'></a>    }
+<a name='L246'></a>    <span class="keyword">return</span> <span class="keyword">true</span>;
+<a name='L247'></a>}
+<a name='L248'></a>
+<a name='L249'></a><span class="comment">/**
+<a name='L250'></a> * Test whether a node is the root node of a tree.
+<a name='L251'></a> *
+<a name='L252'></a> *<span class="phpdoc"> @param</span> {JQuery Node} node the node to operate on
+<a name='L253'></a> */</span>
+<a name='L254'></a><span class="keyword">function</span> isRootNode(node) {
+<a name='L255'></a>    <span class="keyword">return</span> node.filter(<span class="string">"#sn0>.snode"</span>).size() > <span class="number">0</span>;
+<a name='L256'></a>}
+<a name='L257'></a>
+<a name='L258'></a><span class="comment">/**
+<a name='L259'></a> * Test whether a node is a purely structural leaf.
+<a name='L260'></a> *
+<a name='L261'></a> *<span class="phpdoc"> @param</span> {DOM node} node the node to operate on
+<a name='L262'></a> */</span>
+<a name='L263'></a><span class="keyword">function</span> isLeafNode(node) {
+<a name='L264'></a>    <span class="keyword">return</span> $(node).children(<span class="string">".wnode"</span>).size() > <span class="number">0</span>;
+<a name='L265'></a>}
+<a name='L266'></a>
+<a name='L267'></a><span class="comment">/**
+<a name='L268'></a> * Test whether a node is a leaf using heuristics.
+<a name='L269'></a> *
+<a name='L270'></a> * This function respects the results of the `testValidLeafLabel` and
+<a name='L271'></a> * `testValidPhraseLabel` functions, if these are defined.
+<a name='L272'></a> *
+<a name='L273'></a> *<span class="phpdoc"> @param</span> {DOM node} node the node to operate on
+<a name='L274'></a> */</span>
+<a name='L275'></a><span class="keyword">function</span> guessLeafNode(node) {
+<a name='L276'></a>    <span class="keyword">if</span> (typeof testValidLeafLabel   !== <span class="string">"undefined"</span> &amp;&amp;
+<a name='L277'></a>        typeof testValidPhraseLabel !== <span class="string">"undefined"</span>) {
+<a name='L278'></a>        <span class="keyword">if</span> (testValidPhraseLabel(getLabel($(node)))) {
+<a name='L279'></a>            <span class="keyword">return</span> <span class="keyword">false</span>;
+<a name='L280'></a>        } <span class="keyword">else</span> <span class="keyword">if</span> (testValidLeafLabel(getLabel($(node)))) {
+<a name='L281'></a>            <span class="keyword">return</span> <span class="keyword">true</span>;
+<a name='L282'></a>        } <span class="keyword">else</span> {
+<a name='L283'></a>            <span class="comment">// not a valid label, fall back to structural check</span>
+<a name='L284'></a>            <span class="keyword">return</span> isLeafNode(node);
+<a name='L285'></a>        }
+<a name='L286'></a>    } <span class="keyword">else</span> {
+<a name='L287'></a>        <span class="keyword">return</span> isLeafNode(node);
+<a name='L288'></a>    }
+<a name='L289'></a>}
+<a name='L290'></a>
+<a name='L291'></a><span class="comment">// ========== Accessor functions</span>
+<a name='L292'></a>
+<a name='L293'></a><span class="comment">/**
+<a name='L294'></a> * Get the root of the tree that a node belongs to.
+<a name='L295'></a> *
+<a name='L296'></a> *<span class="phpdoc"> @param</span> {JQuery Node} node the node to operate on
+<a name='L297'></a> */</span>
+<a name='L298'></a><span class="keyword">function</span> getTokenRoot(node) {
+<a name='L299'></a>    <span class="keyword">return</span> node.parents().andSelf().filter(<span class="string">"#sn0>.snode"</span>).get(<span class="number">0</span>);
+<a name='L300'></a>}
+<a name='L301'></a>
+<a name='L302'></a><span class="comment">/**
+<a name='L303'></a> * Get the text dominated by a given node, without removing empty material.
+<a name='L304'></a> *
+<a name='L305'></a> *<span class="phpdoc"> @param</span> {DOM node} node the node to operate on
+<a name='L306'></a> */</span>
+<a name='L307'></a><span class="keyword">function</span> wnodeString(node) {
+<a name='L308'></a>    <span class="keyword">var</span> text = $(node).find(<span class="string">'.wnode'</span>).text();
+<a name='L309'></a>    <span class="keyword">return</span> text;
+<a name='L310'></a>}
+<a name='L311'></a>
+<a name='L312'></a><span class="comment">/**
+<a name='L313'></a> * Get the ur-text dominated by a node.
+<a name='L314'></a> *
+<a name='L315'></a> * This function removes any empty material (traces, comments, etc.)  It does
+<a name='L316'></a> * not rejoin words which have been split.  It also does not add spaces.
+<a name='L317'></a> *
+<a name='L318'></a> *<span class="phpdoc"> @param</span> {JQuery Node} root the node to operate on
+<a name='L319'></a> */</span> 
+<a name='L320'></a><span class="keyword">function</span> currentText(root) {
+<a name='L321'></a>    <span class="keyword">var</span> nodes = root.get(<span class="number">0</span>).getElementsByClassName(<span class="string">"wnode"</span>);
+<a name='L322'></a>    <span class="keyword">var</span> text = <span class="string">""</span>,
+<a name='L323'></a>        nv;
+<a name='L324'></a>    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; nodes.length; i++) {
+<a name='L325'></a>        nv = nodes[i].childNodes[<span class="number">0</span>].nodeValue;
+<a name='L326'></a>        <span class="keyword">if</span> (!isEmpty(nv)) {
+<a name='L327'></a>            text += nv;
+<a name='L328'></a>        }
+<a name='L329'></a>    }
+<a name='L330'></a>    <span class="keyword">return</span> text;
+<a name='L331'></a>}
+<a name='L332'></a>
+<a name='L333'></a><span class="comment">/**
+<a name='L334'></a> * Get the label of a node.
+<a name='L335'></a> *
+<a name='L336'></a> *@param {JQuery Node} node the node to operate on
+<a name='L337'></a> */</span>
+<a name='L338'></a><span class="keyword">function</span> getLabel(node) {
+<a name='L339'></a>    <span class="keyword">return</span> $.trim(textNode(node).text());
+<a name='L340'></a>}
+<a name='L341'></a>
+<a name='L342'></a><span class="comment">/**
+<a name='L343'></a> * Get the first text node dominated by a node.
+<a name='L344'></a> *<span class="phpdoc"> @private</span>
+<a name='L345'></a> *
+<a name='L346'></a> *<span class="phpdoc"> @param</span> {JQuery Node} node the node to operate on
+<a name='L347'></a> */</span>
+<a name='L348'></a><span class="keyword">function</span> textNode(node) {
+<a name='L349'></a>    <span class="keyword">return</span> node.contents().filter(<span class="keyword">function</span>() {
+<a name='L350'></a>                                         <span class="keyword">return</span> <span class="keyword">this</span>.nodeType == <span class="number">3</span>;
+<a name='L351'></a>                                     }).first();
+<a name='L352'></a>}
+<a name='L353'></a>
+<a name='L354'></a><span class="keyword">function</span> getMetadata(node) {
+<a name='L355'></a>    <span class="keyword">var</span> m = node.attr(<span class="string">"data-metadata"</span>);
+<a name='L356'></a>    <span class="keyword">if</span> (m) {
+<a name='L357'></a>        <span class="keyword">return</span> JSON.parse(m);
+<a name='L358'></a>    } <span class="keyword">else</span> {
+<a name='L359'></a>        <span class="keyword">return</span> undefined;
+<a name='L360'></a>    }
+<a name='L361'></a>}
+<a name='L362'></a>
+<a name='L363'></a><span class="comment">/**
+<a name='L364'></a> * Test whether a node has a certain dash tag.
+<a name='L365'></a> *
+<a name='L366'></a> *<span class="phpdoc"> @param</span> {JQuery Node} node the node to operate on
+<a name='L367'></a> *<span class="phpdoc"> @param</span> {String} tag the dash tag to look for, without any dashes
+<a name='L368'></a> */</span>
+<a name='L369'></a><span class="keyword">function</span> hasDashTag(node, tag) {
+<a name='L370'></a>    <span class="keyword">var</span> label = getLabel(node);
+<a name='L371'></a>    <span class="keyword">var</span> tags = label.split(<span class="string">"-"</span>).slice(<span class="number">1</span>);
+<a name='L372'></a>    <span class="keyword">return</span> (tags.indexOf(tag) > -<span class="number">1</span>);
+<a name='L373'></a>}
+<a name='L374'></a>
+<a name='L375'></a><span class="comment">// ========== Index-related functions</span>
+<a name='L376'></a>
+<a name='L377'></a><span class="comment">/**
+<a name='L378'></a> * Return the index portion of a label, or -1 if no index.
+<a name='L379'></a> *<span class="phpdoc"> @private</span>
+<a name='L380'></a> *
+<a name='L381'></a> *<span class="phpdoc"> @param</span> {String} label the label to operate on
+<a name='L382'></a> */</span>
+<a name='L383'></a><span class="keyword">function</span> parseIndex (label) {
+<a name='L384'></a>    <span class="keyword">var</span> index = -<span class="number">1</span>;
+<a name='L385'></a>    <span class="keyword">var</span> lastindex = Math.max(label.lastIndexOf(<span class="string">"-"</span>),label.lastIndexOf(<span class="string">"="</span>));
+<a name='L386'></a>    <span class="keyword">if</span> (lastindex == -<span class="number">1</span>) {
+<a name='L387'></a>        <span class="keyword">return</span> -<span class="number">1</span>;
+<a name='L388'></a>    }
+<a name='L389'></a>    <span class="keyword">var</span> lastpart = parseInt(label.substr(lastindex+<span class="number">1</span>));
+<a name='L390'></a>    <span class="keyword">if</span>(!isNaN(parseInt(lastpart))) {
+<a name='L391'></a>        index = Math.max(lastpart, index);
+<a name='L392'></a>    }
+<a name='L393'></a>    <span class="keyword">if</span> (index == <span class="number">0</span>) {
+<a name='L394'></a>        <span class="keyword">return</span> -<span class="number">1</span>;
+<a name='L395'></a>    }
+<a name='L396'></a>    <span class="keyword">return</span> index;
+<a name='L397'></a>}
+<a name='L398'></a>
+<a name='L399'></a><span class="comment">/**
+<a name='L400'></a> * Return the non-index portion of a label.
+<a name='L401'></a> *<span class="phpdoc"> @private</span>
+<a name='L402'></a> *
+<a name='L403'></a> *<span class="phpdoc"> @param</span> {String} label the label to operate on
+<a name='L404'></a> */</span>
+<a name='L405'></a><span class="keyword">function</span> parseLabel (label) {
+<a name='L406'></a>    <span class="keyword">var</span> index = parseIndex(label);
+<a name='L407'></a>    <span class="keyword">if</span> (index > <span class="number">0</span>) {
+<a name='L408'></a>        <span class="keyword">var</span> lastindex = Math.max(label.lastIndexOf(<span class="string">"-"</span>),
+<a name='L409'></a>                                 label.lastIndexOf(<span class="string">"="</span>));
+<a name='L410'></a>        <span class="keyword">var</span> out = $.trim(<span class="string">""</span> + label.substr(<span class="number">0</span>,lastindex));
+<a name='L411'></a>        <span class="keyword">return</span> out;
+<a name='L412'></a>    }
+<a name='L413'></a>    <span class="keyword">return</span> $.trim(label);
+<a name='L414'></a>}
+<a name='L415'></a>
+<a name='L416'></a><span class="comment">/**
+<a name='L417'></a> * Return the type of index attached to a label, either `"-"` or `"="`.
+<a name='L418'></a> *<span class="phpdoc"> @private</span>
+<a name='L419'></a> *
+<a name='L420'></a> *<span class="phpdoc"> @param</span> {String} label the label to operate on
+<a name='L421'></a> */</span>
+<a name='L422'></a><span class="comment">// TODO: document that this doesn't check whether there is a numerical index,</span>
+<a name='L423'></a><span class="comment">// or actually do the test</span>
+<a name='L424'></a><span class="keyword">function</span> parseIndexType(label) {
+<a name='L425'></a>    <span class="keyword">var</span> lastindex = Math.max(label.lastIndexOf(<span class="string">"-"</span>), label.lastIndexOf(<span class="string">"="</span>));
+<a name='L426'></a>    <span class="keyword">return</span> label.charAt(lastindex);
+<a name='L427'></a>}
+<a name='L428'></a>
+<a name='L429'></a><span class="comment">/**
+<a name='L430'></a> * Return the movement index associated with a node.
+<a name='L431'></a> *
+<a name='L432'></a> *<span class="phpdoc"> @param</span> {JQuery Node} node the node to operate on
+<a name='L433'></a> */</span>
+<a name='L434'></a><span class="keyword">function</span> getIndex(node) {
+<a name='L435'></a>    <span class="keyword">if</span> (shouldIndexLeaf(node)) {
+<a name='L436'></a>        <span class="keyword">return</span> parseIndex(textNode(node.children(<span class="string">".wnode"</span>).first()).text());
+<a name='L437'></a>    } <span class="keyword">else</span> {
+<a name='L438'></a>        <span class="keyword">return</span> parseIndex(getLabel(node));
+<a name='L439'></a>    }
+<a name='L440'></a>}
+<a name='L441'></a>
+<a name='L442'></a><span class="comment">/**
+<a name='L443'></a> * Return the type of index associated with a node, either `"-"` or `"="`.
+<a name='L444'></a> *
+<a name='L445'></a> *<span class="phpdoc"> @param</span> {JQuery Node} node the node to operate on
+<a name='L446'></a> */</span>
+<a name='L447'></a><span class="comment">// TODO: only used once, eliminate?</span>
+<a name='L448'></a><span class="keyword">function</span> getIndexType (node) {
+<a name='L449'></a>    <span class="keyword">if</span> (getIndex(node) &lt; <span class="number">0</span>) {
+<a name='L450'></a>        <span class="keyword">return</span> -<span class="number">1</span>;
+<a name='L451'></a>    }
+<a name='L452'></a>    <span class="keyword">var</span> label;
+<a name='L453'></a>    <span class="keyword">if</span> (shouldIndexLeaf(node)) {
+<a name='L454'></a>        label = wnodeString(node);
+<a name='L455'></a>    } <span class="keyword">else</span> {
+<a name='L456'></a>        label = getLabel(node);
+<a name='L457'></a>    }
+<a name='L458'></a>    <span class="keyword">var</span> lastpart = parseIndexType(label);
+<a name='L459'></a>    <span class="keyword">return</span> lastpart;
+<a name='L460'></a>}
+<a name='L461'></a>
+<a name='L462'></a><span class="comment">/**
+<a name='L463'></a> * Determine whether to place a movement index on the node label or the text.
+<a name='L464'></a> *
+<a name='L465'></a> *<span class="phpdoc"> @param</span> {JQuery Node} node the node to operate on
+<a name='L466'></a> */</span>
+<a name='L467'></a><span class="keyword">function</span> shouldIndexLeaf(node) {
+<a name='L468'></a>    <span class="comment">// The below check bogusly returns true if the leftmost node in a tree is</span>
+<a name='L469'></a>    <span class="comment">// a trace, even if it is not a direct daughter.  Only do the more</span>
+<a name='L470'></a>    <span class="comment">// complicated check if we are at a POS label, otherwise short circuit</span>
+<a name='L471'></a>    <span class="keyword">if</span> (node.children(<span class="string">".wnode"</span>).size() == <span class="number">0</span>) <span class="keyword">return</span> <span class="keyword">false</span>;
+<a name='L472'></a>    <span class="keyword">var</span> str = wnodeString(node);
+<a name='L473'></a>    <span class="keyword">return</span> (str.substring(<span class="number">0</span>,<span class="number">3</span>) == <span class="string">"*T*"</span> ||
+<a name='L474'></a>            str.substring(<span class="number">0</span>,<span class="number">5</span>) == <span class="string">"*ICH*"</span> ||
+<a name='L475'></a>            str.substring(<span class="number">0</span>,<span class="number">4</span>) == <span class="string">"*CL*"</span> ||
+<a name='L476'></a>            $.trim(str) == <span class="string">"*"</span>);
+<a name='L477'></a>}
+<a name='L478'></a>
+<a name='L479'></a><span class="comment">/**
+<a name='L480'></a> * Get the highest index attested in a token.
+<a name='L481'></a> *
+<a name='L482'></a> *<span class="phpdoc"> @param</span> {DOM node} token the token to work on
+<a name='L483'></a> */</span>
+<a name='L484'></a><span class="keyword">function</span> maxIndex(token) {
+<a name='L485'></a>    <span class="keyword">var</span> allSNodes = $(token).find(<span class="string">".snode,.wnode"</span>);
+<a name='L486'></a>    <span class="keyword">var</span> temp = <span class="string">""</span>;
+<a name='L487'></a>    <span class="keyword">var</span> ind = <span class="number">0</span>;
+<a name='L488'></a>    <span class="keyword">var</span> label;
+<a name='L489'></a>
+<a name='L490'></a>    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; allSNodes.length; i++) {
+<a name='L491'></a>        label = getLabel($(allSNodes[i]));
+<a name='L492'></a>        ind = Math.max(parseIndex(label), ind);
+<a name='L493'></a>    }
+<a name='L494'></a>    <span class="keyword">return</span> ind;
+<a name='L495'></a>}
+<a name='L496'></a>
+<a name='L497'></a><span class="comment">/**
+<a name='L498'></a> * Increase the value of a tree's indices by an amount
+<a name='L499'></a> *<span class="phpdoc"> @private</span>
+<a name='L500'></a> *
+<a name='L501'></a> *<span class="phpdoc"> @param</span> {JQuery Node} tokenRoot the token to operate on
+<a name='L502'></a> *<span class="phpdoc"> @param</span> {number} numberToAdd
+<a name='L503'></a> */</span>
+<a name='L504'></a><span class="keyword">function</span> addToIndices(tokenRoot, numberToAdd) {
+<a name='L505'></a>    <span class="keyword">var</span> ind = <span class="number">1</span>;
+<a name='L506'></a>    <span class="keyword">var</span> maxindex = maxIndex(tokenRoot);
+<a name='L507'></a>    <span class="keyword">var</span> nodes = tokenRoot.find(<span class="string">".snode,.wnode"</span>).andSelf();
+<a name='L508'></a>    nodes.each(<span class="keyword">function</span>(index) {
+<a name='L509'></a>        <span class="keyword">var</span> curNode = $(<span class="keyword">this</span>);
+<a name='L510'></a>        <span class="keyword">var</span> nindex = getIndex(curNode);
+<a name='L511'></a>        <span class="keyword">if</span> (nindex > <span class="number">0</span>) {
+<a name='L512'></a>            <span class="keyword">if</span> (shouldIndexLeaf(curNode)) {
+<a name='L513'></a>                <span class="keyword">var</span> leafText = wnodeString(curNode);
+<a name='L514'></a>                leafText = parseLabel(leafText) + parseIndexType(leafText);
+<a name='L515'></a>                textNode(curNode.children(<span class="string">".wnode"</span>).first()).text(
+<a name='L516'></a>                    leafText + (nindex + numberToAdd));
+<a name='L517'></a>            } <span class="keyword">else</span> {
+<a name='L518'></a>                <span class="keyword">var</span> label = getLabel(curNode);
+<a name='L519'></a>                label = parseLabel(label) + parseIndexType(label);
+<a name='L520'></a>                label = label + (nindex + numberToAdd);
+<a name='L521'></a>                setNodeLabel(curNode, label, <span class="keyword">true</span>);
+<a name='L522'></a>            }
+<a name='L523'></a>        }
+<a name='L524'></a>    });
+<a name='L525'></a>}
+<a name='L526'></a>
+<a name='L527'></a><span class="comment">// ==================================================</span>
+<a name='L528'></a>
+<a name='L529'></a>
+<a name='L530'></a>
+<a name='L531'></a><span class="comment">// TODO: more perspicuous name</span>
+<a name='L532'></a><span class="keyword">function</span> changeJustLabel (oldlabel, newlabel) {
+<a name='L533'></a>    <span class="keyword">var</span> label = oldlabel;
+<a name='L534'></a>    <span class="keyword">var</span> index = parseIndex(oldlabel);
+<a name='L535'></a>    <span class="keyword">if</span> (index > <span class="number">0</span>) {
+<a name='L536'></a>        label = parseLabel(oldlabel);
+<a name='L537'></a>        <span class="keyword">var</span> indextype = parseIndexType(oldlabel);
+<a name='L538'></a>        <span class="keyword">return</span> newlabel+indextype+index;
+<a name='L539'></a>    }
+<a name='L540'></a>    <span class="keyword">return</span> newlabel;
+<a name='L541'></a>}
+<a name='L542'></a>
+<a name='L543'></a><span class="comment">// This function takes 3 arguments: a node label with dash tags and possibly</span>
+<a name='L544'></a><span class="comment">// indices, a dash tag to toggle (no dash), and a list of possible extensions</span>
+<a name='L545'></a><span class="comment">// (in L-to-R order).  It returns a string, which is the label with</span>
+<a name='L546'></a><span class="comment">// transformations applied</span>
+<a name='L547'></a><span class="keyword">function</span> toggleStringExtension (oldlabel, extension, extensionList) {
+<a name='L548'></a>    <span class="keyword">if</span> (extension[<span class="number">0</span>] == <span class="string">"-"</span>) {
+<a name='L549'></a>        <span class="comment">// temporary compatibility hack for old configs</span>
+<a name='L550'></a>        extension = extension.substring(<span class="number">1</span>);
+<a name='L551'></a>        extensionList = extensionList.map(<span class="keyword">function</span>(s) { <span class="keyword">return</span> s.substring(<span class="number">1</span>); });
+<a name='L552'></a>    }
+<a name='L553'></a>    <span class="keyword">var</span> index = parseIndex(oldlabel);
+<a name='L554'></a>    <span class="keyword">var</span> indextype = <span class="string">""</span>;
+<a name='L555'></a>    <span class="keyword">if</span> (index > <span class="number">0</span>) {
+<a name='L556'></a>        indextype = parseIndexType(oldlabel);
+<a name='L557'></a>    }
+<a name='L558'></a>    <span class="keyword">var</span> currentLabel = parseLabel(oldlabel);
+<a name='L559'></a>
+<a name='L560'></a>    <span class="comment">// The strategy here is as follows:</span>
+<a name='L561'></a>    <span class="comment">// - split the label into an array of dash tags</span>
+<a name='L562'></a>    <span class="comment">// - operate on the array</span>
+<a name='L563'></a>    <span class="comment">// - reform the array into a string</span>
+<a name='L564'></a>    currentLabel = currentLabel.split(<span class="string">"-"</span>);
+<a name='L565'></a>    <span class="keyword">var</span> labelBase = currentLabel.shift();
+<a name='L566'></a>    <span class="keyword">var</span> idx = currentLabel.indexOf(extension);
+<a name='L567'></a>
+<a name='L568'></a>    <span class="keyword">if</span> (idx > -<span class="number">1</span>) {
+<a name='L569'></a>        <span class="comment">// currentLabel contains extension, remove it</span>
+<a name='L570'></a>        currentLabel.splice(idx, <span class="number">1</span>);
+<a name='L571'></a>    } <span class="keyword">else</span> {
+<a name='L572'></a>        idx = extensionList.indexOf(extension);
+<a name='L573'></a>        <span class="keyword">if</span> (idx > -<span class="number">1</span>) {
+<a name='L574'></a>            <span class="comment">// Loop through the list, stop when we pass the right spot</span>
+<a name='L575'></a>            <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; currentLabel.length; i++) {
+<a name='L576'></a>                <span class="keyword">if</span> (idx &lt; extensionList.indexOf(currentLabel[i])) {
+<a name='L577'></a>                    <span class="keyword">break</span>;
+<a name='L578'></a>                }
+<a name='L579'></a>            }
+<a name='L580'></a>            currentLabel.splice(i, <span class="number">0</span>, extension);
+<a name='L581'></a>        } <span class="keyword">else</span> {
+<a name='L582'></a>            currentLabel.push(extension);
+<a name='L583'></a>        }
+<a name='L584'></a>    }
+<a name='L585'></a>
+<a name='L586'></a>    <span class="keyword">var</span> out = labelBase;
+<a name='L587'></a>    <span class="keyword">if</span> (currentLabel.length > <span class="number">0</span>) {
+<a name='L588'></a>        out += <span class="string">"-"</span> + currentLabel.join(<span class="string">"-"</span>);
+<a name='L589'></a>    }
+<a name='L590'></a>    <span class="keyword">if</span> (index > <span class="number">0</span>) {
+<a name='L591'></a>        out += indextype;
+<a name='L592'></a>        out += index;
+<a name='L593'></a>    }
+<a name='L594'></a>    <span class="keyword">return</span> out;
+<a name='L595'></a>}
+<a name='L596'></a>
+<a name='L597'></a><span class="keyword">function</span> lookupNextLabel(oldlabel, labels) {
+<a name='L598'></a>    <span class="comment">// labels is either: an array, an object</span>
+<a name='L599'></a>    <span class="keyword">var</span> newlabel = <span class="keyword">null</span>;
+<a name='L600'></a>    <span class="comment">// TODO(AWE): make this more robust!</span>
+<a name='L601'></a>    <span class="keyword">if</span> (!(labels instanceof <span class="keyword">Array</span>)) {
+<a name='L602'></a>        <span class="keyword">var</span> prefix = oldlabel.split(<span class="string">"-"</span>)[<span class="number">0</span>];
+<a name='L603'></a>        <span class="keyword">var</span> new_labels = labels[prefix];
+<a name='L604'></a>        <span class="keyword">if</span> (!new_labels) {
+<a name='L605'></a>            new_labels = _.values(labels)[<span class="number">0</span>];
+<a name='L606'></a>        }
+<a name='L607'></a>        labels = new_labels;
+<a name='L608'></a>    }
+<a name='L609'></a>    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; labels.length; i++) {
+<a name='L610'></a>        <span class="keyword">if</span> (labels[i] == parseLabel(oldlabel)) {
+<a name='L611'></a>            <span class="keyword">if</span> (i &lt; labels.length - <span class="number">1</span>) {
+<a name='L612'></a>                newlabel = labels[i + <span class="number">1</span>];
+<a name='L613'></a>            } <span class="keyword">else</span> {
+<a name='L614'></a>                newlabel = labels[<span class="number">0</span>];
+<a name='L615'></a>            }
+<a name='L616'></a>        }
+<a name='L617'></a>    }
+<a name='L618'></a>    <span class="keyword">if</span> (!newlabel) {
+<a name='L619'></a>        newlabel = labels[<span class="number">0</span>];
+<a name='L620'></a>    }
+<a name='L621'></a>    newlabel = changeJustLabel(oldlabel,newlabel);
+<a name='L622'></a>
+<a name='L623'></a>    <span class="keyword">return</span> newlabel;
+<a name='L624'></a>}
+<a name='L625'></a>
+<a name='L626'></a><span class="comment">// TODO(AWE): add getMetadataTU fn, to also do trickle-up of metadata.</span>
+<a name='L627'></a>
+<a name='L628'></a>
+<a name='L629'></a>
+<a name='L630'></a>
+<a name='L631'></a>
+<a name='L632'></a>
+<a name='L633'></a><span class="comment">// TODO: unused?</span>
+<a name='L634'></a><span class="comment">// TODO: don't pass tokenroot in as id, instead use the jquery object itself</span>
+<a name='L635'></a><span class="comment">// and use node.find()</span>
+<a name='L636'></a><span class="comment">// function getNodesByIndex(tokenRoot, ind) {</span>
+<a name='L637'></a><span class="comment">//     var nodes = $("#" + tokenRoot + " .snode,#" + tokenRoot +</span>
+<a name='L638'></a><span class="comment">//                   " .wnode").filter(</span>
+<a name='L639'></a><span class="comment">//         function(index) {</span>
+<a name='L640'></a><span class="comment">//             // TODO(AWE): is this below correct?  optimal?</span>
+<a name='L641'></a><span class="comment">//             return getIndex($(this)) == ind;</span>
+<a name='L642'></a><span class="comment">//         });</span>
+<a name='L643'></a><span class="comment">//     return nodes;</span>
+<a name='L644'></a><span class="comment">// }</span>
+<a name='L645'></a>
+<a name='L646'></a><span class="comment">/*
+<a name='L647'></a> * returns value of lowest index if there are any indices, returns -1 otherwise
+<a name='L648'></a>*/</span>
+<a name='L649'></a><span class="comment">/* TODO: unused?
+<a name='L650'></a>function minIndex (tokenRoot, offset) {
+<a name='L651'></a>    var allSNodes = $("#" + tokenRoot + " .snode,#" + tokenRoot + " .wnode");
+<a name='L652'></a>    var highnumber = 9000000;
+<a name='L653'></a>    var index = highnumber;
+<a name='L654'></a>    var label, lastpart;
+<a name='L655'></a>    for (var i=0; i &lt; allSNodes.length; i++){
+<a name='L656'></a>        label = getLabel($(allSNodes[i]));
+<a name='L657'></a>        lastpart = parseInt(label.substr(label.lastIndexOf("-")+1));
+<a name='L658'></a>        if (!isNaN(parseInt(lastpart))) {
+<a name='L659'></a>            if (lastpart != 0 &amp;&amp; lastpart >=offset) {
+<a name='L660'></a>                index = Math.min(lastpart, index);
+<a name='L661'></a>            }
+<a name='L662'></a>        }
+<a name='L663'></a>    }
+<a name='L664'></a>    if (index == highnumber) {
+<a name='L665'></a>        return -1;
+<a name='L666'></a>    }
+<a name='L667'></a>
+<a name='L668'></a>    if (index &lt; offset) {
+<a name='L669'></a>        return -1;
+<a name='L670'></a>    }
+<a name='L671'></a>
+<a name='L672'></a>    return index;
+<a name='L673'></a>}
+<a name='L674'></a> */</span>
+<a name='L675'></a>
+<a name='L676'></a><span class="comment">/* something I wrote long ago, and never used, but might be useful someday
+<a name='L677'></a>function nextNodeSuchThat(node, pred) {
+<a name='L678'></a>    var next = node.nextElementSibling;
+<a name='L679'></a>    if (next) {
+<a name='L680'></a>        if (pred(next)) {
+<a name='L681'></a>            return next;
+<a name='L682'></a>        } else {
+<a name='L683'></a>            return nextNodeSuchThat(next, pred);
+<a name='L684'></a>        }
+<a name='L685'></a>    } else if (node.parentNode) {
+<a name='L686'></a>        return nextNodeSuchThat(node.parentNode, pred);
+<a name='L687'></a>    } else {
+<a name='L688'></a>        return null;
+<a name='L689'></a>    }
+<a name='L690'></a>}
+<a name='L691'></a>*/</span>
+<a name='L692'></a>
+<a name='L693'></a><span class="comment">// Local Variables:</span>
+<a name='L694'></a><span class="comment">// js2-additional-externs: ("$" "_" "JSON" "testValidLeafLabel" "\</span>
+<a name='L695'></a><span class="comment">// testValidPhraseLabel")</span>
+<a name='L696'></a><span class="comment">// indent-tabs-mode: nil</span>
+<a name='L697'></a><span class="comment">// End:</span>
+<a name='L698'></a>
+</code>
+  </pre>
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3</a> on Fri Aug 17 2012 00:15:15 GMT-0400 (EDT)
+</footer>
+
+</body>
+</html>
+
+
