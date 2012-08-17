@@ -17,8 +17,8 @@
 // <http://www.gnu.org/licenses/>.
 
 /*
- *  Displays a context menu for setting case extensions according to
- *  the IcePaHC annotation scheme
+ * Displays a context menu for setting case extensions according to
+ * the IcePaHC annotation scheme.
  *
  * caseTags indicates which tags bear case indicators; casePhrases indicates
  * which phrasal categories case pertains to (though they themselves are not
@@ -31,6 +31,10 @@ var caseTags = ["N","NS","NPR","NPRS",
                 "Q","QR","QS"];
 var casePhrases = ["NP","QP","ADJP"];
 var caseMarkers = ["N", "A", "D", "$"];
+/*
+ * Which labels are barriers to recursive case assignment.
+ */
+var caseBariers = ["IP","CP"];
 
 /*
  * These two functions should return true if the string argument is a valid
