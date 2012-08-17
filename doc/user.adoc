@@ -47,6 +47,7 @@ Annotald was originally written as part of the
 http://www.linguist.is/icelandic_treebank/Icelandic_Parsed_Historical_Corpus_%28IcePaHC%29[Icelandic
 Parsed Historical Corpus] (IcePaHC) project.  Development of the program
 has been funded by:
+
 - The Icelandic Research Fund (RANNÍS)
 - The US’s National Science Foundation
 - The University of Iceland Research Fund
@@ -95,7 +96,9 @@ release.
 // also: maybe put this link on the website somewhere, to make it
 // simpler. (maybe have people download the latest zip of the release
 // branch?)
-Uncompress the file, and open a command line.
+Uncompress the file, and open a command line.  TODO
+
+// TODO: document all command line options
 
 // TODO: this will eventually be graphicalized by Anton; put off writing
 // this until we know how that will work.
@@ -219,6 +222,8 @@ users of non-English keyboard layouts.]
 
 
 == Customization
+
+// TODO: section about writing custom functions in javascript
 
 There are two files which are relavant to the customization of Annotald:
 `settings.js` and `settings.py`.  The former is written in Javascript,
