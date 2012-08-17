@@ -10,3 +10,4 @@ priv-doc/
 htmlcov/
 .coverage
 /doc/user.xml
+/doc/images/icons/
