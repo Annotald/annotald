@@ -244,6 +244,7 @@ function styleTags(tagNames, css) {
  *
  * @param {Object} dict a mapping of properties of the keybinding.  Can
  * contain:
+ *
  * - `keycode`: the numeric keycode for the binding (mandatory)
  * - `shift`: true if this is a binding with shift pressed (optional)
  * - `ctrl`: true if this is a binding with control pressed (optional)
