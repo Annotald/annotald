@@ -537,7 +537,7 @@ function addToIndices(tokenRoot, numberToAdd) {
  */
 function getCase(node) {
     var label = parseLabel(getLabel(node)),
-        dashTags = label.split("-"),
+        dashTags = _.rest(label.split("-")),
         cases = _.intersection(caseMarkers, dashTags);
 
     if (cases.length == 0) {
@@ -547,7 +547,7 @@ function getCase(node) {
     } else {
         throw "Tag has two cases: " + label;
     }
-    }
+}
 
 /**
  * Test if a node has case.
@@ -579,11 +579,11 @@ function hasCase(node) {
  *
  * Based on the `casePhrases` configuration variable.
  *
- * @param {String} nodeLabel
+ * @param {JQuery Node} nodeLabel
  * @returns {Boolean}
  */
-function isCasePhrase(nodeLabel) {
-    return _.contains(casePhrases, nodeLabel.split("-")[0]);
+function isCasePhrase(node) {
+    return _.contains(casePhrases, getLabel(node).split("-")[0]);
 }
 
 /**
