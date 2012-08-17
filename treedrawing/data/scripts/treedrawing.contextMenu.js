@@ -101,138 +101,88 @@ function getSuggestions(label) {
     return suggestions.unique();
 }
 
+// Arg is dom node
 function loadContextMenu(nodeOrig) {
-    var nodeIndex = getIndex( $(nodeOrig) );
-    var indexSep = "", indexString = "";
-    var node = $(nodeOrig).clone();
-    var nodelabel = $.trim(getLabel(node));
+    var nodeIndex = getIndex($(nodeOrig)),
+        indexSep = "",
+        indexString = "",
+        nodelabel = getLabel($(nodeOrig)),
+        newnode,
+        i;
     function loadConMenuMousedown () {
         var e = window.event;
-	var elementId = (e.target || e.srcElement).id;
-	var suggestion = "" + $(this).text();
-	setNodeLabel($(nodeOrig), suggestion);
-	hideContextMenu();
+        var elementId = (e.target || e.srcElement).id;
+        var suggestion = "" + $(this).text();
+        setNodeLabel($(nodeOrig), suggestion);
+        hideContextMenu();
     }
 
     if (nodeIndex > -1) {
-	var lastindex = Math.max(nodelabel.lastIndexOf("-"),
-                                 nodelabel.lastIndexOf("="));
-	indexSep = nodelabel.charAt(lastindex);
-	nodelabel = nodelabel.substr(0, getLabel($(node)).length - 2);
-	indexString = indexSep + "" + nodeIndex;
+        indexSep = parseIndexType(nodelabel);
+        indexString = indexSep + parseIndex(nodelabel);
+        nodelabel = parseLabel(nodelabel);
     }
     $("#conLeft").empty();
     $("#conLeft").append($("<div class='conMenuHeading'>Label</div>"));
 
-    // TODO(AWE): not portable
-    if (/-[NADG]$/.test(nodelabel)) {
-	for (var i = 0; i < caseTags.length; i++) {
-	    var theCase = nodelabel.substr(nodelabel.length - 1);
-	    var suggestion = caseTags[i] + "-" + theCase;
-	    if (suggestion != nodelabel) {
-		var newnode = $("<div class='conMenuItem'><a href='#'>" +
-                                suggestion + "</a></div>");
-		$(newnode).mousedown(loadConMenuMousedown);
-		$("#conLeft").append(newnode);
-	    }
-	}
 
-	var extraNominalSuggestions=["ADV","ES"];
-	for (i = 0; i < extraNominalSuggestions.length; i++) {
-	    var suggestion = extraNominalSuggestions[i];
-	    // suggest ADV
-	    var newnode = $("<div class='conMenuItem'><a href='#'>" +
-                            suggestion + "</a></div>");
-	    $(newnode).mousedown(loadConMenuMousedown);
-	    $("#conLeft").append(newnode);
-	}
-    } else {
-	var suggestions = getSuggestions(nodelabel);
-	for (var i = 0; i < suggestions.length; i++) {
-	    if (suggestions[i] != nodelabel) {
-		var newnode = $("<div class='conMenuItem'><a href='#'>" +
-                                suggestions[i]+indexString+"</a></div>");
-		$(newnode).mousedown(loadConMenuMousedown);
-		$("#conLeft").append(newnode);
-	    }
-	}
+    var suggestions = getSuggestions(nodelabel);
+    for (var i = 0; i < suggestions.length; i++) {
+        if (suggestions[i] != nodelabel) {
+            newnode = $("<div class='conMenuItem'><a href='#'>" +
+                            suggestions[i]+indexString+"</a></div>");
+            $(newnode).mousedown(loadConMenuMousedown);
+            $("#conLeft").append(newnode);
+        }
     }
 
     // do the right side context menu
     $("#conRight").empty();
 
-    // Set in user settings file
     if (displayCaseMenu) {
-        // TODO(AWE): not portable
-	if (/-[NADG]$/.test(nodelabel)) {
-	    $("#conRight").append($("<div class='conMenuHeading'>Case</div>"));
-	    var newnode = $("<div class='conMenuItem'><a href='#'>-N</a></div>");
-	    $(newnode).mousedown(setCaseOnTag(nodeOrig,nodelabel,"N"));
-	    $("#conRight").append(newnode);
+        $("#conRight").append($("<div class='conMenuHeading'>Case</div>"));
 
-	    newnode = $("<div class='conMenuItem'><a href='#'>-A</a></div>");
-	    $(newnode).mousedown(setCaseOnTag(nodeOrig,nodelabel,"A"));
-	    $("#conRight").append(newnode);
-
-	    newnode = $("<div class='conMenuItem'><a href='#'>-D</a></div>");
-	    $(newnode).mousedown(setCaseOnTag(nodeOrig,nodelabel,"D"));
-	    $("#conRight").append(newnode);
-
-	    newnode = $("<div class='conMenuItem'><a href='#'>-G</a></div>");
-	    $(newnode).mousedown(setCaseOnTag(nodeOrig,nodelabel,"G"));
-	    $("#conRight").append(newnode);
-	} else if(isCasePhrase(nodelabel)) {
-            // TODO(AWE): this is almost-but-not-quite dupe of above.  Unify.
-	    $("#conRight").append($("<div class='conMenuHeading'>Case</div>"));
-
-	    var newnode = $("<div class='conMenuItem'><a href='#'>-N</a></div>");
-	    $(newnode).mousedown(doSetCase(nodeOrig,"N"));
-	    $("#conRight").append(newnode);
-
-	    newnode = $("<div class='conMenuItem'><a href='#'>-A</a></div>");
-	    $(newnode).mousedown(doSetCase(nodeOrig,"A"));
-	    $("#conRight").append(newnode);
-
-	    newnode = $("<div class='conMenuItem'><a href='#'>-D</a></div>");
-	    $(newnode).mousedown(doSetCase(nodeOrig,"D"));
-	    $("#conRight").append(newnode);
-
-	    newnode = $("<div class='conMenuItem'><a href='#'>-G</a></div>");
-	    $(newnode).mousedown(doSetCase(nodeOrig,"G"));
-	    $("#conRight").append(newnode);
-	}
+        if (hasCase(nodeOrig) || isCasePhrase(nodeOrig)) {
+            caseMarkers.forEach(function(c) {
+                newnode = $("<div class='conMenuItem'><a href='#'>-" + c +
+                                "</a></div>");
+                $(newnode).mousedown(setCaseOnTag(nodeOrig, nodelabel, c));
+                $("#conRight").append(newnode);
+            });
+        }
     }
 
     // do addleafbefore
     $("#conRight").append($("<div class='conMenuHeading'>Leaf before</div>"));
-    for (var i = 0; i < conleafs.length; i++) {
-	stackTree();
-	var newnode = $("<div class='conMenuItem'><a href='#'>" +
+    for (i = 0; i < conleafs.length; i++) {
+        newnode = $("<div class='conMenuItem'><a href='#'>" +
                         conleafs[i].suggestion + "</a></div>");
-	$(newnode).mousedown(doConLeaf(i,conleafs[i],nodeOrig));
-	$("#conRight").append(newnode);
+        $(newnode).mousedown(doConLeaf(i, conleafs[i], nodeOrig));
+        $("#conRight").append(newnode);
     }
 
     $("#conRightest").empty();
     $("#conRightest").append($("<div class='conMenuHeading'>Toggle ext.</div>"));
 
+    // TODO: make only a subset of the extensions togglable, i.e. introduce a
+    // new variable togglableExtensions
     for (i = 0; i < extensions.length; i++) {
-	// do the right side context menu
-	var newnode = $("<div class='conMenuItem'><a href='#'>" +
+        // do the right side context menu
+        newnode = $("<div class='conMenuItem'><a href='#'>" +
                         extensions[i] + "</a></div>");
-	$(newnode).mousedown(doToggleExtension(nodeOrig, extensions[i]));
-	$("#conRightest").append(newnode);
+        $(newnode).mousedown(doToggleExtension(nodeOrig, extensions[i]));
+        $("#conRightest").append(newnode);
     }
 }
 
 function doToggleExtension(node, extension) {
     return function() {
-	stackTree();
-	clearSelection();
-	selectNode(node);
-	toggleExtension(extension);
-	hideContextMenu();
-	clearSelection();
+        touchTree(node);
+        clearSelection();
+        selectNode(node);
+        toggleExtension(extension);
+        hideContextMenu();
+        clearSelection();
     };
 }
 
@@ -240,39 +190,27 @@ function doToggleExtension(node, extension) {
  * set case just on this one tag
  */
 function setCaseOnTag(node, oldLabel, theCase) {
+    function doKids(n) {
+        n.children(".snode").each(function() {
+            if (hasCase(n)) {
+                setCase(n, theCase);
+            } else if (isCaseNode(n) && !n.parent().is(".CONJP")) {
+                // nothing
+            } else {
+                doKids(n);
+            }
+        });
+    }
     return function() {
-	stackTree();
-	setNodeLabel($(node),
-                     oldLabel.substr(0, oldLabel.length - 2) + "-" + theCase,
-                     true);
-    };
-}
-
-/*
- * set case on all case elements that are daughters of this phrase node
- */
-function doSetCase(node, theCase) {
-    return function() {
-	stackTree();
-	var daughters = $(node).children().each(
-            function() {
-		var child = $(this);
-		var oldLabel = $.trim(getLabel($(this)));
-                // TODO(AWE): not portable
-		if(/-[NADG]$/.test(oldLabel)) {
-		    setNodeLabel($(child),
-                                 oldLabel.substr(0, oldLabel.length - 2) +
-                                 "-" + theCase,
-                                 true);
-		}
-	    });
+        touchTree(node);
+        doKids(node);
     };
 }
 
 function doConLeaf(idx,conleaf,node) {
     return function() {
-	makeLeaf(conleaf.before, conleaf.label, conleaf.word, node, true);
-	hideContextMenu();
+        makeLeaf(conleaf.before, conleaf.label, conleaf.word, node, true);
+        hideContextMenu();
     };
 }
 
