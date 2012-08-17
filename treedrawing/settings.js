@@ -19,14 +19,18 @@
 /*
  *  Displays a context menu for setting case extensions according to
  *  the IcePaHC annotation scheme
- *  caseTags indicates which tags should be interpreted as case tags
- *  for this purpose
+ *
+ * caseTags indicates which tags bear case indicators; casePhrases indicates
+ * which phrasal categories case pertains to (though they themselves are not
+ * marked)
  */ 
 var displayCaseMenu = false; // This feature is inoperative, pending modularization
-var caseTags=["N","NS","NPR","NPRS",
-              "PRO","D","NUM",
-              "ADJ","ADJR","ADJS",
-              "Q","QR","QS"];
+var caseTags = ["N","NS","NPR","NPRS",
+                "PRO","D","NUM",
+                "ADJ","ADJR","ADJS",
+                "Q","QR","QS"];
+var casePhrases = ["NP","QP","ADJP"];
+var caseMarkers = ["N", "A", "D", "$"];
 
 /*
  * These two functions should return true if the string argument is a valid
