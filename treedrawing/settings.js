@@ -34,7 +34,7 @@ var caseMarkers = ["N", "A", "D", "$"];
 /*
  * Which labels are barriers to recursive case assignment.
  */
-var caseBariers = ["IP","CP"];
+var caseBarriers = ["IP","CP","NP"];
 
 /*
  * These two functions should return true if the string argument is a valid
