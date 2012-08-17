@@ -12,8 +12,7 @@ should install the following software packages:
 
 - For running unit tests: the python packages
   http://pypi.python.org/pypi/nose/[nose] and http://pypi.python.org/pypi/coverage[coverage].
-- For generating documentation, the
-  https://code.google.com/p/jsdoc-toolkit/[jsdoc-toolkit] and
+- For generating documentation,
   http://www.methods.co.nz/asciidoc/[asciidoc].
 
 You should install the python packages in your system’s Python 2.x tree,
@@ -46,6 +45,10 @@ Annotald source tree:
 The output of these documentation-generating processes will be placed in
 a folder with a name corresponding to the name of the make target
 (public API docs in `api-doc`, etc.)
+
+NOTE: Generating the API documentation currently requires various
+customized software packages.  If you’d like to receive these, contact
+Aaron Ecay.
 
 == Architecture
 
