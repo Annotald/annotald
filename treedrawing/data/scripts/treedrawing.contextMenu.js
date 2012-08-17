@@ -116,17 +116,18 @@ function getSuggestions(label) {
  * @private
  */
 function loadContextMenu(nodeOrig) {
-    var nodeIndex = getIndex($(nodeOrig)),
+    var nO = $(nodeOrig),
+        nodeIndex = getIndex(nO),
         indexSep = "",
         indexString = "",
-        nodelabel = getLabel($(nodeOrig)),
+        nodelabel = getLabel(nO),
         newnode,
         i;
     function loadConMenuMousedown () {
         var e = window.event;
         var elementId = (e.target || e.srcElement).id;
         var suggestion = "" + $(this).text();
-        setNodeLabel($(nodeOrig), suggestion);
+        setNodeLabel(nO, suggestion);
         hideContextMenu();
     }
 
@@ -140,7 +141,7 @@ function loadContextMenu(nodeOrig) {
 
 
     var suggestions = getSuggestions(nodelabel);
-    for (var i = 0; i < suggestions.length; i++) {
+    for (i = 0; i < suggestions.length; i++) {
         if (suggestions[i] != nodelabel) {
             newnode = $("<div class='conMenuItem'><a href='#'>" +
                             suggestions[i]+indexString+"</a></div>");
@@ -153,9 +154,8 @@ function loadContextMenu(nodeOrig) {
     $("#conRight").empty();
 
     if (displayCaseMenu) {
-        $("#conRight").append($("<div class='conMenuHeading'>Case</div>"));
-
-        if (hasCase(nodeOrig) || isCasePhrase(nodeOrig)) {
+        if (hasCase(nO) || isCasePhrase(nO)) {
+            $("#conRight").append($("<div class='conMenuHeading'>Case</div>"));
             caseMarkers.forEach(function(c) {
                 newnode = $("<div class='conMenuItem'><a href='#'>-" + c +
                                 "</a></div>");
@@ -222,22 +222,23 @@ function doToggleExtension(node, extension) {
  * @private
  */
 function setCaseOnTag(node, theCase) {
-    function doKids(n) {
-        n.children(".snode").each(function() {
-            if (hasCase(n)) {
-                setCase(n, theCase);
-            } else if ((isCaseNode(n) && !n.parent().is(".CONJP")) ||
-                       _.contains(caseBarriers, getLabel(n).split("-")[0])) {
-                // nothing
-            } else {
-                doKids(n);
-            }
-        });
+    function doKids(n, override) {
+        if (hasCase(n)) {
+            setCase(n, theCase);
+        } else if (_.contains(caseBarriers, getLabel(n).split("-")[0]) &&
+                   !n.parent().is(".CONJP") &&
+                   !override) {
+            // nothing
+        } else {
+            n.children(".snode").each(function() {
+                doKids($(this));
+            });
+        }
     }
     return function() {
         var n = $(node);
         touchTree(n);
-        doKids(n);
+        doKids(n, true);
     };
 }
 
