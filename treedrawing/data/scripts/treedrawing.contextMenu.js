@@ -72,6 +72,12 @@ customConLeafBefore();
 
 var defaultsPhrases = defaultConMenuGroup;
 
+/**
+ * Compute the suggested changes for the context menu for a label.
+ *
+ * @param {String} label
+ * @private
+ */
 function getSuggestions(label) {
     var indstr = "",
         indtype = "";
@@ -101,7 +107,14 @@ function getSuggestions(label) {
     return suggestions.unique();
 }
 
-// Arg is dom node
+/**
+ * Populate the context menu for a given node.
+ *
+ * Does not display the menu.
+ *
+ * @param {DOM node} nodeOrig
+ * @private
+ */
 function loadContextMenu(nodeOrig) {
     var nodeIndex = getIndex($(nodeOrig)),
         indexSep = "",
@@ -146,7 +159,7 @@ function loadContextMenu(nodeOrig) {
             caseMarkers.forEach(function(c) {
                 newnode = $("<div class='conMenuItem'><a href='#'>-" + c +
                                 "</a></div>");
-                $(newnode).mousedown(setCaseOnTag(nodeOrig, nodelabel, c));
+                $(newnode).mousedown(setCaseOnTag(nodeOrig, c));
                 $("#conRight").append(newnode);
             });
         }
@@ -157,7 +170,7 @@ function loadContextMenu(nodeOrig) {
     for (i = 0; i < conleafs.length; i++) {
         newnode = $("<div class='conMenuItem'><a href='#'>" +
                         conleafs[i].suggestion + "</a></div>");
-        $(newnode).mousedown(doConLeaf(i, conleafs[i], nodeOrig));
+        $(newnode).mousedown(doConLeaf(conleafs[i], nodeOrig));
         $("#conRight").append(newnode);
     }
 
@@ -175,9 +188,19 @@ function loadContextMenu(nodeOrig) {
     }
 }
 
+/**
+ * Toggle the extension of a node.
+ *
+ * A context menu action function.
+ *
+ * @param {DOM node} node
+ * @param {String} extension the extension to toggle
+ * @returns {Function} A function which, when called, will execute the action.
+ * @private
+ */
 function doToggleExtension(node, extension) {
     return function() {
-        touchTree(node);
+        touchTree($(node));
         clearSelection();
         selectNode(node);
         toggleExtension(extension);
@@ -186,15 +209,25 @@ function doToggleExtension(node, extension) {
     };
 }
 
-/*
- * set case just on this one tag
+/**
+ * Set the case of a node.
+ *
+ * A context menu action function.  Recurses into children of this node,
+ * stopping when a barrier (case node or explicitly defined barrier) is
+ * reached.
+ *
+ * @param {DOM node} node
+ * @param {String} theCase the case to assign
+ * @returns {Function} A function which, when called, will execute the action.
+ * @private
  */
-function setCaseOnTag(node, oldLabel, theCase) {
+function setCaseOnTag(node, theCase) {
     function doKids(n) {
         n.children(".snode").each(function() {
             if (hasCase(n)) {
                 setCase(n, theCase);
-            } else if (isCaseNode(n) && !n.parent().is(".CONJP")) {
+            } else if ((isCaseNode(n) && !n.parent().is(".CONJP")) ||
+                       _.contains(caseBarriers, getLabel(n).split("-")[0])) {
                 // nothing
             } else {
                 doKids(n);
@@ -202,12 +235,28 @@ function setCaseOnTag(node, oldLabel, theCase) {
         });
     }
     return function() {
-        touchTree(node);
-        doKids(node);
+        var n = $(node);
+        touchTree(n);
+        doKids(n);
     };
 }
 
-function doConLeaf(idx,conleaf,node) {
+/**
+ * Insert a leaf node.
+ *
+ * A context menu action function.
+ *
+ * @param {Object} conleaf an object describing the leaf to be added.  Has the
+ * following keys:
+ *
+ * - `before` Boolean, insert this leaf beofre or fter the target
+ * - `label` String, the label of the node to insert
+ * - `word` String, the text of the node to insert
+ * @param {DOM node} node
+ * @returns {Function} A function which, when called, will execute the action.
+ * @private
+ */
+function doConLeaf(conleaf, node) {
     return function() {
         makeLeaf(conleaf.before, conleaf.label, conleaf.word, node, true);
         hideContextMenu();
@@ -221,6 +270,6 @@ function doConLeaf(idx,conleaf,node) {
 // " "hideContextMenu" "clearSelection" "toggleExtension" "selectNode\
 // " "parseIndex" "parseLabel" "defaultConMenuGroup" "getIndex" "parseIndexType\
 // " "displayCaseMenu" "caseTags" "casePhrases" "hasCase" "touchTree\
-// " "startnode")
+// " "startnode" "_")
 // indent-tabs-mode: nil
 // End:
