@@ -524,6 +524,99 @@ function addToIndices(tokenRoot, numberToAdd) {
     });
 }
 
+// ========== Case-related functions
+
+/**
+ * Find the case associated with a node.
+ *
+ * This function respects the case-related variable `caseMarkers`.  It does
+ * not check if a node is in `caseTags`.
+ *
+ * @param {JQuery Node} node
+ * @returns {String} the case on the node, or `""` if none
+ */
+function getCase(node) {
+    var label = parseLabel(getLabel(node)),
+        dashTags = label.split("-"),
+        cases = _.intersection(caseMarkers, dashTags);
+
+    if (cases.length == 0) {
+        return "";
+    } else if (cases.length == 1) {
+        return cases[0];
+    } else {
+        throw "Tag has two cases: " + label;
+    }
+    }
+
+/**
+ * Test if a node has case.
+ *
+ * This function tests whether a node is in `caseTags`, and then whether it
+ * has case.
+ *
+ * @param {JQuery Node} node
+ * @returns {Boolean}
+ */
+function hasCase(node) {
+    var label = parseLabel(getLabel(node)),
+        dashTags = label.split("-"),
+        theCase;
+    if (_.contains(caseTags, dashTags[0])) {
+        theCase = getCase(node);
+        if (theCase == "") {
+            return false;
+        } else {
+            return true;
+        }
+    } else {
+        return false;
+    }
+}
+
+/**
+ * Test whether a node label corresponds to a case phrase.
+ *
+ * Based on the `casePhrases` configuration variable.
+ *
+ * @param {String} nodeLabel
+ * @returns {Boolean}
+ */
+function isCasePhrase(nodeLabel) {
+    return _.contains(casePhrases, nodeLabel.split("-")[0]);
+}
+
+/**
+ * Remove the case from a node.
+ *
+ * Does not record undo information.
+ *
+ * @param {JQuery Node} node
+ */
+function removeCase(node) {
+    if (!hasCase(node)) {
+        return;
+    }
+    var theCase = getCase(node),
+        label = getLabel(node);
+    setNodeLabel(node, label.replace("-" + theCase, ""));
+}
+
+/**
+ * Set the case on a node.
+ *
+ * Removes any previous case.  Does not record undo information.
+ *
+ * @param {JQuery Node} node
+ */
+function setCase(node, theCase) {
+    removeCase(node);
+    var osn = startnode;
+    startnode = node;
+    toggleExtension(theCase, [theCase]);
+    startnode = osn;
+}
+
 // ==================================================
 
 
@@ -692,6 +785,7 @@ function nextNodeSuchThat(node, pred) {
 
 // Local Variables:
 // js2-additional-externs: ("$" "_" "JSON" "testValidLeafLabel" "\
-// testValidPhraseLabel")
+// testValidPhraseLabel" "caseMarkers" "casePhrases" "caseTags" "\
+// startnode")
 // indent-tabs-mode: nil
 // End:
