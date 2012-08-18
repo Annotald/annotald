@@ -14,6 +14,8 @@ Lesser General Public License for more details.
 @contact: jana.eliz.beck@gmail.com
 """
 
+# TODO: catch C-c exit and log prog exit
+
 VERSION = "12.03-dev"
 
 import os.path
@@ -25,6 +27,7 @@ from datetime import datetime
 import json
 import re
 import runpy
+import shelve
 import subprocess
 import sys
 import time
@@ -64,6 +67,7 @@ class Treedraw(object):
         self.inidle = False
         self.justexited = False
         self.startTime = str(int(time.time()))
+        self.eventLog = None    # Will be initialized when needed
 
         # TODO: this needs to come from an IO library, not ad hoc
         if util.queryVersionCookie(self.versionCookie, "FORMAT") == "deep":
@@ -108,7 +112,6 @@ class Treedraw(object):
                 os.unlink(self.thefile + '.bak')
 
             os.rename(self.thefile, self.thefile + '.bak')
-            # JB: using codecs here when in Mac OS X
             f = codecs.open(self.thefile, 'w', 'utf-8')
             f.write(self.versionCookie + "\n\n")
             f.write(tosave)
@@ -122,11 +125,7 @@ class Treedraw(object):
                 # Windows cannot do atomic file renames
                 os.unlink(self.thefile)
             os.rename(self.thefile + '.out', self.thefile)
-            if self.options.timelog:
-                with open("timelog.txt", "a") as timelog:
-                    timelog.write(self.shortfile + ": Saved at " +
-                                  str(datetime.now().isoformat()) + ".\n")
-                    self.justexited = False
+            self.doLogEvent(json.dumps({'type': "save"}))
             return json.dumps(dict(result = "success"))
         except Exception as e:
             print "something went wrong: %s" % e
@@ -141,6 +140,8 @@ class Treedraw(object):
         cherrypy.response.headers['Content-Type'] = 'application/json'
         try:
             if self.showingPartialFile and shift == "true":
+                # TODO: what is going on here?  what is shift? we should
+                # be able to just call integratetrees unconditionally
                 tovalidate = self.integrateTrees(trees)
             else:
                 tovalidate = trees.strip()
@@ -155,6 +156,8 @@ class Treedraw(object):
             else:
                 validatedHtml = self.treesToHtml(validatedTrees)
 
+            self.doLogEvent(json.dumps({'type': "validate",
+                                        'validator': validator}))
             return json.dumps(dict(result = "success",
                                    html = validatedHtml))
         except Exception as e:
@@ -164,29 +167,30 @@ class Treedraw(object):
                                    reason = str(e)))
 
     @cherrypy.expose
-    def doIdle(self):
-        if self.options.timelog:
-            if self.inidle:
-                with open("timelog.txt", "a") as timelog:
-                    timelog.write(self.shortfile + ": Resumed at " +
-                                  str(datetime.now().isoformat()) + ".\n")
-                self.inidle = False
-                self.justexited = False
-            else:
-                with open("timelog.txt", "a") as timelog:
-                    timelog.write(self.shortfile + ": Idled at " +
-                                  str(datetime.now().isoformat()) + ".\n")
-                self.inidle = True
-                self.justexited = False
+    def doLogEvent(self, eventData):
+        eventData = json.loads(eventData) # TODO: so fucking asinine
+        if not self.options.timelog:
+            return
+        if not self.eventLog:
+            self.eventLog = shelve.open("annotaldLog.shelve")
+        evtTime = time.time()
+        # while self.eventLog[str(evtTime)]:
+        #     # TODO: this seems like not the right answer...
+        #     time.sleep(0.01)
+        #     evtTime = time.time()
+        eventData['filename'] = self.options.psd[0]
+        self.eventLog[str(evtTime)] = eventData
+        self.eventLog.sync()
+        return ""
 
     @cherrypy.expose
     def doExit(self):
         print "Exit message received"
-        if self.options.timelog and not self.justexited:
-            with open("timelog.txt", "a") as timelog:
-                timelog.write(self.shortfile + ": Stopped at " +
-                              str(datetime.now().isoformat()) + ".\n")
-                self.justexited = True
+        self.doLogEvent(json.dumps({'type': "program-exit"}))
+        time.sleep(3)           # Wait for log events from server
+        if self.eventLog:
+            self.eventLog.close()
+            self.eventLog = None
         raise SystemExit(0)
 
     @cherrypy.expose
@@ -310,6 +314,7 @@ class Treedraw(object):
         else:
             currentHtml = self.treesToHtml(currentTrees)
 
+        self.doLogEvent(json.dumps({'type': "page-load"}))
         return self.renderIndex(currentHtml, currentSettings, False)
 
     @cherrypy.expose
@@ -375,20 +380,28 @@ parser.add_argument("-1", "--one-tree-mode", dest = "oneTree",
 parser.add_argument("-n", "--n-trees-mode", dest = "numTrees",
                      type = int, action = "store",
                      help = "number of trees to show at a time")
-parser.add_argument("psd", nargs='+')
+parser.add_argument("psd", nargs='+') # TODO: nargs = 1?
 parser.set_defaults(port = 8080,
                     settings = sys.path[0] + "/settings.js",
                     pythonSettings = sys.path[0] + "/settings.py",
                     oneTree = False,
-                    numTrees = 1)
+                    numTrees = 1,
+                    timelog = True)
 args = parser.parse_args()
 shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
 
-
 if args.timelog:
-    with open("timelog.txt", "a") as timelog:
-        timelog.write(shortfile + ": Started at " + \
-                          str(datetime.now().isoformat()) + ".\n")
+    # TODO: code duplicated... :(
+    eventLog = shelve.open("annotaldLog.shelve")
+    evtTime = time.time()
+    eventData = { 'type': "program-start" }
+    # while eventLog[str(evtTime)]:
+    #     # TODO: this seems like not the right answer...
+    #     time.sleep(0.01)
+    #     evtTime = time.time()
+    eventData['filename'] = args.psd[0]
+    eventLog[str(evtTime)] = eventData
+    eventLog.close()
 
 cherrypy.config.update({'server.socket_port': args.port})
 

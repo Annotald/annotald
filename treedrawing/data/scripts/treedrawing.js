@@ -113,6 +113,10 @@ function navigationWarning() {
     return undefined;
 }
 
+function logUnload() {
+    logEvent("page-unload");
+}
+
 function assignEvents() {
     // load custom commands from user settings file
     customCommands();
@@ -131,6 +135,7 @@ function assignEvents() {
     $("#conMenu").mousedown(hideContextMenu);
     $(document).mousewheel(handleMouseWheel);
     window.onbeforeunload = navigationWarning;
+    window.onunload = logUnload;
 }
 
 function styleIpNodes() {
@@ -265,6 +270,12 @@ function handleMouseWheel(e, delta) {
     }
 }
 
+var keyDownHooks = [];
+
+function addKeyDownHook(fn) {
+    keyDownHooks.push(fn);
+}
+
 function handleKeyDown(e) {
     if ((e.ctrlKey && e.shiftKey) || e.metaKey || e.altKey) {
         // unsupported modifier combinations
@@ -285,11 +296,26 @@ function handleKeyDown(e) {
     e.preventDefault();
     var theFn = commandMap[e.keyCode].func;
     var theArgs = commandMap[e.keyCode].args;
+    _.each(keyDownHooks, function (fn) {
+        fn({
+            keyCode: e.keyCode,
+            shift: e.shiftKey,
+            ctrl: e.ctrlKey
+           },
+          theFn,
+          theArgs);
+    });
     theFn.apply(undefined, theArgs);
     if (!theFn.async) {
         undoBarrier();
     }
     return false;
+}
+
+var clickHooks = [];
+
+function addClickHook(fn) {
+    clickHooks.push(fn);
 }
 
 function handleNodeClick(e) {
@@ -326,6 +352,9 @@ function handleNodeClick(e) {
             }
         }
     }
+    _.each(clickHooks, function (fn) {
+        fn(e.button);
+    });
     e.stopPropagation();
     last_event_was_mouse = true;
     undoBarrier();
@@ -1336,7 +1365,7 @@ function clearSearch() {
  * @param {Object} options search options
  * @returns {DOM node} `target` if it matched the query, otherwise `undefined`
  */
- 
+
 function interpretSearchNode(node, target, options) {
     // TODO: optimize to remove jquery calls, only use regex matching if needed
     // TODO: make case sensitivity an option?
@@ -2190,19 +2219,93 @@ function advanceTree(find, async, offset) {
                           }});
 }
 
-// ========== Idle/resume
+// ========== Event logging and idle
+
+// =============== Event logging function
+
+function logEvent(type, data) {
+    data = data || {};
+    data['type'] = type;
+    $.ajax("/doLogEvent",
+          {
+              async: true,
+              dataType: "json",
+              type: "POST",
+              data: { eventData: JSON.stringify(data) },
+              traditional: true
+          });
+}
+
+// =============== Idle timeout
+
+var idleTimeout = false;
+var isIdle = false;
+
+function resetIdleTimeout() {
+    if (idleTimeout) {
+        clearTimeout(idleTimeout);
+    }
+    idleTimeout = setTimeout(autoIdle, 30 * 1000);
+}
+
+function autoIdle() {
+    logEvent("auto-idle");
+}
+
+addStartupHook(resetIdleTimeout);
+
+addKeyDownHook(function() {
+    if (isIdle) {
+        logEvent("auto-resume");
+        isIdle = false;
+        $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
+        $("#butidle").unbind("mousedown").mousedown(idle);
+    }
+    resetIdleTimeout();
+});
+
+// =============== User interface
 
 function idle() {
-    if ($("#idlestatus").html().search("IDLE") != -1) {
-        $.post("/doIdle");
-        $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
-    }
-    else {
-        $.post("/doIdle");
-        $("#idlestatus").html("");
-        $("#idlestatus").html("<div style='color:red'>Status: IDLE.</div>");
-    }
+    logEvent("user-idle");
+    isIdle = true;
+    $("#idlestatus").html("<div style='color:red'>Status: IDLE.</div>");
+    $("#butidle").unbind("mousedown").mousedown(resume);
 }
+
+function resume() {
+    logEvent("user-resume");
+    isIdle = false;
+    $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
+    $("#butidle").unbind("mousedown").mousedown(idle);
+}
+
+// =============== Key/click logging
+
+addStartupHook(function () {
+    // This must be delayed, because this file is loaded before settings.js is
+    if (logDetail) {
+        addKeyDownHook(function (keydata, fn, args) {
+            var key = (keydata['ctrl'] ? "C-" : "") +
+                    (keydata['shift'] ? "S-" : "") +
+                    String.fromCharCode(keydata),
+                theFn = fn.name + "(" +
+                    args.map(function (x) { return JSON.stringify(x); }).join(", ") +
+                    ")";
+            logEvent("keypress",
+                     { key: key,
+                       fn: theFn
+                     });
+        });
+
+        addClickHook(function (button) {
+            logEvent("mouse-click",
+                     { button: button
+                     });
+        });
+
+        // TODO: what about mouse movement?
+    }});
 
 // ========== Quitting
 
@@ -2430,7 +2533,8 @@ function undo() {
         displayWarning("No further undo information");
         return;
     }
-    redoStack.push(doUndo(undoStack.pop()));
+    var lastUndo = undoStack.pop();
+    redoStack.push(doUndo(lastUndo));
     startnode = endnode = undefined;
     updateSelection();
 }
@@ -2663,6 +2767,6 @@ function resetLabelClasses(alertOnError) {
 // " "shouldIndexLeaf" "maxIndex" "addToIndices" "changeJustLabel\
 // " "toggleStringExtension" "lookupNextLabel" "commentTypes\
 // " "invisibleCategories" "invisibleRootCategories" "ipnodes" "messageHistory\
-// " "scrollToNext")
+// " "scrollToNext" "clearTimeout" "logDetail")
 // indent-tabs-mode: nil
 // End:

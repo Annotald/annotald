@@ -16,6 +16,14 @@
 // License along with this program.  If not, see
 // <http://www.gnu.org/licenses/>.
 
+
+/*
+ * Whether to include detailed information on key and mouse actions in the
+ * event log
+ */
+// TODO: add to user manual
+var logDetail = true;
+
 /*
  * Displays a context menu for setting case extensions according to
  * the IcePaHC annotation scheme.
