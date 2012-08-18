@@ -98,7 +98,8 @@ class Treedraw(object):
         if (startTime != self.startTime) and not (force == "true"):
             return json.dumps(dict(result = "failure",
                                    reason = "non-matching invocations of Annotald",
-                                   reasonCode = 1))
+                                   reasonCode = 1,
+                                   startTime = self.startTime))
         tosave = self.integrateTrees(trees)
         tosave = tosave.replace("-FLAG", "")
         try:

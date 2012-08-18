@@ -2067,10 +2067,10 @@ function saveHandler (data) {
     } else {
         lastsavedstate = "";
         var extraInfo = "";
-        // TODO: let force saving sync the annotald instances, so it's only necessary once?
         if (safeGet(data, 'reasonCode', 0) == 1) {
             extraInfo = " <a href='#' id='forceSave' " +
-                "onclick='javascript:save(null, true)'>Force save</a>";
+                "onclick='javascript:startTime=" + data['startTime'] +
+                ";save(null, true)'>Force save</a>";
         }
         displayError("Save FAILED!!!: " + data['reason'] + extraInfo);
     }
@@ -2094,6 +2094,8 @@ function save(e, force) {
                               }, saveHandler).error(function () {
                                   lastsavedstate = "";
                                   saveInProgress = false;
+                                  displayError("Save failed, could not " +
+                                               "communicate with server!");
                               });
             if ($("#idlestatus").html().search("IDLE") != -1) {
                 idle();
