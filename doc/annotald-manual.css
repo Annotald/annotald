@@ -23,3 +23,9 @@ code {
 .copyright,.legalnotice {
     display: none;
 }
+
+body div.note {
+    background-color: #cccccc;
+    margin-left: 0.75in !important;
+    margin-right: 0.75in !important;
+}

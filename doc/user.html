@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Annotald User’s Guide</title><link rel="stylesheet" type="text/css" href="docbook-xsl.css" /><link rel="stylesheet" type="text/css" href="annotald-manual.css" /><meta name="generator" content="DocBook XSL Stylesheets V1.77.1" /></head><body><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="idp185296"></a>Annotald User’s Guide</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Aaron</span> <span class="surname">Ecay</span></h3><code class="email">&lt;<a class="email" href="mailto:ecay@babel.ling.upenn.edu">ecay@babel.ling.upenn.edu</a>&gt;</code></div></div></div><div><p class="copyright">Copyright © 2012 Aaron Ecay</p></div><div><div class="legalnotice"><a id="idp928896"></a><p>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Annotald User’s Guide</title><link rel="stylesheet" type="text/css" href="docbook-xsl.css" /><link rel="stylesheet" type="text/css" href="annotald-manual.css" /><meta name="generator" content="DocBook XSL Stylesheets V1.77.1" /></head><body><div xml:lang="en" class="article" lang="en"><div class="titlepage"><div><div><h2 class="title"><a id="idp198240"></a>Annotald User’s Guide</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Aaron</span> <span class="surname">Ecay</span></h3><code class="email">&lt;<a class="email" href="mailto:ecay@babel.ling.upenn.edu">ecay@babel.ling.upenn.edu</a>&gt;</code></div></div></div><div><p class="copyright">Copyright © 2012 Aaron Ecay</p></div><div><div class="legalnotice"><a id="idp941616"></a><p>
     This work is licensed under a Creative Commons
     Attribution-NonCommercial-NoDerivs 3.0 Unported License
     http://creativecommons.org/licenses/by-nc-nd/3.0/deed.en_US
-  </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl><dt><span class="section"><a href="#_introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#_installation">2. Installation</a></span></dt><dt><span class="section"><a href="#_annotald_ui_and_philosophy">3. Annotald UI and Philosophy</a></span></dt><dd><dl><dt><span class="section"><a href="#_mouse">3.1. Mouse</a></span></dt><dt><span class="section"><a href="#_context_menu">3.2. Context menu</a></span></dt><dt><span class="section"><a href="#_keyboard">3.3. Keyboard</a></span></dt></dl></dd><dt><span class="section"><a href="#_customization">4. Customization</a></span></dt><dd><dl><dt><span class="section"><a href="#_javascript_customization_options">4.1. Javascript customization options</a></span></dt><dt><span class="section"><a href="#keycmds">4.2. Default keybindings</a></span></dt><dt><span class="section"><a href="#_custom_keybindings">4.3. Custom keybindings</a></span></dt></dl></dd><dt><span class="section"><a href="#_advanced_features">5. Advanced features</a></span></dt><dd><dl><dt><span class="section"><a href="#tagset-validate">5.1. Tagset validation</a></span></dt><dt><span class="section"><a href="#_external_validation">5.2. External validation</a></span></dt><dt><span class="section"><a href="#_searching">5.3. Searching</a></span></dt></dl></dd></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_introduction"></a>1. Introduction</h2></div></div></div><p>This manual is designed to teach users how to use the Annotald program
+  </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl><dt><span class="section"><a href="#_introduction">1. Introduction</a></span></dt><dt><span class="section"><a href="#_installation">2. Installation</a></span></dt><dt><span class="section"><a href="#_annotald_ui_and_philosophy">3. Annotald UI and Philosophy</a></span></dt><dd><dl><dt><span class="section"><a href="#_mouse">3.1. Mouse</a></span></dt><dt><span class="section"><a href="#_context_menu">3.2. Context menu</a></span></dt><dt><span class="section"><a href="#_keyboard">3.3. Keyboard</a></span></dt></dl></dd><dt><span class="section"><a href="#_customization">4. Customization</a></span></dt><dd><dl><dt><span class="section"><a href="#_javascript_customization_options">4.1. Javascript customization options</a></span></dt><dt><span class="section"><a href="#keycmds">4.2. Default keybindings</a></span></dt><dt><span class="section"><a href="#_custom_keybindings">4.3. Custom keybindings</a></span></dt></dl></dd><dt><span class="section"><a href="#_advanced_features">5. Advanced features</a></span></dt><dd><dl><dt><span class="section"><a href="#tagset-validate">5.1. Tagset validation</a></span></dt><dt><span class="section"><a href="#_external_validation">5.2. External validation</a></span></dt><dt><span class="section"><a href="#_searching">5.3. Searching</a></span></dt><dt><span class="section"><a href="#casemenu">5.4. Case menu</a></span></dt></dl></dd></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_introduction"></a>1. Introduction</h2></div></div></div><p>This manual is designed to teach users how to use the Annotald program
 for annotating parsed corpora according to (a version of) the Penn
 treebank standards.
 
@@ -26,7 +26,7 @@ The University of Iceland Research Fund
 Research funds at the University of Pennsylvania
 </li></ul></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_installation"></a>2. Installation</h2></div></div></div><p>In order to use Annotald, it is necessary to install several programs
 that Annotald depends on in order to function.  Like Annotald itself,
-all of these programs are Free Software.<a xmlns="" href="#ftn.idp3475968" class="footnote" name="idp3475968" id="idp3475968"><sup class="footnote">[1]</sup></a></p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+all of these programs are Free Software.<a xmlns="" href="#ftn.idp3013008" class="footnote" name="idp3013008" id="idp3013008"><sup class="footnote">[1]</sup></a></p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
 Download and install the latest stable version of
    <a class="ulink" href="https://www.google.com/intl/en/chrome/browser/?hl=en&amp;lr=all" target="_top">Google’s
    Chrome web browser</a>
@@ -41,7 +41,7 @@ Install the NTLK Python package.
    NLTK’s developer.
 </li><li class="listitem">
 Install the python packages Mako, CherryPy, and
-   argparse.<a xmlns="" href="#ftn.idp3089504" class="footnote" name="idp3089504" id="idp3089504"><sup class="footnote">[2]</sup></a>  This can be done using the <code class="literal">pip</code> command,
+   argparse.<a xmlns="" href="#ftn.idp2400736" class="footnote" name="idp2400736" id="idp2400736"><sup class="footnote">[2]</sup></a>  This can be done using the <code class="literal">pip</code> command,
    which you should have installed as a prerequisite for NLTK in the
    previous step.  For Mac, enter <code class="literal">sudo pip install mako cherrypy
    argparse</code> in the Terminal program’s command line.  For Windows,
@@ -105,7 +105,7 @@ dash tags.</p><p>The context menu can be dismissed by left-clicking outside of i
 Annotald users should keep their right hand on the mouse at all times;
 thus, only keys on the left hand side of the keyboard are used as key
 shortcuts (with a small number of exceptions for commands which require
-full keyborad use).<a xmlns="" href="#ftn.idp86192" class="footnote" name="idp86192" id="idp86192"><sup class="footnote">[3]</sup></a></p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_customization"></a>4. Customization</h2></div></div></div><p>There are two files which are relavant to the customization of Annotald:
+full keyborad use).<a xmlns="" href="#ftn.idp90448" class="footnote" name="idp90448" id="idp90448"><sup class="footnote">[3]</sup></a></p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="_customization"></a>4. Customization</h2></div></div></div><p>There are two files which are relavant to the customization of Annotald:
 <code class="literal">settings.js</code> and <code class="literal">settings.py</code>.  The former is written in Javascript,
 and contains the bulk of Annotald’s user interface settings.  The latter
 is written in Python, and (generally speaking) contains customizations
@@ -117,6 +117,51 @@ command, use the <code class="literal">-s</code> command line option.  For a Pyt
 the option is <code class="literal">-S</code> (note capitalization).</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="_javascript_customization_options"></a>4.1. Javascript customization options</h3></div></div></div><p>In this section, the options in <code class="literal">settings.js</code> will be discussed.  Options
 specifiable in <code class="literal">settings.py</code> on the other hand will be discussed in
 other sections where they are implicated.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+<a id="casevars"></a><code class="literal">displayCaseMenu</code>
+</span></dt><dd>
+Whether or not to display options for changing the
+case of items in the context menu.  See the discussion of this feature
+<a class="link" href="#casemenu" title="5.4. Case menu">below</a>
+</dd><dt><span class="term">
+<code class="literal">caseTags</code>
+</span></dt><dd><p class="simpara">
+A list of the labels which can receive a tag indicating
+their case.  Generally speaking, these will be leaf nodes.  Although an
+entire NP (for example) might be said to have case, the only surface
+reflexes of case are the marking of individual words.  Furthermore, as
+is evident from number marking in some dialects of Spanish (TODO: cite
+literature), within a single NP it is possible for some constituents to
+not express the phrase’s features.
+</p><p class="simpara">Therefore, the minimal annotation that captures the linguistic facts
+places case on the leaf nodes; phrasal case can be calculated based on
+that information.
+
+
+However, Annotald provides functions to make this less tedious – to
+allow the annotator to mark a whole NP for case, and have that
+information updated on all the relevant subconstituents of that NP.</p></dd><dt><span class="term">
+<code class="literal">casePhrases</code>
+</span></dt><dd>
+A list of phrasal categories that bear case.  These will
+provide an option in the context menu to set their case (which actually
+sets the case of their subconstituents).
+</dd><dt><span class="term">
+<code class="literal">caseMarkers</code>
+</span></dt><dd>
+A list of case markers.  Each of these is a dash tag
+(given in the Javascript file without surrounding dashes) that may be
+attachedto a member of <code class="literal">caseTags</code> to indicate its case.
+</dd><dt><span class="term">
+<code class="literal">caseBarriers</code>
+</span></dt><dd>
+A list of phrases which should form barriers to
+recursive case assignment.  When case is assigned to an NP, Annotald
+looks (recursively) for all its daughters which are case-marker-bearing,
+and changes their case.  But, this process should not recurse into
+e.g. a relative clause, or a genitive possessor.  Thus, any node in this
+list will block further case-setting traversal.
+</dd></dl></div><div class="note" style="margin-left: 0; margin-right: 10%;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/icons/note.png" /></td><th align="left"></th></tr><tr><td align="left" valign="top"><p>The variables <code class="literal">caseTags</code>, <code class="literal">casePhrases</code>, and <code class="literal">caseBarriers</code> cannot
+contain dashes; they must be genuine top-level category labels.</p></td></tr></table></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">
 <code class="literal">testValidPhraseLabel</code>/<code class="literal">testValidLeafLabel</code>
 </span></dt><dd>
 See the discussion of
@@ -188,7 +233,7 @@ by the IcePaHC project.  It is highly recommended that users make a copy
 of this file in the working directory for their corpus, and customize it
 to their needs.  The procedure to do so is described in the following
 section.  The default keybindings are as follows (from left to
-right and top to bottom of a US keyboard layout):<a xmlns="" href="#ftn.idp5613648" class="footnote" name="idp5613648" id="idp5613648"><sup class="footnote">[4]</sup></a></p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+right and top to bottom of a US keyboard layout):<a xmlns="" href="#ftn.idp5638736" class="footnote" name="idp5638736" id="idp5638736"><sup class="footnote">[4]</sup></a></p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
 Backquote (`)
 </span></dt><dd>
 Toggle the display of lemmata on or off
@@ -292,19 +337,22 @@ user customization.</p><p>The keybindings of Annotald are customized by placing 
 has 2 required arguments; any further arguments are determined by the
 command being bound.  The first argument to the function should be a
 Javascript dictionary (also known as an object).  This has the format
-<code class="literal">{key: value, key2: value2}</code>.  The following keys are recognized:
-- <code class="literal">keycode</code> the numeric Javascript keycode of the key you wish to bind.
+<code class="literal">{key: value, key2: value2}</code>.  The following keys are recognized:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+<code class="literal">keycode</code> the numeric Javascript keycode of the key you wish to bind.
   You can navigate to
   <a class="ulink" href="http://www.asquare.net/javascript/tests/KeyCode.html" target="_top">this website</a> to
   determine interactively the code for any key on your keyboard.
-- <code class="literal">ctrl</code> the value <code class="literal">true</code> if this binding is for a shortcut with the
+</li><li class="listitem">
+<code class="literal">ctrl</code> the value <code class="literal">true</code> if this binding is for a shortcut with the
   control key pressed.  Ergonomically, it is much easier to actuate such
   shortcuts if you remap the “Caps Lock” key on your keyboard to
   control, so that it can be pressed with the pinky without needing to
   reach very far.  A panoply of methods to do so are presented at
   <a class="ulink" href="http://emacswiki.org/emacs/MovingTheCtrlKey" target="_top">this website</a>.
-- <code class="literal">shift</code> the value true if this binding is for a shortcut with the
-  shift key pressed.</p><p>The <code class="literal">ctrl</code> and <code class="literal">shift</code> options are mutually exclusive.</p><p>The second argument to the <code class="literal">addCommand</code> function is the name of the
+</li><li class="listitem">
+<code class="literal">shift</code> the value true if this binding is for a shortcut with the
+  shift key pressed.
+</li></ul></div><p>The <code class="literal">ctrl</code> and <code class="literal">shift</code> options are mutually exclusive.</p><p>The second argument to the <code class="literal">addCommand</code> function is the name of the
 function which the key will be bound to.  Any further arguments will be
 passed to the function given.  A list of functions provided by Annotald
 follows:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
@@ -531,7 +579,7 @@ Or (vertical bar)
 This creates an “OR” node as the parent of the node
 from which it is clicked.  The daughters of an “OR” node are interpreted
 disjunctively, instead of conjunctively (the default).  An example of
-such a search is shown in the follwoing screenshots:<a xmlns="" href="#ftn.idp5783376" class="footnote" name="idp5783376" id="idp5783376"><sup class="footnote">[5]</sup></a>
+such a search is shown in the follwoing screenshots:<a xmlns="" href="#ftn.idp5802640" class="footnote" name="idp5802640" id="idp5802640"><sup class="footnote">[5]</sup></a>
 </dd></dl></div><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-search-or.png" alt="A disjunctive Annotald search" /></div></div><div class="informalfigure"><div class="mediaobject"><img src="images/annotald-search-or-result.png" alt="Results of a disjunctive Annotald search" /></div></div><div class="variablelist"><dl class="variablelist"><dt><span class="term">
 Deep (“D”)
 </span></dt><dd>
@@ -561,20 +609,41 @@ Add daughter (“+”)
 This adds a daughter search node to the node from
 which it is clicked.  The defaultinterpretation is direct daughterhood,
 which can be changed by using a deep node, as already mentioned.
-</dd></dl></div></div></div><div xmlns="" class="footnotes"><br /><hr style="width:100; align:left;" /><div id="ftn.idp3475968" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp3475968" class="simpara"><sup class="simpara">[1] </sup></a>There are two meanings
+</dd></dl></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a id="casemenu"></a>5.4. Case menu</h3></div></div></div><p>Annotald includes support for manipulating case marking information in
+corpora which store that information in a supported format.  In order to
+be supported, the case must:<a xmlns="" href="#ftn.idp5818160" class="footnote" name="idp5818160" id="idp5818160"><sup class="footnote">[6]</sup></a></p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
+be stored as dash tags,
+</li><li class="listitem">
+at the word level,
+</li><li class="listitem">
+without any unmarked default categories.
+</li></ul></div><p>Then, <a class="link" href="#casevars">some options</a> need to be set in the configuration
+file.  Once this is done, the context menu will contain options for
+setting case:</p><div class="informalfigure"><div class="mediaobject"><img src="images/case-menu.png" alt="Annotald context menu with case-setting options" /></div></div><p>Invoking the context menu on an individual case-bearing node (one of
+<a class="link" href="#casevars"><code class="literal">caseTags</code></a>) will allow that node’s case to be changed
+individually.  Invoking it on a case-bearing phrase (one of
+<a class="link" href="#casevars"><code class="literal">casePhrases</code></a>) will change the case of all that node’s
+case-bearing daughters, without recursing too deeply.</p></div></div><div xmlns="" class="footnotes"><br /><hr style="width:100; align:left;" /><div id="ftn.idp3013008" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp3013008" class="simpara"><sup class="simpara">[1] </sup></a>There are two meanings
 of the term “Free Software.”  The first refers to the software being
 provided free of charge.  The second means that the software’s source
 code is freely available to its users for them to inspect, modify, and
 reuse.  The second of these definitions is the most important to
 ensuring scientific openness; as it happens Annotald and its
-dependencies fulfil both definitions.</p></div><div id="ftn.idp3089504" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp3089504" class="simpara"><sup class="simpara">[2] </sup></a>argparse only needs to be installed if your
+dependencies fulfil both definitions.</p></div><div id="ftn.idp2400736" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp2400736" class="simpara"><sup class="simpara">[2] </sup></a>argparse only needs to be installed if your
    system’s Python version is 2.6, as on some older Macs.  It is
-   included with Python 2.7.</p></div><div id="ftn.idp86192" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp86192" class="simpara"><sup class="simpara">[3] </sup></a>Left handed users may wish to use the left
+   included with Python 2.7.</p></div><div id="ftn.idp90448" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp90448" class="simpara"><sup class="simpara">[3] </sup></a>Left handed users may wish to use the left
 hand for mousing and the right hand for the keyboard, but the principle
 of using one hand exclusively for each operation remains the same.
 Additionally, the default configuration will have to be adjusted for
-users of non-English keyboard layouts.</p></div><div id="ftn.idp5613648" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp5613648" class="simpara"><sup class="simpara">[4] </sup></a>To see an
+users of non-English keyboard layouts.</p></div><div id="ftn.idp5638736" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp5638736" class="simpara"><sup class="simpara">[4] </sup></a>To see an
 exact listing of the tags included in each category described below, you
-should consult the configuration file itself.</p></div><div id="ftn.idp5783376" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp5783376" class="simpara"><sup class="simpara">[5] </sup></a>Note that
+should consult the configuration file itself.</p></div><div id="ftn.idp5802640" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp5802640" class="simpara"><sup class="simpara">[5] </sup></a>Note that
 the results are the same as the previously illustrated sisterhood
-search, though the queries are distinct.</p></div></div></div></body></html>
+search, though the queries are distinct.</p></div><div id="ftn.idp5818160" class="footnote"><p xmlns="http://www.w3.org/1999/xhtml"><a xmlns="" href="#idp5818160" class="simpara"><sup class="simpara">[6] </sup></a>The YCOE does not follow these
+guidelines.  Case is marked on phrasal nodes with dash tags (as a substitute for
+grammatical role marking: <span class="corpustext">SBJ</span> etc.), and on words with a caret: <span class="corpustext">^N</span>
+for nominative etc.  The Penn Parsed corpora of Middle English and later
+indicate genitive with a <span class="corpustext">$</span> which is directly concatenated with a
+leaf’s label, but this is not the kind of case that this Annotald
+feature addresses.  The IcePaHC corpus does obey these conditions
+(unsurprisingly, since Annotald comes from that project).</p></div></div></div></body></html>
