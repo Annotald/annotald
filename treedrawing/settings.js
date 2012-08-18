@@ -67,10 +67,6 @@ var leaf_extensions   = [];
  */
 var ipnodes = ["IP-SUB","IP-MAT","IP-IMP","IP-INF","IP-PPL","RRC"];
 
-// TODO: document this
-var invisibleRootCategories = ["ID", "METADATA"];
-var invisibleCategories = ["META"];
-
 // Types of comments.
 // Comments are nodes of the form (CODE {XXX:words_words_words})
 // If "XXX" is in the following list, then when editing the contents of the

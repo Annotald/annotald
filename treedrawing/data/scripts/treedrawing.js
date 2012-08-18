@@ -133,17 +133,6 @@ function assignEvents() {
     window.onbeforeunload = navigationWarning;
 }
 
-// TODO: is this still current?
-function hideCategories() {
-    var i;
-    for (i = 0; i < invisibleRootCategories.length; i++) {
-        addStyle("#sn0>." + invisibleRootCategories[i] + "{display:none;}");
-    }
-    for (i = 0; i < invisibleCategories.length; i++) {
-        addStyle("." + invisibleCategories[i] + "{display:none;}");
-    }
-}
-
 function styleIpNodes() {
     for (var i = 0; i < ipnodes.length; i++) {
         styleTag(ipnodes[i], "border-top: 1px solid black;" +
@@ -162,7 +151,6 @@ function documentReadyHandler() {
     // TODO: move some of this into hooks
     assignEvents();
     styleIpNodes();
-    hideCategories();
     setupCommentTypes();
     globalStyle.appendTo("head");
 
