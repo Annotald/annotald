@@ -24,17 +24,7 @@
 //   raise a prompt?
 // - strict mode
 // - modularize doc -- namespaces?
-
-// Notes for undo system:
-// - globally unique monotonic counter for root-level trees
-// - handle storing undo info in the key handler(/click hdlr)
-// - individual fns call touchtree(node) when they make a change
-// - touchtree stores the orig version of a tree, if in this transaction one
-//   hasn't been stored
-// - at end of oper, push an undo info onto the stack, consisting of:
-//   - replace tree #N with this data: X
-//   - put tree: X onto the global list, after tree #N
-//   - delete tree #N from global list
+// - make key commands for case available
 
 // Table of contents:
 // * Initialization
@@ -1834,12 +1824,9 @@ function makeNode(label) {
 
     undoEndTransaction();
 
-    // BUG when making XP and then use context menu: todo XXX
-
     selectNode(toselect.get(0));
     toselect.attr("xxx",null);
     updateSelection();
-    // toselect.mousedown(handleNodeClick);
 }
 
 // ========== Deletion
