@@ -417,6 +417,7 @@ has 2 required arguments; any further arguments are determined by the
 command being bound.  The first argument to the function should be a
 Javascript dictionary (also known as an object).  This has the format
 `{key: value, key2: value2}`.  The following keys are recognized:
+
 - `keycode` the numeric Javascript keycode of the key you wish to bind.
   You can navigate to
   http://www.asquare.net/javascript/tests/KeyCode.html[this website] to
