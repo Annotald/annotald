@@ -244,10 +244,48 @@ In this section, the options in `settings.js` will be discussed.  Options
 specifiable in `settings.py` on the other hand will be discussed in
 other sections where they are implicated.
 
-// TODO: case menu
 // TODO: discussion assumes familiarity with penn treebank conventions,
 // include note to read intro to annotation section first if reader is
 // not familiar
+
+[[casevars]]`displayCaseMenu`:: Whether or not to display options for changing the
+case of items in the context menu.  See the discussion of this feature
+<<casemenu,below>>
+
+`caseTags`:: A list of the labels which can receive a tag indicating
+their case.  Generally speaking, these will be leaf nodes.  Although an
+entire NP (for example) might be said to have case, the only surface
+reflexes of case are the marking of individual words.  Furthermore, as
+is evident from number marking in some dialects of Spanish (TODO: cite
+literature), within a single NP it is possible for some constituents to
+not express the phrase’s features.
++
+Therefore, the minimal annotation that captures the linguistic facts
+places case on the leaf nodes; phrasal case can be calculated based on
+that information.
+// TODO: this broader philosophical point needs to be explicated
+// elsewhere, like in an annotation philosophy section.
+However, Annotald provides functions to make this less tedious – to
+allow the annotator to mark a whole NP for case, and have that
+information updated on all the relevant subconstituents of that NP.
+
+`casePhrases`:: A list of phrasal categories that bear case.  These will
+provide an option in the context menu to set their case (which actually
+sets the case of their subconstituents).
+
+`caseMarkers`:: A list of case markers.  Each of these is a dash tag
+(given in the Javascript file without surrounding dashes) that may be
+attachedto a member of `caseTags` to indicate its case.
+
+`caseBarriers`:: A list of phrases which should form barriers to
+recursive case assignment.  When case is assigned to an NP, Annotald
+looks (recursively) for all its daughters which are case-marker-bearing,
+and changes their case.  But, this process should not recurse into
+e.g. a relative clause, or a genitive possessor.  Thus, any node in this
+list will block further case-setting traversal.
+
+NOTE: The variables `caseTags`, `casePhrases`, and `caseBarriers` cannot
+contain dashes; they must be genuine top-level category labels.
 
 `testValidPhraseLabel`/`testValidLeafLabel`:: See the discussion of
 these options <<tagset-validate,below>>
@@ -684,6 +722,39 @@ which can be changed by using a deep node, as already mentioned.
 
 // TODO: allow drag and drop of nodes?  or buttons to move them?
 
+
+[[casemenu]]
+=== Case menu
+
+// TODO: this isn’t really an “advanced feature;” consider reorganizing
+// to soemwhere else
+
+Annotald includes support for manipulating case marking information in
+corpora which store that information in a supported format.  In order to
+be supported, the case must:footnote:[The YCOE does not follow these
+guidelines.  Case is marked on phrasal nodes with dash tags (as a substitute for
+grammatical role marking: =SBJ= etc.), and on words with a caret: =^N=
+for nominative etc.  The Penn Parsed corpora of Middle English and later
+indicate genitive with a =$= which is directly concatenated with a
+leaf’s label, but this is not the kind of case that this Annotald
+feature addresses.  The IcePaHC corpus does obey these conditions
+(unsurprisingly, since Annotald comes from that project).]
+
+- be stored as dash tags,
+- at the word level,
+- without any unmarked default categories.
+
+Then, <<casevars,some options>> need to be set in the configuration
+file.  Once this is done, the context menu will contain options for
+setting case:
+
+image::images/case-menu.png[Annotald context menu with case-setting options,align="center"]
+
+Invoking the context menu on an individual case-bearing node (one of
+<<casevars,`caseTags`>>) will allow that node’s case to be changed
+individually.  Invoking it on a case-bearing phrase (one of
+<<casevars,`casePhrases`>>) will change the case of all that node’s
+case-bearing daughters, without recursing too deeply.
 
 // Things to talk about:
 // - annotation philosophy (useful annotation vs. correct annotation, some
