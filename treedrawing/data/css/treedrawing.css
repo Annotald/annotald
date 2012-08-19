@@ -130,7 +130,7 @@ body {
 }
 .metadataTable thead tr td {
     font-weight: bold;
-    // border-bottom: 1px solid #cccccc;
+    /* border-bottom: 1px solid #cccccc; */
     padding-bottom: 4px;
 }
 
