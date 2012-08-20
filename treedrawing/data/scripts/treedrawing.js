@@ -2306,12 +2306,14 @@ function goToTree() {
 }
 
 function nextTree(e) {
+    e = e || {};
     var find = undefined;
     if (e.shiftKey) find = "-FLAG";
     advanceTree(find, false, 1);
 }
 
 function prevTree(e) {
+    e = e || {};
     var find = undefined;
     if (e.shiftKey) find = "-FLAG";
     advanceTree(find, false, -1);
