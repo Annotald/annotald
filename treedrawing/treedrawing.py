@@ -43,6 +43,7 @@ from mako.template import Template
 import nltk.tree as T
 
 # Local libraries
+import logs
 import util
 
 class Treedraw(object):
@@ -209,6 +210,14 @@ class Treedraw(object):
         cherrypy.response.headers['Content-Type'] = 'application/json'
         return json.dumps(dict(
                 trees = self.treesToHtml(self.readTrees(None, text = trees))))
+
+    @cherrypy.expose
+    def logs(self, **formData):
+        if not self.options.timelog:
+            return
+        if not self.eventLog:
+            self.eventLog = shelve.open("annotaldLog.shelve")
+        return logs.plotPage(self.eventLog, **formData)
 
     def readTrees(self, fileName, text = None):
         if text:
