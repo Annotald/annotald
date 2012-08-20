@@ -214,6 +214,18 @@ function scrollToNext(selector) {
 // ========== Predicates
 
 /**
+ * Indicate whether a node has a lemma associated with it.
+ *
+ * @param {JQuery Node} node
+ * @returns {Boolean}
+ * @private
+ */
+// TODO: is private right for this one?
+function hasLemma(node) {
+    return node.children(".wnode").children(".lemma").length == 1;
+}
+
+/**
  * Test whether a string is empty, i.e. a trace, comment, or other empty
  * category.
  *
@@ -351,6 +363,18 @@ function textNode(node) {
                                      }).first();
 }
 
+/**
+ * Return the lemma of a node, or undefined if none.
+ *
+ * @param {JQuery Node} node
+ * @returns {String}
+ */
+function getLemma(node) {
+    return node.children(".wnode").children(".lemma").first().
+        text().substring(1); // strip the dash
+}
+
+// TODO: document
 function getMetadata(node) {
     var m = node.attr("data-metadata");
     if (m) {

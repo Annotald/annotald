@@ -1078,6 +1078,8 @@ editLemma.async = true;
  * @private
  * @constant
  */
+// TODO: make the presence of a lemma search option contingent on the presence
+// of lemmata in the corpus
 var searchnodehtml = "<div class='searchnode'>" +
         "<div class='searchadddelbuttons'>" +
         "<input type='button' class='searchornodebut' " +
@@ -1092,7 +1094,7 @@ var searchnodehtml = "<div class='searchnode'>" +
         "value='+' />" +
         "</div>" +
         "<select class='searchtype'><option>Label</option>" +
-        "<option>Text</option></select>: " +
+        "<option>Text</option><option>Lemma</option></select>: " +
         "<input type='text' class='searchtext' />" +
         "</div>";
 
@@ -1402,6 +1404,13 @@ function interpretSearchNode(node, target, options) {
         rx = RegExp("^" + $(node).children(".searchtext").val(), "i");
         hasMatch = $(target).children(".wnode").length == 1 &&
             rx.test(wnodeString($(target)));
+        if (!hasMatch) {
+            return undefined;
+        }
+    } else if (searchtype == "Lemma") {
+        rx = RegExp("^" + $(node).children(".searchtext").val(), "i");
+        hasMatch = hasLemma($(target)) &&
+            rx.test(getLemma($(target)));
         if (!hasMatch) {
             return undefined;
         }
@@ -2788,6 +2797,6 @@ function resetLabelClasses(alertOnError) {
 // " "shouldIndexLeaf" "maxIndex" "addToIndices" "changeJustLabel\
 // " "toggleStringExtension" "lookupNextLabel" "commentTypes\
 // " "invisibleCategories" "invisibleRootCategories" "ipnodes" "messageHistory\
-// " "scrollToNext" "clearTimeout" "logDetail")
+// " "scrollToNext" "clearTimeout" "logDetail" "hasLemma" "getLemma")
 // indent-tabs-mode: nil
 // End:
