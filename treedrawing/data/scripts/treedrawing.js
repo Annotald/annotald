@@ -117,6 +117,10 @@ function logUnload() {
     logEvent("page-unload");
 }
 
+addStartupHook(function() {
+    logEvent("page-load");
+});
+
 function assignEvents() {
     // load custom commands from user settings file
     customCommands();
@@ -2264,6 +2268,16 @@ addKeyDownHook(function() {
     resetIdleTimeout();
 });
 
+addClickHook(function() {
+    if (isIdle) {
+        logEvent("auto-resume");
+        isIdle = false;
+        $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
+        $("#butidle").unbind("mousedown").mousedown(idle);
+    }
+    resetIdleTimeout();
+});
+
 // =============== User interface
 
 function idle() {
@@ -2305,11 +2319,18 @@ addStartupHook(function () {
         });
 
         // TODO: what about mouse movement?
-    }});
+    }
+});
 
 // ========== Quitting
 
 function quitServer() {
+    if (isIdle) {
+        logEvent("auto-resume");
+        isIdle = false;
+        $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
+        $("#butidle").unbind("mousedown").mousedown(idle);
+    }
     if ($("#editpane").html() != lastsavedstate) {
         alert("Cannot exit, unsaved changes exist.");
     } else {
