@@ -182,6 +182,9 @@ class Treedraw(object):
         eventData['filename'] = self.options.psd[0]
         self.eventLog[str(evtTime)] = eventData
         self.eventLog.sync()
+        # TODO: a backup, in case of corruption...remove once confident
+        with open("annotaldLog.txt", "a") as f:
+            f.write(json.dumps(eventData))
         return ""
 
     @cherrypy.expose
@@ -411,6 +414,8 @@ if args.timelog:
     eventData['filename'] = args.psd[0]
     eventLog[str(evtTime)] = eventData
     eventLog.close()
+    with open("annotaldLog.txt", "a") as f:
+        f.write(json.dumps(eventData) + "\n")
 
 cherrypy.config.update({'server.socket_port': args.port})
 
