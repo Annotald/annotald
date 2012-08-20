@@ -657,13 +657,14 @@ many programming languages.  A full description fo the format is outside
 the scope of this document, but is available via
 https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp[this
 reference manual].  The leaf also has a drop-down box, which indicates
-whether the search string is to match against the node labels or the
-text of the corpus.  The search string is additionally left-anchored –
-that is, the beginning of the regular expression is constrained to match
-the beginning of a node label or word.  Pressing the “Search” button
-will execute the search.  Matches will be highlighted with a yellow box,
-and the document will be scrolled to display the next match.  A very
-simple query and its result is illustrated in the following screenshots:
+whether the search string is to match against the node labels, the text
+of the corpus, or the lemmata.  The search string is additionally
+left-anchored – that is, the beginning of the regular expression is
+constrained to match the beginning of a node label or word.  Pressing
+the “Search” button will execute the search.  Matches will be
+highlighted with a yellow box, and the document will be scrolled to
+display the next match.  A very simple query and its result is
+illustrated in the following screenshots:
 
 image::images/annotald-search-simple.png[A simple Annotald search,align="center"]
 
