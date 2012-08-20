@@ -190,3 +190,25 @@ def deepTreeToHtml(tree, *args):
         res += leafHtml
     res += '</div>'
     return res
+
+
+def writeTreesToFile(meta, trees, filename):
+    trees = trees.split("\n\n")
+    trees = filter(lambda x: x != "", trees)
+    trees = map(T.Tree, trees)
+    trees = map(_formatTree, trees)
+    with open(filename, "w") as f:
+        if meta and meta != "":
+            f.write(meta + "\n\n")
+        f.write("\n\n".join(trees))
+
+def _formatTree(tree, indent = 0):
+    if len(tree) == 1 and isinstance(tree[0], basestring):
+        # This is a leaf node
+        return u"(%s %s)" % (unicode(tree.node), unicode(tree[0]))
+    else:
+        s = u"(%s " % (unicode(tree.node))
+        l = len(s)
+        leaves = (u"\n" + u" " * (indent + l)).join(
+            map(lambda x: _formatTree(x, indent + l), tree))
+        return u"%s%s%s" % (s, leaves, u")")

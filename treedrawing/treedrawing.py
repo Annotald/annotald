@@ -109,23 +109,7 @@ class Treedraw(object):
         tosave = tosave.replace("-FLAG", "")
         try:
             print "self.thefile is: ", self.thefile
-            if os.name == "nt" and os.path.isfile(self.thefile + '.bak'):                               
-                os.unlink(self.thefile + '.bak')
-
-            os.rename(self.thefile, self.thefile + '.bak')
-            f = codecs.open(self.thefile, 'w', 'utf-8')
-            f.write(self.versionCookie + "\n\n")
-            f.write(tosave)
-            f.close()
-            cmdline = 'java -classpath ' + CURRENT_DIR + '/../CS_Tony_oct19.jar' + \
-                ' csearch.CorpusSearch ' + CURRENT_DIR + '/nothing.q ' + \
-                self.thefile
-            # check_call throws on child error exit
-            subprocess.check_call(cmdline.split(" "))
-            if os.name == "nt":
-                # Windows cannot do atomic file renames
-                os.unlink(self.thefile)
-            os.rename(self.thefile + '.out', self.thefile)
+            util.writeTreesToFile(self.versionCookie, trees, self.thefile)
             self.doLogEvent(json.dumps({'type': "save"}))
             return json.dumps(dict(result = "success"))
         except Exception as e:
