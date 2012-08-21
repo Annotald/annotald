@@ -27,5 +27,6 @@ doc/user.html: doc/user.adoc
 all-docs: api-doc priv-doc doc
 
 test:
-	nosetests2 -w treedrawing --with-coverage --cover-erase --cover-package=util
+	nosetests2 -w treedrawing --with-coverage --cover-erase \
+		--cover-package=util --cover-package=logs
 	coverage2 html
