@@ -379,13 +379,14 @@ function save(e, force) {
 
 function idle() {
     if ($("#idlestatus").html().search("IDLE") != -1) {
-        $.post("/doIdle");
-        $("#idlestatus").html("<div style='color:#64C465'>Editing.</div>");
+        $.post("/doIdle").success(function() {
+            $("#idlestatus").html("<div style='color:#64C465'>Editing.</div>");
+        });
     }
     else {
-        $.post("/doIdle");
-        $("#idlestatus").html("");
-        $("#idlestatus").html("<div style='color:#C75C5C'>IDLE.</div>");
+        $.post("/doIdle").success(function() {
+            $("#idlestatus").html("<div style='color:#C75C5C'>IDLE.</div>");
+        });
     }
 }
 
