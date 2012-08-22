@@ -23,7 +23,16 @@ import re
 import nltk.tree as T
 import json
 import string as STR
+import subprocess
 import sys
+import tempfile
+
+import os
+if os.uname == "nt":
+    import win32process
+
+import os.path
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def safe_json(dict):
     j = json.dumps(dict)
@@ -212,6 +221,33 @@ def _formatTree(tree, indent = 0):
         leaves = (u"\n" + u" " * (indent + l)).join(
             map(lambda x: _formatTree(x, indent + l), tree))
         return u"%s%s%s" % (s, leaves, u")")
+
+def corpusSearchValidate(queryFile):
+    def corpusSearchValidateInner(version, trees):
+        tf = tempfile.NamedTemporaryFile(delete = False)
+        name = tf.name
+        tf.write(trees)
+        tf.close()
+        # TODO: this will break when merging anton's branch
+        cmdline = 'java -classpath ' + CURRENT_DIR + '/../CS_Tony_oct19.jar' + \
+                  ' csearch.CorpusSearch ' + queryFile + ' ' + name + \
+                  ' -out ' + name + '.out'
+        # make sure console is hidden in windows py2exe version
+        if os.name == "nt":
+            subprocess.check_call(cmdline.split(" "),
+                                  creationflags = win32process.CREATE_NO_WINDOW)
+        else:
+            subprocess.check_call(cmdline.split(" "))
+
+        with open(name + ".out") as f:
+            newtrees = f.read()
+        newtrees = scrubText(newtrees)
+        os.unlink(name)
+        os.unlink(name + ".out")
+
+        return newtrees
+
+    return corpusSearchValidateInner
 
 def scrubText(text):
     output = ""
