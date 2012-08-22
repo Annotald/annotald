@@ -862,13 +862,14 @@ which can be changed by using a deep node, as already mentioned.
 Annotald includes support for manipulating case marking information in
 corpora which store that information in a supported format.  In order to
 be supported, the case must:footnote:[The YCOE does not follow these
-guidelines.  Case is marked on phrasal nodes with dash tags (as a substitute for
-grammatical role marking: =SBJ= etc.), and on words with a caret: =^N=
-for nominative etc.  The Penn Parsed corpora of Middle English and later
-indicate genitive with a =$= which is directly concatenated with a
-leaf’s label, but this is not the kind of case that this Annotald
-feature addresses.  The IcePaHC corpus does obey these conditions
-(unsurprisingly, since Annotald comes from that project).]
+guidelines.  Case is marked on phrasal nodes with dash tags (as a
+substitute for grammatical role marking: =SBJ= etc.), and on words with
+a caret: =^N= for nominative etc.  The Penn parsed corpora of Middle
+English and later time periods indicate genitive with a =$= which is
+directly concatenated with a leaf’s label, but this is not the kind of
+case-marking that this Annotald feature addresses.  The IcePaHC corpus
+does obey these conditions (unsurprisingly, since Annotald comes from
+that project), as does the Penn Parsed Corpus of Historical Greek.]
 
 - be stored as dash tags,
 - at the word level,
