@@ -221,6 +221,42 @@ users of non-English keyboard layouts.]
 
 // TODO: section about writing custom functions in javascript
 
+=== Command line options
+
+When invoked via the command line, there are several options which can
+be passed to Annotald to affect its behavior.  These are:
+
+`-s PATH`:: Specify the path to the javascript settings file.  If this
+is not specified, the default settings file distributed with Annotald is
+used.
+// TODO: link
+
+`-S PATH`:: Specify the path to the python settings file.  If this is
+not specified, the default settings file distributed with Annotald is
+used.
+// TODO: link
+
+`-p NUMBER`:: Specify the port which Annotald will run its server.  The
+default is 8080 (possible values range between 1025 and 65535).  Only
+one program may listen to a given port, so if you would like to run more
+than one instance of Annotald concurrently, you must specify a different
+port for each of them.
+// TODO: how to specify port in the browser
+
+`-o`:: Specify that the file to be read from is a CorpusSearch output
+file.  CorpusSearch comments will be stripped from the file on reading.
+
+`-q`:: Deactivate the time-logging function.
+// TODO: link to doc
+
+`-n NUMBER`:: Show only NUMBER trees fo the file at a time.
+// TODO: link to doc
+
+`-1`:: A shortcut which is equivalent to `-n 1`
+
+=== Javascript customization options
+
+// TODO: revise/remove this paragraph
 There are two files which are relavant to the customization of Annotald:
 `settings.js` and `settings.py`.  The former is written in Javascript,
 and contains the bulk of Annotald’s user interface settings.  The latter
@@ -228,13 +264,6 @@ is written in Python, and (generally speaking) contains customizations
 that are very pervasive or advanced.  A commented sample version of both
 files is included in the Annotald download, which it is recommended for
 users to base their customizations on.
-
-By default, the `annotald` command loads the included sample
-configurations.  To pass a customized Javascript settings file to the
-command, use the `-s` command line option.  For a Python settings file,
-the option is `-S` (note capitalization).
-
-=== Javascript customization options
 
 In this section, the options in `settings.js` will be discussed.  Options
 specifiable in `settings.py` on the other hand will be discussed in
