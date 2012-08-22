@@ -169,3 +169,9 @@ function customConLeafBefore() {
 // lower-level addStyle() function adds its argument as CSS code to the
 // document.
 // styleTag("NP", "color: red");
+
+// An example of a CSS rule for coloring a dash tag.  Similarly to the
+// styleTag function, styleDashTag takes as an argument the name of a dash tag
+// and CSS rule(s) to apply to it.
+
+styleDashTag("FLAG", "color: red");
