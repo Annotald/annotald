@@ -199,7 +199,6 @@ label and text.  The third column contains options for toggling certain
 dash tags.
 
 // TODO: split context menu dash tags from all dash tags in config file
-// TODO: case menu
 
 The context menu can be dismissed by left-clicking outside of it.
 
@@ -216,9 +215,6 @@ Additionally, the default configuration will have to be adjusted for
 users of non-English keyboard layouts.]
 
 // TODO: link to section about customizing keybindings
-
-
-// TODO: command line options
 
 
 == Customization
@@ -631,6 +627,12 @@ other_word <-
 
 // TODO: num before n
 // TODO: matching dashes in phrasal rules
+
+// TODO: custom CSS
+
+// TODO: n-trees mode
+
+// TODO: settings.py options
 
 === External validation
 
