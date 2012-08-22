@@ -68,9 +68,9 @@
 
 var startnode = null;
 var endnode = null;
-var ctrlKeyMap = new Object();
-var shiftKeyMap = new Object();
-var regularKeyMap = new Object();
+var ctrlKeyMap = {};
+var shiftKeyMap = {};
+var regularKeyMap = {};
 
 var startuphooks = [];
 
@@ -501,7 +501,7 @@ function selectNode(node) {
                 startnode = endnode;
                 endnode = null;
             }
-        } else if (startnode == null) {
+        } else if (startnode === null) {
             startnode = node;
         } else {
             if (last_event_was_mouse) {
@@ -570,7 +570,7 @@ function scrollToShowSel() {
 // ========== Metadata editor
 
 function saveMetadata() {
-    if ($("#metadata").html() != "") {
+    if ($("#metadata").html() !== "") {
         $(startnode).attr("data-metadata",
                           JSON.stringify(formToDictionary($("#metadata"))));
     }
@@ -923,7 +923,7 @@ function displayRename() {
                             }
                         }
                     }
-                    if (newword + newlemma == "") {
+                    if (newword + newlemma === "") {
                         displayWarning("Cannot create an empty leaf.");
                         return;
                     }
@@ -961,7 +961,7 @@ function displayRename() {
                        "type='text' value='" + label + "' />");
         var origNode = $(startnode);
         var isWordLevelConj =
-                origNode.children(".snode").children(".snode").size() == 0 &&
+                origNode.children(".snode").children(".snode").size() === 0 &&
                 // TODO: make configurable
                 origNode.children(".CONJ") .size() > 0;
         textNode(origNode).replaceWith(editor);
@@ -1213,7 +1213,7 @@ function searchDelNode(e) {
     var node = $(e.target).parents(".searchnode").first();
     var tmp = $("#searchnodes").children(".searchnode:not(.newsearchnode)");
     if (tmp.length == 1 && tmp.is(node) &&
-        node.children(".searchnode").length == 0) {
+        node.children(".searchnode").length === 0) {
         displayWarning("Cannot remove only search term!");
         return;
     }
@@ -1383,7 +1383,7 @@ function interpretSearchNode(node, target, options) {
 
     if ($(node).parent().is("#searchnodes") &&
         !$("#searchnodes").children(".searchnode").first().is(node) &&
-        !options['norecurse']) {
+        !options.norecurse) {
         // special case siblings at root level
         // What an ugly hack, can it be improved?
         newTarget = $(target).siblings();
@@ -1815,8 +1815,8 @@ function makeNode(label) {
     // make end = start if only one node is selected
     if (!endnode) {
         // if only one node, wrap around that one
-        $(startnode).wrapAll('<div xxx="newnode" class="snode ' + label + '">'
-                             + label + ' </div>\n');
+        $(startnode).wrapAll('<div xxx="newnode" class="snode ' + label + '">' +
+                             label + ' </div>\n');
     } else {
         if (startnode.compareDocumentPosition(endnode) & 0x2) {
             // startnode and endnode in wrong order, reverse them
@@ -2104,17 +2104,17 @@ function toLabeledBrackets(node) {
 var saveInProgress = false;
 
 function saveHandler (data) {
-    if (data['result'] == "success") {
+    if (data.result == "success") {
         displayInfo("Save success.");
     } else {
         lastsavedstate = "";
         var extraInfo = "";
         if (safeGet(data, 'reasonCode', 0) == 1) {
             extraInfo = " <a href='#' id='forceSave' " +
-                "onclick='javascript:startTime=" + data['startTime'] +
+                "onclick='javascript:startTime=" + data.startTime +
                 ";save(null, true)'>Force save</a>";
         }
-        displayError("Save FAILED!!!: " + data['reason'] + extraInfo);
+        displayError("Save FAILED!!!: " + data.reason + extraInfo);
     }
     saveInProgress = false;
 }
@@ -2178,12 +2178,12 @@ function validateTreesSync(async, shift) {
 }
 
 function validateHandler(data) {
-    if (data['result'] == "success") {
+    if (data.result == "success") {
         displayInfo("Validate success.");
-        $("#editpane").html(data['html']);
+        $("#editpane").html(data.html);
         documentReadyHandler();
-    } else if (data['result'] == "failure") {
-        displayWarning("Validate failed: " + data['reason']);
+    } else if (data.result == "failure") {
+        displayWarning("Validate failed: " + data.reason);
     }
     validatingCurrently = false;
     // TODO(AWE): more nuanced distinction between validation found errors and
@@ -2216,11 +2216,11 @@ function advanceTree(find, async, offset) {
     return $.ajax("/advanceTree",
                   { async: async,
                     success: function(res) {
-                        if (res['result'] == "failure") {
-                            displayWarning("Fetching tree failed: " + res['reason']);
+                        if (res.result == "failure") {
+                            displayWarning("Fetching tree failed: " + res.reason);
                         } else {
                             // TODO: what to do about the save warning
-                            $("#editpane").html(res['tree']);
+                            $("#editpane").html(res.tree);
                             documentReadyHandler();
                             nukeUndo();
                             displayInfo("Tree fetched.");
@@ -2240,7 +2240,7 @@ function advanceTree(find, async, offset) {
 
 function logEvent(type, data) {
     data = data || {};
-    data['type'] = type;
+    data.type = type;
     $.ajax("/doLogEvent",
           {
               async: true,
@@ -2311,8 +2311,8 @@ addStartupHook(function () {
     // This must be delayed, because this file is loaded before settings.js is
     if (logDetail) {
         addKeyDownHook(function (keydata, fn, args) {
-            var key = (keydata['ctrl'] ? "C-" : "") +
-                    (keydata['shift'] ? "S-" : "") +
+            var key = (keydata.ctrl ? "C-" : "") +
+                    (keydata.shift ? "S-" : "") +
                     String.fromCharCode(keydata),
                 theFn = fn.name + "(" +
                     args.map(function (x) { return JSON.stringify(x); }).join(", ") +
@@ -2406,9 +2406,9 @@ function nukeUndo() {
  * @private
  */
 function undoBarrier() {
-    if (_.size(undoMap) == 0 &&
-        _.size(undoNewTrees) == 0 &&
-        _.size(undoDeletedTrees) == 0) {
+    if (_.size(undoMap) === 0 &&
+        _.size(undoNewTrees) === 0 &&
+        _.size(undoDeletedTrees) === 0) {
         return;
     }
     undoStack.push({
@@ -2447,9 +2447,9 @@ function undoEndTransaction() {
  */
 function undoAbortTransaction() {
     var t = undoTransactionStack.pop();
-    undoMap = t["map"];
-    undoNewTrees = t["newTr"];
-    undoDeletedTrees = t["delTr"];
+    undoMap = t.map;
+    undoNewTrees = t.newTr;
+    undoDeletedTrees = t.delTr;
 }
 
 /**
@@ -2498,7 +2498,7 @@ function registerNewRootTree(tree) {
  */
 function registerDeletedRootTree(tree) {
     var prev = tree.prev();
-    if (prev.length == 0) {
+    if (prev.length === 0) {
         prev = null;
     }
     undoDeletedTrees.push({
@@ -2518,7 +2518,7 @@ function doUndo(undoData) {
         newTr = [],
         delTr = [];
 
-    _.each(undoData["map"], function(v, k) {
+    _.each(undoData.map, function(v, k) {
         var theNode = $("#" + k);
         map[k] = theNode.clone();
         theNode.replaceWith(v);
@@ -2527,20 +2527,20 @@ function doUndo(undoData) {
     // Add back the deleted trees before removing the new trees, just in case
     // the insertion point of one of these is going to get zapped.  This
     // shouldn't happen, though.
-    _.each(undoData["delTr"], function(v) {
-        var prev = v["before"];
+    _.each(undoData.delTr, function(v) {
+        var prev = v.before;
         if (prev) {
-            v["tree"].insertAfter($("#" + prev));
+            v.tree.insertAfter($("#" + prev));
         } else {
-            v["tree"].prependTo($("#sn0"));
+            v.tree.prependTo($("#sn0"));
         }
-        newTr.push(v["tree"].attr("id"));
+        newTr.push(v.tree.attr("id"));
     });
 
-    _.each(undoData["newTr"], function(v) {
+    _.each(undoData.newTr, function(v) {
         var theNode = $("#" + v);
         var prev = theNode.prev();
-        if (prev.length == 0) {
+        if (prev.length === 0) {
             prev = null;
         }
         delTr.push({
@@ -2561,7 +2561,7 @@ function doUndo(undoData) {
  * Perform undo.
  */
 function undo() {
-    if (undoStack.length == 0) {
+    if (undoStack.length === 0) {
         displayWarning("No further undo information");
         return;
     }
@@ -2575,7 +2575,7 @@ function undo() {
  * Perform redo.
  */
 function redo () {
-    if (redoStack.length == 0) {
+    if (redoStack.length === 0) {
         displayWarning("No further redo information");
         return;
     }
@@ -2673,7 +2673,7 @@ function appendExtension(node, extension, type) {
         // Adding an index to an empty category, and the EC is not an
         // empty operator.  The final proviso is needed because of
         // things like the empty WADJP in comparatives.
-        var oldLabel = textNode(node.children(".wnode").first()).text();;
+        var oldLabel = textNode(node.children(".wnode").first()).text();
         setLeafLabel(node, oldLabel + type + extension);
     } else {
         setNodeLabel(node, getLabel(node) + type + extension, true);
@@ -2736,7 +2736,7 @@ function updateCssClass(node, oldlabel) {
     } else {
         // oldlabel wasn't supplied -- try to guess
         oldlabel = node.attr("class").split(" ");
-        oldlabel = _.find(oldlabel, function (s) { return /[A-Z-]/.match(s); });
+        oldlabel = _.find(oldlabel, function (s) { return (/[A-Z-]/).match(s); });
     }
     node.removeClass(oldlabel);
     node.addClass(parseLabel(getLabel(node)));
