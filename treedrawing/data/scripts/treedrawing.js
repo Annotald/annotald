@@ -79,7 +79,7 @@ var lastsavedstate = "";
 
 var globalStyle = $('<style type="text/css"></style>');
 
-var lemmataStyleNode, lemmataHidden = false;
+var lemmataStyleNode, lemmataHidden = true;
 (function () {
     lemmataStyleNode = document.createElement("style");
     lemmataStyleNode.setAttribute("type", "text/css");
