@@ -65,7 +65,7 @@ provided free of charge.  The second means that the software’s source
 code is freely available to its users for them to inspect, modify, and
 reuse.  The second of these definitions is the most important to
 ensuring scientific openness; as it happens Annotald and its
-dependencies fulfil both definitions.]
+dependencies fulfill both definitions.]
 
 1. Download and install the latest stable version of
    https://www.google.com/intl/en/chrome/browser/?hl=en&lr=all[Google’s
@@ -117,7 +117,7 @@ to bottom:
   saving, undo/redo, and clocking in/out from a timelog file.
 - The tools panel.  Empty in this screenshot, this contains advanced
   functionality when enabled, such as external validation.
-- The messages pane.  This area displays messages messages from the
+- The messages pane.  This area displays messages from the
   program to the user.
 
 Various Annotald functions involve showing a dialog box to the user.
