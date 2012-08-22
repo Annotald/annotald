@@ -216,7 +216,7 @@ class Treedraw(object):
             currentText = f.read().decode('utf-8')
 
             if self.options.outFile:
-                currentText = self.scrubText(currentText)
+                currentText = util.scrubText(currentText)
 
         # TODO(AWE): remove the one-line restriction
         versionRe = re.compile('^\( \(VERSION.*$', re.M)
@@ -243,28 +243,6 @@ class Treedraw(object):
 
         alltrees = alltrees + '</div>'
         return alltrees
-
-    def scrubText(self, text):
-        output = ""
-        comment = False
-        for line in text.split("\n"):
-            if line.startswith("/*") or line.startswith("/~*"):
-                comment = True
-            elif line.startswith("<+"):
-                # Ignore parser-mode comments
-                pass
-            elif not comment:
-                output = output + line + "\n"
-            elif line.startswith("*/") or line.startswith("*~/"):
-                comment = False
-            else:
-                # Should never happen!
-                pass
-
-        if comment:
-            raise Exception("Unterminated comment in input file!")
-
-        return output
 
     def renderIndex(self, currentTree, currentSettings, test):
         # The CURRENT_DIR below is a bit of a hack

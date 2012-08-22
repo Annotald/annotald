@@ -212,3 +212,25 @@ def _formatTree(tree, indent = 0):
         leaves = (u"\n" + u" " * (indent + l)).join(
             map(lambda x: _formatTree(x, indent + l), tree))
         return u"%s%s%s" % (s, leaves, u")")
+
+def scrubText(text):
+    output = ""
+    comment = False
+    for line in text.split("\n"):
+        if line.startswith("/*") or line.startswith("/~*"):
+            comment = True
+        elif line.startswith("<+"):
+            # Ignore parser-mode comments
+            pass
+        elif not comment:
+            output = output + line + "\n"
+        elif line.startswith("*/") or line.startswith("*~/"):
+            comment = False
+        else:
+            # Should never happen!
+            pass
+
+    if comment:
+        raise Exception("Unterminated comment in input file!")
+
+    return output
