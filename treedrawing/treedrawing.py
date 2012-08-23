@@ -57,11 +57,6 @@ import util
 CURRENT_DIR = util.get_main_dir()
 
 class Treedraw(object):
-    
-    pythonOptions = {'extraJavascripts' : [],
-                 'debugJs' : False,
-                 'validators' : {} }
-    
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
     # object has no attribute 'thefile'
     def __init__(self, args, shortfile):
@@ -94,7 +89,7 @@ class Treedraw(object):
             self.useMetadata = False
         self.showingPartialFile = self.options.oneTree or \
                                   self.options.numTrees > 1
-        #self.pythonOptions = runpy.run_path(args.pythonSettings)
+        self.pythonOptions = runpy.run_path(args.pythonSettings)
         cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
     _cp_config = { 'tools.staticdir.on'    : True,
