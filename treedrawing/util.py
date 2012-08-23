@@ -26,13 +26,13 @@ import string as STR
 import subprocess
 import sys
 import tempfile
+import imp
 
 import os
 if os.uname == "nt":
     import win32process
 
-import os.path
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+CURRENT_DIR = get_main_dir()
 
 def safe_json(dict):
     j = json.dumps(dict)
@@ -200,7 +200,6 @@ def deepTreeToHtml(tree, *args):
     res += '</div>'
     return res
 
-
 def writeTreesToFile(meta, trees, filename):
     trees = trees.split("\n\n")
     trees = filter(lambda x: x != "", trees)
@@ -270,3 +269,13 @@ def scrubText(text):
         raise Exception("Unterminated comment in input file!")
 
     return output
+
+def main_is_frozen():
+   return (hasattr(sys, "frozen") or # new py2exe
+           hasattr(sys, "importers") # old py2exe
+           or imp.is_frozen("__main__")) # tools/freeze
+
+def get_main_dir():
+   if main_is_frozen():
+       return os.path.dirname(sys.executable)
+   return os.path.dirname(__file__)

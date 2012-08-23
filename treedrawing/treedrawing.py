@@ -35,6 +35,14 @@ import traceback
 
 # Part of the standard library as of 2.7
 import argparse
+try:
+    import win32process
+except:
+    pass
+
+# needed for py2exe to work properly
+if os.name == "nt":
+    sys.stderr = open( os.path.expanduser("~/annotald.err.log.txt"), "w" )
 
 # External libraries
 import cherrypy
@@ -46,7 +54,14 @@ import nltk.tree as T
 import logs
 import util
 
+CURRENT_DIR = util.get_main_dir()
+
 class Treedraw(object):
+    
+    pythonOptions = {'extraJavascripts' : [],
+                 'debugJs' : False,
+                 'validators' : {} }
+    
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
     # object has no attribute 'thefile'
     def __init__(self, args, shortfile):
@@ -79,7 +94,7 @@ class Treedraw(object):
             self.useMetadata = False
         self.showingPartialFile = self.options.oneTree or \
                                   self.options.numTrees > 1
-        self.pythonOptions = runpy.run_path(args.pythonSettings)
+        #self.pythonOptions = runpy.run_path(args.pythonSettings)
         cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
     _cp_config = { 'tools.staticdir.on'    : True,
@@ -179,7 +194,9 @@ class Treedraw(object):
         if self.eventLog:
             self.eventLog.close()
             self.eventLog = None
-        raise SystemExit(0)
+        #forceful exit to make up for lack of proper thread management
+        os._exit(0)
+        #raise SystemExit(0)
 
     @cherrypy.expose
     def test(self):
@@ -328,57 +345,60 @@ class Treedraw(object):
                      tree = self.treesToHtml(self.trees[
                          self.treeIndexStart:self.treeIndexEnd])))
 
+def _main(argv):
+    parser = argparse.ArgumentParser(description = "A program for annotating parsed corpora",
+                                     version = "Annotald " + VERSION,
+                                     conflict_handler = "resolve")
+    parser.add_argument("-s", "--settings", action = "store", dest = "settings",
+                        help = "path to settings.js file")
+    parser.add_argument("-p", "--port", action = "store",
+                        type = int, dest = "port",
+                        help = "port to run server on")
+    parser.add_argument("-o", "--out", dest = "outFile", action = "store_true",
+                        help = "boolean for identifying CorpusSearch output files")
+    parser.add_argument("-q", "--quiet", dest = "timelog", action = "store_false",
+                        help = "boolean for specifying whether you'd like to \
+    silence the timelogging")
+    parser.add_argument("-S", "--python-settings", dest = "pythonSettings",
+                        action = "store", help = "path to Python settings file")
+    parser.add_argument("-1", "--one-tree-mode", dest = "oneTree",
+                         action = "store_true",
+                         help = "start Annotald in one-tree mode")
+    # TODO: this will not be handled properly if the arg is greater than the
+    # number of trees in the file.
+    parser.add_argument("-n", "--n-trees-mode", dest = "numTrees",
+                         type = int, action = "store",
+                         help = "number of trees to show at a time")
 
+    parser.add_argument("psd", nargs='+') # TODO: nargs = 1?
 
-#index.exposed = True
-parser = argparse.ArgumentParser(description = "A program for annotating parsed corpora",
-                                 version = "Annotald " + VERSION,
-                                 conflict_handler = "resolve")
-parser.add_argument("-s", "--settings", action = "store", dest = "settings",
-                    help = "path to settings.js file")
-parser.add_argument("-p", "--port", action = "store",
-                    type = int, dest = "port",
-                    help = "port to run server on")
-parser.add_argument("-o", "--out", dest = "outFile", action = "store_true",
-                    help = "boolean for identifying CorpusSearch output files")
-parser.add_argument("-q", "--quiet", dest = "timelog", action = "store_false",
-                    help = "boolean for specifying whether you'd like to \
-silence the timelogging")
-parser.add_argument("-S", "--python-settings", dest = "pythonSettings",
-                    action = "store", help = "path to Python settings file")
-parser.add_argument("-1", "--one-tree-mode", dest = "oneTree",
-                     action = "store_true",
-                     help = "start Annotald in one-tree mode")
-# TODO: this will not be handled properly if the arg is greater than the
-# number of trees in the file.
-parser.add_argument("-n", "--n-trees-mode", dest = "numTrees",
-                     type = int, action = "store",
-                     help = "number of trees to show at a time")
-parser.add_argument("psd", nargs='+') # TODO: nargs = 1?
-parser.set_defaults(port = 8080,
-                    settings = sys.path[0] + "/settings.js",
-                    pythonSettings = sys.path[0] + "/settings.py",
-                    oneTree = False,
-                    numTrees = 1,
-                    timelog = True)
-args = parser.parse_args()
-shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
+    parser.set_defaults(port = 8080,
+                        settings = sys.path[0] + "/settings.js",
+                        pythonSettings = sys.path[0] + "/settings.py",
+                        oneTree = False,
+                        numTrees = 1)
+    args = parser.parse_args(argv)
+    shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
 
-if args.timelog:
-    # TODO: code duplicated... :(
-    eventLog = shelve.open("annotaldLog.shelve")
-    evtTime = time.time()
-    eventData = { 'type': "program-start" }
-    # while eventLog[str(evtTime)]:
-    #     # TODO: this seems like not the right answer...
-    #     time.sleep(0.01)
-    #     evtTime = time.time()
-    eventData['filename'] = args.psd[0]
-    eventLog[str(evtTime)] = eventData
-    eventLog.close()
-    with open("annotaldLog.txt", "a") as f:
-        f.write(json.dumps(eventData) + "\n")
-
-cherrypy.config.update({'server.socket_port': args.port})
-
-cherrypy.quickstart(Treedraw(args, shortfile))
+    if args.timelog:
+        # TODO: code duplicated... :(
+        eventLog = shelve.open("annotaldLog.shelve")
+        evtTime = time.time()
+        eventData = { 'type': "program-start" }
+        # while eventLog[str(evtTime)]:
+        #     # TODO: this seems like not the right answer...
+        #     time.sleep(0.01)
+        #     evtTime = time.time()
+        eventData['filename'] = args.psd[0]
+        eventLog[str(evtTime)] = eventData
+        eventLog.close()
+        with open("annotaldLog.txt", "a") as f:
+            f.write(json.dumps(eventData) + "\n")
+            
+    cherrypy.config.update({'server.socket_port': args.port})
+    
+    treedraw = Treedraw(args, shortfile)
+    cherrypy.quickstart(treedraw)
+    
+if __name__ == '__main__':
+    _main(sys.argv[1:])
