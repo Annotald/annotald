@@ -42,7 +42,7 @@ except:
 
 # needed for py2exe to work properly
 if os.name == "nt":
-    sys.stderr = open( os.path.expanduser("~/annotald.err.log.txt"), "w" )
+    sys.stderr = open(os.path.expanduser("~/annotald.err.log.txt"), "w")
 
 # External libraries
 import cherrypy
@@ -389,11 +389,11 @@ def _main(argv):
         eventLog.close()
         with open("annotaldLog.txt", "a") as f:
             f.write(json.dumps(eventData) + "\n")
-            
+
     cherrypy.config.update({'server.socket_port': args.port})
-    
+
     treedraw = Treedraw(args, shortfile)
     cherrypy.quickstart(treedraw)
-    
+
 if __name__ == '__main__':
     _main(sys.argv[1:])
