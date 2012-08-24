@@ -30,7 +30,7 @@ import tempfile
 import imp
 
 import os
-if os.uname == "nt":
+if os.name == "nt":
     import win32process
 
 def main_is_frozen():
