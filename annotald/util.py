@@ -22,26 +22,15 @@
 import re
 import nltk.tree as T
 import json
-import string as STR
 import pkg_resources
 import subprocess
 import sys
 import tempfile
-import imp
 
 import os
 if os.name == "nt":
     import win32process
 
-def main_is_frozen():
-   return (hasattr(sys, "frozen") or # new py2exe
-           hasattr(sys, "importers") # old py2exe
-           or imp.is_frozen("__main__")) # tools/freeze
-
-def get_main_dir():
-   if main_is_frozen():
-       return os.path.dirname(sys.executable)
-   return os.path.dirname(__file__)
 class AnnotaldException(Exception):
     pass
 
