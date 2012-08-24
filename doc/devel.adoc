@@ -28,7 +28,7 @@ symlinks to be placed in your `$PATH` (or edit the Makefile).
 Annotald is developed via git.  It is available from
 https://github.com/janabeck/Annotald[github].
 
-// TODO: reporting issues?
+// TODO: how to report issues
 
 == Documentation
 
@@ -49,6 +49,30 @@ a folder with a name corresponding to the name of the make target
 NOTE: Generating the API documentation currently requires various
 customized software packages.  If you’d like to receive these, contact
 Aaron Ecay.
+
+== Code Style
+
+Please use the
+https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml[Google
+Javascript style guide] for Javascript code, except:
+
+- Use 4-space indents, instead of 2-space
+
+Please adhere to the http://www.python.org/dev/peps/pep-0008/[PEP 8]
+Python style guide for Python code, except:
+
+- For constistency with Javscript code (which forms the bulk of
+  Annotald’s code), camelCase names are permitted.
+
+Generally speaking:
+
+- Avoid trailing whitespace in code
+- Avoid lines longer than 80 characters
+
+== Running Annotald
+
+The `bin/annotald-dev` script is provided to run the development version
+of Annotald, without needing to install it as a Python package first.
 
 == Architecture
 
