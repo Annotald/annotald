@@ -23,6 +23,7 @@ import re
 import nltk.tree as T
 import json
 import string as STR
+import pkg_resources
 import subprocess
 import sys
 import tempfile
@@ -41,9 +42,6 @@ def get_main_dir():
    if main_is_frozen():
        return os.path.dirname(sys.executable)
    return os.path.dirname(__file__)
-
-CURRENT_DIR = get_main_dir()
-
 class AnnotaldException(Exception):
     pass
 
@@ -223,7 +221,9 @@ def corpusSearchValidate(queryFile):
         tf.write(trees)
         tf.close()
         # TODO: this will break when merging anton's branch
-        cmdline = 'java -classpath ' + CURRENT_DIR + '/../CS_Tony_oct19.jar' + \
+        cmdline = 'java -classpath ' + \
+                  pkg_resoureces.resource_filename(
+                      "annotald", 'CS_Tony_oct19.jar') + \
                   ' csearch.CorpusSearch ' + queryFile + ' ' + name + \
                   ' -out ' + name + '.out'
         # make sure console is hidden in windows py2exe version

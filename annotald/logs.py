@@ -16,9 +16,6 @@ import matplotlib
 #matplotlib.use("SVG")
 import matplotlib.pyplot as plt
 
-import os.path
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-
 def floatToDateString(f):
     t = time.localtime(f)
     return "%s-%s-%s" % (t[0], t[1], t[2])
@@ -196,7 +193,8 @@ def formatPlot(name, plot):
                 ])
 
 def plotPage(evtlog, **formData):
-    plotTemplate = Template(filename = CURRENT_DIR + "/data/html/logs.mako",
+    plotTemplate = Template(filename = pkg_resources.resource_filename(
+                            "annotald","data/html/logs.mako"),
                             strict_undefined = True)
 
     plots = []
