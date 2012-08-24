@@ -1,17 +1,14 @@
-#!/usr/bin/python2
-
-# TODO: this should be put in a different directory, when annotald is
-# converted into a python package
+#!/usr/bin/env python2
 
 import nltk.tree as T
 import sys
-import util
+import annotald.util
 
-def main():
-    with open(sys.argv[1], "r") as f:
+def main(frm, to):
+    with open(frm, "r") as f:
         trees = f.read()
-    util.writeTreesToFile(None, trees, sys.argv[2])
+    annotald.util.writeTreesToFile(None, trees, to)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1], sys.argv[2])
     
