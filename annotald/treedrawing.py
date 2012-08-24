@@ -18,13 +18,12 @@ Lesser General Public License for more details.
 
 VERSION = "12.03-dev"
 
-import os.path
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-
 # Python standard library
 import codecs
 from datetime import datetime
 import json
+import os
+import pkg_resources
 import re
 import runpy
 import shelve
@@ -53,8 +52,6 @@ import nltk.tree as T
 # Local libraries
 import logs
 import util
-
-CURRENT_DIR = util.get_main_dir()
 
 class Treedraw(object):
     # JB: added __init__ because was throwing AttributeError: 'Treedraw'
@@ -106,7 +103,8 @@ class Treedraw(object):
         cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
     _cp_config = { 'tools.staticdir.on'    : True,
-                   'tools.staticdir.dir'   : CURRENT_DIR + '/data',
+                   'tools.staticdir.dir'   :
+                   pkg_resources.resource_filename("annotald", "data/"),
                    'tools.staticdir.index' : 'index.html',
                    'tools.caching.on'      : False
                    }
@@ -270,9 +268,10 @@ class Treedraw(object):
         return alltrees
 
     def renderIndex(self, currentTree, currentSettings, test):
-        # The CURRENT_DIR below is a bit of a hack
-        indexTemplate = Template(filename = CURRENT_DIR + "/data/html/index.mako",
-                                 strict_undefined = True)
+        indexTemplate = Template(
+            filename = pkg_resources.resource_filename(
+                "annotald", "/data/html/index.mako"),
+            strict_undefined = True)
 
         validators = {}
 
@@ -381,8 +380,10 @@ def _main(argv):
     parser.add_argument("psd", nargs='+') # TODO: nargs = 1?
 
     parser.set_defaults(port = 8080,
-                        settings = sys.path[0] + "/settings.js",
-                        pythonSettings = sys.path[0] + "/settings.py",
+                        settings = pkg_resources.resource_filename(
+                            "annotald", "settings.js"),
+                        pythonSettings = pkg_resources.resource_filename(
+                            "annotald", "/settings.py"),
                         oneTree = False,
                         numTrees = 1)
     args = parser.parse_args(argv)
