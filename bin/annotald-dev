@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+
+# This script is for running Annotald from the development repository,
+# without installing it
+
+import os, sys
+currentdir = os.path.dirname(os.path.abspath(__file__))
+os.environ['PYTHONPATH'] = currentdir + "/.."
+os.execve(currentdir + "/annotald",
+          ["annotald"] + sys.argv[1:],
+          os.environ)
