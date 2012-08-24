@@ -11,3 +11,6 @@ htmlcov/
 .coverage
 /doc/user.xml
 /doc/images/icons/
+/MANIFEST
+build/
+dist/
