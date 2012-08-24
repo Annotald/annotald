@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
-import os.path
-current_dir = os.path.dirname(os.path.abspath(__file__))
+import os
 import sys
 import subprocess
 
-python_program = "python2"
-try:
-    with open("/dev/null","w") as sink:
-        subprocess.check_call(["which", python_program], stdout = sink)
-except subprocess.CalledProcessError:
-    python_program = "python"
+if sys.version_info.major == 3:
+    print ("Python 3 detected, re-exec-ing.")
+    # v = args in list; p = use path to find binary
+    args = ['python2']
+    args.extend(sys.argv)
+    os.execvp("python2", args)
 
-os.system(python_program + " " + current_dir +
-          "/treedrawing/treedrawing.py " + ' '.join(sys.argv[1:]))
+import annotald.treedrawing
+
+annotald.treedrawing._main(sys.argv[1:])
