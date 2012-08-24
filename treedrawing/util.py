@@ -32,6 +32,16 @@ import os
 if os.uname == "nt":
     import win32process
 
+def main_is_frozen():
+   return (hasattr(sys, "frozen") or # new py2exe
+           hasattr(sys, "importers") # old py2exe
+           or imp.is_frozen("__main__")) # tools/freeze
+
+def get_main_dir():
+   if main_is_frozen():
+       return os.path.dirname(sys.executable)
+   return os.path.dirname(__file__)
+
 CURRENT_DIR = get_main_dir()
 
 def safe_json(dict):
@@ -269,13 +279,3 @@ def scrubText(text):
         raise Exception("Unterminated comment in input file!")
 
     return output
-
-def main_is_frozen():
-   return (hasattr(sys, "frozen") or # new py2exe
-           hasattr(sys, "importers") # old py2exe
-           or imp.is_frozen("__main__")) # tools/freeze
-
-def get_main_dir():
-   if main_is_frozen():
-       return os.path.dirname(sys.executable)
-   return os.path.dirname(__file__)
