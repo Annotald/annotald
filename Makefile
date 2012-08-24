@@ -27,7 +27,7 @@ all-docs: api-doc priv-doc doc
 ### Test targets
 
 test:
-	nosetests2 -w treedrawing --with-coverage --cover-erase \
+	nosetests2 -w annotald --with-coverage --cover-erase \
 		--cover-package=util --cover-package=logs
 	coverage2 html
 
