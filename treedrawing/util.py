@@ -48,27 +48,6 @@ def safe_json(dict):
     j = json.dumps(dict)
     return j.replace('"', "&#34;")
 
-# Ripped from NLTK.tree and fixed to not do stupid things with Unicode
-# NLTK is distributed under the Apache License 2.0, which looks (to AWE)
-# to be compatible with redistribution under the GPL3.
-def unicode_pprint_flat(tree, nodesep, parens, quotes):
-    childstrs = []
-    for child in tree:
-        if isinstance(child, T.Tree):
-            childstrs.append(unicode_pprint_flat(child, nodesep, parens, quotes))
-        elif isinstance(child, tuple):
-            childstrs.append(u"/".join(child))
-        elif isinstance(child, basestring) and not quotes:
-            childstrs.append(u'%s' % child)
-        else:
-            childstrs.append(u'%r' % child)
-    if isinstance(tree.node, basestring):
-        return u'%s%s%s %s%s' % (parens[0], tree.node, nodesep,
-                                 STR.join(childstrs), parens[1])
-    else:
-        return u'%s%r%s %s%s' % (parens[0], tree.node, nodesep,
-                                 STR.join(childstrs), parens[1])
-
 def queryVersionCookie(tree, key):
     if tree == "" or not tree:
         return None
