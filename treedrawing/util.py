@@ -44,6 +44,9 @@ def get_main_dir():
 
 CURRENT_DIR = get_main_dir()
 
+class AnnotaldException(Exception):
+    pass
+
 def safe_json(dict):
     j = json.dumps(dict)
     return j.replace('"', "&#34;")
@@ -70,12 +73,14 @@ def _queryVersionCookieInner(tree, key):
         return None
 
 def treeToHtml(tree, version, extra_data = None):
-    if isinstance(tree[0], str) or isinstance(tree[0], unicode):
+    if isinstance(tree[0], basestring):
         # Leaf node
         if len(tree) > 1:
-            raise Exception("Leaf node with more than one daughter!: %s" % tree)
+            raise AnnotaldException("Leaf node with more than one " +
+                                    "daughter!: %s" % tree)
         cssClass = re.sub("[-=][0-9]+$", "", tree.node)
-        res = '<div class="snode ' + cssClass + '">' + tree.node + '<span class="wnode">'
+        res = '<div class="snode ' + cssClass + '">' + tree.node + \
+              '<span class="wnode">'
         temp = tree[0].split("-")
         if version == "dash" and len(temp) > 1 and tree.node != "CODE":
             temp = tree[0].split("-")
@@ -101,7 +106,8 @@ def treeToHtml(tree, version, extra_data = None):
                 sisters.append(daughter)
             else:
                 if real_root:
-                    raise Exception("root tree has too many/unknown daughters!: %s" % tree)
+                    raise AnnotaldException(
+                        "root tree has too many/unknown daughters!: %s" % tree)
                 else:
                     real_root = daughter
         xtra_data = sisters
