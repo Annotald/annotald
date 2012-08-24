@@ -89,7 +89,20 @@ class Treedraw(object):
             self.useMetadata = False
         self.showingPartialFile = self.options.oneTree or \
                                   self.options.numTrees > 1
-        self.pythonOptions = runpy.run_path(args.pythonSettings)
+        # TODO: initialize vars with deafult values, so that if they are
+        # not set in the file nothing bad happens
+        self.pythonOptions = runpy.run_path(args.pythonSettings,
+                                            init_globals = {
+                                                'extraJavascripts': [],
+                                                'debugJs': False,
+                                                'validators': {},
+                                                'colorCSS': False,
+                                                # TODO: this masks a bug
+                                                # in jana's branch
+                                                'colorCSSPath': "/dev/null",
+                                                'corpusSearchValidate':
+                                                util.corpusSearchValidate
+                                            })
         cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
     _cp_config = { 'tools.staticdir.on'    : True,
