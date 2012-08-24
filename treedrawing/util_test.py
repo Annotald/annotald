@@ -6,6 +6,12 @@ import nltk.tree as T
 
 class UtilTest(unittest.TestCase):
     maxDiff = None
+
+    def test_safeJson(self):
+        d = dict(foo = 'foo"bar')
+        s = util.safe_json(d)
+        self.assertEqual(s, '{&#34;foo&#34;: &#34;foo\&#34;bar&#34;}')
+
     def test_queryVersionCookie(self):
         version_string = "( (VERSION (FORMAT dash) (FOO (BAR baz))))"
         self.assertEqual(
@@ -42,7 +48,7 @@ class UtilTest(unittest.TestCase):
         self.assertIsNone(util.queryVersionCookie(None, "FOO"))
 
 
-        
+
 
     def test_treeToHtml(self):
         test_tree = T.Tree("( (IP-MAT (NP-SBJ (D this-this)) (BEP is-is) (NP-PRD (D a-a) (N test-test))))")
@@ -67,12 +73,29 @@ class UtilTest(unittest.TestCase):
                                   "<div class=\"snode FOO\">FOO-1" +
                                   "<span class=\"wnode\">bar</span></div>")
 
-    def test_deepTreeToHtml(self):
-        pass
+    def test_treeToHtml_mult_daughters(self):
+        anomalous = T.Tree("(FOO (BAR baz quux))")
+        self.assertRaises(util.AnnotaldException, util.treeToHtml, anomalous, None)
+
+    def test_treeToHtml_NUM(self):
+        num = T.Tree("(FOO (X two-2))")
+        self.assertMultiLineEqual(util.treeToHtml(num, "dash"),
+                                  """
+<div class=\"snode FOO\">FOO <div class=\"snode X\">X<span class=\"wnode\">two-2</span></div></div>
+                                  """.strip())
 
     def test_treeToHtml_metadata(self):
-        # ID node and such, not in deep format
-        # test quote char in metadata
+        md = T.Tree("( (FOO (BAR baz)) (ID foobar-1) (METADATA (AUTHOR me)))")
+        self.assertMultiLineEqual(util.treeToHtml(md, "dash"),
+                                  """
+<div class=\"snode FOO\" data-metadata=\"{&#34;ID&#34;: &#34;foobar-1&#34;, &#34;METADATA&#34;: {&#34;AUTHOR&#34;: &#34;me&#34;}}\">FOO <div class=\"snode BAR\">BAR<span class=\"wnode\">baz</span></div></div>
+                                  """.strip())
+
+    def test_treeToHtml_bad_metadata(self):
+        md = T.Tree("( (FOO (BAR baz)) (ID foobar-1) (METADATA (AUTHOR me)) (BAD metadata))")
+        self.assertRaises(util.AnnotaldException, util.treeToHtml, md, None)
+
+    def test_deepTreeToHtml(self):
         pass
 
     def test_labelFromLabelAndMetadata(self):
