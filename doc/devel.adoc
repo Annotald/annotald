@@ -30,6 +30,8 @@ https://github.com/janabeck/Annotald[github].
 
 // TODO: how to report issues
 
+// TODO: what the git branch layout is
+
 == Documentation
 
 To generate API documentation for the Javascript portion of Annotald,

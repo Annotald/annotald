@@ -11,6 +11,8 @@
 //   a2x: --asciidoc-opts="-f user.conf -a docinfo"
 // Include the default stylesheet and our customizations:
 //   a2x: --stylesheet="docbook-xsl.css annotald-manual.css"
+// Highlight source in output (TODO not working)
+//   a2x: --xsltproc-opts "--stringparam highlight.source 1"
 
 
 // Notes to contributors:
