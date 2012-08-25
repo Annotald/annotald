@@ -283,6 +283,11 @@ class Treedraw(object):
         useValidator = len(validators) > 0
         validatorNames = validators.keys()
 
+        if self.options.oneTree:
+            ti = "1 out of " + str(len(self.trees))
+        else:
+            ti = ""
+            
         return indexTemplate.render(annotaldVersion = VERSION,
                                     currentSettings = currentSettings,
                                     shortfile = self.shortfile,
@@ -292,10 +297,14 @@ class Treedraw(object):
                                     test = test,
                                     partialFile = self.showingPartialFile,
                                     extraScripts = self.pythonOptions['extraJavascripts'],
+                                    colorCSS = self.pythonOptions['colorCSS'],
+                                    colorPath = self.pythonOptions['colorCSSPath'],
                                     startTime = self.startTime,
                                     debugJs = self.pythonOptions['debugJs'],
                                     useValidator = useValidator,
-                                    validators = validatorNames
+                                    validators = validatorNames,
+                                    treeIndexStatement = ti,
+                                    idle = "Editing."
                                     )
 
     @cherrypy.expose
@@ -350,7 +359,10 @@ class Treedraw(object):
             return json.dumps(
                 dict(result = 'success',
                      tree = self.treesToHtml(self.trees[
-                         self.treeIndexStart:self.treeIndexEnd])))
+                         self.treeIndexStart:self.treeIndexEnd]),
+                     treeIndexStart = self.treeIndexStart,
+                     treeIndexEnd = self.treeIndexEnd,
+                     totalTrees = len(self.trees)))
 
 def _main(argv):
     parser = argparse.ArgumentParser(description = "A program for annotating parsed corpora",

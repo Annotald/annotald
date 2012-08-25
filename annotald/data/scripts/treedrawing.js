@@ -87,6 +87,8 @@ var lemmataStyleNode, lemmataHidden = true;
     lemmataStyleNode.innerHTML = ".lemma { display: none; }";
 })();
 
+var currentIndex = 1; // TODO: move to where it goes
+
 String.prototype.startsWith = function(str) {
     return (this.substr(0,str.length) === str);
 };
@@ -2223,7 +2225,10 @@ function advanceTree(find, async, offset) {
                             $("#editpane").html(res.tree);
                             documentReadyHandler();
                             nukeUndo();
-                            displayInfo("Tree fetched.");
+                            currentIndex = res['treeIndexStart'] + 1;
+                            displayInfo("Tree " + currentIndex + " fetched.");
+                            displayTreeIndex("Editing tree #" + currentIndex +
+                                             " out of " + res['totalTrees']);
                         }
                     },
                     dataType: "json",
@@ -2232,6 +2237,26 @@ function advanceTree(find, async, offset) {
                             find: find,
                             offset: offset
                           }});
+}
+
+function displayTreeIndex(text) {
+    $("#treeIndexDisplay").text(text);
+}
+
+// TODO: test post-merge
+function goToTree() {
+    function goTo() {
+        var i;
+        var treeIndex = $("#gotoInput").val();
+        advanceTree(undefined, false, treeIndex - currentIndex);
+        hideDialogBox();
+    }
+    var html = "Enter the index of the tree you'd like to jump to: \
+<input type='text' id='gotoInput' value=' ' /><div id='dialogButtons'><input type='button' id='gotoButton'\
+ value='GoTo' /></div>";
+    showDialogBox("GoTo Tree", html, goTo);
+    $("#gotoButton").click(goTo);
+    $("#gotoInput").focus();
 }
 
 // ========== Event logging and idle
@@ -2294,14 +2319,14 @@ addClickHook(function() {
 function idle() {
     logEvent("user-idle");
     isIdle = true;
-    $("#idlestatus").html("<div style='color:red'>Status: IDLE.</div>");
+    $("#idlestatus").html("<div style='color:#C75C5C'>IDLE.</div>");
     $("#butidle").unbind("mousedown").mousedown(resume);
 }
 
 function resume() {
     logEvent("user-resume");
     isIdle = false;
-    $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
+    $("#idlestatus").html("<div style='color:64C465'>Editing.</div>");
     $("#butidle").unbind("mousedown").mousedown(idle);
 }
 
