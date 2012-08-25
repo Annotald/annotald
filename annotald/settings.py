@@ -4,6 +4,12 @@
 # Annotald UI
 extraJavascripts = []
 
+# Set this to True if you have defined a color.css file to use a personalized color scheme
+colorCSS = False
+
+# Path to your color.css file
+colorCSSPath = ""
+
 # Set this to True if you are an Annotald developer or otherwise need to
 # debug Annotald's jQuery code
 debugJs = False
