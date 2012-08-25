@@ -250,6 +250,6 @@ def scrubText(text):
             pass
 
     if comment:
-        raise Exception("Unterminated comment in input file!")
+        raise AnnotaldException("Unterminated comment in input file!")
 
     return output
