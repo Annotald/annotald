@@ -69,6 +69,12 @@ reuse.  The second of these definitions is the most important to
 ensuring scientific openness; as it happens Annotald and its
 dependencies fulfill both definitions.]
 
+Some of Annotald’s dependencies may require a C compiler; for Macs this is
+available by installing Apple’s no-cost XCode toolkit, and then choosing
+to download the “Command Line Tools” from the “Downloads” preference pane
+within the XCode application.  These are the instructions to install
+Annotald on Mac and Linux:
+
 1. Download and install the latest stable version of
    https://www.google.com/intl/en/chrome/browser/?hl=en&lr=all[Google’s
    Chrome web browser]
@@ -76,34 +82,35 @@ dependencies fulfill both definitions.]
    Macintosh computers have a sufficient version of Python
    pre-installed.  (If you use Linux, it is also very likely that Python
    2 is already installed on your computer.)
-3. Install the NTLK Python package.
-   http://nltk.org/install.html[Instructions to do so] are provided by
-   NLTK’s developer.
-4. Install the python packages Mako, CherryPy, and
-   argparse.footnote:[argparse only needs to be installed if your
-   system’s Python version is 2.6, as on some older Macs.  It is
-   included with Python 2.7.]  This can be done using the `pip` command,
-   which you should have installed as a prerequisite for NLTK in the
-   previous step.  For Mac, enter `sudo pip install mako cherrypy
-   argparse` in the Terminal program’s command line.  For Windows,
-   choose “Run...” from the start menu, and enter
-   `c:\Python27\Scripts\pip install mako cherrypy argparse`
+3. Follow the http://nltk.org/install.html[instructions] given by the
+   Natural Language Toolkit project to install the `pip` command on your
+   computer.
+4. Download the latest release of Annotald from TODO: link.  Open a
+   terminal on your computer, and type `pip install
+   path/to/Annotald-x.y.z.tar.gz` (replacing `path/to/` with an
+   appropriate path you your computer’s download folder and `x.y.z` with
+   the version of the most recent Annotald release).
+5. Annotald and its dependencies will now be automatically installed.
 
-Then you must download Annotald itself.  Navigate to
-https://github.com/janabeck/Annotald/tags[the Annotald release page] and
-download the zip file corresponding to the latest Annotald stable
-release.
-// TODO: a rigorous system to differentiate between devel and release
-// tags
-// also: maybe put this link on the website somewhere, to make it
-// simpler. (maybe have people download the latest zip of the release
-// branch?)
-Uncompress the file, and open a command line.  TODO
+Once this is done, Annotald is ready to use.  At a terminal command
+prompt, type `annotald path/to/file.psd` (supplying the path to a file
+in the Penn treebank format; if a sample file is needed you can use
+https://raw.github.com/antonkarl/icecorpus/6ad3006cc004aefdcbdda99c188d02afa9cbe7d0/finished/1150.firstgrammar.sci-lin.psd[this
+file from the IcePaHC project]).  Then, open the Chrome browser, and
+navigate to `http://localhost:8080`.  You should see the Annotald
+interface appear.  The rest of this manual is concerned with using and
+customizing the program.
 
-// TODO: document all command line options
+NOTE: If you are not able to install Annotald successfully, you can open
+an issue report at Annotald’s website on GitHub.
+// TODO: link
+This will put you in touch with Annotald’s developers, who will help you
+solve the problem.  When creating issue reports, please try to describe
+your computer’s configuration and the error message you received in
+terms that are as accurate and concise as possible.
 
-// TODO: this will eventually be graphicalized by Anton; put off writing
-// this until we know how that will work.
+Installation instructions for windows remain to be written.
+// TODO: Windows install
 
 == Annotald UI and Philosophy
 
