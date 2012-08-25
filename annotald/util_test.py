@@ -130,3 +130,23 @@ class UtilTest(unittest.TestCase):
                                  'QUUX': "b"
                              }
                          })
+
+    def test_scrubText(self):
+        text = """
+foo bar
+
+/*
+foo bar
+*/
+/~*
+foo bar
+*~/
+<+ foo bar +>
+        """.strip()
+        self.assertMultiLineEqual(util.scrubText(text),
+                                  "foo bar\n\n")
+        bad_text = """
+/*
+foo bar
+        """
+        self.assertRaises(util.AnnotaldException, util.scrubText, bad_text)
