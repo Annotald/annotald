@@ -13,7 +13,8 @@ body {
     color: #6600CC;
 }
 
-code {
+code, pre {
+    /* Fix brain-dead Courier in default stylesheet */
     font-family: monospace;
 }
 
@@ -28,4 +29,9 @@ body div.note {
     background-color: #cccccc;
     margin-left: 0.75in !important;
     margin-right: 0.75in !important;
+}
+
+.calloutlist img {
+    /* fix a little alignment problem with callout list images */
+    padding-top: 4px;
 }
