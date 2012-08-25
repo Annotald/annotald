@@ -614,7 +614,7 @@ numbers, and underscores.  The content of the rule can be as follows:
 
 - `'string'` matches string in the input, literally
 - the name of another rule forces that rule to match
-- `(...)` is a groupung construct
+- `(...)` is a grouping construct
 - `A B` matches A followed by B
 - `A | B` matches either A or B
 - `?A` matches maybe A – that is, if A matches, the parser’s input
