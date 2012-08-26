@@ -101,10 +101,10 @@ class Treedraw(object):
                    'tools.staticdir.index' : 'index.html',
                    'tools.caching.on'      : False
                    }
-    
-    cherrypy.config.update({ "server.logToScreen" : False })
-    cherrypy.config.update({'log.screen': False})    
-    cherrypy.config.update({ "environment": "embedded" })
+    if os.name == "nt":
+        cherrypy.config.update({ "server.logToScreen" : False })
+        cherrypy.config.update({'log.screen': False})
+        cherrypy.config.update({ "environment": "embedded" })
 
     def integrateTrees(self, trees):
         if self.showingPartialFile:
