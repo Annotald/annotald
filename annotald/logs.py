@@ -8,6 +8,7 @@ import shelve
 import math
 import time
 import datetime
+import pkg_resources
 import StringIO
 
 import cherrypy

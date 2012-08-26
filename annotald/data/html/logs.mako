@@ -4,7 +4,7 @@
   </head>
   <body>
     <div id="controls">
-      <form action="/plots" method="post">
+      <form action="/logs" method="post">
         <select name="plottype">
 %for plot in plottypes:
 <option value="${plot}">${plot}</option>
