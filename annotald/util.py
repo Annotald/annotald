@@ -208,6 +208,7 @@ def writeTreesToFile(meta, trees, filename):
         f.write("\n\n".join(trees))
 
 def _formatTree(tree, indent = 0):
+    # Should come from lovett
     if len(tree) == 1 and isinstance(tree[0], basestring):
         # This is a leaf node
         return u"(%s %s)" % (unicode(tree.node), unicode(tree[0]))
@@ -249,6 +250,7 @@ def corpusSearchValidate(queryFile): # pragma: no cover
     return corpusSearchValidateInner
 
 def scrubText(text):
+    # Should come from lovett
     output = ""
     comment = False
     for line in text.split("\n"):
@@ -280,3 +282,5 @@ class Blackhole(object):
     softspace = 0
     def write(self, text):
         pass
+
+# This should all come from lovett
