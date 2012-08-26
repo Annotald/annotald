@@ -1,3 +1,23 @@
+Release 1.0.0:
+This is the first release since 12.03.  The version numbering scheme has
+changed.  Significant changes in this version:
+- A user’s manual was written
+- Significant under-the-hood changes to allow the editing of large files
+  in Annotald without overly taxing the system CPU or RAM
+- A structural search feature was added
+- The case-related functions in the context menu were made portable
+- A comprehensive time-logging facility was added
+- The facility to display only a certain number of trees, instead of a
+  whole file at once, was added
+- A metadata editor for working with the deep format was added (the
+  remaining support for this format remains unimplemented)
+- A python settings file was added, in addition to the javascript
+  settings file
+- The facility to add custom CSS rules via a file was added
+- Significant changes of interest to developers:
+  - A developer’s manual was written
+  - Test suites for javascript and python code were added
+
 Release 12.03:
 This is the first release since 11.12.  Changes in this version
 (asterisks indicate potentially backwards-incompatible changes):
