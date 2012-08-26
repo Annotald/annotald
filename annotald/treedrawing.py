@@ -117,11 +117,15 @@ class Treedraw(object):
 
     @cherrypy.expose
     def doSave(self, trees = None, startTime = None, force = None):
+        # Save failure reason codes
+        NON_MATCHING_ANNOTALDS = 1
+        NON_MATCHING_HASHES = 2
+
         cherrypy.response.headers['Content-Type'] = 'application/json'
         if (startTime != self.startTime) and not (force == "true"):
             return json.dumps(dict(result = "failure",
                                    reason = "non-matching invocations of Annotald",
-                                   reasonCode = 1,
+                                   reasonCode = NON_MATCHING_ANNOTALDS,
                                    startTime = self.startTime))
         tosave = self.integrateTrees(trees)
         tosave = tosave.replace("-FLAG", "")
