@@ -56,13 +56,8 @@ class Treedraw(object):
             raise Exception("Annotald requires exactly one .psd file argument!")
         self.shortfile = shortfile
         self.options = args
-        with open(self.thefile) as f:
-            line = f.readline()
-        versionRe = re.compile('^\( \(VERSION.*$', re.M)
-        versionMatch = versionRe.search(line)
-        self.versionCookie = ""
-        if versionMatch:
-            self.versionCookie = versionMatch.group()
+        self.readTrees(self.thefile) # Called for side-effect of setting self.versionCookie
+        # TODO: the above line is a big hack
 
         # TODO: after a respawn these will not be right
         self.inidle = False
@@ -243,15 +238,12 @@ class Treedraw(object):
             if self.options.outFile:
                 currentText = util.scrubText(currentText)
 
-        # TODO(AWE): remove the one-line restriction
-        versionRe = re.compile('^\( \(VERSION.*$', re.M)
-        versionMatch = versionRe.search(currentText)
-        self.versionCookie = ""
-        # TODO: don't set this every time...
-        if versionMatch:
-            self.versionCookie = versionMatch.group()
-        currentText = re.sub(versionRe, '', currentText)
         trees = currentText.strip().split("\n\n")
+        vc = trees[0]
+        self.versionCookie = ""
+        if vc[0:10] == "( (VERSION":
+            self.versionCookie = vc
+            trees = trees[1:]
 
         return trees
 
