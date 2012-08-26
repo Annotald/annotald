@@ -39,10 +39,6 @@ try:
 except:
     pass
 
-# needed for py2exe to work properly
-if os.name == "nt":
-    sys.stderr = open(os.path.expanduser("~/annotald.err.log.txt"), "w")
-
 # External libraries
 import cherrypy
 import cherrypy.lib.caching
@@ -108,6 +104,10 @@ class Treedraw(object):
                    'tools.staticdir.index' : 'index.html',
                    'tools.caching.on'      : False
                    }
+    
+    cherrypy.config.update({ "server.logToScreen" : False })
+    cherrypy.config.update({'log.screen': False})    
+    cherrypy.config.update({ "environment": "embedded" })
 
     def integrateTrees(self, trees):
         if self.showingPartialFile:

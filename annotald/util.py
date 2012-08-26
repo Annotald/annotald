@@ -254,3 +254,14 @@ def scrubText(text):
         raise AnnotaldException("Unterminated comment in input file!")
 
     return output
+
+# TODO: is this needed?
+def get_main_dir():
+   if main_is_frozen():
+       return os.path.dirname(sys.executable)
+   return os.path.dirname(__file__)
+
+class Blackhole(object):
+    softspace = 0
+    def write(self, text):
+        pass

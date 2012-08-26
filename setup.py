@@ -3,7 +3,12 @@ from distutils.core import setup
 # but the former has a very stupid quirk whereby package_data is not put
 # in the sdist.
 
+
+from distutils.core import setup
+import py2exe
+import shutil
 import os
+import glob
 
 setup_args = {
       'name': 'Annotald'
@@ -19,6 +24,32 @@ setup_args = {
 if os.name == "nt":
     import shutil
     import glob
+
+    manifest = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1"
+manifestVersion="1.0">
+<assemblyIdentity
+    version="0.64.1.0"
+    processorArchitecture="x86"
+    name="Controls"
+    type="win32"
+/>
+<description>Annotald/description>
+<dependency>
+    <dependentAssembly>
+        <assemblyIdentity
+            type="win32"
+            name="Microsoft.Windows.Common-Controls"
+            version="6.0.0.0"
+            processorArchitecture="X86"
+            publicKeyToken="6595b64144ccf1df"
+            language="*"
+        />
+    </dependentAssembly>
+</dependency>
+</assembly>
+"""
     
     annotald_data_files = []
 
@@ -38,11 +69,12 @@ if os.name == "nt":
     css_files =  glob.glob('data/css/*.css')
     annotald_data_files.append( ('data/css', css_files) )
 
-    setup(windows=['annotald-win.py'],
+    setup(windows=[{ "script": "annotald-win.py",
+                     "other resources": [24,1, manifest]
+                 }],
           data_files = annotald_data_files,
           options={ "py2exe":{ "skip_archive": True } },
           **setup_args)  
-    #shutil.copy('settings.py','dist')
 
 else:
     setup(
