@@ -230,11 +230,8 @@ class Treedraw(object):
         if text:
             currentText = text
         else:
-            f = open(fileName, 'r')
-            # no longer using codecs to open the file, using .decode('utf-8')
-            # instead when in Mac OS X
-            currentText = f.read().decode('utf-8')
-
+            f = codecs.open(fileName, 'r', "utf-8")
+            currentText = f.read()
             if self.options.outFile:
                 currentText = util.scrubText(currentText)
 
