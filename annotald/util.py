@@ -221,10 +221,14 @@ def _formatTree(tree, indent = 0):
 
 def corpusSearchValidate(queryFile): # pragma: no cover
     # TODO: how to test?
+    # TODO: test the unicode part
     def corpusSearchValidateInner(version, trees):
+        # Should use writetreestofile for unicode thing
         tf = tempfile.NamedTemporaryFile(delete = False)
         name = tf.name
-        tf.write(trees)
+        writer = codecs.getwriter("utf-8")
+        write_handle = writer(tf)
+        write_handle.write(trees)
         tf.close()
         # TODO: this will break when merging anton's branch
         cmdline = 'java -classpath ' + \
