@@ -17,8 +17,8 @@ The central location for Annotald development is
 https://github.com/Annotald/annotald[on Github].  You can view or
 download the program's source code from there.  The latest release is
 available as a link:#[Python package].  Download the file and install it
-with the command `pip install Annotald-x.y.z.tar.gz`.  (Further
-information about installation is available iun the user’s manual.)
+with the command `pip install Annotald-x.y.z.tar.gz` .  (Further
+information about installation is available in the user’s manual.)
 
 == Using Annotald
 
