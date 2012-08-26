@@ -28,7 +28,7 @@ import sys
 import tempfile
 
 import os
-if os.name == "nt":
+if os.name == "nt": # pragma: no cover
     import win32process
 
 class AnnotaldException(Exception):
@@ -203,7 +203,8 @@ def _formatTree(tree, indent = 0):
             map(lambda x: _formatTree(x, indent + l), tree))
         return u"%s%s%s" % (s, leaves, u")")
 
-def corpusSearchValidate(queryFile):
+def corpusSearchValidate(queryFile): # pragma: no cover
+    # TODO: how to test?
     def corpusSearchValidateInner(version, trees):
         tf = tempfile.NamedTemporaryFile(delete = False)
         name = tf.name
@@ -245,7 +246,7 @@ def scrubText(text):
             output = output + line + "\n"
         elif line.startswith("*/") or line.startswith("*~/"):
             comment = False
-        else:
+        else: # pragma: no cover
             # Should never happen!
             pass
 
