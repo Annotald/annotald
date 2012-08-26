@@ -30,6 +30,7 @@ all-docs: api-doc priv-doc doc
 ### Test targets
 
 test:
+# TODO: branch coverage
 	nosetests2 -w annotald --with-coverage --cover-erase \
 		--cover-package=util --cover-package=logs
 	coverage2 html
