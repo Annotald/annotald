@@ -416,3 +416,10 @@ Small Device Styles
   }
 
 }
+
+
+/* Asciidoc additions */
+
+.monospaced {
+    font-family: monospace;
+}
