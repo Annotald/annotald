@@ -49,8 +49,6 @@ import nltk.tree as T
 import util
 
 class Treedraw(object):
-    # JB: added __init__ because was throwing AttributeError: 'Treedraw'
-    # object has no attribute 'thefile'
     def __init__(self, args, shortfile):
         if len(args.psd) == 1:
             self.thefile = args.psd[0]
@@ -287,7 +285,7 @@ class Treedraw(object):
             ti = "1 out of " + str(len(self.trees))
         else:
             ti = ""
-            
+
         return indexTemplate.render(annotaldVersion = VERSION,
                                     currentSettings = currentSettings,
                                     shortfile = self.shortfile,
