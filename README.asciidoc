@@ -22,7 +22,7 @@ information about installation is available in the user’s manual.)
 
 == Using Annotald
 
-The link:http://annotald/github.com/user.html[Annotald user’s manual]
+The link:http://annotald.github.com/user.html[Annotald user’s manual]
 can be found online.  For developers, there is also
 link:http://annotald.github.com/api-doc/global.html[automatically
 generated API documentation].
