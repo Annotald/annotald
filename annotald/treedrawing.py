@@ -124,8 +124,17 @@ class Treedraw(object):
                                    startTime = self.startTime))
         tosave = self.integrateTrees(trees)
         tosave = tosave.replace("-FLAG", "")
+        print "self.thefile is: ", self.thefile
+        if util.queryVersionCookie(self.versionCookie, "HASH.MD5"):
+            print "checking hash"
+            old_hash = util.queryVersionCookie(self.versionCookie, "HASH.MD5")
+            new_hash = util.hashTrees(trees, self.versionCookie)
+            if old_hash != new_hash:
+                return json.dumps(dict(result = "failure",
+                                       reason = "corpus text has changed (it shouldn't!)",
+                                       reasonCode = NON_MATCHING_HASHES,
+                                       startTime = self.startTime))
         try:
-            print "self.thefile is: ", self.thefile
             util.writeTreesToFile(self.versionCookie, trees, self.thefile)
             self.doLogEvent(json.dumps({'type': "save"}))
             return json.dumps(dict(result = "success"))

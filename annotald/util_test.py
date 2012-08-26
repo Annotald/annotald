@@ -150,3 +150,25 @@ foo bar
 foo bar
         """
         self.assertRaises(util.AnnotaldException, util.scrubText, bad_text)
+
+    def test_squashAt(self):
+        l = ['chocolate-@','@chip']
+        self.assertEqual(util._squashAt(*l), "chocolate-chip")
+        l = ['chocolate-@','chip']
+        self.assertEqual(util._squashAt(*l), "chocolate-@ chip")
+        l = ['chocolate-','@chip']
+        self.assertEqual(util._squashAt(*l), "chocolate- @chip")
+
+    def test_isEmpty(self):
+        tree = T.Tree("((CODE foo) (NP *T*-1) (C 0) (NUM 0) (N foo))")
+        p = tree.pos()
+        t = p[0]
+        self.assertTrue(util._isEmpty(t))
+        t = p[1]
+        self.assertTrue(util._isEmpty(t))
+        t = p[2]
+        self.assertTrue(util._isEmpty(t))
+        t = p[3]
+        self.assertFalse(util._isEmpty(t))
+        t = p[4]
+        self.assertFalse(util._isEmpty(t))

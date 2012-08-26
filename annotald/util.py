@@ -288,3 +288,46 @@ class Blackhole(object):
         pass
 
 # This should all come from lovett
+def _squashAt(a,b):
+        if a[-1] == "@" and b[0] == "@":
+            a = a[:-1]
+            b = b[1:]
+            return a + b
+        else:
+            return a + " " + b
+
+def _isEmpty(tuple):
+    if tuple[1] == "CODE":
+        return True
+    elif tuple[0][0] == "*" or \
+         (tuple[0] == "0" and tuple[1] != "NUM"):
+        return True
+    return False
+
+def _stripLemma(s):
+    if "-" in s:
+        return "-".join(s.split("-")[:-1])
+    else:
+        return s
+
+def _getText(tree_text, strip_lemmata = False):
+    tree = T.Tree(tree_text)
+    l = tree.pos()
+    l = filter(lambda t: not _isEmpty(t), l)
+    l = map(lambda t: t[0], l)
+    if strip_lemmata:
+        l = map(_stripLemma, l)
+    l = reduce(_squashAt, l)
+    return l
+
+def hashTrees(trees_text, version):
+    trees = trees_text.strip().split("\n\n")
+    if queryVersionCookie(version, "FORMAT") == "dash":
+        fn = lambda t: _getText(t, True)
+    else:
+        fn = _getText
+    text = "\n\n".join(map(fn, trees))
+    print text
+    h = hashlib.md5()
+    h.update(text)
+    return h.hexdigest()
