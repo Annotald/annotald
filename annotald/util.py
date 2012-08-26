@@ -19,15 +19,30 @@
 # TODO(AWE): many of these functions should be moved into Lovett, once it is
 # public.
 
-import re
-import nltk.tree as T
+# TODO: docstrings
+
+# TODO: subclass nltk.tree to allow dictionary-like subscripting???
+
+# TODO: add a file-saving test that really exercises the unicode fns
+
+# Time travel
+from __future__ import unicode_literals
+
+# Standard library
+import codecs
+import hashlib
 import json
+import os
 import pkg_resources
+import re
 import subprocess
 import sys
 import tempfile
 
-import os
+# External libraries
+import nltk.tree as T
+
+# Conditional imports
 if os.name == "nt": # pragma: no cover
     import win32process
 
