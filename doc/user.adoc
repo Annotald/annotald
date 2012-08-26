@@ -217,7 +217,7 @@ Annotald operations other than movement are controlled by the keyboard.
 Annotald users should keep their right hand on the mouse at all times;
 thus, only keys on the left hand side of the keyboard are used as key
 shortcuts (with a small number of exceptions for commands which require
-full keyborad use).footnote:[Left handed users may wish to use the left
+full keyboard use).footnote:[Left handed users may wish to use the left
 hand for mousing and the right hand for the keyboard, but the principle
 of using one hand exclusively for each operation remains the same.
 Additionally, the default configuration will have to be adjusted for
