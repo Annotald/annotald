@@ -36,8 +36,8 @@ except:
     pass
 
 # needed for py2exe to work properly
-if os.name == "nt":
-    sys.stderr = open( os.path.expanduser("~/annotald.err.log.txt"), "w" )
+#if os.name == "nt":
+#    sys.stderr = open( os.path.expanduser("~/annotald.err.log.txt"), "w" )
 
 # JB: codecs necessary for Unicode Greek support
 import codecs
@@ -91,6 +91,10 @@ class Treedraw(object):
                    'tools.staticdir.index' : 'index.html',
                    'tools.caching.on'      : False
                    }
+    
+    cherrypy.config.update({ "server.logToScreen" : False })
+    cherrypy.config.update({'log.screen': False})    
+    cherrypy.config.update({ "environment": "embedded" })
 
     def integrateTrees(self, trees):
         if self.showingPartialFile:

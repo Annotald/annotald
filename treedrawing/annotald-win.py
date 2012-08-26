@@ -7,10 +7,17 @@ import thread
 import os
 import webbrowser
 import time
+import util 
 
 ID_LAUNCH_SERVER = wx.NewId()
 ID_CHROME = wx.NewId()
- 
+
+# needed for py2exe to work properly
+#sys.stdout = open( os.path.expanduser("~/annotald.out.log.txt"), "w" )
+sys.stderr = util.Blackhole() # open( os.path.expanduser("~/annotald.err.log.txt"), "w" )
+sys.stdout = util.Blackhole()
+#sys.stderr = None
+
 class TaskBarApp(wx.Frame):
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, -1, title, size = (1, 1),
@@ -67,7 +74,7 @@ class TaskBarApp(wx.Frame):
             args = [filename]
             try:
                 # wait for cherrypy, TODO: check when server is running
-                time.sleep(2)
+                time.sleep(4)
                 self.startChrome()
                 self.tbopen.Enable(False)
                 self.tbicon.SetIcon(wx.Icon('user-plain-blue.png', wx.BITMAP_TYPE_PNG), "Annotald")

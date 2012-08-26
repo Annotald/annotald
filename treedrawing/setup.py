@@ -4,7 +4,31 @@ import shutil
 import os
 import glob
 
-
+manifest = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1"
+manifestVersion="1.0">
+<assemblyIdentity
+    version="0.64.1.0"
+    processorArchitecture="x86"
+    name="Controls"
+    type="win32"
+/>
+<description>Annotald/description>
+<dependency>
+    <dependentAssembly>
+        <assemblyIdentity
+            type="win32"
+            name="Microsoft.Windows.Common-Controls"
+            version="6.0.0.0"
+            processorArchitecture="X86"
+            publicKeyToken="6595b64144ccf1df"
+            language="*"
+        />
+    </dependentAssembly>
+</dependency>
+</assembly>
+"""
 
 annotald_data_files = []
 
@@ -27,9 +51,14 @@ annotald_data_files.append( ('data/css', css_files) )
 #script_files = find_data_files('data/scripts','',['data/*.css'])
 #image_files = find_data_files('data/images','',['data/*.png'])
 
-setup(windows=['annotald-win.py'],
+#setup(windows=['annotald-win.py'],
+#      data_files = annotald_data_files,
+#      options={ "py2exe":{ "skip_archive": True } }, )  
+
+setup(windows=[{"script":"annotald-win.py","other resources":[24,1,manifest]}],
       data_files = annotald_data_files,
-      options={ "py2exe":{ "skip_archive": True } })  
+      options={ "py2exe":{ "skip_archive": True } }, )  
+
 #shutil.copy('settings.py','dist')
 
 
