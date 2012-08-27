@@ -316,12 +316,12 @@ def scrubText(text):
     return output
 
 # TODO: is this needed?
-def get_main_dir():
+def get_main_dir(): # pragma: no cover
    if main_is_frozen():
        return os.path.dirname(sys.executable)
    return os.path.dirname(__file__)
 
-class Blackhole(object):
+class Blackhole(object): # pragma: no cover
     softspace = 0
     def write(self, text):
         pass
