@@ -2114,33 +2114,34 @@ function saveHandler (data) {
         if (safeGet(data, 'reasonCode', 0) == 1) {
             extraInfo = " <a href='#' id='forceSave' " +
                 "onclick='javascript:startTime=" + data.startTime +
-                ";save(null, true)'>Force save</a>";
+                ";save(null, {force:true})'>Force save</a>";
+        } else if (safeGet(data, 'reasonCode', 0) == 2) {
+            extraInfo = " <a href='#' id='forceSave' " +
+                "onclick='javascript:startTime=" + data.startTime +
+                ";save(null, {update_md5:true})'>Force save</a>";
         }
         displayError("Save FAILED!!!: " + data.reason + extraInfo);
     }
     saveInProgress = false;
 }
 
-function save(e, force) {
+function save(e, extraArgs) {
+    if (!extraArgs) {
+        extraArgs = {};
+    }
     if (!saveInProgress) {
-        if (force) {
-            force = true;
-        } else {
-            force = false;
-        }
         displayInfo("Saving...");
         saveInProgress = true;
         setTimeout(function () {
             var tosave = toLabeledBrackets($("#editpane"));
-            $.post("/doSave", { trees: tosave,
-                                startTime: startTime,
-                                force: force
-                              }, saveHandler).error(function () {
-                                  lastsavedstate = "";
-                                  saveInProgress = false;
-                                  displayError("Save failed, could not " +
-                                               "communicate with server!");
-                              });
+            extraArgs.trees = tosave;
+            extraArgs.startTime = startTime;
+            $.post("/doSave", extraArgs, saveHandler).error(function () {
+                lastsavedstate = "";
+                saveInProgress = false;
+                displayError("Save failed, could not " +
+                             "communicate with server!");
+            });
             if ($("#idlestatus").html().search("IDLE") != -1) {
                 idle();
             }

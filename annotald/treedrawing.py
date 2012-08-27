@@ -111,7 +111,7 @@ class Treedraw(object):
             return trees.strip()
 
     @cherrypy.expose
-    def doSave(self, trees = None, startTime = None, force = None):
+    def doSave(self, trees = None, startTime = None, force = None, update_md5 = None):
         # Save failure reason codes
         NON_MATCHING_ANNOTALDS = 1
         NON_MATCHING_HASHES = 2
@@ -125,13 +125,21 @@ class Treedraw(object):
         tosave = self.integrateTrees(trees)
         tosave = tosave.replace("-FLAG", "")
         print "self.thefile is: ", self.thefile
+        if update_md5:
+            self.versionCookie = util.updateVersionCookie(
+                self.versionCookie,
+                "HASH.MD5",
+                util.hashTrees(trees,
+                               self.versionCookie))
         if util.queryVersionCookie(self.versionCookie, "HASH.MD5"):
             print "checking hash"
-            old_hash = util.queryVersionCookie(self.versionCookie, "HASH.MD5")
+            old_hash = util.queryVersionCookie(self.versionCookie,
+                                               "HASH.MD5")
             new_hash = util.hashTrees(trees, self.versionCookie)
             if old_hash != new_hash:
                 return json.dumps(dict(result = "failure",
-                                       reason = "corpus text has changed (it shouldn't!)",
+                                       reason = ("corpus text has changed" +
+                                                 " (it shouldn't!)"),
                                        reasonCode = NON_MATCHING_HASHES,
                                        startTime = self.startTime))
         try:
