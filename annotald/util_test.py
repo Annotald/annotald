@@ -193,3 +193,61 @@ foo bar
             }
         }, "VERSION"),
                          T.Tree("(VERSION (FORMAT dash) (HASH (MD5 none)))"))
+
+    def test_getIndex(self):
+        cases = [("(NP-1 (D foo))", 1, "-"),
+                 ("(NP *T*-1)", 1, "-"),
+                 ("(XP *ICH*-3)", 3, "-"),
+                 ("(XP *-34)", 34, "-"),
+                 ("(XP *CL*-1)", 1, "-"),
+                 ("(XP=4 (X foo))", 4, "="),
+                 ("(XP *FOO*-1)", None, None),
+                 ("(NP (D foo))", None, None)]
+        for (s, i, t) in cases:
+            self.assertEqual(util._getIndex(T.Tree(s)), i)
+            self.assertEqual(util._getIndexType(T.Tree(s)), t)
+            self.assertEqual(util._hasIndex(T.Tree(s)), i is not None)
+
+    def test_setIndex(self):
+        cases = [("(NP-1 (D foo))", "(NP (D foo))"),
+                 ("(NP *T*-1)", "(NP *T*)"),
+                 ("(XP *ICH*-3)", "(XP *ICH*)"),
+                 ("(XP *-34)", "(XP *)"),
+                 ("(XP *CL*-1)", "(XP *CL*)"),
+                 ("(XP=4 (X foo))", "(XP (X foo))"),
+                 ("(XP *FOO*-1)", "(XP *FOO*-1)"),
+                 ("(NP (D foo))", "(NP (D foo))")]
+        for (orig, new) in cases:
+            self.assertEqual(util._stripIndex(T.Tree(orig)), T.Tree(new))
+
+    def test_setIndex(self):
+        cases = [("(NP-1 (D foo))", "(NP-7 (D foo))"),
+                 ("(NP *T*-1)", "(NP *T*-7)"),
+                 ("(XP *ICH*-3)", "(XP *ICH*-7)"),
+                 ("(XP *-34)", "(XP *-7)"),
+                 ("(XP *CL*-1)", "(XP *CL*-7)"),
+                 ("(XP=4 (X foo))", "(XP=7 (X foo))"),
+                 ("(XP *FOO*-1)", "(XP-7 *FOO*-1)"),
+                 ("(NP (D foo))", "(NP-7 (D foo))")]
+
+        for (orig, new) in cases:
+            self.assertEqual(util._setIndex(T.Tree(orig), 7), T.Tree(new))
+
+    def test_rewriteIndices(self):
+        t = """
+( (IP-MAT-14 (NP-SBJ-3 (D This))
+             (PRO-CL-6 lo)
+             (VBP is)
+             (NP-PRD=3 (D-6 a)
+                       (NP *CL*-6)
+                       (N test))))
+        """
+        r = """
+( (IP-MAT-1  (NP-SBJ-2 (D This))
+             (PRO-CL-3 lo)
+             (VBP is)
+             (NP-PRD=2 (D-3 a)
+                       (NP *CL*-3)
+                       (N test))))
+        """
+        self.assertEqual(util.rewriteIndices(T.Tree(t)), T.Tree(r))

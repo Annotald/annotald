@@ -369,3 +369,72 @@ def hashTrees(trees_text, version):
     h = hashlib.md5()
     h.update(text)
     return h.hexdigest()
+
+
+_idxRe = "([-=])([0-9]+)$"
+
+def _getIndexInner(tree, grp):
+    if _shouldIndexLeaf(tree):
+        s = tree[0]
+    else:
+        s = tree.node
+    res = re.search(_idxRe, s)
+    if res:
+        return res.group(grp)
+    else:
+        return None
+
+def _getIndexType(tree):
+    return _getIndexInner(tree, 1)
+
+def _getIndex(tree):
+    i = _getIndexInner(tree, 2)
+    if i is None:
+        return i
+    return int(i)
+
+def _hasIndex(tree):
+    return bool(_getIndex(tree))
+
+def _setIndex(tree, idx):
+    it = _getIndexType(tree)
+    if it is None:
+        it = "-"
+    if _hasIndex(tree):
+        tree = _stripIndex(tree)
+    if _shouldIndexLeaf(tree):
+        tree[0] = tree[0] + it + str(idx)
+    else:
+        tree.node = tree.node + it + str(idx)
+    return tree
+
+def _stripIndex(tree):
+    if not _hasIndex(tree):
+        return tree
+    if _shouldIndexLeaf(tree):
+        tree[0] = re.sub(_idxRe, "", tree[0])
+    else:
+        tree.node = re.sub(_idxRe, "", tree.node)
+    return tree
+
+def _shouldIndexLeaf(tree):
+    if not isinstance(tree[0], basestring):
+        return False
+    s = tree[0]
+    return re.split("[-=]", s)[0] in ["*T*","*ICH*","*CL*","*"]
+
+def rewriteIndices(tree):
+    indexMap = {}
+    maxIndex = 1
+    subtrees = list(tree.subtrees())
+    subtrees.insert(0, tree)
+    for t in subtrees:
+        if _hasIndex(t):
+            i = _getIndex(t)
+            try:
+                _setIndex(t, indexMap[i])
+            except KeyError:
+                indexMap[i] = maxIndex
+                _setIndex(t, maxIndex)
+                maxIndex += 1
+    return tree
