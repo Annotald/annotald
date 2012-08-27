@@ -9,10 +9,13 @@ import nltk.tree as T
 
 # TODO: document in user manual
 
-def hash_file(args):
-    if len(args) != 1:
-        print "You must specify exactly one file to hash."
+def check_n_args(args, n):
+    if len(args) != n:
+        print "You must give exactly %d arguments!" % n
         sys.exit(1)
+
+def hash_file(args):
+    check_n_args(args, 1)
     filename = args[0]
     print "Computing hash for %s." % filename
     contents = codecs.open(filename, "r", "utf-8").read()
@@ -32,14 +35,23 @@ def hash_file(args):
     annotald.util.writeTreesToFile(vc, "\n\n".join(trees), filename)
     print "Hash successfully updated."
 
+def convert_file(args):
+    check_n_args(args, 1)
+    filename = args[0]
+    with codecs.open(filename, "r", "utf-8") as f:
+        trees = f.read()
+    annotald.util.writeTreesToFile(None, trees, filename)
+
 def main(args):
     if args.cmd == "hash-file":
         hash_file(args.rest)
+    elif args.cmd == "convert":
+        convert_file(args.rest)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "A helper script for various Annotald functions")
     parser.add_argument("-d", "--dev", dest = "dev", action = "store_true")
-    parser.add_argument("cmd", choices = ["hash-file"])
+    parser.add_argument("cmd", choices = ["hash-file","convert"])
     parser.add_argument("rest", nargs = "+")
     args = parser.parse_args(sys.argv[1:])
 
