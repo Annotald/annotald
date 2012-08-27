@@ -33,3 +33,5 @@ validators = {}
 #     "example of a lovett validator": flagIf(lovett expression),
 #     "example of a corpussearch-based validator": TODO
 # }
+
+rewriteIndices = True

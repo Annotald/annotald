@@ -86,7 +86,8 @@ class Treedraw(object):
                                                 # in jana's branch
                                                 'colorCSSPath': "/dev/null",
                                                 'corpusSearchValidate':
-                                                util.corpusSearchValidate
+                                                util.corpusSearchValidate,
+                                                'rewriteIndices': True
                                             })
         cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
@@ -142,6 +143,11 @@ class Treedraw(object):
                                                  " (it shouldn't!)"),
                                        reasonCode = NON_MATCHING_HASHES,
                                        startTime = self.startTime))
+        if self.pythonOptions.rewriteIndices:
+            # TODO: we pass to and from T.Tree too many times...for
+            # efficiency, only convert to NLTK trees once
+            tosave = "\n\n".join(map(lambda t: util.rewriteIndices(T.Tree(t)),
+                                     tosave.split("\n\n")))
         try:
             util.writeTreesToFile(self.versionCookie, trees, self.thefile)
             self.doLogEvent(json.dumps({'type': "save"}))
