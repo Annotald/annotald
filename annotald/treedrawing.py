@@ -134,6 +134,7 @@ class Treedraw(object):
                                self.versionCookie))
         if util.queryVersionCookie(self.versionCookie, "HASH.MD5"):
             print "checking hash"
+            # TODO: document hash function in user manual
             old_hash = util.queryVersionCookie(self.versionCookie,
                                                "HASH.MD5")
             new_hash = util.hashTrees(trees, self.versionCookie)

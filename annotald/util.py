@@ -19,7 +19,7 @@
 # TODO(AWE): many of these functions should be moved into Lovett, once it is
 # public.
 
-# TODO: docstrings
+# TODO: docstrings, organize code
 
 # TODO: subclass nltk.tree to allow dictionary-like subscripting???
 
@@ -237,6 +237,7 @@ def deepTreeToHtml(tree, *args):
     return res
 
 def writeTreesToFile(meta, trees, filename):
+    # TODO: do this with atomic rename, just in case! ('cept on winblows)
     trees = trees.split("\n\n")
     trees = filter(lambda x: x != "", trees)
     trees = map(T.Tree, trees)
