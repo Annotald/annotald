@@ -327,7 +327,6 @@ def hashTrees(trees_text, version):
     else:
         fn = _getText
     text = "\n\n".join(map(fn, trees))
-    print text
     h = hashlib.md5()
     h.update(text)
     return h.hexdigest()
