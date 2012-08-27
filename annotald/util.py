@@ -204,7 +204,7 @@ def writeTreesToFile(meta, trees, filename):
     trees = map(_formatTree, trees)
     with codecs.open(filename, "w", "utf-8") as f:
         if meta and meta != "":
-            f.write(meta + "\n\n")
+            f.write(_formatTree(T.Tree(meta)) + "\n\n")
         f.write("\n\n".join(trees))
 
 def _formatTree(tree, indent = 0):
