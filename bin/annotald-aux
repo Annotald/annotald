@@ -9,14 +9,8 @@ import nltk.tree as T
 
 # TODO: document in user manual
 
-def check_n_args(args, n):
-    if len(args) != n:
-        print "You must give exactly %d arguments!" % n
-        sys.exit(1)
-
 def hash_file(args):
-    check_n_args(args, 1)
-    filename = args[0]
+    filename = args.filename
     print "Computing hash for %s." % filename
     contents = codecs.open(filename, "r", "utf-8").read()
     trees = contents.split("\n\n")
@@ -36,10 +30,11 @@ def hash_file(args):
     print "Hash successfully updated."
 
 def convert_file(args):
-    check_n_args(args, 1)
-    filename = args[0]
+    filename = args.filename
     with codecs.open(filename, "r", "utf-8") as f:
         trees = f.read()
+    if args.cs:
+        trees = annotald.util.scrubText(trees)
     annotald.util.writeTreesToFile(None, trees, filename)
 
 def main(args):
@@ -48,17 +43,27 @@ def main(args):
     elif args.cmd == "convert":
         convert_file(args.rest)
 
-if __name__ == "__main__":
+def parse_args(args):
     parser = argparse.ArgumentParser(description = "A helper script for various Annotald functions")
-    parser.add_argument("-d", "--dev", dest = "dev", action = "store_true")
-    parser.add_argument("cmd", choices = ["hash-file","convert"])
-    parser.add_argument("rest", nargs = "+")
-    args = parser.parse_args(sys.argv[1:])
+    parser.add_argument("-d", "--dev", dest = "dev", action = "store_true",
+                        help = "Only for developer use")
+    subparsers = parser.add_subparsers()
+    hash_file_parser = subparsers.add_parser("hash-file", help = "add hash to a parsed file")
+    hash_file_parser.add_argument("filename", nargs = 1)
+    hash_file_parser.set_defaults(func = hash_file)
+    convert_parser = subparsers.add_parser("convert", help = "convert from another format algorithm")
+    convert_parser.add_argument("-o", "--cs-output", dest = "cs", action = "store_true",
+                                help = "strip CorpusSearch comments")
+    convert_parser.add_argument("filename", nargs = 1)
+    convert_parser.set_defaults(func = convert_file)
+    args = parser.parse_args(args)
+    return args
 
+if __name__ == "__main__":
+    args = parse_args(sys.argv[1:])
     if args.dev:
         print "dev active"
         sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
     import annotald.util
     
-    main(args)
-
+    args.func(args)
