@@ -77,7 +77,7 @@ manifestVersion="1.0">
 else:
     setup(
           packages = ['annotald']
-        , scripts = ['bin/annotald', 'bin/cs-to-annotald.py']
+        , scripts = ['bin/annotald', 'bin/annotald-aux']
         # TODO: or data_files?; move corpussearch jar somewhere; ...
         , package_data = { 'annotald': ["data/*/*", "settings.py",
                                         "settings.js",
