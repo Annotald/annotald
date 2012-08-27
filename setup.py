@@ -6,9 +6,7 @@ from distutils.core import setup
 
 from distutils.core import setup
 import py2exe
-import shutil
 import os
-import glob
 
 setup_args = {
       'name': 'Annotald'
