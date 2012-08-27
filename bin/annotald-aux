@@ -17,29 +17,19 @@ def hash_file(args):
     print "Computing hash for %s." % filename
     contents = codecs.open(filename, "r", "utf-8").read()
     trees = contents.split("\n\n")
-    vc = T.Tree(trees[0])
-    if vc[0].node != "VERSION":
+    vc = trees[0]
+    if T.Tree(vc)[0].node != "VERSION":
         print "This file has no version cookie; adding."
-        vc = T.Tree("( (VERSION (HASH (MD5 none))))")
+        vc = "( (VERSION (HASH (MD5 none))))"
     else:
         trees = trees[1:]
-        if annotald.util.queryVersionCookie(unicode(vc), "HASH.MD5"):
+        if annotald.util.queryVersionCookie(vc, "HASH.MD5"):
             print "Old hash present; overwriting."
         else:
             print "Adding hash to pre-existing version cookie."
-            tmp = filter(lambda h: h.node == "HASH", vc[0])
-            if len(tmp) == 0:
-                vc[0].append(T.Tree("(HASH (MD5 none))"))
-            elif len(tmp) == 1:
-                tmp[0].append(T.Tree("(MD5 none)"))
-            else:
-                raise util.AnnotaldError("Does your version cookie have two HASH entries?")
-    new_hash = annotald.util.hashTrees("\n\n".join(trees), unicode(vc))
-    h = filter(lambda h: h.node == "HASH", vc[0])[0]
-    hn = filter(lambda h: h.node == "MD5", h)[0]
-    hn[0] = new_hash
-    print vc
-    annotald.util.writeTreesToFile(unicode(vc), "\n\n".join(trees), filename)
+    new_hash = annotald.util.hashTrees("\n\n".join(trees), vc)
+    vc = annotald.util.updateVersionCookie(vc, "HASH.MD5", new_hash)
+    annotald.util.writeTreesToFile(vc, "\n\n".join(trees), filename)
     print "Hash successfully updated."
 
 def main(args):
