@@ -30,6 +30,7 @@ from __future__ import unicode_literals
 
 # Standard library
 import codecs
+from collections import defaultdict
 import hashlib
 import json
 import os
@@ -73,6 +74,30 @@ def _queryVersionCookieInner(tree, key):
             return _queryVersionCookieInner(f[0], ".".join(keys[1:]))
     else:
         return None
+
+def updateVersionCookie(tree, key, val):
+    if tree == "" or not tree:
+        return None
+    tree = T.Tree(tree)
+    tree = tree[0]
+    if tree.node != "VERSION":
+        return
+    dd = metadataToDict(tree)
+    d = dd
+    k = key.split(".")
+    while True:
+        if len(k) == 1:
+            d[k[0]] = val
+            break
+        if isinstance(d[k[0]], basestring):
+            f = lambda: defaultdict(f)
+            d[k[0]] = defaultdict(f)
+        d = d[k[0]]
+        k = k[1:]
+
+    ret = dictToMetadata(dd)
+    ret.node = "VERSION"
+    return unicode(T.Tree('', [ret]))
 
 def treeToHtml(tree, version, extra_data = None):
     if isinstance(tree[0], basestring):
@@ -149,13 +174,27 @@ def nodeListToDict(nodes):
     return metadataToDict(T.Tree("FOO", nodes))
 
 def metadataToDict(metadata):
-    d = {}
+    f = lambda: defaultdict(f)  # A devious way of getting a recursive
+                                # defaultdict
+    d = defaultdict(f)
     for datum in metadata:
         if isinstance(datum[0], T.Tree):
             d[datum.node] = metadataToDict(datum)
         else:
             d[datum.node] = datum[0]
     return d
+
+def dictToMetadata(d, label = ""):
+    if isinstance(d, basestring):
+        return [d]
+    keys = d.keys()
+    l = []
+    for k in keys:
+        l.append(T.Tree(k, dictToMetadata(d[k])))
+    l.sort()                    # Not technically needed, except to make
+                                # the output predctable for unit tests
+    return T.Tree(label, l)
+
 
 # TODO: unify the calling convention of these fns, so we don't need *args
 def deepTreeToHtml(tree, *args):

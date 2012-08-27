@@ -172,3 +172,24 @@ foo bar
         self.assertFalse(util._isEmpty(t))
         t = p[4]
         self.assertFalse(util._isEmpty(t))
+
+    def test_updateVersionCookie(self):
+        vc = "( (VERSION (BAR (BAZ quux)) (FOO bar)))"
+        self.assertEqual(util.updateVersionCookie(vc, "FOO", "baz"),
+                         "( (VERSION (BAR (BAZ quux)) (FOO baz)))")
+        self.assertEqual(util.updateVersionCookie(vc, "BAR.BAZ", "baz"),
+                         "( (VERSION (BAR (BAZ baz)) (FOO bar)))")
+        self.assertEqual(util.updateVersionCookie(vc, "BAR", "baz"),
+                         "( (VERSION (BAR baz) (FOO bar)))")
+        self.assertEqual(util.updateVersionCookie(
+            "( (VERSION (FOO baz) (BAR baz)))", "BAR.BAZ", "baz"),
+                         "( (VERSION (BAR (BAZ baz)) (FOO baz)))")
+
+    def test_dictToMetadata(self):
+        self.assertEqual(util.dictToMetadata({
+            "FORMAT": "dash",
+            "HASH": {
+                "MD5": "none"
+            }
+        }, "VERSION"),
+                         T.Tree("(VERSION (FORMAT dash) (HASH (MD5 none)))"))
