@@ -10,7 +10,7 @@ import nltk.tree as T
 # TODO: document in user manual
 
 def hash_file(args):
-    filename = args.filename
+    filename = args.filename[0]
     print "Computing hash for %s." % filename
     contents = codecs.open(filename, "r", "utf-8").read()
     trees = contents.split("\n\n")
@@ -30,7 +30,7 @@ def hash_file(args):
     print "Hash successfully updated."
 
 def convert_file(args):
-    filename = args.filename
+    filename = args.filename[0]
     with codecs.open(filename, "r", "utf-8") as f:
         trees = f.read()
     if args.cs:
