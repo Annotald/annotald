@@ -2142,7 +2142,8 @@ function save(e, extraArgs) {
                 displayError("Save failed, could not " +
                              "communicate with server!");
             });
-            if ($("#idlestatus").html().search("IDLE") != -1) {
+            if ($("#idlestatus").length > 0 &&
+                $("#idlestatus").html().search("IDLE") != -1) {
                 idle();
             }
             lastsavedstate = $("#editpane").html();
