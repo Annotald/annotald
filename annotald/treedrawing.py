@@ -112,7 +112,8 @@ class Treedraw(object):
             return trees.strip()
 
     @cherrypy.expose
-    def doSave(self, trees = None, startTime = None, force = None, update_md5 = None):
+    def doSave(self, trees = None, startTime = None, force = None,
+               update_md5 = None):
         # Save failure reason codes
         NON_MATCHING_ANNOTALDS = 1
         NON_MATCHING_HASHES = 2
@@ -137,20 +138,21 @@ class Treedraw(object):
             # TODO: document hash function in user manual
             old_hash = util.queryVersionCookie(self.versionCookie,
                                                "HASH.MD5")
-            new_hash = util.hashTrees(trees, self.versionCookie)
+            new_hash = util.hashTrees(tosave, self.versionCookie)
             if old_hash != new_hash:
                 return json.dumps(dict(result = "failure",
                                        reason = ("corpus text has changed" +
                                                  " (it shouldn't!)"),
                                        reasonCode = NON_MATCHING_HASHES,
                                        startTime = self.startTime))
-        if self.pythonOptions.rewriteIndices:
+        if self.pythonOptions['rewriteIndices']:
             # TODO: we pass to and from T.Tree too many times...for
             # efficiency, only convert to NLTK trees once
             tosave = "\n\n".join(map(lambda t: util.rewriteIndices(T.Tree(t)),
                                      tosave.split("\n\n")))
+        tosave = tosave.replace("-FLAG", "")
         try:
-            util.writeTreesToFile(self.versionCookie, trees, self.thefile)
+            util.writeTreesToFile(self.versionCookie, tosave, self.thefile)
             self.doLogEvent(json.dumps({'type': "save"}))
             return json.dumps(dict(result = "success"))
         except Exception as e:
