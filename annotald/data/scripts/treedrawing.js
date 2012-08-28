@@ -2114,11 +2114,11 @@ function saveHandler (data) {
         if (safeGet(data, 'reasonCode', 0) == 1) {
             extraInfo = " <a href='#' id='forceSave' " +
                 "onclick='javascript:startTime=" + data.startTime +
-                ";save(null, {force:true})'>Force save</a>";
+                ";save(null, {force:true});return false'>Force save</a>";
         } else if (safeGet(data, 'reasonCode', 0) == 2) {
             extraInfo = " <a href='#' id='forceSave' " +
                 "onclick='javascript:startTime=" + data.startTime +
-                ";save(null, {update_md5:true})'>Force save</a>";
+                ";save(null, {update_md5:true});return false'>Force save</a>";
         }
         displayError("Save FAILED!!!: " + data.reason + extraInfo);
     }
