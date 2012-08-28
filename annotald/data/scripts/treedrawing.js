@@ -901,7 +901,7 @@ function displayRename() {
                     undoAbortTransaction();
                 }
                 if (event.keyCode == 13) {
-                    var newlabel = $("#leafphrasebox").val();
+                    var newlabel = $("#leafphrasebox").val().toUpperCase();
                     var newword = $("#leaftextbox").val();
                     var newlemma;
                     if (lemma) {
