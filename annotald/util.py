@@ -366,9 +366,9 @@ def hashTrees(trees_text, version):
         fn = lambda t: _getText(t, True)
     else:
         fn = _getText
-    text = "\n\n".join(map(fn, trees))
+    text = " ".join(map(fn, trees))
     h = hashlib.md5()
-    h.update(text)
+    h.update(text.encode("utf-8"))
     return h.hexdigest()
 
 
