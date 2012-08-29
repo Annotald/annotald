@@ -1814,11 +1814,11 @@ function makeNode(label) {
     }
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
     var parent_before = parent_ip.clone();
+    var newnode = $('<div class="snode ' + label + '">' + label + ' </div>\n');
     // make end = start if only one node is selected
     if (!endnode) {
         // if only one node, wrap around that one
-        $(startnode).wrapAll('<div xxx="newnode" class="snode ' + label + '">' +
-                             label + ' </div>\n');
+        $(startnode).wrapAll(newnode);
     } else {
         if (startnode.compareDocumentPosition(endnode) & 0x2) {
             // startnode and endnode in wrong order, reverse them
@@ -1832,8 +1832,7 @@ function makeNode(label) {
             // then, collect startnode and its sister up until endnode
             var oldtext = currentText(parent_ip);
             $(startnode).add($(startnode).nextUntil(endnode)).add(
-                endnode).wrapAll('<div xxx="newnode" class="snode ' +
-                                        label + '">' + label + ' </div>\n');
+                endnode).wrapAll(toselect);
             // undo if this messed up the text order
             if(currentText(parent_ip) != oldtext) {
                 // TODO: is this plausible? can we remove the check?
@@ -1842,13 +1841,15 @@ function makeNode(label) {
                 clearSelection();
                 return;
             }
+        } else {
+            return;
         }
     }
 
+    var toselect = $(startnode).parent();
+
     startnode = null;
     endnode = null;
-
-    var toselect = $(".snode[xxx=newnode]").first();
 
     if (rootLevel) {
         registerNewRootTree(toselect);
@@ -1857,7 +1858,6 @@ function makeNode(label) {
     undoEndTransaction();
 
     selectNode(toselect.get(0));
-    toselect.attr("xxx",null);
     updateSelection();
 }
 
