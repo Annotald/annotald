@@ -2362,15 +2362,16 @@ addStartupHook(function () {
 
 // ========== Quitting
 
-function quitServer() {
+function quitServer(e, force) {
     if (isIdle) {
         logEvent("auto-resume");
         isIdle = false;
         $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
         $("#butidle").unbind("mousedown").mousedown(idle);
     }
-    if ($("#editpane").html() != lastsavedstate) {
-        alert("Cannot exit, unsaved changes exist.");
+    if (!force && $("#editpane").html() != lastsavedstate) {
+        displayError("Cannot exit, unsaved changes exist.  <a href='#' " +
+                    "onclick='quitServer(null, true);return false;'>Force</a>");
     } else {
         $.post("/doExit");
         window.onbeforeunload = undefined;
