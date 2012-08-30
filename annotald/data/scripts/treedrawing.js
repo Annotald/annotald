@@ -26,6 +26,9 @@
 // - modularize doc -- namespaces?
 // - make key commands for case available
 
+// TODO: for unsaved ch warning: use tolabeledbrax, not html...html is
+// sensitive to search highlight, selection, etc
+
 // Table of contents:
 // * Initialization
 // * User configuration
