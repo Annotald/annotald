@@ -2328,7 +2328,7 @@ function idle() {
 function resume() {
     logEvent("user-resume");
     isIdle = false;
-    $("#idlestatus").html("<div style='color:64C465'>Editing.</div>");
+    $("#idlestatus").html("<div style='color:#64C465'>Editing.</div>");
     $("#butidle").unbind("mousedown").mousedown(idle);
 }
 
