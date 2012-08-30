@@ -176,7 +176,7 @@ function displayWarning(html) {
  */
 function displayInfo(html) {
     logMessage(html);
-    $("#messageBoxInner").html(html).css("color", "green");
+    $("#messageBoxInner").html(html).css("color", "#64C465");
 }
 
 /**
@@ -186,7 +186,7 @@ function displayInfo(html) {
  */
 function displayError(html) {
     logMessage(html);
-    $("#messageBoxInner").html(html).css("color", "red");
+    $("#messageBoxInner").html(html).css("color", "#C75C5C");
 }
 
 /**
