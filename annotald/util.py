@@ -237,15 +237,24 @@ def deepTreeToHtml(tree, *args):
     return res
 
 def writeTreesToFile(meta, trees, filename):
-    # TODO: do this with atomic rename, just in case! ('cept on winblows)
-    trees = trees.split("\n\n")
-    trees = filter(lambda x: x != "", trees)
-    trees = map(T.Tree, trees)
+    if isinstance(trees, basestring):
+        trees = trees.split("\n\n")
+        trees = filter(lambda x: x != "", trees)
+        trees = map(T.Tree, trees)
+    if isinstance(meta, basestring):
+        meta = T.Tree(meta)
     trees = map(_formatTree, trees)
-    with codecs.open(filename, "w", "utf-8") as f:
+
+    fn = filename
+    if os.name != "nt":
+        fn = filename + ".tmp"
+    with codecs.open(fn, "w", "utf-8") as f:
         if meta and meta != "":
-            f.write(_formatTree(T.Tree(meta)) + "\n\n")
+            f.write(_formatTree(meta) + "\n\n")
         f.write("\n\n".join(trees))
+
+    if os.name != "nt":
+        os.rename(fn, filename)
 
 def _formatTree(tree, indent = 0):
     # Should come from lovett
