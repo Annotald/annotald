@@ -39,6 +39,18 @@ def convert_file(args):
         trees = annotald.util.scrubText(trees)
     annotald.util.writeTreesToFile(None, trees, filename)
 
+def rewrite_indices(args):
+    filename = args.filename[0]
+    metadata = None
+    with codecs.open(filename, "r", "utf-8") as f:
+        trees = f.read().split("\n\n")
+    trees = map(T.Tree, trees)
+    if trees[0][0].node == "VERSION":
+        metadata = trees[0]
+        trees = trees[1:]
+    trees = map(annotald.util.rewriteIndices, trees)
+    annotald.util.writeTreesToFile(metadata, trees, filename)
+
 def main(args):
     if args.cmd == "hash-file":
         hash_file(args.rest)
@@ -58,6 +70,10 @@ def parse_args(args):
                                 help = "strip CorpusSearch comments")
     convert_parser.add_argument("filename", nargs = 1)
     convert_parser.set_defaults(func = convert_file)
+    rewrite_parser = subparsers.add_parser('rewrite-indices',
+                                          help = "rewrite tree indices in sequential order")
+    rewrite_parser.add_argument("filename", nargs = 1)
+    rewrite_parser.set_defaults(func = rewrite_indices)
     args = parser.parse_args(args)
     return args
 
