@@ -51,6 +51,17 @@ def rewrite_indices(args):
     trees = map(annotald.util.rewriteIndices, trees)
     annotald.util.writeTreesToFile(metadata, trees, filename)
 
+def test_trees(args):
+    filename = args.filename[0]
+    with codecs.open(filename, "r", "utf-8") as f:
+        trees = f.read().split("\n\n")
+    for t in xrange(len(trees)):
+        try:
+            T.Tree(trees[t])
+        except ValueError:
+            print "Anomalous tree: %dth in the file, text is %s" % (t, trees[t])
+    print "All trees checked"
+
 def main(args):
     if args.cmd == "hash-file":
         hash_file(args.rest)
@@ -77,6 +88,10 @@ def parse_args(args):
                                           help = "rewrite tree indices in sequential order")
     rewrite_parser.add_argument("filename", nargs = 1)
     rewrite_parser.set_defaults(func = rewrite_indices)
+    check_parser = subparsers.add_parser('check-trees',
+                                         help = "check that all trees are properly formatted")
+    check_parser.add_argument("filename", nargs = 1)
+    check_parser.set_defaults(func = check_trees)
     args = parser.parse_args(args)
     return args
 
