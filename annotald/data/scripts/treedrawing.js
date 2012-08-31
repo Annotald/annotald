@@ -1817,7 +1817,7 @@ function makeNode(label) {
     }
     var parent_ip = $(startnode).parents("#sn0>.snode,#sn0").first();
     var parent_before = parent_ip.clone();
-    var newnode = $('<div class="snode ' + label + '">' + label + ' </div>\n');
+    var newnode = '<div class="snode ' + label + '">' + label + ' </div>\n';
     // make end = start if only one node is selected
     if (!endnode) {
         // if only one node, wrap around that one
@@ -1835,7 +1835,7 @@ function makeNode(label) {
             // then, collect startnode and its sister up until endnode
             var oldtext = currentText(parent_ip);
             $(startnode).add($(startnode).nextUntil(endnode)).add(
-                endnode).wrapAll(toselect);
+                endnode).wrapAll(newnode);
             // undo if this messed up the text order
             if(currentText(parent_ip) != oldtext) {
                 // TODO: is this plausible? can we remove the check?
