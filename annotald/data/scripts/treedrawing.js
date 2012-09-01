@@ -355,8 +355,7 @@ function handleNodeClick(e) {
         // leftclick
         hideContextMenu();
         if (e.shiftKey && startnode) {
-            endnode = element;
-            updateSelection();
+            selectNode(element, true);
             e.preventDefault(); // Otherwise, this sets the text
                                 // selection in the browser...
         } else {
@@ -487,8 +486,10 @@ function setInputFieldEnter(field, fn) {
  * Select a node, and update the GUI to reflect that.
  *
  * @param {DOM Node} node the node to be selected
+ * @param {Boolean} force if true, force this node to be a secondary
+ * selection, even if it wouldn't otherwise be.
  */
-function selectNode(node) {
+function selectNode(node, force) {
     if (node) {
         if (!(node instanceof Node)) {
             try {
@@ -515,7 +516,7 @@ function selectNode(node) {
         } else if (startnode === null) {
             startnode = node;
         } else {
-            if (last_event_was_mouse) {
+            if (startnode && (last_event_was_mouse || force)) {
                 if (node == endnode) {
                     endnode = null;
                 } else {
