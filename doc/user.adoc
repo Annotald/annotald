@@ -393,6 +393,8 @@ Backquote (`):: Toggle the display of lemmata on or off
 
 2:: Cycle between tags for non-argument NPs
 
+@ (Shift-2):: <<splitWords,Split a word>>
+
 3:: Unbound
 
 4:: Toggle the =-PRN= dash tag (parentheticals)
