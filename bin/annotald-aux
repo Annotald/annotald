@@ -51,7 +51,7 @@ def rewrite_indices(args):
     trees = map(annotald.util.rewriteIndices, trees)
     annotald.util.writeTreesToFile(metadata, trees, filename)
 
-def test_trees(args):
+def check_trees(args):
     filename = args.filename[0]
     with codecs.open(filename, "r", "utf-8") as f:
         trees = f.read().split("\n\n")
