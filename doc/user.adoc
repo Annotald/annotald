@@ -457,7 +457,8 @@ Javascript dictionary (also known as an object).  This has the format
 - `keycode` the numeric Javascript keycode of the key you wish to bind.
   You can navigate to
   http://www.asquare.net/javascript/tests/KeyCode.html[this website] to
-  determine interactively the code for any key on your keyboard.
+  determine interactively the code for any key on your keyboard.  Be
+  sure to use the “keypress” code, not the “keydown” or “keyup” ones.
 - `ctrl` the value `true` if this binding is for a shortcut with the
   control key pressed.  Ergonomically, it is much easier to actuate such
   shortcuts if you remap the “Caps Lock” key on your keyboard to
