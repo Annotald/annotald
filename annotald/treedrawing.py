@@ -58,8 +58,7 @@ class Treedraw(object):
             raise Exception("Annotald requires exactly one .psd file argument!")
         self.shortfile = shortfile
         self.options = args
-        self.readTrees(self.thefile) # Called for side-effect of setting self.versionCookie
-        # TODO: the above line is a big hack
+        self.readVersionCookie(self.thefile)
 
         # TODO: after a respawn these will not be right
         self.inidle = False
@@ -253,6 +252,18 @@ class Treedraw(object):
         if not self.eventLog:
             self.eventLog = shelve.open("annotaldLog.shelve")
         return logs.plotPage(self.eventLog, **formData)
+
+    def readVersionCookie(filename):
+        f = codecs.open(fileName, 'r', "utf-8")
+        currentText = f.read(3*1024)
+        if self.options.outFile:
+            currentText = util.scrubText(currentText)
+
+        trees = currentText.strip().split("\n\n")
+        vc = trees[0]
+        self.versionCookie = ""
+        if vc[0:10] == "( (VERSION":
+            self.versionCookie = vc
 
     def readTrees(self, fileName, text = None):
         if text:
