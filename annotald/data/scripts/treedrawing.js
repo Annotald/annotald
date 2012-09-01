@@ -658,9 +658,19 @@ function addMetadataDialog() {
 function splitWord() {
     if (!startnode || endnode) return;
     if (!isLeafNode($(startnode)) || isEmpty(wnodeString($(startnode)))) return;
+    undoBeginTransaction();
     touchTree($(startnode));
     var wordSplit = wnodeString($(startnode)).split("-");
     var origWord = wordSplit[0];
+    var startsWithAt = false, endsWithAt = false;
+    if (origWord[0] == "@") {
+        startsWithAt = true;
+        origWord = origWord.substr(1);
+    }
+    if (origWord.substr(origWord.length - 1, 1) == "@") {
+        endsWithAt = true;
+        origWord = origWord.substr(0, origWord.length - 1);
+    }
     var origLemma = "XXX";
     if (wordSplit.length == 2) {
         origLemma = "@" + wordSplit[1] + "@";
@@ -670,14 +680,17 @@ function splitWord() {
         var words = $("#splitWordInput").val().split("@");
         if (words.join("") != origWord) {
             displayWarning("The two new words don't match the original.  Aborting");
+            undoAbortTransaction();
             return;
         }
         if (words.length < 0) {
             displayWarning("You have not specified where to split the word.");
+            undoAbortTransaction();
             return;
         }
         if (words.length > 2) {
             displayWarning("You can only split in one place at a time.");
+            undoAbortTransaction();
             return;
         }
         var labelSplit = origLabel.split("+");
@@ -686,15 +699,17 @@ function splitWord() {
             setLeafLabel($(startnode), labelSplit[0]);
             secondLabel = labelSplit[1];
         }
-        setLeafLabel($(startnode), words[0] + "@");
+        setLeafLabel($(startnode), (startsWithAt ? "@" : "") + words[0] + "@");
         var hasLemma = $(startnode).find(".lemma").size() > 0;
-        makeLeaf(false, secondLabel, "@" + words[1]);
+        makeLeaf(false, secondLabel, "@" + words[1] + (endsWithAt ? "@" : ""));
         if (hasLemma) {
             // TODO: move to something like foo@1 and foo@2 for the two pieces
             // of the lemmata
             addLemma(origLemma);
         }
         hideDialogBox();
+        undoEndTransaction();
+        undoBarrier();
     }
     var html = "Enter an at-sign at the place to split the word: \
 <input type='text' id='splitWordInput' value='" + origWord +
@@ -704,6 +719,7 @@ function splitWord() {
     $("#splitWordButton").click(doSplit);
     $("#splitWordInput").focus();
 }
+splitWord.async = true;
 
 // ========== Editing parts of the tree
 
