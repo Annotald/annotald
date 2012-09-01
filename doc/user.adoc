@@ -553,6 +553,14 @@ label “QUUX” and pressing the “f” key sequentially will yield:
 +
 One argument.
 
+[[splitWord]] `splitWord`:: Split a word (for example, to break up a
+contraction).  Annotald will display a dialog box with the text of the
+selected leaf.  You should enter an “@” (at-sign) at the location where
+the words should be split.  Annotald will then create two leaves, one
+containing the text to the left of the “@” and one the text to the
+right.  Annotald adds =@= to the beginning or end of the resulting
+leaves, to indicate that a splitting operation has taken place.
+
 `toggleExtension`:: Toggle a dash tag on the selected node.  If the (first)
 argument exists as a dash tag on the node, remove it.  Otherwise, add it.
 The optional second argument gives a list of extensions in the order they
