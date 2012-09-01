@@ -2150,10 +2150,7 @@ function save(e, extraArgs) {
                 displayError("Save failed, could not " +
                              "communicate with server!");
             });
-            if ($("#idlestatus").length > 0 &&
-                $("#idlestatus").html().search("IDLE") != -1) {
-                idle();
-            }
+            unAutoIdle();
             lastsavedstate = $("#editpane").html();
         }, 0);
     }
@@ -2300,44 +2297,50 @@ function resetIdleTimeout() {
 
 function autoIdle() {
     logEvent("auto-idle");
+    becomeIdle();
 }
 
 addStartupHook(resetIdleTimeout);
 
 addKeyDownHook(function() {
-    if (isIdle) {
-        logEvent("auto-resume");
-        isIdle = false;
-        $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
-        $("#butidle").unbind("mousedown").mousedown(idle);
-    }
+    unAutoIdle();
     resetIdleTimeout();
 });
 
 addClickHook(function() {
-    if (isIdle) {
-        logEvent("auto-resume");
-        isIdle = false;
-        $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
-        $("#butidle").unbind("mousedown").mousedown(idle);
-    }
+    unAutoIdle();
     resetIdleTimeout();
 });
 
+function unAutoIdle() {
+    if (isIdle) {
+        logEvent("auto-resume");
+        becomeEditing();
+    }
+}
+
 // =============== User interface
 
-function idle() {
-    logEvent("user-idle");
+function becomeIdle() {
     isIdle = true;
     $("#idlestatus").html("<div style='color:#C75C5C'>IDLE.</div>");
     $("#butidle").unbind("mousedown").mousedown(resume);
 }
 
-function resume() {
-    logEvent("user-resume");
+function becomeEditing() {
     isIdle = false;
     $("#idlestatus").html("<div style='color:#64C465'>Editing.</div>");
     $("#butidle").unbind("mousedown").mousedown(idle);
+}
+
+function idle() {
+    logEvent("user-idle");
+    becomeIdle();
+}
+
+function resume() {
+    logEvent("user-resume");
+    becomeEditing();
 }
 
 // =============== Key/click logging
@@ -2371,12 +2374,7 @@ addStartupHook(function () {
 // ========== Quitting
 
 function quitServer(e, force) {
-    if (isIdle) {
-        logEvent("auto-resume");
-        isIdle = false;
-        $("#idlestatus").html("<div style='color:green'>Status: Editing.</div>");
-        $("#butidle").unbind("mousedown").mousedown(idle);
-    }
+    unAutoIdle();
     if (!force && $("#editpane").html() != lastsavedstate) {
         displayError("Cannot exit, unsaved changes exist.  <a href='#' " +
                     "onclick='quitServer(null, true);return false;'>Force</a>");
