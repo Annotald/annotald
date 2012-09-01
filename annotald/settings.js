@@ -31,7 +31,7 @@ var logDetail = true;
  * caseTags indicates which tags bear case indicators; casePhrases indicates
  * which phrasal categories case pertains to (though they themselves are not
  * marked)
- */ 
+ */
 var displayCaseMenu = false; // This feature is inoperative, pending modularization
 var caseTags = ["N","NS","NPR","NPRS",
                 "PRO","D","NUM",
@@ -131,7 +131,7 @@ function customCommands() {
 
 
 /*
- * Default phrase label suggestions in context menu 
+ * Default phrase label suggestions in context menu
  */
 var defaultConMenuGroup = ["VBPI","VBPS","VBDI","VBDS","VBI","VAN","VBN","VB"];
 
@@ -147,7 +147,7 @@ function customConMenuGroups() {
                       "NP-DIR","NP-ADT","NP-VOC","QP"] );
     addConMenuGroup( ["PP","ADVP","ADVP-TMP","ADVP-LOC","ADVP-DIR","NP-MSR","NP-ADV"] );
     addConMenuGroup( ["VBPI","VBPS","VBDI","VBDS","VBI","VAN","VBN","VB","HV"] );
-    addConMenuGroup( ["HVPI","HVPS","HVDI","HVDS","HVI","HV"] );	
+    addConMenuGroup( ["HVPI","HVPS","HVDI","HVDS","HVI","HV"] );
     addConMenuGroup( ["RP","P","ADV","ADVR","ADVS","ADJ","ADJR","ADJS","C","CONJ","ALSO"] );
     addConMenuGroup( ["WADVP","WNP","WPP","WQP","WADJP"] );
     addConMenuGroup( ["CP-THT","CP-QUE","CP-REL","CP-DEG","CP-ADV","CP-CMP"] );
