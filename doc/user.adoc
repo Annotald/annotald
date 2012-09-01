@@ -146,7 +146,7 @@ represents the file itself is dark brown.
 
 // editing operations cannot change the text
 
-There are three ways of interacting with Annotald’s user interface.  
+There are three ways of interacting with Annotald’s user interface.
 
 === Mouse
 
