@@ -919,3 +919,49 @@ case-bearing daughters, without recursing too deeply.
 
 
 // TODO: custom CSS – file, with functions in settings.js
+== Auxiliary commands
+
+Annotald comes with a command-line tool that performs some auxiliary
+functions.  It is invoked at the command line by typing `annotald-aux`,
+followed by the name of an auxiliary command, followed by that command’s
+arguments.  Unless otherwise indicated, commands that operate on a file
+modify the file in place.  If you want to preserve an unmodified version
+of the file, make sure to make a copy before invoking
+`annotald-aux`.footnote:[You can also use another means of recording the
+prior state of the file, of course, such as checking it into a version
+control system.]  The available commands are:
+
+`convert`:: Convert a file from another format into Annotald’ output
+format.  Currently, this command supports converting from CorpusSearch
+output files, via the `-o` option followed by a filename argument.
+Supplying this option will strip CorpusSearch (and emacs parser-mode)
+comments from the file.  The file will additionally have its trees
+reindented.  You can have reindentation alone by invoking the command
+with only a filename argument (no `-o`).
+
+`check-trees`:: Check each tree in the file to make sure it is valid.
+When working with non-structural editing methods(such as hand-editing or
+regular expressions), it is somewhat common for a parenthesis to go
+astray, leading to an invalid tree.  This mode will help you find such
+mistakes.  It does not modify its argument file.
+
+`hash-file`:: This command adds a hash to the file.  A hash is a
+“fingerprint” of the file’s text.  Annotald will not allow you to change
+the text of the corpus, and if a file has a hash, it will verify, on
+every save, that the corpus text has not changed.  Hashing files is good
+protection against possible Annotald bugs, as well as against
+modifications to the file’s text arising from other editing methods.
++
+Annotald contains a built-in feature for <<splitWord,splitting words>>, and splits
+will not be counted as changes to the text.  However, if you edit the
+text by hand (for example to join words, which Annotald does not
+support natively), you will need to re-hash the file.
+
+`rewrite-indices`:: In editing trees, the movement indices can become
+disjointed.  For example, splitting a sentence in two can result in a
+sentence whose indices begin at a number larger than one.  Using this
+command sequentially renumbers all indices in all trees, beginning with
+1 for each tree and proceeding in order.
++
+Annotald will additionally rewrte indices automatically on save, unless
+this feature is disabled in the `settings.py` file.
