@@ -2351,7 +2351,7 @@ addStartupHook(function () {
         addKeyDownHook(function (keydata, fn, args) {
             var key = (keydata.ctrl ? "C-" : "") +
                     (keydata.shift ? "S-" : "") +
-                    String.fromCharCode(keydata),
+                    String.fromCharCode(keydata.keyCode),
                 theFn = fn.name + "(" +
                     args.map(function (x) { return JSON.stringify(x); }).join(", ") +
                     ")";
