@@ -254,7 +254,7 @@ class Treedraw(object):
         return logs.plotPage(self.eventLog, **formData)
 
     def readVersionCookie(self, filename):
-        f = codecs.open(fileName, 'r', "utf-8")
+        f = codecs.open(filename, 'r', "utf-8")
         currentText = f.read(3*1024)
         if self.options.outFile:
             currentText = util.scrubText(currentText)
