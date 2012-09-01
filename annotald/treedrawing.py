@@ -212,7 +212,7 @@ class Treedraw(object):
         self.eventLog.sync()
         # TODO: a backup, in case of corruption...remove once confident
         with open("annotaldLog.txt", "a") as f:
-            f.write(json.dumps(eventData))
+            f.write(str(evtTime) + ": " + json.dumps(eventData) + "\n")
         return ""
 
     @cherrypy.expose
@@ -444,7 +444,7 @@ def _main(argv):
         eventLog[str(evtTime)] = eventData
         eventLog.close()
         with open("annotaldLog.txt", "a") as f:
-            f.write(json.dumps(eventData) + "\n")
+            f.write(str(evtTime) + ": " + json.dumps(eventData) + "\n")
 
     cherrypy.config.update({'server.socket_port': args.port})
 
