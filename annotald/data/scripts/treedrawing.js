@@ -385,6 +385,7 @@ function showContextMenu(e) {
 
     var conl = $("#conLeft"),
         conr = $("#conRight"),
+        conrr = $("#conRightest"),
         conm = $("#conMenu");
 
     conl.empty();
@@ -393,11 +394,11 @@ function showContextMenu(e) {
     // Make the columns equally high
     conl.height("auto");
     conr.height("auto");
-    if (conl.height() < conr.height()) {
-        conl.height(conr.height());
-    } else {
-        conr.height(conl.height());
-    }
+    conrr.height("auto");
+    var h = _.max([conl,conr,conrr], function (x) { return x.height(); });
+    conl.height(h);
+    conr.height(h);
+    conrr.height(h);
 
     conm.css("left",left);
     conm.css("top",top);
