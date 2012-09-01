@@ -666,7 +666,11 @@ function splitWord() {
             displayWarning("The two new words don't match the original.  Aborting");
             return;
         }
-        if (words.length != 2) {
+        if (words.length < 0) {
+            displayWarning("You have not specified where to split the word.");
+            return;
+        }
+        if (words.length > 2) {
             displayWarning("You can only split in one place at a time.");
             return;
         }
