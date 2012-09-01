@@ -334,7 +334,7 @@ class Treedraw(object):
                                     useValidator = useValidator,
                                     validators = validatorNames,
                                     treeIndexStatement = ti,
-                                    idle = "Editing."
+                                    idle = "<div style='color:#64C465'>Editing.</div>"
                                     )
 
     @cherrypy.expose
