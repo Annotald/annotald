@@ -55,7 +55,8 @@ class Treedraw(object):
         if len(args.psd) == 1:
             self.thefile = args.psd[0]
         else:
-            raise Exception("Annotald requires exactly one .psd file argument!")
+            raise util.AnnotaldException(
+                "Annotald requires exactly one .psd file argument!")
         self.shortfile = shortfile
         self.options = args
         self.readVersionCookie(self.thefile)
@@ -66,7 +67,6 @@ class Treedraw(object):
         self.startTime = str(int(time.time()))
         self.eventLog = None    # Will be initialized when needed
 
-        # TODO: this needs to come from an IO library, not ad hoc
         if util.queryVersionCookie(self.versionCookie, "FORMAT") == "deep":
             self.conversionFn = util.deepTreeToHtml
             self.useMetadata = True
@@ -75,8 +75,6 @@ class Treedraw(object):
             self.useMetadata = False
         self.showingPartialFile = self.options.oneTree or \
                                   self.options.numTrees > 1
-        # TODO: initialize vars with deafult values, so that if they are
-        # not set in the file nothing bad happens
         self.pythonOptions = runpy.run_path(args.pythonSettings,
                                             init_globals = {
                                                 'extraJavascripts': [],
@@ -100,8 +98,10 @@ class Treedraw(object):
                    }
     if os.name == "nt":
         cherrypy.config.update({ "server.logToScreen" : False })
-        cherrypy.config.update({'log.screen': False})
-        cherrypy.config.update({ "environment": "embedded" })
+        cherrypy.config.update({ 'log.screen'         : False})
+        # TODO: why do we do this? if all it does is remove the bt from the
+        # browser, it isn't waht we want.
+        cherrypy.config.update({ "environment"        : "embedded" })
 
     def integrateTrees(self, trees):
         if self.showingPartialFile:
