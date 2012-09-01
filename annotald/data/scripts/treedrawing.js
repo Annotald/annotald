@@ -129,7 +129,10 @@ addStartupHook(function() {
 function assignEvents() {
     // load custom commands from user settings file
     customCommands();
-    document.body.onkeydown = handleKeyDown;
+    // We should use keypress events, because we don't want modifier-only
+    // keystrokes.  The name of the handler function doesn't match the event
+    // handler used for historical reasons.
+    document.body.onkeypress = handleKeyDown;
     $("#sn0").mousedown(handleNodeClick);
     $("#butsave").mousedown(save);
     $("#butundo").mousedown(undo);
@@ -285,6 +288,8 @@ function addKeyDownHook(fn) {
     keyDownHooks.push(fn);
 }
 
+// This is actaully a keypress handler; the name is different (wrong) for
+// historical reasons
 function handleKeyDown(e) {
     if ((e.ctrlKey && e.shiftKey) || e.metaKey || e.altKey) {
         // unsupported modifier combinations
@@ -436,7 +441,7 @@ addStartupHook(function () {
  * @param {Function} hideHook a function to run when hiding the dialog box
  */
 function showDialogBox(title, html, returnFn, hideHook) {
-    document.body.onkeydown = function (e) {
+    document.body.onkeypress = function (e) {
         if (e.keyCode == 27) { // escape
             if (hideHook) {
                 hideHook();
@@ -458,7 +463,7 @@ function showDialogBox(title, html, returnFn, hideHook) {
 function hideDialogBox() {
     $("#dialogBox").get(0).style.visibility = "hidden";
     $("#dialogBackground").get(0).style.visibility = "hidden";
-    document.body.onkeydown = handleKeyDown;
+    document.body.onkeypress = handleKeyDown;
 }
 
 /**
@@ -856,7 +861,7 @@ function displayRename() {
             updateCssClass(newNode, oldClass);
             startnode = endnode = null;
             updateSelection();
-            document.body.onkeydown = handleKeyDown;
+            document.body.onkeypress = handleKeyDown;
             $("#sn0").mousedown(handleNodeClick);
             $("#editpane").mousedown(clearSelection);
             $("#undo").attr("disabled", false);
@@ -871,7 +876,7 @@ function displayRename() {
     }
     undoBeginTransaction();
     touchTree($(startnode));
-    document.body.onkeydown = null;
+    document.body.onkeypress = null;
     $("#sn0").unbind('mousedown');
     $("#editpane").unbind('mousedown');
     $("#undo").attr("disabled", true);
@@ -1024,7 +1029,7 @@ function editLemma() {
     function postChange() {
         startnode = null; endnode = null;
         updateSelection();
-        document.body.onkeydown = handleKeyDown;
+        document.body.onkeypress = handleKeyDown;
         $("#sn0").mousedown(handleNodeClick);
         $("#undo").attr("disabled", false);
         $("#redo").attr("disabled", false);
@@ -1037,7 +1042,7 @@ function editLemma() {
     if (!startnode || endnode || childLemmata.size() != 1) {
         return;
     }
-    document.body.onkeydown = null;
+    document.body.onkeypress = null;
     $("#sn0").unbind('mousedown');
     undoBeginTransaction();
     touchTree($(startnode));
