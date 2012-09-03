@@ -2855,6 +2855,7 @@ function resetLabelClasses(alertOnError) {
 // " "shouldIndexLeaf" "maxIndex" "addToIndices" "changeJustLabel\
 // " "toggleStringExtension" "lookupNextLabel" "commentTypes\
 // " "invisibleCategories" "invisibleRootCategories" "ipnodes" "messageHistory\
-// " "scrollToNext" "clearTimeout" "logDetail" "hasLemma" "getLemma")
+// " "scrollToNext" "clearTimeout" "logDetail" "hasLemma" "getLemma\
+// " "logDetail")
 // indent-tabs-mode: nil
 // End:
