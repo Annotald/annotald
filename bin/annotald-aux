@@ -105,10 +105,14 @@ def parse_args(args):
     parser.add_argument("-d", "--dev", dest = "dev", action = "store_true",
                         help = "Only for developer use")
     subparsers = parser.add_subparsers()
+
+    # hash-file
     hash_file_parser = subparsers.add_parser("hash-file",
                                              help = "add hash to a parsed file")
     hash_file_parser.add_argument("filename", nargs = 1)
     hash_file_parser.set_defaults(func = hash_file)
+
+    # convert
     convert_parser = subparsers.add_parser("convert",
                                            help = "convert from another format algorithm")
     convert_parser.add_argument("-o", "--cs-output", dest = "cs",
@@ -116,10 +120,14 @@ def parse_args(args):
                                 help = "strip CorpusSearch comments")
     convert_parser.add_argument("filename", nargs = 1)
     convert_parser.set_defaults(func = convert_file)
+
+    # rewrite-indices
     rewrite_parser = subparsers.add_parser('rewrite-indices',
                                           help = "rewrite tree indices in sequential order")
     rewrite_parser.add_argument("filename", nargs = 1)
     rewrite_parser.set_defaults(func = rewrite_indices)
+
+    # check-trees
     check_parser = subparsers.add_parser('check-trees',
                                          help = "check that all trees are properly formatted")
     check_parser.add_argument("filename", nargs = 1)
