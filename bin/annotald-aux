@@ -4,7 +4,9 @@ from __future__ import unicode_literals
 
 import argparse
 import codecs
+import csv
 import os
+import shelve
 import sys
 
 import nltk.tree as T
@@ -62,6 +64,36 @@ def check_trees(args):
             print "Anomalous tree: %dth in the file, text is %s" % (t, trees[t])
     print "All trees checked"
 
+def log_to_csv(args):
+    if not os.path.exists("annotaldLog.shelve"):
+        print "No annotaldLog.shelve in working directory."
+        sys.exit(1)
+    log = shelve.open("annotaldLog.shelve")
+    rfile_real = open("annotaldLog.csv", "w")
+    rfile = csv.writer(rfile_real)
+    keys = set()
+    for v in log.values():
+        for k in v.keys():
+            keys.add(k)
+    keys = list(keys)
+    keys.sort()
+
+    times = log.keys()
+    times.sort()
+    rfile.writerow(["time"] + keys)
+    for t in times:
+        row = []
+        row.append(t)
+        for k in keys:
+            try:
+                row.append(log[t][k])
+            except KeyError:
+                row.append("NA")
+        rfile.writerow(row)
+
+    rfile_real.close()
+    print "Annotald log converted to CSV successfully."
+
 def main(args):
     if args.cmd == "hash-file":
         hash_file(args.rest)
@@ -92,6 +124,12 @@ def parse_args(args):
                                          help = "check that all trees are properly formatted")
     check_parser.add_argument("filename", nargs = 1)
     check_parser.set_defaults(func = check_trees)
+
+    # csv-log
+    csv_parser = subparsers.add_parser('csv-log',
+                                         help = "convert log to CSV format")
+    csv_parser.set_defaults(func = log_to_csv)
+
     args = parser.parse_args(args)
     return args
 
