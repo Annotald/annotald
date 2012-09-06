@@ -162,7 +162,6 @@ function addStartupHook(fn) {
 
 function documentReadyHandler() {
     // TODO: something is very slow here; profile
-    $("#editpane>.snode").attr("id", "sn0");
     // TODO: move some of this into hooks
     assignEvents();
     styleIpNodes();

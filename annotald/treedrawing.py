@@ -285,7 +285,7 @@ class Treedraw(object):
 
     def treesToHtml(self, trees):
         version = util.queryVersionCookie(self.versionCookie, "FORMAT")
-        alltrees = '<div class="snode">'
+        alltrees = '<div class="snode" id="sn0">'
         for tree in trees:
             tree = tree.strip()
             tree = tree.replace("<","&lt;")
