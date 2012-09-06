@@ -24,6 +24,13 @@ body {
     margin: 0px;
     padding: 0px;
     background-color: #D2B48C;
+    /*
+     * This is the right thing to do to prevent inadvertent drags from
+     * selecting text, but inexplicably this creates a big slowdown in
+     * the UI. WTF, Chrome?
+
+    -webkit-user-select: none;
+    */
 }
 
 /* Nodes */

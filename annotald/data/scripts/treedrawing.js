@@ -131,6 +131,7 @@ function assignEvents() {
     customCommands();
     document.body.onkeydown = handleKeyDown;
     $("#sn0").mousedown(handleNodeClick);
+    document.body.onmouseup = killTextSelection;
     $("#butsave").mousedown(save);
     $("#butundo").mousedown(undo);
     $("#butredo").mousedown(redo);
@@ -263,6 +264,12 @@ function addCommand(dict, fn) {
 // ===== UI functions
 
 // ========== Event handlers
+
+function killTextSelection() {
+    if (dialogShowing) return;
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+}
 
 function handleMouseWheel(e, delta) {
     if (e.shiftKey && startnode) {
@@ -423,6 +430,8 @@ addStartupHook(function () {
 
 // ========== Dialog boxes
 
+var dialogShowing = false;
+
 /**
  * Show a dialog box.
  *
@@ -449,6 +458,7 @@ function showDialogBox(title, html, returnFn, hideHook) {
         '<div id="dialogContent">' + html + '</div>';
     $("#dialogBox").html(html).get(0).style.visibility = "visible";
     $("#dialogBackground").get(0).style.visibility = "visible";
+    dialogShowing = true;
 }
 
 /**
@@ -458,6 +468,7 @@ function hideDialogBox() {
     $("#dialogBox").get(0).style.visibility = "hidden";
     $("#dialogBackground").get(0).style.visibility = "hidden";
     document.body.onkeydown = handleKeyDown;
+    dialogShowing = false;
 }
 
 /**
