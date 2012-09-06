@@ -424,7 +424,8 @@ function hideContextMenu() {
  * Show the message history.
  */
 function showMessageHistory() {
-    showDialogBox("Messages", "<textarea style='width:100%;height:100%;'>" +
+    showDialogBox("Messages", "<textarea readonly='readonly' " +
+                  "style='width:100%;height:100%;'>" +
                   messageHistory + "</textarea>");
 }
 addStartupHook(function () {
