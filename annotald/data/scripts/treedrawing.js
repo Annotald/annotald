@@ -296,6 +296,10 @@ function handleKeyDown(e) {
         // unsupported modifier combinations
         return true;
     }
+    if (e.keyCode == 16 || e.keyCode == 17 || e.keyCode == 18) {
+        // Don't handle shift, ctrl, and meta presses
+        return true;
+    }
     var commandMap;
     if (e.ctrlKey) {
         commandMap = ctrlKeyMap;
