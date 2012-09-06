@@ -2222,7 +2222,8 @@ function validateHandler(data) {
     if (data.result == "success") {
         displayInfo("Validate success.");
         $("#editpane").html(data.html);
-        documentReadyHandler();
+        assignEvents();
+        prepareUndoIds();
     } else if (data.result == "failure") {
         displayWarning("Validate failed: " + data.reason);
     }
@@ -2434,13 +2435,15 @@ var undoMap,
 
 var idNumber = 1;
 
-addStartupHook(function () {
+function prepareUndoIds() {
     $("#sn0>.snode").map(function () {
         $(this).attr("id", "id" + idNumber);
         idNumber++;
     });
-    resetUndo();
-});
+    nukeUndo();
+}
+
+addStartupHook(prepareUndoIds);
 
 /**
  * Reset the undo system.
