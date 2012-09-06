@@ -285,11 +285,12 @@ function isLeafNode(node) {
  * @param {DOM node} node the node to operate on
  */
 function guessLeafNode(node) {
+    var label = getLabel($(node)).replace("-FLAG", "");
     if (typeof testValidLeafLabel   !== "undefined" &&
         typeof testValidPhraseLabel !== "undefined") {
-        if (testValidPhraseLabel(getLabel($(node)))) {
+        if (testValidPhraseLabel(label)) {
             return false;
-        } else if (testValidLeafLabel(getLabel($(node)))) {
+        } else if (testValidLeafLabel(label)) {
             return true;
         } else {
             // not a valid label, fall back to structural check
