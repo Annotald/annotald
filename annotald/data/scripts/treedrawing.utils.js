@@ -328,7 +328,7 @@ function wnodeString(node) {
  * not rejoin words which have been split.  It also does not add spaces.
  *
  * @param {JQuery Node} root the node to operate on
- */ 
+ */
 function currentText(root) {
     var nodes = root.get(0).getElementsByClassName("wnode");
     var text = "",
