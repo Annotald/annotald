@@ -164,36 +164,46 @@ class Treedraw(object):
 
     @cherrypy.expose
     def doValidate(self, trees = None, validator = None, shift = None):
-        # TODO: don't dump the current doc's trees if something goes wrong
-        # during validate
         cherrypy.response.headers['Content-Type'] = 'application/json'
+        tovalidate = self.integrateTrees(trees)
+        self.doLogEvent(json.dumps({'type': "validate",
+                                    'validator': validator}))
+
+        # When showing part of the file, a regular click of the validation
+        # button validates only the showing trees, whereas shift-click does
+        # them all.  This implements that logic.
+        if self.showingPartialTree and not shift:
+            tovalidate = "\n\n".join(
+                self.trees[self.treeIndexStart:self.treeIndexEnd])
+
         try:
-            if self.showingPartialFile and shift == "true":
-                # TODO: what is going on here?  what is shift? we should
-                # be able to just call integratetrees unconditionally
-                tovalidate = self.integrateTrees(trees)
-            else:
-                tovalidate = trees.strip()
             validatedTrees = self.pythonOptions['validators'][validator](
                 self.versionCookie, tovalidate
-                ).split("\n\n")
+            ).split("\n\n")
+        except Exception as e:
+            print "something went wrong with validation: %s, %s" % (type(e), e)
+            traceback.print_exc()
+            return json.dumps(dict(result = "failure",
+                                   reason = str(e)))
 
-            if self.showingPartialFile and shift == "true":
+        # What to do with the resultant trees depends on whether they are all
+        # the trees in the file, and on whether we want to show all the trees
+        # in the file.s
+        if self.showingPartialFile:
+            if shift == "true":
                 self.trees = validatedTrees
                 validatedHtml = self.treesToHtml(self.trees[
                     self.treeIndexStart:self.treeIndexEnd])
             else:
+                self.integrateTrees(validatedTrees)
                 validatedHtml = self.treesToHtml(validatedTrees)
+        else:
+            self.trees = validatedTrees
+            validatedHtml = self.treesToHtml(validatedTrees)
 
-            self.doLogEvent(json.dumps({'type': "validate",
-                                        'validator': validator}))
-            return json.dumps(dict(result = "success",
-                                   html = validatedHtml))
-        except Exception as e:
-            print "something went wrong: %s, %s" % (type(e), e)
-            traceback.print_exc()
-            return json.dumps(dict(result = "failure",
-                                   reason = str(e)))
+        return json.dumps(dict(result = "success",
+                               html = validatedHtml))
+
 
     @cherrypy.expose
     def doLogEvent(self, eventData):
