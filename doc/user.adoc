@@ -60,6 +60,10 @@ has been funded by:
 - The University of Iceland Research Fund
 - Research funds at the University of Pennsylvania
 
+Annotald is under active development.  If you would like to be on a
+mailing list to receive announcements of new releases, please contact
+mailto:ecay@sas.upenn.edu[Aaron Ecay]
+
 // eventually: availability of annotation seminars etc.
 
 == Installation
@@ -72,7 +76,9 @@ provided free of charge.  The second means that the software’s source
 code is freely available to its users for them to inspect, modify, and
 reuse.  The second of these definitions is the most important to
 ensuring scientific openness; as it happens Annotald and its
-dependencies fulfill both definitions.]
+dependencies fulfill both definitions.  For more information, consult
+https://www.gnu.org/philosophy/free-sw.html[this document from the Free
+Software Foundation].]
 
 Some of Annotald’s dependencies may require a C compiler; for Macs this is
 available by installing Apple’s no-cost XCode toolkit, and then choosing
@@ -83,13 +89,16 @@ Annotald on Mac and Linux:
 1. Download and install the latest stable version of
    https://www.google.com/intl/en/chrome/browser/?hl=en&lr=all[Google’s
    Chrome web browser]
-2. Install the latest stable version of Python 2, if necessary.
+2. Install the latest stable version of Python 2, if necessary.  At the
+   http://www.python.org/download/[Python download page], be sure to
+   select one of the 2.x versions of Python, not 3.x.
    Macintosh computers have a sufficient version of Python
    pre-installed.  (If you use Linux, it is also very likely that Python
    2 is already installed on your computer.)
 3. Follow the http://nltk.org/install.html[instructions] given by the
    Natural Language Toolkit project to install the `pip` command on your
-   computer.
+   computer.  That is, steps 1–3 of the Mac/Linux directions, or steps
+   1–4 of the Windows directions for source installation.
 4. Download the latest release of Annotald from TODO: link.  Open a
    terminal on your computer, and type `pip install
    path/to/Annotald-x.y.z.tar.gz` (replacing `path/to/` with an
@@ -107,21 +116,24 @@ interface appear.  The rest of this manual is concerned with using and
 customizing the program.
 
 NOTE: If you are not able to install Annotald successfully, you can open
-an issue report at Annotald’s website on GitHub.
-// TODO: link
-This will put you in touch with Annotald’s developers, who will help you
-solve the problem.  When creating issue reports, please try to describe
-your computer’s configuration and the error message you received in
-terms that are as accurate and concise as possible.
+an issue report at https://github.com/Annotald/annotald[Annotald’s
+website] on GitHub.  This will put you in touch with Annotald’s
+developers, who will help you solve the problem.  When creating issue
+reports, please try to describe your computer’s configuration and the
+error message you received in terms that are as accurate and concise as
+possible.
 
-Installation instructions for windows remain to be written.
-// TODO: Windows install
+In the near future, it is likely that there will be a graphical
+frontend for Windows users, including a graphical installation method.
+Pay attention to forthcoming releases of Annotald for news.
 
 == Annotald UI and Philosophy
 
-The Annotald user interface (UI) is shown in the following screenshot:
-
-// TODO: is it necessary to redo this since search has been added? ugh.
+The Annotald user interface (UI) is shown in the following
+screenshot:footnote:[You may notice subtle differences in some
+screenshots, reflecting ways in which the Annotald UI has evolved over
+its development.  It is hoped that these will not detract from the
+points being explicated.]
 
 image::images/annotald-hello.png[The Annotald UI at startup,align="center"]
 
@@ -149,7 +161,17 @@ dark pink, in order to make them more salient, and provide an additional visual
 reference to the structure of the sentences being edited.  The box which
 represents the file itself is dark brown.
 
-// editing operations cannot change the text
+Annotald aims to make common tasks in annotation nearly effortless.
+Thus, complex behaviors can be executed with a single keystroke – often
+without using modifier keys.  Conversely, Annotald tries to prevent
+users from doing things that would be deleterious to the project of
+efficiently annotating a corpus.  Thus, it is impossible to change the
+text of the file itself in Annotald.  It is also difficult to edit
+POS tags directly in Annotald’s interface.  Annotald is optimized for
+editing a corpus which already contains mostly-accurate POS
+annotation and at least some syntactic structure.  Users with corpora
+that need extensive POS correction may be better served (at present) by
+another tool.
 
 There are three ways of interacting with Annotald’s user interface.
 
@@ -228,8 +250,12 @@ of using one hand exclusively for each operation remains the same.
 Additionally, the default configuration will have to be adjusted for
 users of non-English keyboard layouts.]
 
-// TODO: link to section about customizing keybindings
-
+Generally speaking, Annotald key commands perform annotation operations
+related to a single goal.  One key, for example, toggles between the
+tags for different kinds of argument NPs.  For more on <<keycmds,the
+default keybindings>>, including their organizing principles, or on
+<<customkeys,customizing the key commands to fit your annotation
+needs>>, see the linked sections.
 
 == Customization
 
@@ -240,10 +266,9 @@ users of non-English keyboard layouts.]
 When invoked via the command line, there are several options which can
 be passed to Annotald to affect its behavior.  These are:
 
-`-s PATH`:: Specify the path to the javascript settings file.  If this
-is not specified, the default settings file distributed with Annotald is
-used.
-// TODO: link
+`-s PATH`:: Specify the path to the <<jssettings,javascript settings
+file>>.  If this is not specified, the default settings file distributed
+with Annotald is used.
 
 `-S PATH`:: Specify the path to the python settings file.  If this is
 not specified, the default settings file distributed with Annotald is
@@ -254,8 +279,10 @@ used.
 default is 8080 (possible values range between 1025 and 65535).  Only
 one program may listen to a given port, so if you would like to run more
 than one instance of Annotald concurrently, you must specify a different
-port for each of them.
-// TODO: how to specify port in the browser
+port for each of them.  The port is sepcified in the Chrome browser
+after `localhost:`.  Thus, the default URL for Annotald is
+http://localhost:8080.  If you have started Annotald with the `-p 8081`
+option, you should use http://localhost:8081 as the URL in the browser.
 
 `-o`:: Specify that the file to be read from is a CorpusSearch output
 file.  CorpusSearch comments will be stripped from the file on reading.
@@ -268,6 +295,7 @@ file.  CorpusSearch comments will be stripped from the file on reading.
 
 `-1`:: A shortcut which is equivalent to `-n 1`
 
+[[jssettings]]
 === Javascript customization options
 
 // TODO: revise/remove this paragraph
@@ -279,9 +307,7 @@ that are very pervasive or advanced.  A commented sample version of both
 files is included in the Annotald download, which it is recommended for
 users to base their customizations on.
 
-In this section, the options in `settings.js` will be discussed.  Options
-specifiable in `settings.py` on the other hand will be discussed in
-other sections where they are implicated.
+In this section, the options in `settings.js` will be discussed.
 
 // TODO: discussion assumes familiarity with penn treebank conventions,
 // include note to read intro to annotation section first if reader is
@@ -378,7 +404,83 @@ link:../api-doc/symbols/global.html#addConMenuGroup[`addConMenuGroup` function].
 options in the context menu.  This should be a series of calls to the
 link:../api-doc/symbols/global.html#addConLeafBefore[`addConLeafBefore` function].
 
-// TODO: styleTag
+
+=== Color schemes
+
+In the javascript settings file, you may also place calls to the
+link:../api-doc/symbols/global.html#styleTag[`styleTag`] and
+link:../api-doc/symbols/global.html#styleDashTag[`styleDashTag`]
+functions.  These allow you to specify alternate colors for certain
+nodes in the corpus.  As their names suggest, `styleTag` operates on
+category-level tags, whereas `styleDashTag` operates on dash tags.  The
+first argument of the function is the tag to apply a style to.  The
+second is a sequence of
+https://developer.mozilla.org/en-US/docs/CSS/CSS_Reference[CSS rules].
+
+A full explanation of CSS is beyond the scope of the present document.
+Suffice it to say that CSS consists of a sequence of rules of the form
+`key: value;`.  Two keys relevant for present purposes are `color` and
+`background-color`, which set the text and backgroudn color,
+respectively.  The `value` for the color can be a color name from
+https://developer.mozilla.org/en-US/docs/CSS/color_value[this list], or
+a specification of the form `#RRGGBB`.  `RR` here represents a 2-digit
+hexadecimal (i.e. base 16) number giving the intensity of the red
+component of the color; `GG` and `BB` give green and blue intensities
+respectively.  The following Javascript will, when placed in the
+`settings.js` file, give all verbal tags a green background, and make all `-SBJ`
+elements appear in red text:
+
+[source,javascript]
+-------
+styleDashTag("SBJ", "color:red;");
+
+_.each(["BE","DO","HV","VB"], function (tag) {
+    styleTag(tag,       "background-color:green;");
+    styleTag(tag + "D", "background-color:green;");
+    styleTag(tag + "P", "background-color:green;");
+})
+-------
+
+Note the use of a looping construct to decrease the amount of
+boilerplate needed when styling all the forms of the verbal tag.  The
+results of inserting this snippet in a settings file are shown here:
+
+image::images/annotald-colors.png["A custom stylesheet in Annotald",align="center"]
+
+Users who know how to write their own CSS rules may do so using the
+<<colorcss,`colorCSS`>> functionality.  Annotald maintains the label of
+a node as part of the CSS class attribute.  You will probably need to
+write fairly complex selectors for this; see the source for the
+`style(Dash)Tag` functions for inspiration.
+
+== Python settings
+
+In this section, the settings specifiable in a `settings.py` file will
+be discussed.
+
+`extraJavascripts`:: The path to additional javascript files to be
+included in the page.  This is relevant if for advanced users who are
+writing their own javascript functions
+// TODO: link
+and would like to include external libraries.
+
+`debugJs`:: Include debugger-friendly versions of javascript files in
+the page.  Only Annotald developers need to set this; for users the
+default value `False` is appropriate.
+
+`colorCSS` [[colorcss]]:: Whether to use a user-supplied CSS file.
+
+`colorCSSPath`:: The path to the user-supplied CSS file.
+
+`rewriteIndices`:: By default, Annotald normalizes the indices of files
+when saving.  Thus, if you split a sentence into two root-level clauses,
+the indices in the second clause will begin at 1 and count up
+monotonically, even though they may have been originally higher by
+virtue of having been split from later in another clause.  If you do not
+want this behavior, set this variable to `False`.
+
+`validators`:: See the <<externalvalidation,section on external
+validation>> for information on this option.
 
 [[keycmds]]
 === Default keybindings
@@ -441,6 +543,7 @@ L:: Edit the Label and/or text of a node
 Shift + L:: The same (included as an example of a keybinding with modifier)
 
 
+[[customkeys]]
 === Custom keybindings
 
 It is virtually certain that users will want to adapt the default key
@@ -583,6 +686,12 @@ UI.  No arguments.
 `undo`/`redo`:: Undo the most recent editing operations, or redo after
 undoing something.  No arguments.
 
+== Additional features
+
+// time log
+// ...?
+
+foo
 
 == Advanced features
 
@@ -688,6 +797,7 @@ other_word <-
 
 // TODO: settings.py options
 
+[[externalvalidation]]
 === External validation
 
 Annotald includes a feature that allows the user to interactively submit
@@ -699,6 +809,12 @@ form of that function modifying the file contents; these modified file
 contents replace the original file in the Annotald interface.  It is
 hoped that this flexibility will facilitate a wide variety of automated
 workflows.
+
+NOTE: This feature presently causes all undo history to be erased when
+the file is sent for validation.
+// TODO: we could instead record the validation as a single undo step.
+// Drawback: undoing past the validate will erase the validation also.
+// Which is worse?
 
 One conventionalized way of using this facility is to perform
 _validation queries_ on the file – queries that will find anomalous
@@ -950,6 +1066,10 @@ When working with non-structural editing methods(such as hand-editing or
 regular expressions), it is somewhat common for a parenthesis to go
 astray, leading to an invalid tree.  This mode will help you find such
 mistakes.  It does not modify its argument file.
+
+`csv-log`:: Convert the Annotald event log
+// TODO: link, expand documentation
+to CSV format, appropriate for analysis in R.
 
 `hash-file`:: This command adds a hash to the file.  A hash is a
 “fingerprint” of the file’s text.  Annotald will not allow you to change
