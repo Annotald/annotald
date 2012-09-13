@@ -36,14 +36,19 @@
 
 This manual is designed to teach users how to use the Annotald program
 for annotating parsed corpora according to (a version of) the Penn
-treebank standards.
-// TODO: link, also our labgroup updates (incorp. latter into this doc?)
-In that vein, it consists of both documentation relating to the
-configuration and use of Annotald, as well as instruction on the
-application of the Penn treebank standards to corpus data.  For
-simplicity, the annotation examples in this guide will be based on
-modern English.  The principles illustrated should be applicable to
-annotation in all languages, however.
+treebank standards.  This version of the manual accompanies version
+*1.0.dev1* of Annotald.
+
+
+// TODO: our labgroup docs/updates (incorp. latter into this doc?)
+
+// TODO: this paragraph isn’t really applicable yet.
+// In that vein, it consists of both documentation relating to the
+// configuration and use of Annotald, as well as instruction on the
+// application of the Penn treebank standards to corpus data.  For
+// simplicity, the annotation examples in this guide will be based on
+// modern English.  The principles illustrated should be applicable to
+// annotation in all languages, however.
 
 Annotald was originally written as part of the
 http://www.linguist.is/icelandic_treebank/Icelandic_Parsed_Historical_Corpus_%28IcePaHC%29[Icelandic

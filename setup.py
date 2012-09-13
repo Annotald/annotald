@@ -10,10 +10,10 @@ import os
 
 setup_args = {
       'name': 'Annotald'
-    , 'version': '0.0.1'
+    , 'version': '1.0.dev1'
     , 'author': 'Aaron Ecay, Anton Karl Ingason and Jana Beck'
     , 'author_email': 'aaronecay@gmail.com'
-    , 'url': 'foo'
+    , 'url': 'http://annotald.github.com/'
     , 'description': 'A GUI for treebank annotation'
     , 'license': "LICENSE"
     # TODO: long_description
@@ -48,7 +48,7 @@ manifestVersion="1.0">
 </dependency>
 </assembly>
 """
-    
+
     annotald_data_files = []
 
     annotald_data_files.append( ('', ['settings.js','CS_Tony_oct19.jar',
@@ -72,7 +72,7 @@ manifestVersion="1.0">
                  }],
           data_files = annotald_data_files,
           options={ "py2exe":{ "skip_archive": True } },
-          **setup_args)  
+          **setup_args)
 
 else:
     setup(

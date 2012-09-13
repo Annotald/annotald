@@ -18,7 +18,7 @@ from __future__ import unicode_literals
 
 # TODO: catch C-c exit and log prog exit
 
-VERSION = "12.03-dev"
+VERSION = "1.0.dev1"
 
 # Python standard library
 import codecs
