@@ -152,3 +152,15 @@ Annotald running, and clicking the “Run Tests” button.
 
 Generally speaking, new code contributed to Annotald should be
 accompanied by appropriate tests.
+
+== Releasing
+
+To release Annotald, follow these steps:
+
+- Update the version number
+  - In the `treedrawing.py` file
+  - In the user’s manual
+  - In `settings.py`
+- TODO
+- Upload the user’s manual by running `make deploy-docs` and pushing to
+  the `gh-pages` branch.
