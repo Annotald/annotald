@@ -4,15 +4,21 @@
 # Annotald UI
 extraJavascripts = []
 
-# Set this to True if you have defined a color.css file to use a personalized color scheme
+# Set this to True if you are an Annotald developer or otherwise need to
+# debug Annotald's jQuery code
+debugJs = False
+
+# TODO: add an option to include waxeye files, which we wil distribute?
+
+# Set this to True if you have defined a color.css file to use a personalized
+# color scheme
 colorCSS = False
 
 # Path to your color.css file
 colorCSSPath = ""
 
-# Set this to True if you are an Annotald developer or otherwise need to
-# debug Annotald's jQuery code
-debugJs = False
+# TODO: document
+rewriteIndices = True
 
 # This should be a dictionary, with the keys being the names of
 # validation queries, and the values being a Pythin function (or other
@@ -33,5 +39,3 @@ validators = {}
 #     "example of a lovett validator": flagIf(lovett expression),
 #     "example of a corpussearch-based validator": TODO
 # }
-
-rewriteIndices = True
