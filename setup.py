@@ -5,7 +5,6 @@ from distutils.core import setup
 
 
 from distutils.core import setup
-import py2exe
 import os
 
 setup_args = {
@@ -20,6 +19,7 @@ setup_args = {
 }
 
 if os.name == "nt":
+    import py2exe
     import shutil
     import glob
 
