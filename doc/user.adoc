@@ -1121,3 +1121,51 @@ command sequentially renumbers all indices in all trees, beginning with
 +
 Annotald will additionally rewrte indices automatically on save, unless
 this feature is disabled in the `settings.py` file.
+
+
+[appendix]
+== Annotald file format
+
+Annotald understands files in the Penn treebank format.  The following
+is a description of the file format, as implemented by Annotald.  In
+this description, the word “must” should be interpreted to mean that
+Annotald’s behavior on files not fulfilling the given restriction is
+undefined, and quite possibly buggy.  “Should” introduces prescriptions
+that, while best practices for ensuring full stability, may not be
+necessary for Annotald to function properly.
+
+Annotald’s input files must consist of UTF-8 encoded text.  (If you do
+not use any diacritics or non-English letters, UTF-8 encoding is
+equivalent to using ASCII, which is the default text format on all
+platforms.)  They should have the file extension `.psd`.  The contents
+of the file must be a list of trees (defined below), each separated from
+the next by two newline characters.  (If you have the option, choose
+“Unix” line endings, as opposed to “Mac” or “Windows” when saving the
+files in a text editor).
+
+A tree must contain a balanced number of opening parentheses =(= and
+closing parentheses =)=.  The outermost set of parentheses encloses:
+
+- the tree itself
+- an optional ID node
+// TODO: link to defintion
+// TODO: metadata
+
+Uniquely, the outermost set of parentheses has no label.
+
+The ID must be a leaf node, with label =ID= and text as described below.
+// TODO
+
+The tree must be any node.  A node must be either a leaf node or a
+branching node.  A leaf node must have the format =(LABEL text)=.  The
+label should consist of capital letters of the English alphabet, A–Z.
+Often, the label is a word’s POS tag.  The text can be arbitrary text,
+except it must not contain =(= or =)= characters.
+
+A branching node must have the following format: =(LABEL <node> ...)=.
+The label must be formatted as above.  The remainder of the content of a
+branching node must be a sequence of one or more nodes, separated by
+arbitrary whitespace.
+
+
+//  LocalWords:  Annotald
