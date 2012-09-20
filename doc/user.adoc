@@ -30,7 +30,7 @@
 // TODO: once this is reasonably complete, add internal links to and
 // from various parts of the documentation
 
-// TODO: centering pictures doesn’t work
+// TODO: centering pictures sometimes doesn’t work
 
 == Introduction
 
@@ -795,8 +795,6 @@ other_word <-
 
 // TODO: n-trees mode
 
-// TODO: settings.py options
-
 [[externalvalidation]]
 === External validation
 
@@ -998,7 +996,7 @@ which can be changed by using a deep node, as already mentioned.
 === Case menu
 
 // TODO: this isn’t really an “advanced feature;” consider reorganizing
-// to soemwhere else
+// to somewhere else
 
 Annotald includes support for manipulating case marking information in
 corpora which store that information in a supported format.  In order to
@@ -1039,8 +1037,6 @@ case-bearing daughters, without recursing too deeply.
 
 // what else???
 
-
-// TODO: custom CSS – file, with functions in settings.js
 == Auxiliary commands
 
 Annotald comes with a command-line tool that performs some auxiliary
