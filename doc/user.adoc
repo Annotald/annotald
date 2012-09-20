@@ -1151,19 +1151,65 @@ closing parentheses =)=.  The outermost set of parentheses encloses:
 
 Uniquely, the outermost set of parentheses has no label.
 
-The ID must be a leaf node, with label =ID= and text as described below.
+The ID, if present, must be a leaf node, with label =ID= and text as
+described below.
 // TODO
 
 The tree must be any node.  A node must be either a leaf node or a
 branching node.  A leaf node must have the format =(LABEL text)=.  The
 label should consist of capital letters of the English alphabet, A–Z.
-Often, the label is a word’s POS tag.  The text can be arbitrary text,
-except it must not contain =(= or =)= characters.
+Often, the label is a word’s POS tag.  The text can be an arbitrary
+non-empty string, except it must not contain =(= or =)= characters.
 
 A branching node must have the following format: =(LABEL <node> ...)=.
 The label must be formatted as above.  The remainder of the content of a
 branching node must be a sequence of one or more nodes, separated by
 arbitrary whitespace.
 
+Annotald imposes a particular indentation scheme on files it writes, but
+whitespace generally speaking does not affect its interpretation of
+input files, except that trees must be separated by exactly two
+newlines.
 
-//  LocalWords:  Annotald
+=== Mapping from source document to corpus representation
+
+In general, the text of leaf nodes in the file should correspond as
+closely as possible to the text of the original document being parsed.
+This maximizes the reproducibility and perspicuity of the parsing
+process in several ways:
+
+- Any passages with questionable text can be cross-checked with the
+  original source document.
+- The original text provides a base against which different parsing
+  standards can be compared
+- Any interpolation done by the annotator is made explicit, as described
+  below.
+
+With the following exceptions, the text of every node should represent
+an orthographic word (for the rest of this section, a “word”) from the
+original document.
+
+- Sometimes, a word must be split so that its parts can be given
+  different annotation.  Annotald contains <<splitWord,a facility for
+  splitting words in a consistent, reversible way>>.
+- Sometimes, it is beneficial to insert comments into the text.
+  Annotald reserves the =CODE= label for leaf nodes whose text should be
+  interpreted as a comment.  There is a <<displayRename,facility for
+  editing and distinguishing different comments>>.
+- Most annotation schemes include some kinds of traces and empty
+  elements.  The rules for these are:
+  - Any node with the text exactly =0= will be considered an empty
+    operator.  If the source text contains “0” as an orthographic word,
+    your annotation scheme should specify a canonical replacement (such
+    as =<zero>=).
+  - Any node with the following text as the beginning of its text
+    string will be considered a trace:
+    `*`:: An A-movement trace
+    `*T*`:: An A-bar movement trace
+    `*CL*`:: A clitic movement trace
+    `*ICH*`:: A trace of rightward movement or extraposition (mnemonic:
+    Interpret Constituent Here)
+
+
+
+//  LocalWords:  Annotald extraposition clitic whitespace
