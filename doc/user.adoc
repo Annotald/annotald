@@ -287,7 +287,7 @@ option, you should use http://localhost:8081 as the URL in the browser.
 `-o`:: Specify that the file to be read from is a CorpusSearch output
 file.  CorpusSearch comments will be stripped from the file on reading.
 
-`-q`:: Deactivate the time-logging function.
+`-q` [[cmdline-q]]:: Deactivate the time-logging function.
 // TODO: link to doc
 
 `-n NUMBER`:: Show only NUMBER trees fo the file at a time.
@@ -313,7 +313,10 @@ In this section, the options in `settings.js` will be discussed.
 // include note to read intro to annotation section first if reader is
 // not familiar
 
-[[casevars]]`displayCaseMenu`:: Whether or not to display options for changing the
+`logDetail` [[logdetail]]:: This variable shoudl be a Boolean value (`true` or
+`false`).  It controls the operation of the <<timelog,time logging function>>.
+
+`displayCaseMenu` [[casevars]]:: Whether or not to display options for changing the
 case of items in the context menu.  See the discussion of this feature
 <<casemenu,below>>
 
@@ -688,10 +691,42 @@ undoing something.  No arguments.
 
 == Additional features
 
-// time log
 // ...?
 
-foo
+[[timelog]]
+=== Event log
+
+Annotald supports keeping a log of actions that you take in the program.
+This log is stored in a non-user-readable file called
+`annotaldLog.shelve` in the directory from which Annotald is
+invoked.footnote:[This file is in the format used by the `shelve` Python
+library.  Interested users may consult
+http://docs.python.org/library/shelve.html[the module’s documentation]
+and Annotald’s source code if they desire to create custom code to
+analyze the log.]  There are three levels of logging possible:
+
+[options="header",cols="s,3*1^"]
+|====
+| Type                           | no logging | major event logging  | full logging
+| <<cmdline-q,Command line flag>> | `-q`       | `<none>`             | `<none>`
+| <<logdetail,`logDetail`>>       | N/A        | `true`               | `false`
+|====
+
+The “major event logging” setting records when the program is opened and
+closed, as well as when the file is validated or saved.  That is, it
+records events visible to the Annotald server.  It does not record any
+actions taken in the browser.  Full logging, on the other hand, records
+all events in the browser interface, such as key presses and mouse
+clicks.
+
+Each event has associated with it a timestamp, which is recorded as
+seconds since the https://en.wikipedia.org/wiki/Unix_time[Unix epoch].
+Currently, the only way to analyze this data is by <<csv-log,converting
+it to CSV format>> and importing it into another analysis program such
+as http://www.r-project.org/[R].  In the future, Annotald will offer
+built-in ways of generating reports from this data, such as how much
+annotation time has been spent on each file, or (with full logging
+enabled) which keys are most often pressed.
 
 == Advanced features
 
@@ -1063,9 +1098,8 @@ regular expressions), it is somewhat common for a parenthesis to go
 astray, leading to an invalid tree.  This mode will help you find such
 mistakes.  It does not modify its argument file.
 
-`csv-log`:: Convert the Annotald event log
-// TODO: link, expand documentation
-to CSV format, appropriate for analysis in R.
+`csv-log` [[csv-log]]:: Convert the <<timelog,Annotald event log>> to
+CSV format, appropriate for analysis in an external program.
 
 `hash-file`:: This command adds a hash to the file.  A hash is a
 “fingerprint” of the file’s text.  Annotald will not allow you to change
