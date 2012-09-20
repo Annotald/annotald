@@ -27,9 +27,6 @@
 
 = Annotald User’s Guide
 
-// TODO: once this is reasonably complete, add internal links to and
-// from various parts of the documentation
-
 // TODO: centering pictures sometimes doesn’t work
 
 == Introduction
@@ -42,7 +39,7 @@ treebank standards.  This version of the manual accompanies version
 
 // TODO: our labgroup docs/updates (incorp. latter into this doc?)
 
-// TODO: this paragraph isn’t really applicable yet.
+// TODO(post-1.0): this paragraph isn’t really applicable yet.
 // In that vein, it consists of both documentation relating to the
 // configuration and use of Annotald, as well as instruction on the
 // application of the Penn treebank standards to corpus data.  For
@@ -216,9 +213,10 @@ operation will take place.  Right clicking with two selected nodes will
 move those nodes, as well as any intervening material, to the desired
 destination.  The two selected nodes must be sisters of each other.
 
-// TODO: ctrl click -> new xp
+Control-clicking on a node will create and select a new XP dominating
+that node.
 
-// TODO: mouse wheel...document, or remove the code
+// TODO(post-1.0): mouse wheel...document, or remove the code
 
 === Context menu
 
@@ -234,7 +232,7 @@ before the node; clicking any of these will insert a node with the given
 label and text.  The third column contains options for toggling certain
 dash tags.
 
-// TODO: split context menu dash tags from all dash tags in config file
+// TODO(post-1.0): split context menu dash tags from all dash tags in config file
 
 The context menu can be dismissed by left-clicking outside of it.
 
@@ -270,10 +268,9 @@ be passed to Annotald to affect its behavior.  These are:
 file>>.  If this is not specified, the default settings file distributed
 with Annotald is used.
 
-`-S PATH`:: Specify the path to the python settings file.  If this is
-not specified, the default settings file distributed with Annotald is
-used.
-// TODO: link
+`-S PATH`:: Specify the path to the <<pythonsettings,python settings
+file>>.  If this is not specified, the default settings file distributed
+with Annotald is used.
 
 `-p NUMBER`:: Specify the port which Annotald will run its server.  The
 default is 8080 (possible values range between 1025 and 65535).  Only
@@ -287,10 +284,9 @@ option, you should use http://localhost:8081 as the URL in the browser.
 `-o`:: Specify that the file to be read from is a CorpusSearch output
 file.  CorpusSearch comments will be stripped from the file on reading.
 
-`-q` [[cmdline-q]]:: Deactivate the time-logging function.
-// TODO: link to doc
+`-q` [[cmdline-q]]:: Deactivate the <<timelog,time-logging function>>.
 
-`-n NUMBER`:: Show only NUMBER trees fo the file at a time.
+`-n NUMBER`:: Show only NUMBER trees of the file at a time.
 // TODO: link to doc
 
 `-1`:: A shortcut which is equivalent to `-n 1`
@@ -313,7 +309,7 @@ In this section, the options in `settings.js` will be discussed.
 // include note to read intro to annotation section first if reader is
 // not familiar
 
-`logDetail` [[logdetail]]:: This variable shoudl be a Boolean value (`true` or
+`logDetail` [[logdetail]]:: This variable should be a Boolean value (`true` or
 `false`).  It controls the operation of the <<timelog,time logging function>>.
 
 `displayCaseMenu` [[casevars]]:: Whether or not to display options for changing the
@@ -456,6 +452,7 @@ a node as part of the CSS class attribute.  You will probably need to
 write fairly complex selectors for this; see the source for the
 `style(Dash)Tag` functions for inspiration.
 
+[[pythonsettings]]
 == Python settings
 
 In this section, the settings specifiable in a `settings.py` file will
@@ -605,14 +602,14 @@ indicate movement/coreference/etc. chains:
 +
 No arguments.
 
-// TODO: better name
-`displayRename`:: Edit the text of the currently selected node.  If this
-is a non-terminal, edit its label.  If this is a terminal, allow editing
-its label, lemma (if present) and text (iff the text is an “empty element”
-– trace, comment, etc.)  This function handles <<commenttypes-vars,comment
-nodes>> specially.  No arguments.
+`editNode` [[displayRename]]:: Edit the text of the currently selected
+node.  If this is a non-terminal, edit its label.  If this is a
+terminal, allow editing its label, lemma (if present) and text (iff the
+text is an “empty element” – trace, comment, etc.)  This function
+handles <<commenttypes-vars,comment nodes>> specially, as shown below.
+No arguments.
 
-// editLemmaOrLabel – do we want to document this fn?  remove from source?
+image::images/annotald-comment-editor.png[The Annotald comment editor,align="center"]
 
 `leafAfter`, `leafBefore`:: [[leafBefore]] [[leafAfter]] Create a leaf node
 after or before the (first-)selected node.  A heuristic is used to
@@ -1067,6 +1064,7 @@ case-bearing daughters, without recursing too deeply.
 // - the annotation itself (building up from nps to pps to verbs to
 //   sentences/clauses)
 // - extensions (morpho/semantic information, lemmatization, ...)
+// - tagset design etc.
 
 // corpus formats – old, dash, and deep
 
