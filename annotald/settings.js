@@ -115,7 +115,7 @@ function customCommands() {
                                            "NP-PRD"]); // w
     addCommand({ keycode: 68 }, pruneNode); // d
     addCommand({ keycode: 90 }, undo); // z
-    addCommand({ keycode: 76 }, displayRename); // l
+    addCommand({ keycode: 76 }, editNode); // l
     addCommand({ keycode: 32 }, clearSelection); // spacebar
     addCommand({ keycode: 192 }, toggleLemmata); // `
     addCommand({ keycode: 76, ctrl: true }, displayRename); // ctrl + l

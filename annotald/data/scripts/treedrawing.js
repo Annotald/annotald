@@ -737,22 +737,21 @@ splitWord.async = true;
 // DONE(?): split these fns up...they are monsters.  (or split to sep. file?)
 
 /**
- * Edit the lemma, if a leaf node is selected, or the label, if a phrasal node is.
+ * Perform an appropriate editing operation on the selected node.
  */
-function editLemmaOrLabel() {
+function editNode() {
     if (getLabel($(startnode)) == "CODE" &&
-        (wnodeString($(startnode)).substring(0,4) == "{COM" ||
-         wnodeString($(startnode)).substring(0,5) == "{TODO" ||
-         wnodeString($(startnode)).substring(0,4) == "{MAN")) {
+        _.contains(commentTypes,
+                   // strip leading { and the : and everything after
+                   wnodeString($(startnode)).substr(1).split(":")[0])
+        ) {
         editComment();
-    } else if (isLeafNode(startnode)) {
-        editLemma();
     } else {
         displayRename();
     }
 }
 
-var commentTypeCheckboxes = "";
+var commentTypeCheckboxes = "Type of comment: ";
 
 function setupCommentTypes() {
     for (var i = 0; i < commentTypes.length; i++) {
