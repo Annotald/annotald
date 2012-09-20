@@ -111,7 +111,7 @@ prompt, type `annotald path/to/file.psd` (supplying the path to a file
 in the Penn treebank format; if a sample file is needed you can use
 https://raw.github.com/antonkarl/icecorpus/6ad3006cc004aefdcbdda99c188d02afa9cbe7d0/finished/1150.firstgrammar.sci-lin.psd[this
 file from the IcePaHC project]).  Then, open the Chrome browser, and
-navigate to `http://localhost:8080`.  You should see the Annotald
+navigate to http://localhost:8080.  You should see the Annotald
 interface appear.  The rest of this manual is concerned with using and
 customizing the program.
 
