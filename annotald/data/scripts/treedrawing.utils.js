@@ -236,6 +236,8 @@ function isEmpty (text) {
     // test whether the node is a leaf or not before giving a return value?  This
     // would simplify the check I had to put in shouldIndexLeafNode, and prevent
     // future such errors.
+
+    // TODO: use CODE-ness of a node, rather than starting with a bracket
     if (text.startsWith("*") || text.startsWith("{") ||
         text.split("-")[0] == "0") {
         return true;
