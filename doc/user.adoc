@@ -11,7 +11,7 @@
 //   a2x: --asciidoc-opts="-f user.conf -a docinfo"
 // Include the default stylesheet and our customizations:
 //   a2x: --stylesheet="docbook-xsl.css annotald-manual.css"
-// Highlight source in output (TODO not working)
+// Highlight source in output (TODO(post-1.0): not working)
 //   a2x: --xsltproc-opts "--stringparam highlight.source 1"
 
 
@@ -27,15 +27,12 @@
 
 = Annotald User’s Guide
 
-// TODO: centering pictures sometimes doesn’t work
-
 == Introduction
 
 This manual is designed to teach users how to use the Annotald program
 for annotating parsed corpora according to (a version of) the Penn
 treebank standards.  This version of the manual accompanies version
 *1.0.dev1* of Annotald.
-
 
 // TODO: our labgroup docs/updates (incorp. latter into this doc?)
 
@@ -257,8 +254,6 @@ needs>>, see the linked sections.
 
 == Customization
 
-// TODO: section about writing custom functions in javascript
-
 === Command line options
 
 When invoked via the command line, there are several options which can
@@ -286,8 +281,8 @@ file.  CorpusSearch comments will be stripped from the file on reading.
 
 `-q` [[cmdline-q]]:: Deactivate the <<timelog,time-logging function>>.
 
-`-n NUMBER`:: Show only NUMBER trees of the file at a time.
-// TODO: link to doc
+`-n NUMBER`:: Show only NUMBER trees of the file at a time, as
+described <<limiteddisplay,below>>.
 
 `-1`:: A shortcut which is equivalent to `-n 1`
 
@@ -378,12 +373,10 @@ IP-XXX.
 highlighted (with a tan shade) to make it clear where the “floor” of a
 clause is, for the purpose of rearranging nodes in the user interface.
 
-`invisibleCategories`:: TODO: what to do about these?
-
 `commentTypes`:: [[commenttypes-vars]] Types of comments.  Comments
 are nodes of the form =(CODE \{XXX:words_words_words})= For every
 value of “XXX” is in this list, when editing the contents of the
-comment with one of the editing functions (TODO: link), a dialog box
+comment with <<displayRename,the editing function>>, a dialog box
 will appear allowing the comment to be edited as text, instead of the
 default editing interface.
 
@@ -735,7 +728,7 @@ grater annotation efficiency and accuracy.
 [[tagset-validate]]
 === Tagset validation
 
-// TODO: make sure that annotald uses this info everywhere it can.
+// TODO(dev): make sure that annotald uses this info everywhere it can.
 
 By default, Annotald does not contain a mechanism to ensure that tags
 created through editing conform to any sort of schema.  At the same
@@ -823,10 +816,6 @@ other_word <-
 // TODO: num before n
 // TODO: matching dashes in phrasal rules
 
-// TODO: custom CSS
-
-// TODO: n-trees mode
-
 [[externalvalidation]]
 === External validation
 
@@ -842,9 +831,9 @@ workflows.
 
 NOTE: This feature presently causes all undo history to be erased when
 the file is sent for validation.
-// TODO: we could instead record the validation as a single undo step.
-// Drawback: undoing past the validate will erase the validation also.
-// Which is worse?
+// TODO(dev): we could instead record the validation as a single undo
+// step.  Drawback: undoing past the validate will erase the validation
+// also.  Which is worse?
 
 One conventionalized way of using this facility is to perform
 _validation queries_ on the file – queries that will find anomalous
@@ -874,8 +863,8 @@ validators = OrderedDict([
 CorpusSearch queries) is by locating them with relation to the Python
 file itself.  This line assigns the directory where the script is
 located (as a string) to the variable `current_dir`.
-// TODO: could we simplify things, by using a decorator to add a name to
-// fns, and then just using a list of fns?
+// TODO(dev): could we simplify things, by using a decorator to add a
+// name to fns, and then just using a list of fns?
 <2> The format of the `validators` variable is a dictionary – a data
 structure that associates keys (in this case, human-readable names of
 validators) with values (validation functions).  The default dictionary
@@ -1146,7 +1135,6 @@ closing parentheses =)=.  The outermost set of parentheses encloses:
 
 - the tree itself
 - an optional ID node
-// TODO: link to defintion
 // TODO: metadata
 
 Uniquely, the outermost set of parentheses has no label.
