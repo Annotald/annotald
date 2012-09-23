@@ -129,7 +129,7 @@ screenshots, reflecting ways in which the Annotald UI has evolved over
 its development.  It is hoped that these will not detract from the
 points being explicated.]
 
-image::images/annotald-hello.png[The Annotald UI at startup,align="center"]
+image::images/annotald-hello.png["The Annotald UI at startup",align="center"]
 
 On the left-hand side of the screen, the following are present, from top
 to bottom:
@@ -146,7 +146,7 @@ For example, the following image demonstrates the message history dialog
 dialog, press the escape key.  (Different dialogs may also display
 buttons allowing you to close them).
 
-image::images/annotald-dialog.png[An example of a dialog box in Annotald,align="center"]
+image::images/annotald-dialog.png["An example of a dialog box in Annotald",align="center"]
 
 The right-hand portion of the screen is devoted to showing the contents
 of the file being edited.  The tree structure of the annotation is
@@ -183,12 +183,12 @@ node; the left side of each node’s box is padded in order ot facilitate
 this.  An example of a selected node is shown here, notice that the
 selected node has been highlighted in blue:
 
-image::images/annotald-select.png[Selection in the Annotald UI,align="center"]
+image::images/annotald-select.png["Selection in the Annotald UI",align="center"]
 
 Up to two nodes may be selected at a time.  If a node is selected,
 clicking another node will also highlight that node:
 
-image::images/annotald-select2.png[Dual selection in the Annotald UI,align="center"]
+image::images/annotald-select2.png["Dual selection in the Annotald UI",align="center"]
 
 Further clicks after two nodes are selected will de-highlight the
 previous second selection, and highlight the clicked node.  To clear any
@@ -220,7 +220,7 @@ that node.
 Right-clicking a node when no selection is present will summon the
 context menu, which is illustrated here:
 
-image::images/annotald-context.png[The Annotald context menu,align="center"]
+image::images/annotald-context.png["The Annotald context menu",align="center"]
 
 The context menu has three columns.  The first has suggested label
 changes for the node; clicking any of these will change the node’s label
@@ -602,7 +602,7 @@ text is an “empty element” – trace, comment, etc.)  This function
 handles <<commenttypes-vars,comment nodes>> specially, as shown below.
 No arguments.
 
-image::images/annotald-comment-editor.png[The Annotald comment editor,align="center"]
+image::images/annotald-comment-editor.png["The Annotald comment editor",align="center"]
 
 `leafAfter`, `leafBefore`:: [[leafBefore]] [[leafAfter]] Create a leaf node
 after or before the (first-)selected node.  A heuristic is used to
@@ -900,7 +900,7 @@ When validators are specified, the Annotald interface shows the
 menu in the “Tools” section of the left-hand column, as shown in the
 below image:
 
-image::images/annotald-validate.png[Validation interface in Annotald,align="center"]
+image::images/annotald-validate.png["Validation interface in Annotald",align="center"]
 
 The example given above assumes that two CorpusSearch query functions
 are present in the same directory as the Python file.  For more
@@ -922,7 +922,7 @@ append_label{1}: -FLAG
 
 If run in the Annotald interface, it produces this result:
 
-image::images/annotald-validate-results.png[Validation results in the Annotald interface,align="center"]
+image::images/annotald-validate-results.png["Validation results in the Annotald interface",align="center"]
 
 === Searching
 
