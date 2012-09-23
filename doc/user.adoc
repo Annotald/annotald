@@ -314,10 +314,13 @@ case of items in the context menu.  See the discussion of this feature
 `caseTags`:: A list of the labels which can receive a tag indicating
 their case.  Generally speaking, these will be leaf nodes.  Although an
 entire NP (for example) might be said to have case, the only surface
-reflexes of case are the marking of individual words.  Furthermore, as
-is evident from number marking in some dialects of Spanish (TODO: cite
-literature), within a single NP it is possible for some constituents to
-not express the phrase’s features.
+reflexes of case are the marking of individual words.  Furthermore,
+within a single NP it is possible for some constituents to not express
+the phrase’s features.footnote:[For a classic discussion of this
+phenomenon in Spanish and Portugese of Latin America, consult Guy,
+Gregory. 1981. “Parallel variability in American dialects of Spanish and
+Portuguese.” _Variation omnibus_, ed. by David Sankoff and Henrietta
+Cedergren, 85-95. Alberta: Carbondale and Edmonton]
 +
 Therefore, the minimal annotation that captures the linguistic facts
 places case on the leaf nodes; phrasal case can be calculated based on
