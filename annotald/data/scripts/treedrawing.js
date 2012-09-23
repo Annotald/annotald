@@ -141,6 +141,7 @@ function assignEvents() {
     $("#butnexterr").unbind("click").click(nextValidationError);
     $("#butnexttree").unbind("click").click(nextTree);
     $("#butprevtree").unbind("click").click(prevTree);
+    $("#butgototree").unbind("click").click(goToTree);
     $("#editpane").mousedown(clearSelection);
     $("#conMenu").mousedown(hideContextMenu);
     $(document).mousewheel(handleMouseWheel);
