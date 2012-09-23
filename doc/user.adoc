@@ -449,16 +449,14 @@ write fairly complex selectors for this; see the source for the
 `style(Dash)Tag` functions for inspiration.
 
 [[pythonsettings]]
-== Python settings
+=== Python settings
 
 In this section, the settings specifiable in a `settings.py` file will
 be discussed.
 
 `extraJavascripts`:: The path to additional javascript files to be
 included in the page.  This is relevant if for advanced users who are
-writing their own javascript functions
-// TODO: link
-and would like to include external libraries.
+writing their own <<customjs,javascript functions>> and would like to include external libraries.
 
 `debugJs`:: Include debugger-friendly versions of javascript files in
 the page.  Only Annotald developers need to set this; for users the
@@ -640,8 +638,7 @@ if not present, the label of the new node will be “XP”.  One optional argume
 selected, the operation always succeeds, and the daughters of the
 deleted node become daughters of the deleted node’s parent.  If a
 terminal node is selected, the operation can succeed only if the node is
-empty of textual content.  No arguments.
-// TODO: add definition of empty text (philosophy section?), link to it
+<<emptyelements,empty of textual content>>.  No arguments.
 
 `setLabel`:: Set the label of the selected node.  The argument must be a
 list of labels.  If the node’s current label is not present in the list,
@@ -684,7 +681,26 @@ undoing something.  No arguments.
 
 == Additional features
 
-// ...?
+// TODO: this section talks about extra features that require no
+// programming; next sec. is about features that do require programming
+
+[[limiteddisplay]]
+=== Limited display
+Annotald supports showing only a limited number of trees at a time in
+the browser interface.  Some people find that annotating in this manner
+feels more natural.  In order to activate this feature, pass the `-n`
+command line option to Annotald, followed by a number indicating how
+many trees to show at a time.  As a shortcut for `-n 1`, you can also
+use `-1` (in both cases, the last character is the numeral one).
+
+When this mode is active, Annotald will have a “previous tree,” “next
+tree,” and “goto tree” button; the latter of which operates based on the
+index shown in the left-hand menu.  This appears as in the following
+screenshot:footnote:[The screenshot is somewhat cramped, owing to the
+artificially small size of the window.  When working with the interface
+at full-screen size, the interface will be less crowded.]
+
+image::images/annotald-one-tree.png["One-tree mode in Annotald",align="center"]
 
 [[timelog]]
 === Event log
@@ -698,7 +714,7 @@ http://docs.python.org/library/shelve.html[the module’s documentation]
 and Annotald’s source code if they desire to create custom code to
 analyze the log.]  There are three levels of logging possible:
 
-[options="header",cols="s,3*1^"]
+[options="header",cols="s,3*1^",align="center"]
 |====
 | Type                           | no logging | major event logging  | full logging
 | <<cmdline-q,Command line flag>> | `-q`       | `<none>`             | `<none>`
@@ -720,6 +736,125 @@ as http://www.r-project.org/[R].  In the future, Annotald will offer
 built-in ways of generating reports from this data, such as how much
 annotation time has been spent on each file, or (with full logging
 enabled) which keys are most often pressed.
+
+[[casemenu]]
+=== Case menu
+
+Annotald includes support for manipulating case marking information in
+corpora which store that information in a supported format.  In order to
+be supported, the case must:footnote:[The YCOE does not follow these
+guidelines.  Case is marked on phrasal nodes with dash tags (as a
+substitute for grammatical role marking: =SBJ= etc.), and on words with
+a caret: =^N= for nominative etc.  The Penn parsed corpora of Middle
+English and later time periods indicate genitive with a =$= which is
+directly concatenated with a leaf’s label, but this is not the kind of
+case-marking that this Annotald feature addresses.  The IcePaHC corpus
+does obey these conditions (unsurprisingly, since Annotald comes from
+that project), as does the Penn Parsed Corpus of Historical Greek.]
+
+- be stored as dash tags,
+- at the word level,
+- without any unmarked default categories.
+
+Then, <<casevars,some options>> need to be set in the configuration
+file.  Once this is done, the context menu will contain options for
+setting case:
+
+image::images/case-menu.png["Annotald context menu with case-setting options",align="center"]
+
+Invoking the context menu on an individual case-bearing node (one of
+<<casevars,`caseTags`>>) will allow that node’s case to be changed
+individually.  Invoking it on a case-bearing phrase (one of
+<<casevars,`casePhrases`>>) will change the case of all that node’s
+case-bearing daughters, without recursing too deeply.
+
+=== Searching
+
+Annotald has a structural search engine built in.  While it cannot
+replicate the flexibility or (perhaps especially) speed of a dedicated
+search program such as
+http://corpussearch.sourceforge.net/[CorpusSearch], it is useful to be
+able to search within the Annotald interface itself.  The search dialog
+is accessed by clicking the “Search” button in the Tools menu.
+// TODO: or via slash key
+Within the dialog box, you will construct a visual representation of
+your query, similar to the representation of trees in the Annotald
+interface.
+
+The simplest query tree contains only one leaf node.  The leaf has a
+text box, into which the search string can be entered.  The string is
+interpreted as a case-insensitive Javascript regular expression.  The
+Javascript regular expression format is very similar to that used by
+many programming languages.  A full description fo the format is outside
+the scope of this document, but is available via
+https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp[this
+reference manual].  The leaf also has a drop-down box, which indicates
+whether the search string is to match against the node labels, the text
+of the corpus, or the lemmata.  The search string is additionally
+left-anchored – that is, the beginning of the regular expression is
+constrained to match the beginning of a node label or word.  Pressing
+the “Search” button will execute the search.  Matches will be
+highlighted with a yellow box, and the document will be scrolled to
+display the next match.  A very simple query and its result is
+illustrated in the following screenshots:
+
+image::images/annotald-search-simple.png["A simple Annotald search",align="center"]
+
+image::images/annotald-search-simple-result.png["Results of a simple Annotald search",align="center"]
+
+Once the search has completed, two buttons will appear below the
+“Search” button.  The first of these scrolls the document down to
+display the next match.  The second removes teh hithlighting from serach
+matches.
+
+In addition to the search node where text can be entered, there is a
+node consisting only of a plus sign (“+”).  Clicking this node adds a
+sister to the search node.  Search nodes which are sisters are
+interpreted as the (unordered) sisterhood relation.  An example of such
+a search is given in the following two screenshots:
+
+image::images/annotald-search-sister.png["A sisterhood Annotald search",align="center"]
+
+image::images/annotald-search-sister-result.png["Results of a sisterhood Annotald search",align="center"]
+
+Each search node has some buttons in the upper-right hand corner.  From
+left to right, these are:
+
+// TODO: add screen shot examples to all of these
+
+Or (vertical bar):: This creates an “OR” node as the parent of the node
+from which it is clicked.  The daughters of an “OR” node are interpreted
+disjunctively, instead of conjunctively (the default).  An example of
+such a search is shown in the follwoing screenshots:footnote:[Note that
+the results are the same as the previously illustrated sisterhood
+search, though the queries are distinct.]
+
+image::images/annotald-search-or.png["A disjunctive Annotald search",align="center"]
+
+image::images/annotald-search-or-result.png["Results of a disjunctive Annotald search",align="center"]
+
+Deep (“D”):: This creates a deep search node as a daughter of the node
+from which it is clicked.  By default, child search nodes require direct
+daughterhood.  The children of deep nodes, in contrast, can match at any
+depth.
+
+Precedes (“>”):: This creates a precedes node as a sister of the node from
+which it ic clicked.  By default, as mentioned above (and illustrated in
+the screenshots), the sisterhood relation among search nodes in
+interpreted without regard to directionality.  Precedes nodes, on the
+other hand, impose a precedence relation on their daughter (whih is not
+in fact interpreted as a daughter, but rather as a sister, of the
+original node.)
+
+Remove (“-”):: This removes the node from which it is clicked.  Any
+daughters of this node are promoted to the node’s parent; if the node
+has no daughters it simply disappears.
+
+Add daughter (“+”):: This adds a daughter search node to the node from
+which it is clicked.  The defaultinterpretation is direct daughterhood,
+which can be changed by using a deep node, as already mentioned.
+
+// TODO(dev): allow drag and drop of nodes?  or buttons to move them?
 
 == Advanced features
 
@@ -927,128 +1062,92 @@ If run in the Annotald interface, it produces this result:
 
 image::images/annotald-validate-results.png["Validation results in the Annotald interface",align="center"]
 
-=== Searching
+[[customjs]]
+=== Custom Javascript
 
-Annotald has a structural search engine built in.  While it cannot
-replicate the flexibility or (perhaps especially) speed of a dedicated
-search program such as
-http://corpussearch.sourceforge.net/[CorpusSearch], it is useful to be
-able to search within the Annotald interface itself.  The search dialog
-is accessed by clicking the “Search” button in the Tools menu.
-// TODO: or via slash key
-Within the dialog box, you will construct a visual representation of
-your query, similar to the representation of trees in the Annotald
-interface.
+Because the `settings.js` file is interpreted as unrestricted Javascript
+in the Annotald UI, it can be the vehicle for powerful customizations.
+Annotald includes the http://jquery.com/[jQuery] and
+http://underscorejs.org/[Underscore.js] libraries, meaning that you can
+use functions from either of these libraries in customization code.  The
+details of these libraries are beyond the scope of the current document.
+As an overview, Annotald maps nodes in a parsed file to nodes in the
+DOM.  Using jQuery’s DOM manipulation functions (which are what Annotald
+itself uses internally), it is possible to create custom functions that
+are powerful and mnemonic.
 
-The simplest query tree contains only one leaf node.  The leaf has a
-text box, into which the search string can be entered.  The string is
-interpreted as a case-insensitive Javascript regular expression.  The
-Javascript regular expression format is very similar to that used by
-many programming languages.  A full description fo the format is outside
-the scope of this document, but is available via
-https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp[this
-reference manual].  The leaf also has a drop-down box, which indicates
-whether the search string is to match against the node labels, the text
-of the corpus, or the lemmata.  The search string is additionally
-left-anchored – that is, the beginning of the regular expression is
-constrained to match the beginning of a node label or word.  Pressing
-the “Search” button will execute the search.  Matches will be
-highlighted with a yellow box, and the document will be scrolled to
-display the next match.  A very simple query and its result is
-illustrated in the following screenshots:
+For more information on Annotald’s API, consult
+http://annotald.github.com/api-doc/global.html[the API documentation].
 
-image::images/annotald-search-simple.png[A simple Annotald search,align="center"]
+What follows is an annotated example of a custom function.  It forms a
+=CONJP= semi-automatically.  Specifically:
 
-image::images/annotald-search-simple-result.png[Results of a simple Annotald search,align="center"]
+- if two nodes are selected, create a word-level conjunction spanning
+  the selection; give it the label of the first selected node
+- if one node is selected, look for a =CONJ= daughter of the selected
+  node.  The nodes before the =CONJ= and after it are wrapped in an
+  extra layer of structure; a =CONJP= is inserted dominating the =CONJ=
+  and the second conjunct
 
-Once the search has completed, two buttons will appear below the
-“Search” button.  The first of these scrolls the document down to
-display the next match.  The second removes teh hithlighting from serach
-matches.
-
-In addition to the search node where text can be entered, there is a
-node consisting only of a plus sign (“+”).  Clicking this node adds a
-sister to the search node.  Search nodes which are sisters are
-interpreted as the (unordered) sisterhood relation.  An exampl of such a
-search is given in the following two screenshots:
-
-image::images/annotald-search-sister.png[A sisterhood Annotald search,align="center"]
-
-image::images/annotald-search-sister-result.png[Results of a sisterhood Annotald search,align="center"]
-
-Each search node has some buttons in the upper-right hand corner.  From
-left to right, these are:
-
-// TODO: add screen shot examples to all of these
-
-Or (vertical bar):: This creates an “OR” node as the parent of the node
-from which it is clicked.  The daughters of an “OR” node are interpreted
-disjunctively, instead of conjunctively (the default).  An example of
-such a search is shown in the follwoing screenshots:footnote:[Note that
-the results are the same as the previously illustrated sisterhood
-search, though the queries are distinct.]
-
-image::images/annotald-search-or.png[A disjunctive Annotald search,align="center"]
-
-image::images/annotald-search-or-result.png[Results of a disjunctive Annotald search,align="center"]
-
-Deep (“D”):: This creates a deep search node as a daughter of the node
-from which it is clicked.  By default, child search nodes require direct
-daughterhood.  The children of deep nodes, in contrast, can match at any
-depth.
-
-Precedes (“>”):: This creates a precedes node as a sister of the node from
-which it ic clicked.  By default, as mentioned above (and illustrated in
-the screenshots), the sisterhood relation among search nodes in
-interpreted without regard to directionality.  Precedes nodes, on the
-other hand, impose a precedence relation on their daughter (whih is not
-in fact interpreted as a daughter, but rather as a sister, of the
-original node.)
-
-Remove (“-”):: This removes the node from which it is clicked.  Any
-daughters of this node are promoted to the node’s parent; if the node
-has no daughters it simply disappears.
-
-Add daughter (“+”):: This adds a daughter search node to the node from
-which it is clicked.  The defaultinterpretation is direct daughterhood,
-which can be changed by using a deep node, as already mentioned.
-
-// TODO: allow drag and drop of nodes?  or buttons to move them?
+[source,javascript]
+----------
+function autoConjoin() {
+    if (!startnode) return; // <1>
+    if (!endnode) { // <2>
+        var savestartnode = startnode;
+        var selnode = $(startnode); // <3>
+        var label = getLabel(selnode);
+        if (!label.startsWith("IP") &&
+            !label.startsWith("CP")) { // <4>
+            label = label.split("-")[0];
+        }
+        var conjnode = selnode.children(".CONJ").first(); // <5>
+        if (conjnode) {
+            startnode = selnode.children().first().get(0); // <6>
+            endnode = conjnode.prev().get(0);
+            makeNode(label);
+            startnode = conjnode.get(0);
+            endnode = selnode.children().last().get(0);
+            makeNode("CONJP");
+            var conjpnode = $(startnode);
+            startnode = conjpnode.children().get(1);
+            endnode = conjpnode.children().last().get(0);
+            makeNode(label);
+            startnode = savestartnode; // <7>
+            endnode = undefined;
+            updateSelection();
+        }
+    } else { // <8>
+        var s = $(startnode);
+        var l = getLabel(s);
+        if (s.nextUntil(endnode).filter(".CONJ").size() > 0 && // <9>
+            s.end().children().filter(function () {
+                return !guessLeafNode($(this));
+            }).size() == 0) {
+            makeNode(l);
+        }
+    }
+}
+----------
 
 
-[[casemenu]]
-=== Case menu
-
-// TODO: this isn’t really an “advanced feature;” consider reorganizing
-// to somewhere else
-
-Annotald includes support for manipulating case marking information in
-corpora which store that information in a supported format.  In order to
-be supported, the case must:footnote:[The YCOE does not follow these
-guidelines.  Case is marked on phrasal nodes with dash tags (as a
-substitute for grammatical role marking: =SBJ= etc.), and on words with
-a caret: =^N= for nominative etc.  The Penn parsed corpora of Middle
-English and later time periods indicate genitive with a =$= which is
-directly concatenated with a leaf’s label, but this is not the kind of
-case-marking that this Annotald feature addresses.  The IcePaHC corpus
-does obey these conditions (unsurprisingly, since Annotald comes from
-that project), as does the Penn Parsed Corpus of Historical Greek.]
-
-- be stored as dash tags,
-- at the word level,
-- without any unmarked default categories.
-
-Then, <<casevars,some options>> need to be set in the configuration
-file.  Once this is done, the context menu will contain options for
-setting case:
-
-image::images/case-menu.png[Annotald context menu with case-setting options,align="center"]
-
-Invoking the context menu on an individual case-bearing node (one of
-<<casevars,`caseTags`>>) will allow that node’s case to be changed
-individually.  Invoking it on a case-bearing phrase (one of
-<<casevars,`casePhrases`>>) will change the case of all that node’s
-case-bearing daughters, without recursing too deeply.
+<1> Exit the function if nothing is selected.
+<2> If `endnode` is `null`, there is only one node selected.
+<3> The `startnode` and `endnode` variables hold “native” nodes.  The
+`$()` function “wraps” them in the jQuery library, allowing jQuery
+functions to be used.
+<4> IP and CP nodes should keep their dash tags when embedded inside
+conjunction.  Thus we have (e.g. in the PPCEME) =(NP (NP ...)
+(CONJP ...))= but =(IP-INF (IP-INF ...) (CONJP ...))=
+<5> jQuery syntax is very intuitive; this line gets the first child of
+the `selnode` (selected node)
+<6> Appending `.get(0)` to a jQuery object “unwraps” it, transforming it
+back to a native type appropriate for storing in the `startnode`
+variable.
+<7> Restore the user’s selection before exiting the function
+<8> This is the pronch that will be taken if two nodes are selected
+<9> For word level conjunction, the selection must span over a =CONJ=
+node, and each member of the selection must be a leaf node.
 
 // Things to talk about:
 // - annotation philosophy (useful annotation vs. correct annotation, some
@@ -1187,19 +1286,21 @@ original document.
   Annotald reserves the =CODE= label for leaf nodes whose text should be
   interpreted as a comment.  There is a <<displayRename,facility for
   editing and distinguishing different comments>>.
-- Most annotation schemes include some kinds of traces and empty
-  elements.  The rules for these are:
+- [[emptyelements]] Most annotation schemes include some kinds of traces
+  and empty elements.  The rules for these are:
   - Any node with the text exactly =0= will be considered an empty
     operator.  If the source text contains “0” as an orthographic word,
     your annotation scheme should specify a canonical replacement (such
     as =<zero>=).
   - Any node with the following text as the beginning of its text
     string will be considered a trace:
-    `*`:: An A-movement trace
-    `*T*`:: An A-bar movement trace
-    `*CL*`:: A clitic movement trace
-    `*ICH*`:: A trace of rightward movement or extraposition (mnemonic:
-    Interpret Constituent Here)
++
+[horizontal]
+`*`:: An A-movement trace
+`*T*`:: An A-bar movement trace
+`*CL*`:: A clitic movement trace
+`*ICH*`:: A trace of rightward movement or extraposition (mnemonic:
+Interpret Constituent Here)
 
 
 
