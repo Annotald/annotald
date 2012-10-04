@@ -1170,7 +1170,7 @@ function autoConjoin() {
 `$()` function “wraps” them in the jQuery library, allowing jQuery
 functions to be used.
 <4> IP and CP nodes should keep their dash tags when embedded inside
-conjunction.  Thus we have (e.g. in the PPCEME) =(NP (NP ...)
+conjunction.  Thus we have (e.g. in the PPCEME) =(NP-SBJ (NP ...)
 (CONJP ...))= but =(IP-INF (IP-INF ...) (CONJP ...))=
 <5> jQuery syntax is very intuitive; this line gets the first child of
 the `selnode` (selected node)
@@ -1178,7 +1178,7 @@ the `selnode` (selected node)
 back to a native type appropriate for storing in the `startnode`
 variable.
 <7> Restore the user’s selection before exiting the function
-<8> This is the pronch that will be taken if two nodes are selected
+<8> This is the branch that will be taken if two nodes are selected
 <9> For word level conjunction, the selection must span over a =CONJ=
 node, and each member of the selection must be a leaf node.
 
