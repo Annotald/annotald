@@ -325,7 +325,7 @@ Cedergren, 85-95. Alberta: Carbondale and Edmonton]
 Therefore, the minimal annotation that captures the linguistic facts
 places case on the leaf nodes; phrasal case can be calculated based on
 that information.
-// TODO: this broader philosophical point needs to be explicated
+// TODO(post-1.0): this broader philosophical point needs to be explicated
 // elsewhere, like in an annotation philosophy section.
 However, Annotald provides functions to make this less tedious – to
 allow the annotator to mark a whole NP for case, and have that
@@ -369,7 +369,7 @@ moving through =NP-SBJ=, =NP-OB2=, etc.  Thus, it need not appear in this
 list.  However, the =SPE= dash tag (for reported speech) is toggled on
 and off – changing an =IP-XXX= to =IP-XXX-SPE=, and potentially back to
 IP-XXX.
-// TODO: this is a bad explanation.  Maybe require to list all dash
+// TODO(post-1.0): this is a bad explanation.  Maybe require to list all dash
 // tags?  but that gets tedious.
 
 `ipnodes`:: A list of categories which are clauses.  These are
