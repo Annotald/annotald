@@ -1030,7 +1030,10 @@ validators = OrderedDict([
 <1> An easy way to find in Python other necessary files (in this case,
 CorpusSearch queries) is by locating them with relation to the Python
 file itself.  This line assigns the directory where the script is
-located (as a string) to the variable `current_dir`.
+located (as a string) to the variable `current_dir`.  Thus, this code
+assumes that in the same directory as the `settings.py` file, there are
+two files named `example1.q` and `example2.q` containing relevant
+CorpusSearch queries.
 // TODO(dev): could we simplify things, by using a decorator to add a
 // name to fns, and then just using a list of fns?
 <2> The format of the `validators` variable is a dictionary – a data
@@ -1045,15 +1048,15 @@ appear in Annotald’s dropdown menu.
 variable.  Each entry in the dictionary is given as a pair of `(key,
 value)`.
 
-The `corpusSearchValidate` function takes one argument, giving the
-path to a CorpusSearch query file.  It then arranges to run this query
-on the file, and return the modified output.  The CorpusSearch program
-is distributed with Annotald; however, this facility relies on a Java
+The `corpusSearchValidate` function takes one argument, giving the path
+to a CorpusSearch query file.  It then arranges to run this query on the
+file, and return the modified output.  The CorpusSearch program is
+distributed with Annotald; however, this facility relies on a Java
 executable being installed on your machine.  You can test this by
 opening a command prompt and typing `java` followed by a carriage
 return.  You should see a usage message from the java program; if you
-instead receive an error message the program is not installed and/or
-accessible.
+instead receive an error message the java program is not installed
+and/or accessible.
 
 By convention, the validator should add the =-FLAG= dash tag to
 trees which are anomalous.  The “Next Error” button in the Annotald
