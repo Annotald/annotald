@@ -35,3 +35,7 @@ body div.note {
     /* fix a little alignment problem with callout list images */
     padding-top: 4px;
 }
+
+a.footnote {
+    text-decoration: none;
+}
