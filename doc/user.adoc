@@ -1209,7 +1209,7 @@ command sequentially renumbers all indices in all trees, beginning with
 1 for each tree and proceeding in order.
 +
 Annotald will additionally rewrte indices automatically on save, unless
-this feature is disabled in the `settings.py` file.
+this feature is <<rewriteindices,disabled>> in the `settings.py` file.
 
 
 [appendix]
