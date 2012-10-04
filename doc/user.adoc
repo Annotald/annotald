@@ -910,6 +910,8 @@ numbers, and underscores.  The content of the rule can be as follows:
 - `*A` matches 0 or more A
 - `+A` matches 1 or more A
 
+Comments are enclosed in `/* ... */`.
+
 Using these rules, it is possible to build up a grammar.  As an
 illustration, here is a grammar that matches
 http://www.ling.upenn.edu/histcorpora/annotation/labels.htm#pos_tags[the
@@ -918,13 +920,12 @@ tagset from the PPCEME] (without, for simplicity, the numbered word splitting).
 // TODO: test this
 
 ----------
-/* Subdivide types of tag, for simplicity */
 word_tag <-
+/* <1> */
  ( verbal | nominal | punct | other_word | fn_cat )
 
-/* TODO: comments! */
-
 nominal <-
+/*       <2>      <3> */
  ('NUM' ?'$') | ('N' ?'PR' ?'S' ?'$') | ('ADJ' ?('R' | 'S')) | 'D' |
  ('PRO' ?'$') | ('Q' ?('R' | 'S' | '$'))
 
@@ -932,6 +933,7 @@ verbal <-
  verb | verb_modifier
 
 verb <-
+/* <4> */
  (('DO' | 'BE' | 'HV' | 'VB') ?('D' | 'P' | 'N' | 'I')) |
  (('D' | 'B' | 'H' | 'V') 'A' ('G' | 'N')) |
  ('MD' ?'0')
@@ -940,6 +942,7 @@ verb_modifier <-
  ('ADV' ?('R' | 'S')) | 'NEG'
 
 punct <-
+/* <5> */
  '\'' | '"' |',' | '.' | '`'
 
 fn_cat <-
@@ -950,6 +953,26 @@ fn_cat <-
 other_word <-
  'CODE' | 'FW' | 'X' | 'FP' | 'META'
 ----------
+
+<1> For simplicity, the first rule is divided into a disjunction of
+different sub-rules.
+
+<2> This is a very simple example of a rule – the =NUM= tag may be
+followed by an optional =$=, indicating that it is possessive
+
+<3> A more complicated rule.  A noun =N= may be proper =PR=, plural =S=,
+and/or possessive =$=.  Any subest of these modifiers may appear.
+
+<4> The most complicated rule in this grammar.  A verbal tag consists of
+an indicator of the verb’s lexical identity (_do_, _be_, _have_, or
+other), followed by an indicator of its form.  Present =P=, past =D=,
+past participle =N=, and imperative =I= follow a two-letter verb code,
+giving rise to forms like =DOD=, =BEP=, etc.  Present participle =G= and
+passive participle =N= follow a one-letter code followed by =A=, giving
+rise to =VAN=, =HAG=, etc.
+
+<5> Because `'` is the quote character, to obtain a literal quote
+character it must be backslash-escaped.
 
 // TODO: num before n
 // TODO: matching dashes in phrasal rules
