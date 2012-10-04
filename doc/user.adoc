@@ -466,7 +466,7 @@ default value `False` is appropriate.
 
 `colorCSSPath`:: The path to the user-supplied CSS file.
 
-`rewriteIndices`:: By default, Annotald normalizes the indices of files
+`rewriteIndices` [[rewriteindices]]:: By default, Annotald normalizes the indices of files
 when saving.  Thus, if you split a sentence into two root-level clauses,
 the indices in the second clause will begin at 1 and count up
 monotonically, even though they may have been originally higher by
