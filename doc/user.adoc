@@ -779,11 +779,10 @@ replicate the flexibility or (perhaps especially) speed of a dedicated
 search program such as
 http://corpussearch.sourceforge.net/[CorpusSearch], it is useful to be
 able to search within the Annotald interface itself.  The search dialog
-is accessed by clicking the “Search” button in the Tools menu.
-// TODO: or via slash key
-Within the dialog box, you will construct a visual representation of
-your query, similar to the representation of trees in the Annotald
-interface.
+is accessed by clicking the “Search” button in the Tools menu, or by
+pressing the forward slash (`/`) key.  Within the dialog box, you will
+construct a visual representation of your query, similar to the
+representation of trees in the Annotald interface.
 
 The simplest query tree contains only one leaf node.  The leaf has a
 text box, into which the search string can be entered.  The string is
