@@ -717,11 +717,12 @@ http://docs.python.org/library/shelve.html[the module’s documentation]
 and Annotald’s source code if they desire to create custom code to
 analyze the log.]  There are three levels of logging possible:
 
-[options="header",cols="s,3*1^",align="center"]
+[options="header",cols="s,2*1^",align="center"]
 |====
-| Type                           | no logging | major event logging  | full logging
-| <<cmdline-q,Command line flag>> | `-q`       | `<none>`             | `<none>`
-| <<logdetail,`logDetail`>>       | N/A        | `true`               | `false`
+| Type                   | <<cmdline-q,Command line flag>> | <<logdetail,`logDetail`>>
+| no logging             | `-q`                            | N/A
+| major event logging    | none                            | `false`
+| full logging           | none                            | `true`
 |====
 
 The “major event logging” setting records when the program is opened and
