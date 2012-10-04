@@ -120,6 +120,8 @@ function customCommands() {
     addCommand({ keycode: 192 }, toggleLemmata); // `
     addCommand({ keycode: 76, ctrl: true }, displayRename); // ctrl + l
 
+    addCommand({ keycode: 191 }, search); // forward slash
+
 
     // TODO: remove this
     // An example of a context-sensitive label switching command.  If
