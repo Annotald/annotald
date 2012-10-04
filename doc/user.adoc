@@ -681,8 +681,11 @@ undoing something.  No arguments.
 
 == Additional features
 
-// TODO: this section talks about extra features that require no
-// programming; next sec. is about features that do require programming
+This section addresses Annotald features that, while not necessary for
+annotation, can be convenient in certain circumstances.  Generally
+speaking, the features in this section do not require any programming in
+order to be useful.  Features which do require programming are discussed
+in the <<advanced-features,next section>>
 
 [[limiteddisplay]]
 === Limited display
@@ -856,12 +859,16 @@ which can be changed by using a deep node, as already mentioned.
 
 // TODO(dev): allow drag and drop of nodes?  or buttons to move them?
 
+[[advanced-features]]
 == Advanced features
 
 In this section, some advanced features of Annotald are described.
 These are not required to use Annotald (and in fact are deactivated by
 default).  However, for proficient users, their use may make possible
-grater annotation efficiency and accuracy.
+grater annotation efficiency and accuracy.  Generally speaking, all
+features in this section require some faculty with programming, in the
+broad sense of using an abstract language to give instructions to a
+computer.
 
 [[tagset-validate]]
 === Tagset validation
