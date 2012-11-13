@@ -149,7 +149,7 @@ class Treedraw(object):
         if self.pythonOptions['rewriteIndices']:
             # TODO: we pass to and from T.Tree too many times...for
             # efficiency, only convert to NLTK trees once
-            tosave = "\n\n".join(map(lambda t: util.rewriteIndices(T.Tree(t)),
+            tosave = "\n\n".join(map(lambda t: unicode(util.rewriteIndices(T.Tree(t))),
                                      tosave.split("\n\n")))
         tosave = tosave.replace("-FLAG", "")
         try:
