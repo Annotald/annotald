@@ -265,7 +265,9 @@ class Treedraw(object):
 
     def readVersionCookie(self, filename):
         f = codecs.open(filename, 'r', "utf-8")
-        currentText = f.read(3*1024)
+        currentText = f.read()  # must read the whole thing to avoid reading
+                                # half a comment...optimize here, or hope the
+                                # disk cache gets used.
         if self.options.outFile:
             currentText = util.scrubText(currentText)
 
