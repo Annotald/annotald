@@ -241,7 +241,7 @@ def writeTreesToFile(meta, trees, filename):
         trees = trees.split("\n\n")
         trees = filter(lambda x: x != "", trees)
         trees = map(T.Tree, trees)
-    if isinstance(meta, basestring):
+    if isinstance(meta, basestring) and meta.strip() != "":
         meta = T.Tree(meta)
     trees = map(_formatTree, trees)
 
