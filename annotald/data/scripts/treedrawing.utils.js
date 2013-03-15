@@ -194,7 +194,7 @@ function displayError(html) {
  *
  * If no matches, do nothing.
  *
- * @returns {Boolean} an indicator of whether scrolling was performed
+ * @returns {JQuery Node} the node scrolled to, or `undefined` if none.
  */
 function scrollToNext(selector) {
     var docViewTop = $(window).scrollTop();
@@ -205,8 +205,9 @@ function scrollToNext(selector) {
         }).first();
     if (nextError.length == 1) {
         window.scroll(0, nextError.offset().top - $(window).height() * 0.25);
+        return nextError;
     }
-    return !!nextError; // convert to boolean and return
+    return undefined;
 }
 
 // ===== Functions on node representation
