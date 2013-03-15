@@ -2245,7 +2245,8 @@ function validateHandler(data) {
 }
 
 function nextValidationError() {
-    scrollToNext(".snode[class*=\"FLAG\"],.snode[class$=\"FLAG\"]");
+    var node = scrollToNext(".snode[class*=\"FLAG\"],.snode[class$=\"FLAG\"]");
+    selectNode(node.get(0));
 }
 
 // ========== Advancing through the file
