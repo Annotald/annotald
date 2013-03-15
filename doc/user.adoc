@@ -534,7 +534,10 @@ Spacebar:: Clear the selection
 
 L:: Edit the Label and/or text of a node
 
-Shift + L:: The same (included as an example of a keybinding with modifier)
+Shift + L:: The same (included as an example of a keybinding with
+modifier)
+
+Forward slash (/):: <<search,Search>>
 
 
 [[customkeys]]
@@ -717,7 +720,10 @@ http://docs.python.org/library/shelve.html[the module’s documentation]
 and Annotald’s source code if they desire to create custom code to
 analyze the log.]  There are three levels of logging possible:
 
-[options="header",cols="s,2*1^",align="center"]
+// TODO(post-1.0): ideally this table would be centered, but adoc ->
+// docbook doesn’t center things
+
+[options="header",cols="s,2*1^"]
 |====
 | Type                   | <<cmdline-q,Command line flag>> | <<logdetail,`logDetail`>>
 | no logging             | `-q`                            | N/A
@@ -729,7 +735,6 @@ The “major event logging” setting records when the program is opened and
 closed, as well as when the file is validated or saved.  That is, it
 records events visible to the Annotald server.  It does not record any
 actions taken in the browser.  Full logging, on the other hand, records
-all events in the browser interface, such as key presses and mouse
 clicks.
 
 Each event has associated with it a timestamp, which is recorded as
@@ -772,6 +777,7 @@ individually.  Invoking it on a case-bearing phrase (one of
 <<casevars,`casePhrases`>>) will change the case of all that node’s
 case-bearing daughters, without recursing too deeply.
 
+[[search]]
 === Searching
 
 Annotald has a structural search engine built in.  While it cannot
