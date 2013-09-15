@@ -18,7 +18,9 @@ from __future__ import unicode_literals
 
 # TODO: catch C-c exit and log prog exit
 
-VERSION = "1.0.dev1"
+import annotald
+
+VERSION = annotald.__version__
 
 # Python standard library
 import codecs
