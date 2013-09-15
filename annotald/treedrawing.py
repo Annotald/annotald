@@ -175,7 +175,7 @@ class Treedraw(object):
         # When showing part of the file, a regular click of the validation
         # button validates only the showing trees, whereas shift-click does
         # them all.  This implements that logic.
-        if self.showingPartialTree and not shift:
+        if self.showingPartialFile and not shift:
             tovalidate = "\n\n".join(
                 self.trees[self.treeIndexStart:self.treeIndexEnd])
 

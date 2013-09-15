@@ -1378,7 +1378,7 @@ function doSearch () {
     saveSearch();
     hideDialogBox();
     var searchCtx = $(".snode"); // TODO: remove sn0
-    var incremental = $("#searchInc").attr("checked");
+    var incremental = $("#searchInc").val() == "on";
 
     if (incremental && $(".searchmatch").length > 0) {
         var lastMatchTop = $(".searchmatch").last().offset().top;
