@@ -526,7 +526,7 @@ function selectNode(node, force) {
             return;
         }
 
-        if (node.className == "wnode") {
+        while (!$(node).hasClass("snode") && node != document) {
             node = node.parentNode;
         }
 
