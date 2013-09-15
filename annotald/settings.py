@@ -8,7 +8,7 @@ extraJavascripts = []
 # debug Annotald's jQuery code
 debugJs = False
 
-# TODO: add an option to include waxeye files, which we wil distribute?
+# TODO: add an option to include waxeye files, which we will distribute?
 
 # Set this to True if you have defined a color.css file to use a personalized
 # color scheme
@@ -21,7 +21,7 @@ colorCSSPath = ""
 rewriteIndices = True
 
 # This should be a dictionary, with the keys being the names of
-# validation queries, and the values being a Pythin function (or other
+# validation queries, and the values being a Python function (or other
 # callable).  The function should accept two arguments -- the file
 # header, and the file content, both as strings of parenthesized trees.
 # It should return a string, which will be interpreted as the new
