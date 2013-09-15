@@ -17,7 +17,8 @@ setup_args = {
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Topic :: Scientific/Engineering"
     ]
-    , 'long_description': open("README.rst").read()
+    , 'long_description': (open("README.rst").read() + "\n\n" +
+                           open("NEWS.rst").read())
 }
 
 if os.name == "nt":
