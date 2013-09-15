@@ -24,24 +24,18 @@ VERSION = annotald.__version__
 
 # Python standard library
 import codecs
-from datetime import datetime
 import json
 import os
 import pkg_resources
 import re
 import runpy
 import shelve
-import subprocess
 import sys
 import time
 import traceback
 
 # Part of the standard library as of 2.7
 import argparse
-try:
-    import win32process
-except:
-    pass
 
 # External libraries
 import cherrypy
@@ -51,6 +45,7 @@ import nltk.tree as T
 
 # Local libraries
 import util
+
 
 class Treedraw(object):
     def __init__(self, args, shortfile):
@@ -124,12 +119,12 @@ class Treedraw(object):
         cherrypy.response.headers['Content-Type'] = 'application/json'
         if (startTime != self.startTime) and not (force == "true"):
             return json.dumps(dict(result = "failure",
-                                   reason = "non-matching invocations of Annotald",
+                                   reason = "non-matching invocations of Annotald",  # noqa
                                    reasonCode = NON_MATCHING_ANNOTALDS,
                                    startTime = self.startTime))
         tosave = self.integrateTrees(trees)
         tosave = tosave.replace("-FLAG", "")
-        print "self.thefile is: ", self.thefile
+        print ("self.thefile is: %s" % self.thefile)
         if update_md5:
             self.versionCookie = util.updateVersionCookie(
                 self.versionCookie,
@@ -137,7 +132,7 @@ class Treedraw(object):
                 util.hashTrees(trees,
                                self.versionCookie))
         if util.queryVersionCookie(self.versionCookie, "HASH.MD5"):
-            print "checking hash"
+            print ("checking hash")
             # TODO: document hash function in user manual
             old_hash = util.queryVersionCookie(self.versionCookie,
                                                "HASH.MD5")
@@ -151,15 +146,16 @@ class Treedraw(object):
         if self.pythonOptions['rewriteIndices']:
             # TODO: we pass to and from T.Tree too many times...for
             # efficiency, only convert to NLTK trees once
-            tosave = "\n\n".join(map(lambda t: unicode(util.rewriteIndices(T.Tree(t))),
-                                     tosave.split("\n\n")))
+            tosave = "\n\n".join(map(
+                lambda t: unicode(util.rewriteIndices(T.Tree(t))),
+                tosave.split("\n\n")))
         tosave = tosave.replace("-FLAG", "")
         try:
             util.writeTreesToFile(self.versionCookie, tosave, self.thefile)
             self.doLogEvent(json.dumps({'type': "save"}))
             return json.dumps(dict(result = "success"))
         except Exception as e:
-            print "something went wrong: %s" % e
+            print ("something went wrong: %s" % e)
             traceback.print_exc()
             return json.dumps(dict(result = "failure",
                                    reason = "server got an exception"))
@@ -183,7 +179,8 @@ class Treedraw(object):
                 self.versionCookie, tovalidate
             ).split("\n\n")
         except Exception as e:
-            print "something went wrong with validation: %s, %s" % (type(e), e)
+            print ("something went wrong with validation: %s, %s" %
+                   (type(e), e))
             traceback.print_exc()
             return json.dumps(dict(result = "failure",
                                    reason = str(e)))
@@ -206,10 +203,9 @@ class Treedraw(object):
         return json.dumps(dict(result = "success",
                                html = validatedHtml))
 
-
     @cherrypy.expose
     def doLogEvent(self, eventData):
-        eventData = json.loads(eventData) # TODO: so fucking asinine
+        eventData = json.loads(eventData)  # TODO: so fucking asinine
         if not self.options.timelog:
             return
         if not self.eventLog:
@@ -229,7 +225,7 @@ class Treedraw(object):
 
     @cherrypy.expose
     def doExit(self):
-        print "Exit message received"
+        print ("Exit message received")
         self.doLogEvent(json.dumps({'type': "program-exit"}))
         time.sleep(3)           # Wait for log events from server
         if self.eventLog:
@@ -254,7 +250,7 @@ class Treedraw(object):
     def testLoadTrees(self, trees = None):
         cherrypy.response.headers['Content-Type'] = 'application/json'
         return json.dumps(dict(
-                trees = self.treesToHtml(self.readTrees(None, text = trees))))
+            trees = self.treesToHtml(self.readTrees(None, text = trees))))
 
     @cherrypy.expose
     def logs(self, **formData):
@@ -302,8 +298,8 @@ class Treedraw(object):
         alltrees = '<div class="snode" id="sn0">'
         for tree in trees:
             tree = tree.strip()
-            tree = tree.replace("<","&lt;")
-            tree = tree.replace(">","&gt;")
+            tree = tree.replace("<", "&lt;")
+            tree = tree.replace(">", "&gt;")
             if not tree == "":
                 nltk_tree = T.Tree(tree)
                 alltrees = alltrees + self.conversionFn(nltk_tree, version)
@@ -340,15 +336,15 @@ class Treedraw(object):
                                     usemetadata = self.useMetadata,
                                     test = test,
                                     partialFile = self.showingPartialFile,
-                                    extraScripts = self.pythonOptions['extraJavascripts'],
+                                    extraScripts = self.pythonOptions['extraJavascripts'],  # noqa
                                     colorCSS = self.pythonOptions['colorCSS'],
-                                    colorPath = self.pythonOptions['colorCSSPath'],
+                                    colorPath = self.pythonOptions['colorCSSPath'],  # noqa
                                     startTime = self.startTime,
                                     debugJs = self.pythonOptions['debugJs'],
                                     useValidator = useValidator,
                                     validators = validatorNames,
                                     treeIndexStatement = ti,
-                                    idle = "<div style='color:#64C465'>Editing.</div>"
+                                    idle = "<div style='color:#64C465'>Editing.</div>"  # noqa
                                     )
 
     @cherrypy.expose
@@ -380,7 +376,7 @@ class Treedraw(object):
             self.integrateTrees(trees)
             while True:
                 self.treeIndexStart = self.treeIndexStart + \
-                                      offset * self.options.numTrees
+                                      offset * self.options.numTrees  # noqa
                 self.treeIndexEnd = self.treeIndexStart + \
                                     self.options.numTrees
                 if self.treeIndexEnd >= len(self.trees):
@@ -388,7 +384,7 @@ class Treedraw(object):
                 if self.treeIndexStart >= len(self.trees):
                     self.treeIndexStart, self.treeIndexEnd = oldindex
                     return json.dumps(dict(result = 'failure',
-                                       reason = 'At end of file.'))
+                                           reason = 'At end of file.'))
                 elif self.treeIndexStart < 0:
                     self.treeIndexStart, self.treeIndexEnd = oldindex
                     return json.dumps(dict(result = 'failure',
@@ -408,32 +404,39 @@ class Treedraw(object):
                      treeIndexEnd = self.treeIndexEnd,
                      totalTrees = len(self.trees)))
 
+
 def _main(argv):
-    parser = argparse.ArgumentParser(description = "A program for annotating parsed corpora",
-                                     version = "Annotald " + VERSION,
-                                     conflict_handler = "resolve")
-    parser.add_argument("-s", "--settings", action = "store", dest = "settings",
-                        help = "path to settings.js file")
-    parser.add_argument("-p", "--port", action = "store",
-                        type = int, dest = "port",
-                        help = "port to run server on")
-    parser.add_argument("-o", "--out", dest = "outFile", action = "store_true",
-                        help = "boolean for identifying CorpusSearch output files")
-    parser.add_argument("-q", "--quiet", dest = "timelog", action = "store_false",
-                        help = "boolean for specifying whether you'd like to \
+    parser = argparse.ArgumentParser(
+        description = "A program for annotating parsed corpora",
+        version = "Annotald " + VERSION,
+        conflict_handler = "resolve")
+    parser.add_argument(
+        "-s", "--settings", action = "store", dest = "settings",
+        help = "path to settings.js file")
+    parser.add_argument(
+        "-p", "--port", action = "store",
+        type = int, dest = "port",
+        help = "port to run server on")
+    parser.add_argument(
+        "-o", "--out", dest = "outFile", action = "store_true",
+        help = "boolean for identifying CorpusSearch output files")
+    parser.add_argument(
+        "-q", "--quiet", dest = "timelog", action = "store_false",
+        help = "boolean for specifying whether you'd like to \
     silence the timelogging")
-    parser.add_argument("-S", "--python-settings", dest = "pythonSettings",
-                        action = "store", help = "path to Python settings file")
-    parser.add_argument("-1", "--one-tree-mode", dest = "oneTree",
-                         action = "store_true",
-                         help = "start Annotald in one-tree mode")
+    parser.add_argument(
+        "-S", "--python-settings", dest = "pythonSettings",
+        action = "store", help = "path to Python settings file")
+    parser.add_argument(
+        "-1", "--one-tree-mode", dest = "oneTree", action = "store_true",
+        help = "start Annotald in one-tree mode")
     # TODO: this will not be handled properly if the arg is greater than the
     # number of trees in the file.
     parser.add_argument("-n", "--n-trees-mode", dest = "numTrees",
                          type = int, action = "store",
                          help = "number of trees to show at a time")
 
-    parser.add_argument("psd", nargs='+') # TODO: nargs = 1?
+    parser.add_argument("psd", nargs='+')  # TODO: nargs = 1?
 
     parser.set_defaults(port = 8080,
                         settings = pkg_resources.resource_filename(
