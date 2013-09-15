@@ -87,6 +87,9 @@ class Treedraw(object):
                                             })
         cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
+        self.doLogEvent(json.dumps({'type': "program-start",
+                                    'filename': self.thefile}))
+
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   :
                    pkg_resources.resource_filename("annotald", "data/"),
@@ -447,21 +450,6 @@ def _main(argv):
                         numTrees = 1)
     args = parser.parse_args(argv)
     shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
-
-    if args.timelog:
-        # TODO: code duplicated... :(
-        eventLog = shelve.open("annotaldLog.shelve")
-        evtTime = time.time()
-        eventData = { 'type': "program-start" }
-        # while eventLog[str(evtTime)]:
-        #     # TODO: this seems like not the right answer...
-        #     time.sleep(0.01)
-        #     evtTime = time.time()
-        eventData['filename'] = args.psd[0]
-        eventLog[str(evtTime)] = eventData
-        eventLog.close()
-        with open("annotaldLog.txt", "a") as f:
-            f.write(str(evtTime) + ": " + json.dumps(eventData) + "\n")
 
     cherrypy.config.update({'server.socket_port': args.port})
 
