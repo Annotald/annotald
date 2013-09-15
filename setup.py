@@ -4,14 +4,20 @@ import os
 import annotald
 
 setup_args = {
-      'name': 'Annotald'
+      'name': 'annotald'
     , 'version': annotald.__version__
+    , 'description': 'A GUI for treebank annotation'
     , 'author': 'Aaron Ecay, Anton Karl Ingason and Jana Beck'
     , 'author_email': 'aaronecay@gmail.com'
     , 'url': 'http://annotald.github.com/'
-    , 'description': 'A GUI for treebank annotation'
-    , 'license': "LICENSE"
-    # TODO: long_description
+    , 'license': "GPLv3+"
+    , 'classifiers': [
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Education",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "Topic :: Scientific/Engineering"
+    ]
+    , 'long_description': open("README.rst").read()
 }
 
 if os.name == "nt":
