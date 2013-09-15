@@ -72,19 +72,25 @@ class Treedraw(object):
             self.useMetadata = False
         self.showingPartialFile = self.options.oneTree or \
                                   self.options.numTrees > 1
-        self.pythonOptions = runpy.run_path(args.pythonSettings,
-                                            init_globals = {
-                                                'extraJavascripts': [],
-                                                'debugJs': False,
-                                                'validators': {},
-                                                'colorCSS': False,
-                                                # TODO: this masks a bug
-                                                # in jana's branch
-                                                'colorCSSPath': "/dev/null",
-                                                'corpusSearchValidate':
-                                                util.corpusSearchValidate,
-                                                'rewriteIndices': True
-                                            })
+        self.pythonOptions = {'extraJavascripts': [],
+                              'debugJs': False,
+                              'validators': {},
+                              'colorCSS': False,
+                              # TODO: this masks a bug in jana's branch
+                              'colorCSSPath': "/dev/null",
+                              'corpusSearchValidate':
+                              util.corpusSearchValidate,
+                              'rewriteIndices': True}
+        if args.pythonSettings is not None:
+            if sys.version_info[0] == 2 and sys.version_info[1] < 7 or \
+               sys.version_info[0] == 3 and sys.version_info[1] < 2:
+                print ("Specifying python settings requires Python v." +
+                       ">2.7 or >3.2.")
+                sys.exit(1)
+            else:
+                self.pythonOptions = runpy.run_path(args.pythonSettings,
+                                                    init_globals =
+                                                    self.pythonOptions)
         cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
         self.doLogEvent(json.dumps({'type': "program-start",
@@ -454,8 +460,7 @@ def _main(argv):
     parser.set_defaults(port = 8080,
                         settings = pkg_resources.resource_filename(
                             "annotald", "settings.js"),
-                        pythonSettings = pkg_resources.resource_filename(
-                            "annotald", "/settings.py"),
+                        pythonSettings = None,
                         oneTree = False,
                         numTrees = 1)
     args = parser.parse_args(argv)
