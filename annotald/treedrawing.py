@@ -220,7 +220,7 @@ class Treedraw(object):
                 try:
                     os.rename("annotaldLog.shelve", "annotaldLog.shelve.old")
                     print ("Error opening event database; old db is at path" +
-                           "annotaldLog.shelve.old")
+                           ": annotaldLog.shelve.old")
                 except:
                     pass
                 self.eventLog = shelve.open("annotaldLog.shelve")
