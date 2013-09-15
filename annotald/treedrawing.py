@@ -212,7 +212,16 @@ class Treedraw(object):
         if not self.options.timelog:
             return
         if not self.eventLog:
-            self.eventLog = shelve.open("annotaldLog.shelve")
+            try:
+                self.eventLog = shelve.open("annotaldLog.shelve")
+            except:
+                try:
+                    os.rename("annotaldLog.shelve", "annotaldLog.shelve.old")
+                    print ("Error opening event database; old db is at path" +
+                           "annotaldLog.shelve.old")
+                except:
+                    pass
+                self.eventLog = shelve.open("annotaldLog.shelve")
         evtTime = time.time()
         # while self.eventLog[str(evtTime)]:
         #     # TODO: this seems like not the right answer...
