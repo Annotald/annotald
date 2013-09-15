@@ -22,7 +22,7 @@ doc/devel.html: doc/devel.adoc
 doc/user.html: doc/user.adoc
 	cd doc && make user.html
 
-doc/index.html: README.asciidoc
+doc/index.html: README.rst
 	cd doc && make index.html
 
 all-docs: api-doc priv-doc doc
