@@ -411,7 +411,6 @@ class Treedraw(object):
 def _main(argv):
     parser = argparse.ArgumentParser(
         description = "A program for annotating parsed corpora",
-        version = "Annotald " + VERSION,
         conflict_handler = "resolve")
     parser.add_argument(
         "-s", "--settings", action = "store", dest = "settings",
@@ -438,6 +437,8 @@ def _main(argv):
     parser.add_argument("-n", "--n-trees-mode", dest = "numTrees",
                          type = int, action = "store",
                          help = "number of trees to show at a time")
+    parser.add_argument("-v", "--version", action = "version",
+                        version = "This is Annotald v." + annotald.__version__)
 
     parser.add_argument("psd", nargs='+')  # TODO: nargs = 1?
 
