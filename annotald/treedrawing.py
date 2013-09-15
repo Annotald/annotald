@@ -49,11 +49,7 @@ import util
 
 class Treedraw(object):
     def __init__(self, args, shortfile):
-        if len(args.psd) == 1:
-            self.thefile = args.psd[0]
-        else:
-            raise util.AnnotaldException(
-                "Annotald requires exactly one .psd file argument!")
+        self.thefile = args.psd[0]
         self.shortfile = shortfile
         self.options = args
         self.readVersionCookie(self.thefile)
@@ -455,7 +451,7 @@ def _main(argv):
     parser.add_argument("-v", "--version", action = "version",
                         version = "This is Annotald v." + annotald.__version__)
 
-    parser.add_argument("psd", nargs='+')  # TODO: nargs = 1?
+    parser.add_argument("psd", nargs=1)
 
     parser.set_defaults(port = 8080,
                         settings = pkg_resources.resource_filename(
