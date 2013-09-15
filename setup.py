@@ -1,7 +1,4 @@
 from distutils.core import setup
-# It might be more future-proof to use distribute instead of distutils,
-# but the former has a very stupid quirk whereby package_data is not put
-# in the sdist.
 
 import os
 import annotald
@@ -49,38 +46,37 @@ manifestVersion="1.0">
 
     annotald_data_files = []
 
-    annotald_data_files.append( ('', ['settings.js', 'CS_Tony_oct19.jar',
-                                      'nothing.q', 'user-plain-red.png',
-                                      'user-plain-blue.png']) )
+    annotald_data_files.append(('', ['settings.js', 'CS_Tony_oct19.jar',
+                                     'nothing.q', 'user-plain-red.png',
+                                     'user-plain-blue.png']))
 
     html_files = glob.glob('data/html/*.mako')
-    annotald_data_files.append( ('data/html', html_files) )
+    annotald_data_files.append(('data/html', html_files))
 
     image_files = glob.glob('data/images/*.png')
-    annotald_data_files.append( ('data/images', image_files) )
+    annotald_data_files.append(('data/images', image_files))
 
     script_files = glob.glob('data/scripts/*.js')
-    annotald_data_files.append( ('data/scripts', script_files) )
+    annotald_data_files.append(('data/scripts', script_files))
 
     css_files = glob.glob('data/css/*.css')
-    annotald_data_files.append( ('data/css', css_files) )
+    annotald_data_files.append(('data/css', css_files))
 
-    setup(windows=[{ "script": "annotald-win.py",
-                     "other resources": [24,1, manifest]
-                   }],
-          data_files = annotald_data_files,
-          options={ "py2exe": { "skip_archive": True } },
+    setup(windows=[{"script": "annotald-win.py",
+                    "other resources": [24,1, manifest]
+                }],
+          data_files=annotald_data_files,
+          options={"py2exe": {"skip_archive": True}},
           **setup_args)
 
 else:
     setup(
-          packages = ['annotald']
-        , scripts = ['bin/annotald', 'bin/annotald-aux']
-        # TODO: or data_files?; move corpussearch jar somewhere; ...
-        , package_data = { 'annotald': ["data/*/*", "settings.py",
-                                        "settings.js",
-                                        "CS_Tony_oct19.jar"] }
-        , requires = ["mako", "cherrypy", "setuptools", "lovett", "argparse"]
-        , provides = ["annotald"]
+          packages=['annotald']
+        , scripts=['bin/annotald', 'bin/annotald-aux']
+        , package_data={'annotald': ["data/*/*", "settings.py",
+                                     "settings.js",
+                                     "CS_Tony_oct19.jar"]}
+        , requires=["mako", "cherrypy", "setuptools", "lovett", "argparse"]
+        , provides=["annotald"]
         , **setup_args
     )
