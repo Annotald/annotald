@@ -460,6 +460,8 @@ def _main(argv):
                         oneTree = False,
                         numTrees = 1)
     args = parser.parse_args(argv)
+
+    # TODO: can we calculate this in __init__?
     shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
 
     cherrypy.config.update({'server.socket_port': args.port})
