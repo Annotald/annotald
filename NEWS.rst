@@ -43,13 +43,14 @@ Release 12.03
 This is the first release since 11.12.
 
 Potentially backwards-incompatible changes:
-* The handling of dash tags has been overhauled.  Annotald now has
+
+- The handling of dash tags has been overhauled.  Annotald now has
   three separate lists of allowable dash tags: one list for dash tags
   on word-level labels, one for dash tags on clausal nodes (IP and CP),
   and one for dash tags on non-clausal non-leaf nodes.  Refer to the
   settings.js file distributed with Annotald to see how to configure
   these options.
-* Annotald is now licensed under the GPL, version 3 or higher.
+- Annotald is now licensed under the GPL, version 3 or higher.
 
 Other changes:
 
@@ -87,7 +88,7 @@ Other changes:
   “python2” command.
 - Added support for clitic traces.  When creating a movement trace with
   the leafBefore and leafAfter functions, if the original phrase has the
-  dash tag -CL, the trace inserted will be *CL*.
+  dash tag -CL, the trace inserted will be ``*CL*``.
 - Annotald now colors IP-level nodes and the topmost “document” node
   differently.
 - Bug fixes.
@@ -106,7 +107,7 @@ Changes:
   details.
 - Added mousewheel support; use shift+wheel-up/-down to move through the
   tree, sisterwise
-– Limit undo history to 15 steps.  This limits how much memory is used
+- Limit undo history to 15 steps.  This limits how much memory is used
   by Annotald, which could be very high.
 - Allow (optional) specification of port on the commandline:
   annotald -p <number> <optional settings file> <.psd file>
