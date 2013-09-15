@@ -2733,6 +2733,18 @@ function untilSuccess() {
     }
 }
 
+function leafOrNot(leaf, not) {
+    var fn, args;
+    if (guessLeafNode($(startnode))) {
+        fn = arguments[0][0];
+        args = arguments[0].slice(1);
+    } else {
+        fn = arguments[1][0];
+        args = arguments[1].slice(1);
+    }
+    fn.apply(null, args);
+}
+
 // ===== Misc (candidates to move to utils)
 
 // TODO: move to utils?
