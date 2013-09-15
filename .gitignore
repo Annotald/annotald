@@ -15,4 +15,4 @@ htmlcov/
 build/
 dist/
 annotaldLog.*
-Annotald.egg-info/
+annotald.egg-info/
