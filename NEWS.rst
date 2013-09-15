@@ -1,5 +1,10 @@
+News
+====
+
 Release 1.1
 -----------
+
+Changes:
 
 - Annotald is now tested on Python 2.6+ and 3.3+.  Annotald officially
   supports (only) these versions of Python
@@ -14,6 +19,7 @@ This is the first release since 12.03.  The version numbering scheme has
 changed.
 
 Significant changes in this version:
+
 - A user’s manual was written
 - Significant under-the-hood changes to allow the editing of large files
   in Annotald without overly taxing the system CPU or RAM
@@ -89,6 +95,8 @@ Other changes:
 Release 11.12
 -------------
 
+Changes:
+
 - Various bugs fixed
 - Support for ID and METADATA nodes, as sisters of the clause root.
   (Currently, nodes other than ID and METADATA will not work.)
@@ -107,6 +115,8 @@ Release 11.12
 
 Release 11.11
 -------------
+
+Changes:
 
 - Proper Unicode support on OS X and Linux
 - Remove dependency on a particular charset in parsed files
