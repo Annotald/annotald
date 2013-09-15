@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 import os
 import annotald
@@ -76,7 +76,8 @@ else:
         , package_data={'annotald': ["data/*/*", "settings.py",
                                      "settings.js",
                                      "CS_Tony_oct19.jar"]}
-        , requires=["mako", "cherrypy", "setuptools", "lovett", "argparse"]
+        , install_requires=["mako", "cherrypy", "argparse", "nltk"]
+        , setup_requires = ["setuptools"]
         , provides=["annotald"]
         , **setup_args
     )
