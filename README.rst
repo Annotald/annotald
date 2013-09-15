@@ -22,14 +22,12 @@ Obtaining Annotald
 
 The central location for Annotald development is `on Github`_.  You can
 view or download the program's source code from there.  The latest
-release is available as a Python package.  Download the file and
-install it with the command ``pip install Annotald-x.y.z.tar.gz`` .
-(Further information about installation is available in the user’s
-manual.)
-
-(TODO: link to PyPI, user’s manual)
+release is available as a `Python package`_.  Install it with the
+command ``pip install annotald`` .  (Further information about
+installation is available in the user’s manual.)
 
 .. _on Github: https://github.com/Annotald/annotald
+.. _Python package: https://pypi.python.org/pypi/annotald
 
 Using Annotald
 --------------
