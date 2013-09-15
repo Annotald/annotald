@@ -284,7 +284,7 @@ test))) (ID test-01))\n\n");
 
         makeNode("FOO");
         undoBarrier();
-        newUndo();
+        undo();
         expectEqualText("undo makeNode",
                         $("#editpane").html(), origHtml);
 
@@ -294,22 +294,22 @@ test))) (ID test-01))\n\n");
         selectNodeByLabel("FOO");
         pruneNode();
         undoBarrier();
-        newUndo();
-        newUndo();
+        undo();
+        undo();
         expectEqualText("undo pruneNode",
                         $("#editpane").html(), origHtml);
 
         selectWord("other");
         toggleExtension("FOO", ["FOO"]);
         undoBarrier();
-        newUndo();
+        undo();
         expectEqualText("undo toggleExtension",
                         $("#editpane").html(), origHtml);
 
         selectWord("other");
         setLabel(["FOO"]);
         undoBarrier();
-        newUndo();
+        undo();
         expectEqualText("undo setLabel",
                         $("#editpane").html(), origHtml);
 
@@ -317,7 +317,7 @@ test))) (ID test-01))\n\n");
         selectWord("that", true);
         coIndex();
         undoBarrier();
-        newUndo();
+        undo();
         expectEqualText("undo coIndex",
                         $("#editpane").html(), origHtml);
 
@@ -335,7 +335,7 @@ test))) (ID test-01))\n\n");
 // dictionaryToForm" "_" "toLabeledBrackets" "startnode" "endnode" "\
 // wnodeString" "updateSelection" "leafBefore" "resetIds" "\
 // resetLabelClasses" "getLabel" "testValidLeafLabel" "basesAndDashes" "\
-// getIndex" "coIndex" "getIndexType" "makeNode" "newUndo" "pruneNode" "\
+// getIndex" "coIndex" "getIndexType" "makeNode" "undo" "pruneNode" "\
 // undoBarrier" "idNumber" "displayInfo" "displayWarning" "displayError" "\
 // setLabel" "toggleExtension" "resetUndo")
 // indent-tabs-mode: nil
