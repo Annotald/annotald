@@ -89,16 +89,34 @@ Annotald on Mac and Linux:
    Macintosh computers have a sufficient version of Python
    pre-installed.  (If you use Linux, it is also very likely that Python
    2 is already installed on your computer.)
-3. Follow the http://nltk.org/install.html[instructions] given by the
-   Natural Language Toolkit project to install the `pip` command on your
-   computer.  That is, steps 1–3 of the Mac/Linux directions, or steps
-   1–4 of the Windows directions for source installation.
-4. Download the latest release of Annotald from TODO: link.  Open a
-   terminal on your computer, and type `pip install
-   path/to/Annotald-x.y.z.tar.gz` (replacing `path/to/` with an
-   appropriate path you your computer’s download folder and `x.y.z` with
-   the version of the most recent Annotald release).
+3. Follow the
+   https://pip.readthedocs.org/en/latest/installing.html[instructions]
+   to install the `pip` command on your computer.
+4. Open a terminal on your computer, and type `pip install annotald` .
+   You may need to use `sudo` or an equivalent in order to gain
+   administrative privileges needed to write the files to the proper
+   location.
++
+NOTE: If you do not have administrator privileges on your machine,
+you can install using the command `pip install --user annotald` .
+The consequence of this is that the `annotald` script will be placed
+in a hidden subdirectory of your home folder (on Linux, this is
+`/home/<username>/.local/bin/`); you will have to add this directory
+to your `$PATH` in order to use Annotald conveniently.
++
+WARNING: During the installation process, you may see an error
+message stating “libyaml not found”  This is *not* a fatal error!  If
+the `pip` command ends with the line “Successfully installed annotald
+[...]” then the installation has been successful.
+
 5. Annotald and its dependencies will now be automatically installed.
++
+TIP: Annotald may be installed to a folder which is not in your shell’s
+`$PATH`.  The most common destination is `/usr/local/bin`.  If this is
+the case, you will need to add the directory to your path, following for
+example
+http://askubuntu.com/questions/60218/how-to-add-a-directory-to-my-path/60219#60219[these
+directions].
 
 Once this is done, Annotald is ready to use.  At a terminal command
 prompt, type `annotald path/to/file.psd` (supplying the path to a file
