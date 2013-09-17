@@ -151,6 +151,7 @@ image::images/annotald-hello.png["The Annotald UI at startup",align="center"]
 
 On the left-hand side of the screen, the following are present, from top
 to bottom:
+
 - The control panel.  This contains buttons for functions such as
   saving, undo/redo, and clocking in/out from a timelog file.
 - The tools panel.  Empty in this screenshot, this contains advanced
@@ -197,7 +198,7 @@ ergonomic point of view.
 The mouse serves to select nodes in the UI.  Click anywhere in the box
 corresponding to a node in order to select it.  The horizontal mouse
 motion necessary can be reduced by clicking on the left edge of the
-node; the left side of each node’s box is padded in order ot facilitate
+node; the left side of each node’s box is padded in order to facilitate
 this.  An example of a selected node is shown here, notice that the
 selected node has been highlighted in blue:
 
@@ -220,13 +221,14 @@ movement (wh-movement, etc.), see the <<leafAfter,`leafAfter`>> and
 <<leafBefore,`leafBefore`>> functions.
 
 In order to move a selected node, right click on the desired
-destination.  Movements must satisfy certain structural (e.g. a node
-cannot be moved into its own daughter) as well as extrinsic conditions
-(no movement operation may change the text of the sentence, e.g. by
-reordering two words).  Assuming these conditions are met, the movement
-operation will take place.  Right clicking with two selected nodes will
-move those nodes, as well as any intervening material, to the desired
-destination.  The two selected nodes must be sisters of each other.
+destination.  Movements must satisfy certain structural conditions
+(e.g. a node cannot be moved into its own daughter) as well as extrinsic
+conditions (no movement operation may change the text of the sentence,
+e.g. by reordering two words).  Assuming these conditions are met, the
+movement operation will take place.  Right clicking with two selected
+nodes will move those nodes, as well as any intervening material, to the
+desired destination.  The two selected nodes must be sisters of each
+other.
 
 Control-clicking on a node will create and select a new XP dominating
 that node.
@@ -812,7 +814,7 @@ The simplest query tree contains only one leaf node.  The leaf has a
 text box, into which the search string can be entered.  The string is
 interpreted as a case-insensitive Javascript regular expression.  The
 Javascript regular expression format is very similar to that used by
-many programming languages.  A full description fo the format is outside
+many programming languages.  A full description of the format is outside
 the scope of this document, but is available via
 https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/RegExp[this
 reference manual].  The leaf also has a drop-down box, which indicates
@@ -866,7 +868,7 @@ daughterhood.  The children of deep nodes, in contrast, can match at any
 depth.
 
 Precedes (“>”):: This creates a precedes node as a sister of the node from
-which it ic clicked.  By default, as mentioned above (and illustrated in
+which it is clicked.  By default, as mentioned above (and illustrated in
 the screenshots), the sisterhood relation among search nodes in
 interpreted without regard to directionality.  Precedes nodes, on the
 other hand, impose a precedence relation on their daughter (whih is not
@@ -1103,7 +1105,7 @@ information about writing CorpusSearch queries, consult the
 http://corpussearch.sourceforge.net/CS-manual/Contents.html[user’s
 guide], esepcially (for present purposes) the
 http://corpussearch.sourceforge.net/CS-manual/Revise.html[section on
-uatomated corpus revision] which tells how to make changes to the
+automated corpus revision] which tells how to make changes to the
 input.  As an example, the following CorpusSearch revision query adds a
 =-FLAG= to all NPs:
 
@@ -1265,7 +1267,7 @@ sentence whose indices begin at a number larger than one.  Using this
 command sequentially renumbers all indices in all trees, beginning with
 1 for each tree and proceeding in order.
 +
-Annotald will additionally rewrte indices automatically on save, unless
+Annotald will additionally rewrite indices automatically on save, unless
 this feature is <<rewriteindices,disabled>> in the `settings.py` file.
 
 
@@ -1338,26 +1340,26 @@ original document.
 
 - Sometimes, a word must be split so that its parts can be given
   different annotation.  Annotald contains <<splitWord,a facility for
-  splitting words in a consistent, reversible way>>.
+  splitting words in a consistent and reversible way>>.
 - Sometimes, it is beneficial to insert comments into the text.
   Annotald reserves the =CODE= label for leaf nodes whose text should be
   interpreted as a comment.  There is a <<displayRename,facility for
   editing and distinguishing different comments>>.
 - [[emptyelements]] Most annotation schemes include some kinds of traces
   and empty elements.  The rules for these are:
-  - Any node with the text exactly =0= will be considered an empty
+  * Any node with the text exactly =0= will be considered an empty
     operator.  If the source text contains “0” as an orthographic word,
     your annotation scheme should specify a canonical replacement (such
     as =<zero>=).
-  - Any node with the following text as the beginning of its text
+  * Any node with the following text as the beginning of its text
     string will be considered a trace:
-+
-[horizontal]
-`*`:: An A-movement trace
-`*T*`:: An A-bar movement trace
-`*CL*`:: A clitic movement trace
-`*ICH*`:: A trace of rightward movement or extraposition (mnemonic:
-Interpret Constituent Here)
+    +
+    [horizontal]
+    `*`:: An A-movement trace
+    `*T*`:: An A-bar movement trace
+    `*CL*`:: A clitic movement trace
+    `*ICH*`:: A trace of rightward movement or extraposition (mnemonic:
+    Interpret Constituent Here)
 
 
 
