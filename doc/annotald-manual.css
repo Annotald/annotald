@@ -25,10 +25,12 @@ code, pre {
     display: none;
 }
 
-body div.note {
+div.note, div.tip, div.warning {
     background-color: #cccccc;
     margin-left: 0.75in !important;
     margin-right: 0.75in !important;
+    margin-top: 0.25in;
+    margin-bottom: 0.25in;
 }
 
 .calloutlist img {
