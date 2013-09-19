@@ -271,6 +271,6 @@ function doConLeaf(conleaf, node) {
 // " "hideContextMenu" "clearSelection" "toggleExtension" "selectNode\
 // " "parseIndex" "parseLabel" "defaultConMenuGroup" "getIndex" "parseIndexType\
 // " "displayCaseMenu" "caseTags" "casePhrases" "hasCase" "touchTree\
-// " "startnode" "_")
+// " "startnode" "_" "setCase" "caseBarriers" "isCasePhrase")
 // indent-tabs-mode: nil
 // End:
