@@ -24,6 +24,8 @@
 // - text which corresponds to the contents of a parse (.psd file)
 //   should be surrounded with =equals signs=
 
+// TODO: document context menu groups better
+
 
 = Annotald User’s Guide
 
@@ -104,7 +106,7 @@ in a hidden subdirectory of your home folder (on Linux, this is
 `/home/<username>/.local/bin/`); you will have to add this directory
 to your `$PATH` in order to use Annotald conveniently.
 +
-WARNING: During the installation process, you may see an error
+CAUTION: During the installation process, you may see an error
 message stating “libyaml not found”  This is *not* a fatal error!  If
 the `pip` command ends with the line “Successfully installed annotald
 [...]” then the installation has been successful.
@@ -138,6 +140,46 @@ possible.
 In the near future, it is likely that there will be a graphical
 frontend for Windows users, including a graphical installation method.
 Pay attention to forthcoming releases of Annotald for news.
+
+=== Using Annotald on a remote server
+
+If you cannot install Annotald locally (or otherwise feel motivated to
+do so), you can use Annotald on a server to which you have ssh access.
+In order to do so, you will need to follow these instructions:
+
+1. Upload the files you wish to annotate to the server.  One good way to
+do this is to use SFTP, either from the command line or using a
+https://en.wikipedia.org/wiki/Comparison_of_FTP_client_software[graphical
+client].
+
+2. Open an SSH tunnel from your computer to the remote computer.  This
+is done with the `ssh` command line program: `ssh -L 1234:localhost:8080
+user@server` .  This command makes port 1234 on your computer behave as
+though it were port 8080 on `server`.
++
+NOTE: You will need to adjust the number 8080 to match the port that you
+attached Annotald to on the server.  8080 is the default port.  However,
+only one instance of Annotald can be connected to a single port.  Thus
+if there are many users of Annotald on the server you will need to
+specify an alternate port using the <<port-option,-p command line
+option>>
++
+In addition to establishing the tunnel, this will give you a command
+prompt on the remote server as usual.
+
+3. Start Annotald from the server command line as usual.
+
+4. Connect to Annotald by navigating Chrome on your local computer to
+http://localhost:1234 (or whichever port number you specified in the
+`ssh` command line).
+
+WARNING: The instance of Annotald you start on the remote server will be
+accessible to other users on the server, who can (in principle) connect
+to the running server using their own SSH tunnel just as you can.  If
+you do not trust the other users on the SSH server, you should not be
+running Annotald on it.  Accidents are also a danger.  Be careful that
+you do not inadvertently connect to someone else’s instance of Annotald!
+You may inadvertently save over their work.
 
 == Annotald UI and Philosophy
 
@@ -287,7 +329,7 @@ with Annotald is used.
 file>>.  If this is not specified, the default settings file distributed
 with Annotald is used.
 
-`-p NUMBER`:: Specify the port which Annotald will run its server.  The
+`-p NUMBER` [[port-option]]:: Specify the port which Annotald will run its server.  The
 default is 8080 (possible values range between 1025 and 65535).  Only
 one program may listen to a given port, so if you would like to run more
 than one instance of Annotald concurrently, you must specify a different
