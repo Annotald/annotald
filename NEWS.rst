@@ -1,6 +1,21 @@
 News
 ====
 
+Release 1.1.1
+-------------
+
+A hotfix release.  Changes:
+
+- Fix the height of the context menu (thanks to Jana for reporting)
+- Fix the interaction of the context menu and case tags.  Case is now
+  factored out of context menu calculations, just like numerical indices
+  (thanks to Joel for reporting)
+- Fix calculation of the set of alternatives for the context menu
+  (thanks to Joel for reporting)
+
+The user’s manual also acquired an improved section on installation and
+remote access.
+
 Release 1.1
 -----------
 
