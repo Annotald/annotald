@@ -226,6 +226,9 @@ body {
 
 .conMenuColumn {
     width: 115px;
+    float: left;
+    /* border-right: 1px solid silver; */
+    /* border-left: 1px solid silver; */
 }
 
 .conMenuItem {
@@ -251,22 +254,6 @@ body {
     text-decoration: none;
     color: black;
     display: block;
-}
-
-#conLeft, #conRight {
-    border-right: 1px solid silver;
-}
-
-#conRight {
-    position: absolute;
-    left: 115px;
-    top: 0px;
-}
-
-#conRightest {
-    position: absolute;
-    left: 230px;
-    top: 0px;
 }
 
 /* Message box */
