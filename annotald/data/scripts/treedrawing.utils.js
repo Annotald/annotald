@@ -564,16 +564,32 @@ function addToIndices(tokenRoot, numberToAdd) {
  * @returns {String} the case on the node, or `""` if none
  */
 function getCase(node) {
-    var label = parseLabel(getLabel(node)),
-        dashTags = _.rest(label.split("-")),
-        cases = _.intersection(caseMarkers, dashTags);
+    var label = parseLabel(getLabel(node));
+    return labelGetCase(label);
+}
 
-    if (cases.length == 0) {
-        return "";
-    } else if (cases.length == 1) {
-        return cases[0];
+/**
+ * Find the case associated with a label.
+ *
+ * This function respects the case-related variable `caseMarkers`.
+ *
+ * @param {String} label
+ * @returns {String} the case on the label, or `""` if none.
+ */
+function labelGetCase(label) {
+    var dashTags = label.split("-");
+    if (_.contains(caseTags, dashTags[0])) {
+        dashTags = _.rest(dashTags);
+        var cases = _.intersection(caseMarkers, dashTags);
+        if (cases.length == 0) {
+            return "";
+        } else if (cases.length == 1) {
+            return cases[0];
+        } else {
+            throw "Tag has two cases: " + label;
+        }
     } else {
-        throw "Tag has two cases: " + label;
+        return "";
     }
 }
 
@@ -587,19 +603,21 @@ function getCase(node) {
  * @returns {Boolean}
  */
 function hasCase(node) {
-    var label = parseLabel(getLabel(node)),
-        dashTags = label.split("-"),
-        theCase;
-    if (_.contains(caseTags, dashTags[0])) {
-        theCase = getCase(node);
-        if (theCase == "") {
-            return false;
-        } else {
-            return true;
-        }
-    } else {
-        return false;
-    }
+    var label = parseLabel(getLabel(node));
+    return labelGetCase(label);
+}
+
+/**
+ * Test if a label has case.
+ *
+ * This function tests whether a label is in `caseTags`, and then whether it
+ * has case.
+ *
+ * @param {String} label
+ * @returns {Boolean}
+ */
+function labelHasCase(label) {
+    return labelGetCase(label) !== "";
 }
 
 /**
@@ -615,6 +633,45 @@ function isCasePhrase(node) {
 }
 
 /**
+ * Test whether a label can bear case.
+ *
+ * Respects the `caseTags` configuration variable.
+ *
+ * @param {String} label
+ * @returns {Boolean}
+ */
+function isCaseLabel(label) {
+    var dashTags = label.split("-");
+    return _.contains(caseTags, dashTags[0]);
+}
+
+/**
+ * Test whether a node can bear case.
+ *
+ * See ``isCaseLabel``.
+ *
+ * @param {JQuery Node} node
+ * @returns {Boolean}
+ */
+function isCaseNode(node) {
+    return isCaseLabel(getLabel(node));
+}
+
+/**
+ * Remove the case from a string label.
+ *
+ * @param {String} label
+ * @returns {String} the label without case
+ */
+function labelRemoveCase(label) {
+    if (labelHasCase(label)) {
+        var theCase = labelGetCase(label);
+        return label.replace("-" + theCase, "");
+    }
+    return label;
+}
+
+/**
  * Remove the case from a node.
  *
  * Does not record undo information.
@@ -625,9 +682,8 @@ function removeCase(node) {
     if (!hasCase(node)) {
         return;
     }
-    var theCase = getCase(node),
-        label = getLabel(node);
-    setNodeLabel(node, label.replace("-" + theCase, ""));
+    var label = getLabel(node);
+    setNodeLabel(node, labelRemoveCase(label));
 }
 
 /**
@@ -644,6 +700,13 @@ function setCase(node, theCase) {
     toggleExtension(theCase, [theCase]);
     startnode = osn;
 }
+
+// TODO: toggling the case requires intelligence about where the dash tag
+// should be put, which is only in toggleExtension
+
+// function labelSetCase(label) {
+
+// }
 
 // ==================================================
 
