@@ -93,16 +93,9 @@ function getSuggestions(label) {
         menuitems = conmenus[label].suggestions;
     }
 
-    for (var i=0; i < menuitems.length; i++){
+    for (var i = 0; i < menuitems.length; i++){
         var menuitem = menuitems[i];
         suggestions.push(menuitem + indtype + indstr);
-
-        if (conmenus[menuitem] != null) {
-            var iitems = conmenus[menuitem].suggestions;
-            for (var j=0; j < iitems.length; j++) {
-                suggestions.push(iitems[j] + indtype + indstr);
-            }
-        }
     }
     return suggestions.unique();
 }
