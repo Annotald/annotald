@@ -80,12 +80,18 @@ var defaultsPhrases = defaultConMenuGroup;
  */
 function getSuggestions(label) {
     var indstr = "",
-        indtype = "";
+        indtype = "",
+        theCase = "";
     if (parseIndex(label) > 0) {
         indstr = parseIndex(label);
         indtype = parseIndexType(label);
     }
     label = parseLabel(label);
+    theCase = labelGetCase(label);
+    if (theCase !== "") {
+        theCase = "-" + theCase;
+    }
+    label = labelRemoveCase(label);
 
     var suggestions = new Array();
     var menuitems = defaultsPhrases;
@@ -93,9 +99,9 @@ function getSuggestions(label) {
         menuitems = conmenus[label].suggestions;
     }
 
-    for (var i = 0; i < menuitems.length; i++){
+    for (var i = 0; i < menuitems.length; i++) {
         var menuitem = menuitems[i];
-        suggestions.push(menuitem + indtype + indstr);
+        suggestions.push(menuitem + theCase + indtype + indstr);
     }
     return suggestions.unique();
 }
@@ -216,7 +222,7 @@ function doToggleExtension(node, extension) {
  */
 function setCaseOnTag(node, theCase) {
     function doKids(n, override) {
-        if (hasCase(n)) {
+        if (isCaseNode(n)) {
             setCase(n, theCase);
         } else if (_.contains(caseBarriers, getLabel(n).split("-")[0]) &&
                    !n.parent().is(".CONJP") &&
@@ -264,6 +270,6 @@ function doConLeaf(conleaf, node) {
 // " "hideContextMenu" "clearSelection" "toggleExtension" "selectNode\
 // " "parseIndex" "parseLabel" "defaultConMenuGroup" "getIndex" "parseIndexType\
 // " "displayCaseMenu" "caseTags" "casePhrases" "hasCase" "touchTree\
-// " "startnode" "_" "setCase" "caseBarriers" "isCasePhrase")
+// " "startnode" "_" "setCase" "caseBarriers" "isCasePhrase" "isCaseNode")
 // indent-tabs-mode: nil
 // End:
