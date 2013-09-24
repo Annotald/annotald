@@ -103,7 +103,7 @@ function getSuggestions(label) {
         var menuitem = menuitems[i];
         suggestions.push(menuitem + theCase + indtype + indstr);
     }
-    return suggestions.unique();
+    return _.uniq(suggestions);
 }
 
 /**
