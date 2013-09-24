@@ -25,7 +25,7 @@ code, pre {
     display: none;
 }
 
-div.note, div.tip, div.warning {
+div.note, div.tip, div.warning, div.caution {
     background-color: #cccccc;
     margin-left: 0.75in !important;
     margin-right: 0.75in !important;
