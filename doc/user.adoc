@@ -85,6 +85,7 @@ Annotald on Mac and Linux:
 1. Download and install the latest stable version of
    https://www.google.com/intl/en/chrome/browser/?hl=en&lr=all[Google’s
    Chrome web browser]
+
 2. Install the latest stable version of Python 2.7, if necessary.  At
    the http://www.python.org/download/[Python download page], be sure to
    select one of the 2.7 versions of Python, not 2.6 or 3.x.  Macintosh
@@ -94,12 +95,14 @@ Annotald on Mac and Linux:
 +
 In a pinch, you can use Python 2.6 to run Annotald, but some advanced
 features may not be functional.
+
 3. Follow the
    https://pip.readthedocs.org/en/latest/installing.html[instructions]
    to install the `pip` command on your computer.  The `ez_setup.py` and
    `get-pip.py` scripts you will need to download can be placed anywhere
    on your computer (for example in your Downloads folder).  They are
    one-time use scripts and can be deleted after use.
+
 4. Open a terminal on your computer, and type `pip install annotald` .
    You may need to use `sudo` or an equivalent in order to gain
    administrative privileges needed to write the files to the proper
