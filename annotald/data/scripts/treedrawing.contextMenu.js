@@ -101,7 +101,10 @@ function getSuggestions(label) {
 
     for (var i = 0; i < menuitems.length; i++) {
         var menuitem = menuitems[i];
-        suggestions.push(menuitem + theCase + indtype + indstr);
+        if (isCaseLabel(menuitem)) {
+            menuitem += theCase;
+        }
+        suggestions.push(menuitem + indtype + indstr);
     }
     return _.uniq(suggestions);
 }
