@@ -1,6 +1,17 @@
 News
 ====
 
+Release 1.1.2
+-------------
+
+A bugfix release.  Changes:
+
+- Fix overapplication of case in context menu.  (Thanks to Joel for
+  report)
+- Fix crash when time log db is corrupt.  (Thanks to Sandra for report)
+- Fixes in formatting of documentation.  (Thanks to Beatrice for report)
+- Various code cleanups.
+
 Release 1.1.1
 -------------
 
