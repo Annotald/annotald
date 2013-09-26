@@ -217,13 +217,22 @@ class Treedraw(object):
             try:
                 self.eventLog = shelve.open("annotaldLog.shelve")
             except:
-                try:
-                    os.rename("annotaldLog.shelve", "annotaldLog.shelve.old")
-                    print ("Error opening event database; old db is at path" +
-                           ": annotaldLog.shelve.old")
-                except:
-                    pass
-                self.eventLog = shelve.open("annotaldLog.shelve")
+                print ("-" * 60)
+                print ("COULD NOT OPEN TIME LOG DB")
+                print ("There will thus be no timelogging")
+                print ("(If you don't know what this message means, you can" +
+                       "ignore it)")
+                print ("-" * 60)
+
+                def doLogEvent(eventData):
+                    return ""
+
+                # This is a little weird, since the new doLogEvent does not
+                # take a self argument.  But the self argument is treated
+                # specially, and needs extra magic to work for a monkey-patch
+                # like here.
+                self.doLogEvent = doLogEvent
+                return ""
         evtTime = time.time()
         # while self.eventLog[str(evtTime)]:
         #     # TODO: this seems like not the right answer...
