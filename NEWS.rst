@@ -1,6 +1,35 @@
 News
 ====
 
+Release 1.1.3
+-------------
+
+A release with some minor fixes.  Changes:
+
+- Previously, Annotald would reindent the .psd file on every save.  This
+  proved to be slow for large files.  Now Annotald reindents the file on
+  exit (only).  This means users **ought to** use the exit button in the
+  Annotald browser UI to exit, and not kill Annotald in the terminal.
+  It is also possible to use the reindent auxiliary command to reindent
+  a file of trees
+- The `annotald-aux` command was extended with `cat-settings-js` and
+  `cat-settings-py` commands, which write the contents of the default
+  Javascript and Python settings files to standard output (whence they
+  may be piped into a file and further edited.
+- The `annotald-aux` command also was extended with the `reindent`
+  command, which takes a .psd file as an argument and reindents it.
+- It is no longer possible to move empty nodes (traces, comments,
+  etc.).  It remains possible to move a non-terminal dominating only an
+  empty node(s), so if you must move an empty node create a dummy XP as
+  a “handle” to use for grabbing on.
+- Deleting a trace now deletes the numeric index from its antecedent, if
+  the antecedent is now the only node to bear that index.  (If there is
+  another coindexed trace besides the one deleted, the index will
+  survive.)
+- The search features were improved, especially incremental search.
+
+Thanks to Beatrice and Tony for problem reports and discussion.
+
 Release 1.1.2
 -------------
 
