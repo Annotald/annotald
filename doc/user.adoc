@@ -281,6 +281,17 @@ nodes will move those nodes, as well as any intervening material, to the
 desired destination.  The two selected nodes must be sisters of each
 other.
 
+NOTE: Moving an empty category (for example a trace) behaves
+interestingly, since it is not treated as part of the file’s text by
+Annotald.  This allows some interesting and confusing movement
+possibilities.  Thus, moving empty categories (traces beginning with
+=*=, empty nodes which are =0=, and =CODE= nodes) by default is not
+allowed.  However, moving a non-terminal dominating only such a
+node(s) is.  So if you need to move an empty node in a pinch, just
+create an XP dominating it, do your movement operation, and delete
+the XP.  Do not be upset though if this procedure results in interesting
+behavior (you can always use undo to get back to a sensible structure).
+
 Control-clicking on a node will create and select a new XP dominating
 that node.
 
