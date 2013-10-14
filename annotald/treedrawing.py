@@ -102,7 +102,7 @@ class Treedraw(object):
         cherrypy.config.update({ "server.logToScreen" : False })
         cherrypy.config.update({ 'log.screen'         : False})
         # TODO: why do we do this? if all it does is remove the bt from the
-        # browser, it isn't waht we want.
+        # browser, it isn't what we want.
         cherrypy.config.update({ "environment"        : "embedded" })
 
     def integrateTrees(self, trees):
