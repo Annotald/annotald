@@ -198,13 +198,13 @@ function displayError(html) {
  */
 function scrollToNext(selector) {
     var docViewTop = $(window).scrollTop();
-    var docViewMiddle = docViewTop + $(window).height() / 2;
     var nextError = $(selector).filter(
         function () {
-            return $(this).offset().top > docViewMiddle;
+            // Magic number alert!  Not sure if the +5 is needed...
+            return $(this).offset().top > docViewTop + 5;
         }).first();
     if (nextError.length == 1) {
-        window.scroll(0, nextError.offset().top - $(window).height() * 0.25);
+        window.scroll(0, nextError.offset().top);
         return nextError;
     }
     return undefined;
