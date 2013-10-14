@@ -1,5 +1,5 @@
 # This Python file uses the following encoding: utf-8
-# This file copyright © 2012 by Aaron Ecay
+# This file copyright © 2012-2013 by Aaron Ecay
 
 # This file is part of Annotald.
 #
@@ -44,15 +44,18 @@ import tempfile
 import nltk.tree as T
 
 # Conditional imports
-if os.name == "nt": # pragma: no cover
+if os.name == "nt":  # pragma: no cover
     import win32process
+
 
 class AnnotaldException(Exception):
     pass
 
+
 def safe_json(dict):
     j = json.dumps(dict)
     return j.replace('"', "&#34;")
+
 
 def queryVersionCookie(tree, key):
     if tree == "" or not tree:
@@ -61,6 +64,7 @@ def queryVersionCookie(tree, key):
     if t.node != "VERSION":
         return
     return _queryVersionCookieInner(t, key)
+
 
 def _queryVersionCookieInner(tree, key):
     # TODO: maybe we should just convert the version cookie into a dict
@@ -74,6 +78,7 @@ def _queryVersionCookieInner(tree, key):
             return _queryVersionCookieInner(f[0], ".".join(keys[1:]))
     else:
         return None
+
 
 def updateVersionCookie(tree, key, val):
     if tree == "" or not tree:
@@ -98,6 +103,7 @@ def updateVersionCookie(tree, key, val):
     ret = dictToMetadata(dd)
     ret.node = "VERSION"
     return unicode(T.Tree('', [ret]))
+
 
 def treeToHtml(tree, version, extra_data = None):
     if isinstance(tree[0], basestring):
@@ -143,20 +149,24 @@ def treeToHtml(tree, version, extra_data = None):
         cssClass = re.sub("[-=][0-9]+$", "", tree.node)
         res = '<div class="snode ' + cssClass + '"'
         if extra_data:
-            res += ' data-metadata="' + safe_json(nodeListToDict(extra_data)) + '"'
+            res += (' data-metadata="' + safe_json(nodeListToDict(extra_data))
+                    + '"')
         res += '>' + tree.node + ' '
         res += "\n".join(map(lambda x: treeToHtml(x, version), tree))
         res += "</div>"
         return res
+
 
 def labelFromLabelAndMetadata(label, metadata):
     # TODO: Remove indices, allow customizable "dash tags" (phantom), indices,
     # etc.
     return label
 
+
 def cssClassFromLabel(label):
     # TODO
     return label
+
 
 def orthoFromTree(tree):
     orthoNodes = [t for t in tree if t.node == "ORTHO"]
@@ -170,8 +180,10 @@ def orthoFromTree(tree):
             return altOrthoNode[0][0]
     return "XXX-ORTHO-UNKNOWN"
 
+
 def nodeListToDict(nodes):
     return metadataToDict(T.Tree("FOO", nodes))
+
 
 def metadataToDict(metadata):
     f = lambda: defaultdict(f)  # A devious way of getting a recursive
@@ -183,6 +195,7 @@ def metadataToDict(metadata):
         else:
             d[datum.node] = datum[0]
     return d
+
 
 def dictToMetadata(d, label = ""):
     if isinstance(d, basestring):
@@ -236,6 +249,7 @@ def deepTreeToHtml(tree, *args):
     res += '</div>'
     return res
 
+
 def writeTreesToFile(meta, trees, filename):
     if isinstance(trees, basestring):
         trees = trees.split("\n\n")
@@ -256,6 +270,7 @@ def writeTreesToFile(meta, trees, filename):
     if os.name != "nt":
         os.rename(fn, filename)
 
+
 def _formatTree(tree, indent = 0):
     # Should come from lovett
     if len(tree) == 1 and isinstance(tree[0], basestring):
@@ -268,7 +283,8 @@ def _formatTree(tree, indent = 0):
             map(lambda x: _formatTree(x, indent + l), tree))
         return u"%s%s%s" % (s, leaves, u")")
 
-def corpusSearchValidate(queryFile): # pragma: no cover
+
+def corpusSearchValidate(queryFile):  # pragma: no cover
     # TODO: how to test?
     # TODO: test the unicode part
     def corpusSearchValidateInner(version, trees):
@@ -281,14 +297,14 @@ def corpusSearchValidate(queryFile): # pragma: no cover
         tf.close()
         # TODO: this will break when merging anton's branch
         cmdline = 'java -classpath ' + \
-                  pkg_resoureces.resource_filename(
+                  pkg_resources.resource_filename(
                       "annotald", 'CS_Tony_oct19.jar') + \
                   ' csearch.CorpusSearch ' + queryFile + ' ' + name + \
                   ' -out ' + name + '.out'
         # make sure console is hidden in windows py2exe version
         if os.name == "nt":
             subprocess.check_call(cmdline.split(" "),
-                                  creationflags = win32process.CREATE_NO_WINDOW)
+                                  creationflags=win32process.CREATE_NO_WINDOW)
         else:
             subprocess.check_call(cmdline.split(" "))
 
@@ -301,6 +317,7 @@ def corpusSearchValidate(queryFile): # pragma: no cover
         return newtrees
 
     return corpusSearchValidateInner
+
 
 def scrubText(text):
     # Should come from lovett
@@ -316,7 +333,7 @@ def scrubText(text):
             output = output + line + "\n"
         elif line.startswith("*/") or line.startswith("*~/"):
             comment = False
-        else: # pragma: no cover
+        else:  # pragma: no cover
             # Should never happen!
             pass
 
@@ -325,25 +342,30 @@ def scrubText(text):
 
     return output
 
-# TODO: is this needed?
-def get_main_dir(): # pragma: no cover
-   if main_is_frozen():
-       return os.path.dirname(sys.executable)
-   return os.path.dirname(__file__)
 
-class Blackhole(object): # pragma: no cover
+# TODO: is this needed?
+def get_main_dir():  # pragma: no cover
+    if main_is_frozen():
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(__file__)
+
+
+class Blackhole(object):  # pragma: no cover
     softspace = 0
+
     def write(self, text):
         pass
 
+
 # This should all come from lovett
-def _squashAt(a,b):
+def _squashAt(a, b):
         if a[-1] == "@" and b[0] == "@":
             a = a[:-1]
             b = b[1:]
             return a + b
         else:
             return a + " " + b
+
 
 def _isEmpty(tuple):
     if tuple[1] == "CODE":
@@ -353,11 +375,13 @@ def _isEmpty(tuple):
         return True
     return False
 
+
 def _stripLemma(s):
     if "-" in s:
         return "-".join(s.split("-")[:-1])
     else:
         return s
+
 
 def _getText(tree_text, strip_lemmata = False):
     tree = T.Tree(tree_text)
@@ -368,6 +392,7 @@ def _getText(tree_text, strip_lemmata = False):
         l = map(_stripLemma, l)
     l = reduce(_squashAt, l)
     return l
+
 
 def hashTrees(trees_text, version):
     trees = trees_text.strip().split("\n\n")
@@ -383,6 +408,7 @@ def hashTrees(trees_text, version):
 
 _idxRe = "([-=])([0-9]+)$"
 
+
 def _getIndexInner(tree, grp):
     if _shouldIndexLeaf(tree):
         s = tree[0]
@@ -394,8 +420,10 @@ def _getIndexInner(tree, grp):
     else:
         return None
 
+
 def _getIndexType(tree):
     return _getIndexInner(tree, 1)
+
 
 def _getIndex(tree):
     i = _getIndexInner(tree, 2)
@@ -403,8 +431,10 @@ def _getIndex(tree):
         return i
     return int(i)
 
+
 def _hasIndex(tree):
     return bool(_getIndex(tree))
+
 
 def _setIndex(tree, idx):
     it = _getIndexType(tree)
@@ -418,6 +448,7 @@ def _setIndex(tree, idx):
         tree.node = tree.node + it + str(idx)
     return tree
 
+
 def _stripIndex(tree):
     if not _hasIndex(tree):
         return tree
@@ -427,11 +458,13 @@ def _stripIndex(tree):
         tree.node = re.sub(_idxRe, "", tree.node)
     return tree
 
+
 def _shouldIndexLeaf(tree):
     if not isinstance(tree[0], basestring):
         return False
     s = tree[0]
-    return re.split("[-=]", s)[0] in ["*T*","*ICH*","*CL*","*"]
+    return re.split("[-=]", s)[0] in ["*T*", "*ICH*", "*CL*", "*"]
+
 
 def rewriteIndices(tree):
     indexMap = {}
