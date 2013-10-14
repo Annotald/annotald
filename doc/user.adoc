@@ -325,6 +325,7 @@ needs>>, see the linked sections.
 
 == Customization
 
+[[cmdline-opts]]
 === Command line options
 
 When invoked via the command line, there are several options which can
@@ -357,17 +358,30 @@ described <<limiteddisplay,below>>.
 
 `-1`:: A shortcut which is equivalent to `-n 1`
 
-[[jssettings]]
-=== Javascript customization options
+=== Settings files
 
-// TODO: revise/remove this paragraph
 There are two files which are relavant to the customization of Annotald:
 `settings.js` and `settings.py`.  The former is written in Javascript,
 and contains the bulk of Annotald’s user interface settings.  The latter
 is written in Python, and (generally speaking) contains customizations
-that are very pervasive or advanced.  A commented sample version of both
-files is included in the Annotald download, which it is recommended for
-users to base their customizations on.
+that are very pervasive or advanced.  A basic version of both files is
+included in the Annotald package.
+
+In order to customize these files, the user should first extract a copy
+thereof.  An auxiliary script is provided for this purpose.  Execute the
+following commands in your OS shell to obtain copies of each of these
+files:
+........
+$ annotald-aux cat-settings-js > my-settings.js
+$ annotald-aux cat-settings-py > my-settings.py
+........
+You can now edit the files `my-settings.js` and `my-settings.py`, using
+the instructions given below.  These files may be places anywhere on
+your hard drive, provided that you provide the correct to the customized
+file(s) using the `-s` and `-S` <<cmdline-opts,command line options>>.
+
+[[jssettings]]
+==== Javascript customization options
 
 In this section, the options in `settings.js` will be discussed.
 
@@ -470,8 +484,7 @@ link:../api-doc/symbols/global.html#addConMenuGroup[`addConMenuGroup` function].
 options in the context menu.  This should be a series of calls to the
 link:../api-doc/symbols/global.html#addConLeafBefore[`addConLeafBefore` function].
 
-
-=== Color schemes
+===== Color schemes
 
 In the javascript settings file, you may also place calls to the
 link:../api-doc/symbols/global.html#styleTag[`styleTag`] and
@@ -520,7 +533,7 @@ write fairly complex selectors for this; see the source for the
 `style(Dash)Tag` functions for inspiration.
 
 [[pythonsettings]]
-=== Python settings
+==== Python settings
 
 In this section, the settings specifiable in a `settings.py` file will
 be discussed.
@@ -1415,3 +1428,7 @@ original document.
 
 
 //  LocalWords:  Annotald extraposition clitic whitespace
+
+// Local Variables:
+// outline-regexp: "=+ "
+// End:

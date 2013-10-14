@@ -6,6 +6,7 @@ import argparse
 import codecs
 import csv
 import os
+import pkg_resources
 import shelve
 import sys
 
@@ -94,11 +95,12 @@ def log_to_csv(args):
     rfile_real.close()
     print "Annotald log converted to CSV successfully."
 
-def main(args):
-    if args.cmd == "hash-file":
-        hash_file(args.rest)
-    elif args.cmd == "convert":
-        convert_file(args.rest)
+def cat_file(fname):
+    with open(pkg_resources.resource_filename("annotald", fname)) as f:
+        sys.stdout.write(f.read())
+
+cat_settings_js = lambda args: cat_file("settings.js")
+cat_settings_py = lambda args: cat_file("settings.py")
 
 def parse_args(args):
     parser = argparse.ArgumentParser(description = "A helper script for various Annotald functions")
@@ -138,6 +140,16 @@ def parse_args(args):
                                          help = "convert log to CSV format")
     csv_parser.set_defaults(func = log_to_csv)
 
+    # cat-settings-js
+    psjs_parser = subparsers.add_parser('cat-settings-js',
+                                        help = "print out default settings.js file")
+    psjs_parser.set_defaults(func = cat_settings_js)
+
+        # cat-settings-js
+    pspy_parser = subparsers.add_parser('cat-settings-py',
+                                        help = "print out default settings.py file")
+    pspy_parser.set_defaults(func = cat_settings_py)
+
     args = parser.parse_args(args)
     return args
 
@@ -149,3 +161,7 @@ if __name__ == "__main__":
     import annotald.util
 
     args.func(args)
+
+# Local Variables:
+# mode: python
+# End:
