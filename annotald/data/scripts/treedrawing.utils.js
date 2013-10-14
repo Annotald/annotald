@@ -227,10 +227,32 @@ function hasLemma(node) {
 }
 
 /**
+ * Test whether a given node is empty, i.e. a trace, comment, or other empty
+ * category.
+ *
+ * @param {DOM Node} node
+ * @returns {Boolean}
+ */
+function isEmptyNode(node) {
+    if (!isLeafNode(node)) {
+        return false;
+    }
+    if (getLabel($(node)) == "CODE") {
+        return true;
+    }
+    var text = wnodeString(node);
+    if (text.startsWith("*") || text.split("-")[0] == "0") {
+        return true;
+    }
+    return false;
+}
+
+/**
  * Test whether a string is empty, i.e. a trace, comment, or other empty
  * category.
  *
  * @param {String} text the text to test
+ * @returns {Boolean}
  */
 function isEmpty (text) {
     // TODO(AWE): should this be passed a node instead of a string, and then

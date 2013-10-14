@@ -1523,6 +1523,9 @@ function search() {
  *
  * The movement operation must not change the text of the token.
  *
+ * Empty categories are not allowed to be moved as a leaf.  However, a
+ * non-terminal containing only empty categories can be moved.
+ *
  * @param {DOM Node} parent the parent node to move selection under
  *
  * @returns {Boolean} whether the operation was successful
@@ -1539,7 +1542,8 @@ function moveNode(parent) {
     var nodeMoved;
     if (!isPossibleTarget(parent) || // can't move under a tag node
         $(startnode).parent().children().length == 1 || // can't move an only child
-        $(parent).parents().is(startnode) // can't move under one's own child
+        $(parent).parents().is(startnode) || // can't move under one's own child
+        isEmptyNode(startnode) // can't move an empty leaf node by itself
        )
     {
         clearSelection();
@@ -2887,6 +2891,6 @@ function resetLabelClasses(alertOnError) {
 // " "toggleStringExtension" "lookupNextLabel" "commentTypes\
 // " "invisibleCategories" "invisibleRootCategories" "ipnodes" "messageHistory\
 // " "scrollToNext" "clearTimeout" "logDetail" "hasLemma" "getLemma\
-// " "logDetail")
+// " "logDetail" "isEmptyNode")
 // indent-tabs-mode: nil
 // End:
