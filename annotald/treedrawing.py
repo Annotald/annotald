@@ -106,13 +106,15 @@ class Treedraw(object):
         cherrypy.config.update({ "environment"        : "embedded" })
 
     def integrateTrees(self, trees):
+        trees = trees.strip().split("\n\n")
         if self.showingPartialFile:
-            trees = trees.strip().split("\n\n")
             self.trees[self.treeIndexStart:self.treeIndexEnd] = trees
             self.treeIndexEnd = self.treeIndexStart + len(trees)
-            return "\n\n".join(self.trees)
         else:
-            return trees.strip()
+            # TODO: this case is mildly inefficent, since we strip and then
+            # join
+            self.trees = trees
+        return "\n\n".join(self.trees)
 
     @cherrypy.expose
     def doSave(self, trees = None, startTime = None, force = None,
@@ -148,12 +150,6 @@ class Treedraw(object):
                                                  " (it shouldn't!)"),
                                        reasonCode = NON_MATCHING_HASHES,
                                        startTime = self.startTime))
-        if self.pythonOptions['rewriteIndices']:
-            # TODO: we pass to and from T.Tree too many times...for
-            # efficiency, only convert to NLTK trees once
-            tosave = "\n\n".join(map(
-                lambda t: unicode(util.rewriteIndices(T.Tree(t))),
-                tosave.split("\n\n")))
         tosave = tosave.replace("-FLAG", "")
         try:
             util.writeTreesToFile(self.versionCookie, tosave, self.thefile)
@@ -249,12 +245,21 @@ class Treedraw(object):
     @cherrypy.expose
     def doExit(self):
         print ("Exit message received")
+        print ("Reformatting trees")
+        if self.pythonOptions['rewriteIndices']:
+            print ("...and rewriting indices sequnetially")
+        print ("Please be patient, this may take some time")
+        util.writeTreesToFile(self.versionCookie, "\n\n".join(self.trees),
+                              self.thefile,
+                              True, self.pythonOptions['rewriteIndices'])
+        print ("Done. :)")
+
         self.doLogEvent(json.dumps({'type': "program-exit"}))
         time.sleep(3)           # Wait for log events from server
         if self.eventLog:
             self.eventLog.close()
             self.eventLog = None
-        #forceful exit to make up for lack of proper thread management
+        # forceful exit to make up for lack of proper thread management
         os._exit(0)
         #raise SystemExit(0)
 
@@ -375,8 +380,8 @@ class Treedraw(object):
         cherrypy.lib.caching.expires(0, force = True)
         currentSettings = open(self.options.settings).read()
         currentTrees = self.readTrees(self.thefile)
+        self.trees = currentTrees
         if self.showingPartialFile:
-            self.trees = currentTrees
             self.treeIndexStart = 0
             self.treeIndexEnd = self.options.numTrees
             currentHtml = self.treesToHtml(

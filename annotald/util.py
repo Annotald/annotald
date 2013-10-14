@@ -250,21 +250,28 @@ def deepTreeToHtml(tree, *args):
     return res
 
 
-def writeTreesToFile(meta, trees, filename):
-    if isinstance(trees, basestring):
-        trees = trees.split("\n\n")
-        trees = filter(lambda x: x != "", trees)
+def writeTreesToFile(meta, trees, filename, reformat = False,
+                     fix_indices = False):
+    if not isinstance(trees, basestring):
+        raise AnnotaldException("writeTreesToFile got a non-string!")
+
+    trees = trees.split("\n\n")
+    trees = filter(lambda x: x != "", trees)
+
+    if reformat or fix_indices:
         trees = map(T.Tree, trees)
-    if isinstance(meta, basestring) and meta.strip() != "":
-        meta = T.Tree(meta)
-    trees = map(_formatTree, trees)
+        if fix_indices:
+            trees = map(rewriteIndices, trees)
+        trees = map(_formatTree, trees)
+        if isinstance(meta, basestring):
+            meta = _formatTree(T.Tree(meta))
 
     fn = filename
     if os.name != "nt":
         fn = filename + ".tmp"
     with codecs.open(fn, "w", "utf-8") as f:
         if meta and meta != "":
-            f.write(_formatTree(meta) + "\n\n")
+            f.write(meta + "\n\n")
         f.write("\n\n".join(trees))
 
     if os.name != "nt":

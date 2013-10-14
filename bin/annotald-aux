@@ -102,6 +102,13 @@ def cat_file(fname):
 cat_settings_js = lambda args: cat_file("settings.js")
 cat_settings_py = lambda args: cat_file("settings.py")
 
+def reindent(args):
+    fil = args.file_name[0]
+    with codecs.open(fil, 'r', 'utf-8') as f:
+        trees = f.read()
+        annotald.util.writeTreesToFile(None, trees, fil, reformat = True,
+                                       fix_indices = True)
+
 def parse_args(args):
     parser = argparse.ArgumentParser(description = "A helper script for various Annotald functions")
     parser.add_argument("-d", "--dev", dest = "dev", action = "store_true",
@@ -145,10 +152,16 @@ def parse_args(args):
                                         help = "print out default settings.js file")
     psjs_parser.set_defaults(func = cat_settings_js)
 
-        # cat-settings-js
+    # cat-settings-js
     pspy_parser = subparsers.add_parser('cat-settings-py',
                                         help = "print out default settings.py file")
     pspy_parser.set_defaults(func = cat_settings_py)
+
+    # reindent
+    reindent_parser = subparsers.add_parser('reindent',
+                                            help = "reindent a .psd file")
+    reindent_parser.add_argument("file_name", nargs = 1)
+    reindent_parser.set_defaults(func = reindent)
 
     args = parser.parse_args(args)
     return args
@@ -157,7 +170,7 @@ if __name__ == "__main__":
     args = parse_args(sys.argv[1:])
     if args.dev:
         print "dev active"
-        sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/..")
     import annotald.util
 
     args.func(args)
