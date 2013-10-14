@@ -1940,6 +1940,19 @@ function pruneNode() {
             } else {
                 touchTree($(startnode));
             }
+            var idx = getIndex($(startnode));
+            if (idx > 0) {
+                var root = $(getTokenRoot($(startnode)));
+                var sameIdx = root.find('.snode').filter(function () {
+                    return getIndex($(this)) == idx;
+                }).not(startnode);
+                if (sameIdx.length == 1) {
+                    var osn = startnode;
+                    startnode = sameIdx.get(0);
+                    coIndex();
+                    startnode = osn;
+                }
+            }
             $(startnode).remove();
             startnode = endnode = null;
             updateSelection();
