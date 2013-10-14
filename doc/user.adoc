@@ -1345,6 +1345,13 @@ command sequentially renumbers all indices in all trees, beginning with
 Annotald will additionally rewrite indices automatically on save, unless
 this feature is <<rewriteindices,disabled>> in the `settings.py` file.
 
+`cat-settings-js`, `cat-settings-py`:: These commands write a copy of
+the default Javascript or Python settings files to standard output.
+
+`reindent`:: Passed the name of a file as an argument, this command will
+reindent the trees in the file so that sisters on the same level have
+the same amount of preceding horizontal whitespace.
+
 
 [appendix]
 == Annotald file format
