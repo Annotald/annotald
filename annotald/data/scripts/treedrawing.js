@@ -1226,7 +1226,12 @@ function clearSearchMatches() {
 /**
  * Scroll down to the next node that matched a search.
  */
-function nextSearchMatch() {
+function nextSearchMatch(e, fromSearch) {
+    if (!fromSearch) {
+        if ($("#searchInc").prop('checked')) {
+            doSearch();
+        }
+    }
     scrollToNext(".searchmatch");
 }
 
@@ -1365,21 +1370,22 @@ function saveSearch() {
  * @private
  */
 function doSearch () {
-    // TODO: need to save val of incremental acorss searches
-    clearSearchMatches();
+    // TODO: need to save val of incremental across searches
     var searchnodes = $("#searchnodes");
     saveSearch();
     hideDialogBox();
     var searchCtx = $(".snode"); // TODO: remove sn0
-    var incremental = $("#searchInc").val() == "on";
+    var incremental = $("#searchInc").prop('checked');
 
     if (incremental && $(".searchmatch").length > 0) {
         var lastMatchTop = $(".searchmatch").last().offset().top;
-        searchCtx.filter(function () {
+        searchCtx = searchCtx.filter(function () {
             // TODO: do this with faster document position dom call
             return $(this).offset().top > lastMatchTop;
         });
     }
+
+    clearSearchMatches();
 
     for (var i = 0; i < searchCtx.length; i++) {
         var res = interpretSearchNode(searchnodes, searchCtx[i]);
@@ -1390,7 +1396,11 @@ function doSearch () {
             }
         }
     }
-    nextSearchMatch();
+    nextSearchMatch(null, true);
+    // TODO: when reaching the end of the document in incremental search,
+    // don't dehighlight the last match, but print a nice message
+
+    // TODO: need a way to go back in incremental search
 }
 
 /**
