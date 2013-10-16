@@ -387,9 +387,10 @@ $ annotald-aux cat-settings-js > my-settings.js
 $ annotald-aux cat-settings-py > my-settings.py
 ........
 You can now edit the files `my-settings.js` and `my-settings.py`, using
-the instructions given below.  These files may be places anywhere on
-your hard drive, provided that you provide the correct to the customized
-file(s) using the `-s` and `-S` <<cmdline-opts,command line options>>.
+the instructions given below.  These files may be placed anywhere on
+your hard drive, as long as you provide the correct path to the
+customized file(s) using the `-s` and `-S` <<cmdline-opts,command line
+options>>.
 
 [[jssettings]]
 ==== Javascript customization options
