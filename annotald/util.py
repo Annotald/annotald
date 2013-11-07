@@ -263,8 +263,11 @@ def writeTreesToFile(meta, trees, filename, reformat = False,
         if fix_indices:
             trees = map(rewriteIndices, trees)
         trees = map(_formatTree, trees)
-        if isinstance(meta, basestring):
+        try:
             meta = _formatTree(T.Tree(meta))
+        except:
+            # the metadata tree did not parse
+            pass
 
     fn = filename
     if os.name != "nt":
