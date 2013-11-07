@@ -1,6 +1,13 @@
 News
 ====
 
+Release 1.1.4
+-------------
+
+A single-bugfix release:
+
+- Fix a bug which could prevent the saving of trees on exit
+
 Release 1.1.3
 -------------
 
