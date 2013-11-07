@@ -247,7 +247,7 @@ class Treedraw(object):
         print ("Exit message received")
         print ("Reformatting trees")
         if self.pythonOptions['rewriteIndices']:
-            print ("...and rewriting indices sequnetially")
+            print ("...and rewriting indices sequentially")
         print ("Please be patient, this may take some time")
         util.writeTreesToFile(self.versionCookie, "\n\n".join(self.trees),
                               self.thefile,
