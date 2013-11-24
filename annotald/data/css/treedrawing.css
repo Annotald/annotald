@@ -72,6 +72,38 @@ body {
     background-color: #4682B4 !important;
 }
 
+.collapsed .snode {
+    margin-left: 0px;
+    border: none;
+    border-left: none;
+    padding: 0px;
+    display: inline;
+
+    /* Ugly hack! Ideally we'd put the node POS labels in a span, so
+     * that we could just do .collapsed .label {display: none}.  But
+     * would trigger lots of other changes in the code... */
+    font-size: 0px;
+
+}
+
+.collapsed .wnode {
+    margin-left: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    border: none;
+    background-color: inherit;
+    font-size: 12px;
+}
+
+.collapsed .wnode:after {
+    content: " ";
+}
+
+.collapsed.snode {
+    border: 1px solid #A64274;
+    border-left: 4px solid #A64274;
+}
+
 /* Menus */
 #menus {
     position: fixed;

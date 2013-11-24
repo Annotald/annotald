@@ -624,6 +624,8 @@ X:: Create a new node (labeled XP)
 
 C:: Coindex nodes
 
+Shift + C:: Toggle <<collapsing-nodes,collapsing>> of a node
+
 V:: Cycle between tags for non-sentential IPs
 
 Spacebar:: Clear the selection
@@ -632,7 +634,6 @@ L:: Edit the Label and/or text of a node
 
 Shift + L:: The same (included as an example of a keybinding with
 modifier)
-
 Forward slash (/):: <<search,Search>>
 
 
@@ -960,6 +961,19 @@ which it is clicked.  The defaultinterpretation is direct daughterhood,
 which can be changed by using a deep node, as already mentioned.
 
 // TODO(dev): allow drag and drop of nodes?  or buttons to move them?
+
+[[collapsing-nodes]]
+=== Collapsing nodes
+
+The hierarchy of a node may be collapsed, for example to facilitate the
+editing of the clause-level structure in the presence of large amounts
+of structure inside NPs.  When collapsed, a node’s text (including
+traces and empty categories) is displayed in the node, separated by
+spaces.  The syntactic labels inside the node are not displayed.  The
+usual blue and grey colors of the node’s border are replaced by purple,
+to indicate that collapsing is in effect.
+
+// TODO: screenshot
 
 [[advanced-features]]
 == Advanced features

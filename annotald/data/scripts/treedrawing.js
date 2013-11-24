@@ -1524,6 +1524,23 @@ function search() {
     searchNodePostAdd();
 }
 
+// ===== Collapsing nodes
+
+/**
+ * Toggle collapsing of a node.
+ *
+ * When a node is collapsed, its contents are displayed as continuous text,
+ * without labels.  The node itself still functions normally with respect to
+ * movement operations etc., but its contents are inaccessible.
+ */
+function toggleCollapsed() {
+    if (!startnode || endnode) {
+        return false;
+    }
+    $(startnode).toggleClass("collapsed");
+    return true;
+}
+
 // ===== Tree manipulations
 
 // ========== Movement
