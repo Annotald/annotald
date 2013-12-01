@@ -572,6 +572,11 @@ want this behavior, set this variable to `False`.
 `validators`:: See the <<externalvalidation,section on external
 validation>> for information on this option.
 
+`serverMode`:: By default, Annotald starts up in “server mode,” which
+presents you with a checkpoint before opening a file.  This is to avoid
+mishaps when Annotald is used in a multi-user environment.  In order to
+disable this, set this variable to `False`.
+
 [[keycmds]]
 === Default keybindings
 
