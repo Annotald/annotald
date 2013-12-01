@@ -896,9 +896,9 @@ function displayRename() {
             document.body.onkeydown = handleKeyDown;
             $("#sn0").mousedown(handleNodeClick);
             $("#editpane").mousedown(clearSelection);
-            $("#undo").attr("disabled", false);
-            $("#redo").attr("disabled", false);
-            $("#save").attr("disabled", false);
+            $("#butundo").prop("disabled", false);
+            $("#butredo").prop("disabled", false);
+            $("#butsave").prop("disabled", false);
         }
     }
 
@@ -911,9 +911,9 @@ function displayRename() {
     document.body.onkeydown = null;
     $("#sn0").unbind('mousedown');
     $("#editpane").unbind('mousedown');
-    $("#undo").attr("disabled", true);
-    $("#redo").attr("disabled", true);
-    $("#save").attr("disabled", true);
+    $("#butundo").prop("disabled", true);
+    $("#butredo").prop("disabled", true);
+    $("#butsave").prop("disabled", true);
     var label = getLabel($(startnode));
     var oldClass = parseLabel(label);
 
@@ -2217,6 +2217,11 @@ function saveHandler (data) {
 function save(e, extraArgs) {
     if (!extraArgs) {
         extraArgs = {};
+    }
+    if (document.getElementById("leafphrasebox") ||
+        document.getElementById("labelbox")) {
+        displayError("Cannot save while editing a node label.");
+        return;
     }
     if (!saveInProgress) {
         displayInfo("Saving...");
