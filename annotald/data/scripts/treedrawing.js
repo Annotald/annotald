@@ -1000,6 +1000,8 @@ function displayRename() {
                     }
                     event.preventDefault();
                 }
+            }).mouseup(function editLeafClick(e) {
+                e.stopPropagation();
             });
         setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
     } else {
@@ -1042,6 +1044,8 @@ function displayRename() {
                     undoEndTransaction();
                     undoBarrier();
                 }
+            }).mouseup(function editNonLeafClick(e) {
+                e.stopPropagation();
             });
         setTimeout(function(){ $("#labelbox").focus(); }, 10);
     }
@@ -2220,6 +2224,9 @@ function save(e, extraArgs) {
     }
     if (document.getElementById("leafphrasebox") ||
         document.getElementById("labelbox")) {
+        // It should be impossible to trigger a save in these conditions, but
+        // it causes data corruption if the save happens,, so this functions
+        // as a last-ditch safety.
         displayError("Cannot save while editing a node label.");
         return;
     }
