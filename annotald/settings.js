@@ -94,6 +94,7 @@ function customCommands() {
     addCommand({ keycode: 88 }, makeNode, "XP"); // x
     addCommand({ keycode: 88, shift: true }, setLabel, ["XP"]);
     addCommand({ keycode: 67 }, coIndex); // c
+    addCommand({ keycode: 67, shift: true }, toggleCollapsed); // shift + c
     addCommand({ keycode: 82 }, setLabel, ["CP-REL","CP-FRL","CP-CAR",
                                            "CP-CLF"]); // r
     addCommand({ keycode: 83 }, setLabel, ["IP-SUB","IP-MAT","IP-IMP"]); // s

@@ -24,6 +24,7 @@ VERSION = annotald.__version__
 
 # Python standard library
 import codecs
+import getpass
 import json
 import os
 import pkg_resources
@@ -76,7 +77,8 @@ class Treedraw(object):
                               'colorCSSPath': "/dev/null",
                               'corpusSearchValidate':
                               util.corpusSearchValidate,
-                              'rewriteIndices': True}
+                              'rewriteIndices': True,
+                              'serverMode': True}
         if args.pythonSettings is not None:
             if sys.version_info[0] == 2 and sys.version_info[1] < 7 or \
                sys.version_info[0] == 3 and sys.version_info[1] < 2:
@@ -377,6 +379,20 @@ class Treedraw(object):
 
     @cherrypy.expose
     def index(self):
+        if self.pythonOptions['serverMode']:
+            user = getpass.getuser()
+            return """
+            <html><head><title>Checkpoint</title></head><body>
+            <h1>Checkpoint</h1>Are you user %s?<ul><li><b>Yes</b> Open
+            <a href="%s">this link</a> to use Annotald on file %s</li><li>
+            <b>No</b> You are accessing this Annotald instance by mistake;
+            please close your browser window.</li></ul></body></html>""" % (
+                user, user, self.shortfile)
+        else:
+            return self.inner_index()
+
+    @cherrypy.expose(alias=getpass.getuser())
+    def inner_index(self):
         cherrypy.lib.caching.expires(0, force = True)
         currentSettings = open(self.options.settings).read()
         currentTrees = self.readTrees(self.thefile)

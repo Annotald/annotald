@@ -896,9 +896,9 @@ function displayRename() {
             document.body.onkeydown = handleKeyDown;
             $("#sn0").mousedown(handleNodeClick);
             $("#editpane").mousedown(clearSelection);
-            $("#undo").attr("disabled", false);
-            $("#redo").attr("disabled", false);
-            $("#save").attr("disabled", false);
+            $("#butundo").prop("disabled", false);
+            $("#butredo").prop("disabled", false);
+            $("#butsave").prop("disabled", false);
         }
     }
 
@@ -911,9 +911,9 @@ function displayRename() {
     document.body.onkeydown = null;
     $("#sn0").unbind('mousedown');
     $("#editpane").unbind('mousedown');
-    $("#undo").attr("disabled", true);
-    $("#redo").attr("disabled", true);
-    $("#save").attr("disabled", true);
+    $("#butundo").prop("disabled", true);
+    $("#butredo").prop("disabled", true);
+    $("#butsave").prop("disabled", true);
     var label = getLabel($(startnode));
     var oldClass = parseLabel(label);
 
@@ -1000,6 +1000,8 @@ function displayRename() {
                     }
                     event.preventDefault();
                 }
+            }).mouseup(function editLeafClick(e) {
+                e.stopPropagation();
             });
         setTimeout(function(){ $("#leafphrasebox").focus(); }, 10);
     } else {
@@ -1042,6 +1044,8 @@ function displayRename() {
                     undoEndTransaction();
                     undoBarrier();
                 }
+            }).mouseup(function editNonLeafClick(e) {
+                e.stopPropagation();
             });
         setTimeout(function(){ $("#labelbox").focus(); }, 10);
     }
@@ -1522,6 +1526,23 @@ function search() {
     $("#doSearch").click(doSearch);
     $("#clearSearch").click(clearSearch);
     searchNodePostAdd();
+}
+
+// ===== Collapsing nodes
+
+/**
+ * Toggle collapsing of a node.
+ *
+ * When a node is collapsed, its contents are displayed as continuous text,
+ * without labels.  The node itself still functions normally with respect to
+ * movement operations etc., but its contents are inaccessible.
+ */
+function toggleCollapsed() {
+    if (!startnode || endnode) {
+        return false;
+    }
+    $(startnode).toggleClass("collapsed");
+    return true;
 }
 
 // ===== Tree manipulations
@@ -2200,6 +2221,14 @@ function saveHandler (data) {
 function save(e, extraArgs) {
     if (!extraArgs) {
         extraArgs = {};
+    }
+    if (document.getElementById("leafphrasebox") ||
+        document.getElementById("labelbox")) {
+        // It should be impossible to trigger a save in these conditions, but
+        // it causes data corruption if the save happens,, so this functions
+        // as a last-ditch safety.
+        displayError("Cannot save while editing a node label.");
+        return;
     }
     if (!saveInProgress) {
         displayInfo("Saving...");

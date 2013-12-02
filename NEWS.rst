@@ -1,6 +1,31 @@
 News
 ====
 
+Release 1.2
+-----------
+
+A release with some bug fixes and new features.
+
+New features:
+
+- Node collapsing is added, bound to Shift+C by default.  Users with a
+  custom `settings.js` file should add a line such as the following to
+  enable this functionality: `addCommand({ keycode: 67, shift: true },
+  toggleCollapsed);`
+- Long `CODE` nodes are now truncated with an ellipse by default.  This
+  change could be applied to all nodes if there is user demand.
+- Server mode is added.  By default, Annotald displays a page asking
+  whether a user really intends to edit a file, to avoid confusion in
+  multi-user environments.  To turn off this prompt, users may either
+  navigate to `http://localhsot:port/<username>` directly, or use a
+  variable in `settings.py` to disable the prompt.  Consult the user’s
+  manual for details
+
+Bug fixes:
+- Disallow saving while editing of a node label (as a textbox) is in
+  progress
+- Allow using the mouse to select text in a node label editing textbox
+
 Release 1.1.4
 -------------
 
