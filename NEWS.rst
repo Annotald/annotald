@@ -22,6 +22,7 @@ New features:
   manual for details
 
 Bug fixes:
+
 - Disallow saving while editing of a node label (as a textbox) is in
   progress
 - Allow using the mouse to select text in a node label editing textbox
