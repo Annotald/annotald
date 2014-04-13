@@ -523,7 +523,8 @@ function shouldIndexLeaf(node) {
     return (str.substring(0,3) == "*T*" ||
             str.substring(0,5) == "*ICH*" ||
             str.substring(0,4) == "*CL*" ||
-            $.trim(str) == "*");
+            $.trim(str) == "*" ||
+            str.substring(0,2) == "*-");
 }
 
 /**
