@@ -354,15 +354,18 @@ function wnodeString(node) {
  * not rejoin words which have been split.  It also does not add spaces.
  *
  * @param {JQuery Node} root the node to operate on
+ * @param {String} sep the separator between elements
  */
-function currentText(root) {
+function currentText(root, sep) {
     var nodes = root.get(0).getElementsByClassName("wnode");
     var text = "",
         nv;
+    sep = sep || "";
     for (var i = 0; i < nodes.length; i++) {
         nv = nodes[i].childNodes[0].nodeValue;
         if (!isEmpty(nv)) {
             text += nv;
+            text += sep;
         }
     }
     return text;

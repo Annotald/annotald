@@ -577,6 +577,16 @@ function updateSelection() {
     }
 
     updateMetadataEditor();
+    updateUrtext();
+}
+
+function updateUrtext() {
+    if (startnode) {
+        var str = currentText($(getTokenRoot($(startnode))), " ");
+        $("#urtext").text(str).show();
+    } else {
+        $("#urtext").hide();
+    }
 }
 
 /**

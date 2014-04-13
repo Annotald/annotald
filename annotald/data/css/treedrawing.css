@@ -347,3 +347,12 @@ body {
 .shown {
     visibility: visible;
 }
+
+#urtext {
+    position: fixed;
+    bottom: 4px;
+    left: 15%;
+    background-color: #D2B48C;
+    border: 1px solid black;
+    padding: 4px;
+}
