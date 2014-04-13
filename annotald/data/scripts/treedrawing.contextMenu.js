@@ -133,7 +133,7 @@ function loadContextMenu(nodeOrig) {
         hideContextMenu();
     }
 
-    if (nodeIndex > -1) {
+    if (nodeIndex > -1 && !shouldIndexLeaf(nO)) {
         indexSep = parseIndexType(nodelabel);
         indexString = indexSep + parseIndex(nodelabel);
         nodelabel = parseLabel(nodelabel);
@@ -274,6 +274,6 @@ function doConLeaf(conleaf, node) {
 // " "parseIndex" "parseLabel" "defaultConMenuGroup" "getIndex" "parseIndexType\
 // " "displayCaseMenu" "caseTags" "casePhrases" "hasCase" "touchTree\
 // " "startnode" "_" "setCase" "caseBarriers" "isCasePhrase" "isCaseNode\
-// " "isCaseLabel" "labelHasCase" "labelGetCase" "labelRemoveCase")
+// " "isCaseLabel" "labelHasCase" "labelGetCase" "labelRemoveCase" "shouldIndexLeaf")
 // indent-tabs-mode: nil
 // End:
