@@ -833,6 +833,23 @@ function lookupNextLabel(oldlabel, labels) {
     return newlabel;
 }
 
+
+// From mustache.js via http://stackoverflow.com/a/12034334/463500
+var entityMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;'
+};
+
+function escapeHtml(string) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+        return entityMap[s];
+    });
+}
+
 // TODO(AWE): add getMetadataTU fn, to also do trickle-up of metadata.
 
 
