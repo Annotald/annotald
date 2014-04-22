@@ -354,15 +354,18 @@ function wnodeString(node) {
  * not rejoin words which have been split.  It also does not add spaces.
  *
  * @param {JQuery Node} root the node to operate on
+ * @param {String} sep the separator between elements
  */
-function currentText(root) {
+function currentText(root, sep) {
     var nodes = root.get(0).getElementsByClassName("wnode");
     var text = "",
         nv;
+    sep = sep || "";
     for (var i = 0; i < nodes.length; i++) {
         nv = nodes[i].childNodes[0].nodeValue;
         if (!isEmpty(nv)) {
             text += nv;
+            text += sep;
         }
     }
     return text;
@@ -523,7 +526,8 @@ function shouldIndexLeaf(node) {
     return (str.substring(0,3) == "*T*" ||
             str.substring(0,5) == "*ICH*" ||
             str.substring(0,4) == "*CL*" ||
-            $.trim(str) == "*");
+            $.trim(str) == "*" ||
+            str.substring(0,2) == "*-");
 }
 
 /**
@@ -827,6 +831,23 @@ function lookupNextLabel(oldlabel, labels) {
     newlabel = changeJustLabel(oldlabel,newlabel);
 
     return newlabel;
+}
+
+
+// From mustache.js via http://stackoverflow.com/a/12034334/463500
+var entityMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;'
+};
+
+function escapeHtml(string) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+        return entityMap[s];
+    });
 }
 
 // TODO(AWE): add getMetadataTU fn, to also do trickle-up of metadata.

@@ -577,6 +577,19 @@ function updateSelection() {
     }
 
     updateMetadataEditor();
+    updateUrtext();
+}
+
+function updateUrtext() {
+    if (startnode) {
+        var tr = getTokenRoot($(startnode));
+        var str = currentText($(tr), " ");
+        var md = JSON.parse(tr.getAttribute("data-metadata"));
+        var id = (md || {}).ID;
+        $("#urtext").html("<b>" + id + "</b>: " + escapeHtml(str)).show();
+    } else {
+        $("#urtext").hide();
+    }
 }
 
 /**
@@ -2952,6 +2965,6 @@ function resetLabelClasses(alertOnError) {
 // " "toggleStringExtension" "lookupNextLabel" "commentTypes\
 // " "invisibleCategories" "invisibleRootCategories" "ipnodes" "messageHistory\
 // " "scrollToNext" "clearTimeout" "logDetail" "hasLemma" "getLemma\
-// " "logDetail" "isEmptyNode")
+// " "logDetail" "isEmptyNode" "escapeHtml")
 // indent-tabs-mode: nil
 // End:

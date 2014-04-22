@@ -1,6 +1,23 @@
 News
 ====
 
+Release 1.2.1
+-------------
+
+A release with some bug fixes and new features.  Thanks to Ariel
+Diertani for testing and feature ideas.
+
+New feature:
+
+- Add display of the text and token ID of the selected node
+
+Bug fixes:
+
+- Don’t add the index of a node to context menu label suggestions, if
+  the index is contained on the node’s text (as in the case of a trace)
+- Fix a corner case in the shouldIndexLeaf function dealing with * empty
+  categories (not \*X* type traces).
+
 Release 1.2
 -----------
 

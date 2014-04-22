@@ -135,5 +135,7 @@ any later version.  See the LICENSE file for more information. -->
 
     <div id="dialogBackground"></div>
 
+    <div id="urtext"></div>
+
   </body>
 </html>

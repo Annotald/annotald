@@ -470,10 +470,21 @@ def _stripIndex(tree):
 
 
 def _shouldIndexLeaf(tree):
-    if not isinstance(tree[0], basestring):
-        return False
-    s = tree[0]
-    return re.split("[-=]", s)[0] in ["*T*", "*ICH*", "*CL*", "*"]
+    try:
+        if not isinstance(tree[0], basestring):
+            return False
+        s = tree[0]
+        return re.split("[-=]", s)[0] in ["*T*", "*ICH*", "*CL*", "*"]
+    except IndexError as e:
+        # Github issue #45
+        print "shouldIndexLeaf error, tree is: "
+        print tree.pprint()
+        print "Whole tree (from root): "
+        r = tree.root
+        if not isinstance(r, nltk.tree.Tree):
+            r = r()
+        print r.pprint()
+        raise e
 
 
 def rewriteIndices(tree):

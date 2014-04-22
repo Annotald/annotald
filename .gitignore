@@ -17,3 +17,16 @@ dist/
 annotaldLog.*
 annotald.egg-info/
 doc/README.asciidoc
+
+
+# Files from the JS branch
+
+.grunt/
+bower_components/
+_SpecRunner.html
+cache-react/
+cache-ts/
+node_modules/
+webapp/
+test/out/
+types/
