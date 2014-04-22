@@ -1986,7 +1986,16 @@ function pruneNode() {
         }
 
         var toselect = $(startnode).children().first();
-        touchTree($(startnode));
+        if (isRootNode($(startnode))) {
+            // TODO: ugly and expensive. the alternative is adding a fourth
+            // data type to the undo list, I think.
+            registerDeletedRootTree($(startnode).clone());
+            $(startnode).children().each(function () {
+                registerNewRootTree($(this));
+            });
+        } else {
+            touchTree($(startnode));
+        }
         $(startnode).replaceWith($(startnode).children());
         startnode = endnode = null;
         selectNode(toselect.get(0));
