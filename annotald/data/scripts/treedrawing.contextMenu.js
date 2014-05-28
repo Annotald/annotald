@@ -129,7 +129,9 @@ function loadContextMenu(nodeOrig) {
         var e = window.event;
         var elementId = (e.target || e.srcElement).id;
         var suggestion = "" + $(this).text();
+        touchTree(nO);
         setNodeLabel(nO, suggestion);
+        undoBarrier();
         hideContextMenu();
     }
 
@@ -206,6 +208,7 @@ function doToggleExtension(node, extension) {
         clearSelection();
         selectNode(node);
         toggleExtension(extension);
+        undoBarrier();
         hideContextMenu();
         clearSelection();
     };
@@ -241,6 +244,7 @@ function setCaseOnTag(node, theCase) {
         var n = $(node);
         touchTree(n);
         doKids(n, true);
+        undoBarrier();
     };
 }
 
@@ -262,6 +266,7 @@ function setCaseOnTag(node, theCase) {
 function doConLeaf(conleaf, node) {
     return function() {
         makeLeaf(conleaf.before, conleaf.label, conleaf.word, node, true);
+        undoBarrier();
         hideContextMenu();
     };
 }
