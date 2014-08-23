@@ -138,6 +138,22 @@ navigate to http://localhost:8080.  You should see the Annotald
 interface appear.  The rest of this manual is concerned with using and
 customizing the program.
 
+CAUTION: A bug in the CherryPy webserver package has emerged recently
+which will cause new installations of Annotald to fail to start with an
+error message saying `No module named wsgiserver2`.  If this occurs,
+execute the following commands in your shell:
++
+----
+pip uninstall Cherrypy
+pip install --no-use-wheel CherryPy
+----
++
+Prepend `sudo` to the commands or add the `--user` flag after
+`(un)install` as appropriate, depending on which method you used to
+install Annotald originally.  Details about this bug are available
+https://bitbucket.org/cherrypy/cherrypy/issue/1295/325-wheel-does-not-include-wsgiserver2py[from
+the CherryPy project].
+
 NOTE: If you are not able to install Annotald successfully, you can open
 an issue report at https://github.com/Annotald/annotald[Annotald’s
 website] on GitHub.  This will put you in touch with Annotald’s
