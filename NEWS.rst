@@ -1,6 +1,17 @@
 News
 ====
 
+Release 1.3
+-----------
+
+A release with bug and documentation fixes.  Thanks to Ariel Diertani,
+Sandra, and Catarina for testing and feedback.
+
+- Fix (?) unexplained crashes
+- Fix errors in the interaction between the context menu and undo
+  features
+- Document a bug in CherryPy installation that affects some users
+
 Release 1.2.1
 -------------
 
