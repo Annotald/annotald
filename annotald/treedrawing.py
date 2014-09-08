@@ -30,7 +30,6 @@ import os
 import pkg_resources
 import re
 import runpy
-import shelve
 import sys
 import time
 import traceback
@@ -211,35 +210,8 @@ class Treedraw(object):
         eventData = json.loads(eventData)  # TODO: so fucking asinine
         if not self.options.timelog:
             return
-        if not self.eventLog:
-            try:
-                self.eventLog = shelve.open("annotaldLog.shelve")
-            except:
-                print ("-" * 60)
-                print ("COULD NOT OPEN TIME LOG DB")
-                print ("There will thus be no timelogging")
-                print ("(If you don't know what this message means, you can" +
-                       "ignore it)")
-                print ("-" * 60)
-
-                def doLogEvent(eventData):
-                    return ""
-
-                # This is a little weird, since the new doLogEvent does not
-                # take a self argument.  But the self argument is treated
-                # specially, and needs extra magic to work for a monkey-patch
-                # like here.
-                self.doLogEvent = doLogEvent
-                return ""
         evtTime = time.time()
-        # while self.eventLog[str(evtTime)]:
-        #     # TODO: this seems like not the right answer...
-        #     time.sleep(0.01)
-        #     evtTime = time.time()
         eventData['filename'] = self.options.psd[0]
-        self.eventLog[str(evtTime)] = eventData
-        self.eventLog.sync()
-        # TODO: a backup, in case of corruption...remove once confident
         with open("annotaldLog.txt", "a") as f:
             f.write(str(evtTime) + ": " + json.dumps(eventData) + "\n")
         return ""
@@ -281,15 +253,6 @@ class Treedraw(object):
         cherrypy.response.headers['Content-Type'] = 'application/json'
         return json.dumps(dict(
             trees = self.treesToHtml(self.readTrees(None, text = trees))))
-
-    @cherrypy.expose
-    def logs(self, **formData):
-        import logs
-        if not self.options.timelog:
-            return
-        if not self.eventLog:
-            self.eventLog = shelve.open("annotaldLog.shelve")
-        return logs.plotPage(self.eventLog, **formData)
 
     def readVersionCookie(self, filename):
         f = codecs.open(filename, 'r', "utf-8")
