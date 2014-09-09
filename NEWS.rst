@@ -1,6 +1,14 @@
 News
 ====
 
+Release 1.3.1
+-------------
+
+This release fixes one bug.
+
+- Fix bug whereby a newer, incompatible version of the NLTK library
+  could be installed with Annotald.
+
 Release 1.3
 -----------
 
