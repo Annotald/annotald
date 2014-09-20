@@ -2002,7 +2002,7 @@ function pruneNode() {
         if (isRootNode($(startnode))) {
             // TODO: ugly and expensive. the alternative is adding a fourth
             // data type to the undo list, I think.
-            registerDeletedRootTree($(startnode).clone());
+            registerDeletedRootTree($(startnode));
             $(startnode).children().each(function () {
                 registerNewRootTree($(this));
             });
@@ -2655,7 +2655,7 @@ function registerDeletedRootTree(tree) {
         prev = null;
     }
     undoDeletedTrees.push({
-        tree: tree,
+        tree: tree.clone(),
         before: prev && prev.attr("id")
     });
 }
