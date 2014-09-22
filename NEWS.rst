@@ -1,6 +1,15 @@
 News
 ====
 
+Release 1.3.2
+-------------
+
+This release fixes one bug.
+
+- Fix bug whereby undoing the deletion of a root level node
+  (e.g. IP-MAT) could do weird and nasty things.  Thanks to Ariel for
+  reporting.
+
 Release 1.3.1
 -------------
 
