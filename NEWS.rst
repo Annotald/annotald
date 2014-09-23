@@ -1,6 +1,11 @@
 News
 ====
 
+Release 1.3.4
+-------------
+
+This release really fixes the bug supposedly fixed by 1.3.3.
+
 Release 1.3.3
 -------------
 
