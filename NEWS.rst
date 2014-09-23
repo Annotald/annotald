@@ -1,6 +1,13 @@
 News
 ====
 
+Release 1.3.3
+-------------
+
+This release fixes one bug.
+
+- Fix error in hash-trees.  Thanks to Ariel for reporting.
+
 Release 1.3.2
 -------------
 
