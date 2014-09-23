@@ -400,7 +400,7 @@ def _getText(tree_text, strip_lemmata = False):
     l = map(lambda t: t[0], l)
     if strip_lemmata:
         l = map(_stripLemma, l)
-    l = reduce(_squashAt, l)
+    l = reduce(_squashAt, l, "")
     return l
 
 
