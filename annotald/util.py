@@ -369,12 +369,16 @@ class Blackhole(object):  # pragma: no cover
 
 # This should all come from lovett
 def _squashAt(a, b):
-        if a[-1] == "@" and b[0] == "@":
-            a = a[:-1]
-            b = b[1:]
-            return a + b
-        else:
-            return a + " " + b
+    if a == "":
+        return b
+    if b == "":
+        return a
+    if a[-1] == "@" and b[0] == "@":
+        a = a[:-1]
+        b = b[1:]
+        return a + b
+    else:
+        return a + " " + b
 
 
 def _isEmpty(tuple):
