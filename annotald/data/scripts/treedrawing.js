@@ -306,6 +306,14 @@ function handleKeyDown(e) {
         // Don't handle shift, ctrl, and meta presses
         return true;
     }
+    // Becasuse of bug #75, we don't want to count keys used for scrolling as
+    // keypresses that interrupt a chain of mouse clicks.
+    if (! _.includes([33, //page up
+                      34, // page down
+                      37,38,39,40 // arrow keys
+                     ], e.keyCode)) {
+        last_event_was_mouse = false;
+    }
     var commandMap;
     if (e.ctrlKey) {
         commandMap = ctrlKeyMap;
@@ -314,7 +322,6 @@ function handleKeyDown(e) {
     } else {
         commandMap = regularKeyMap;
     }
-    last_event_was_mouse = false;
     if (!commandMap[e.keyCode]) {
         return true;
     }
