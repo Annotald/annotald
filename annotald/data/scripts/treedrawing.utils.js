@@ -317,13 +317,21 @@ function guessLeafNode(node) {
             return false;
         } else if (testValidLeafLabel(label)) {
             return true;
-        } else {
-            // not a valid label, fall back to structural check
-            return isLeafNode(node);
         }
-    } else {
-        return isLeafNode(node);
+        // not a valid label, fall through to structural check
     }
+    if (isLeafNode(node)) {
+        if (_.startsWith(wnodeString(node), "*T*") ||
+            _.startsWith(wnodeString(node), "*ICH*")) {
+            // TODO: should not hardcode these labels
+
+            // A movement trace is structurally a leaf, but in fact counts as
+            // a non-leaf
+            return false;
+        }
+        return true;
+    }
+    return false;
 }
 
 // ========== Accessor functions
