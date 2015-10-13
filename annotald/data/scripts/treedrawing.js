@@ -592,12 +592,19 @@ function updateUrtext() {
         var tr = getTokenRoot($(startnode));
         var str = currentText($(tr), " ");
         var md = JSON.parse(tr.getAttribute("data-metadata"));
-        var id = (md || {}).ID;
-        $("#urtext").html("<b>" + id + "</b>: " + escapeHtml(str)).show();
+        var id = (md || {ID: ""}).ID;
+        if (id !== "") {
+            id = "<b>" + id + "</b>: ";
+        }
+        $("#urtext").html(id + escapeHtml(str)).show();
     } else {
         $("#urtext").hide();
     }
 }
+
+addStartupHook(function () {
+    $("#urtext").hide();
+});
 
 /**
  * Scroll the page so that the first selected node is visible.
