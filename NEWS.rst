@@ -1,10 +1,17 @@
 News
 ====
 
+Release 1.3.6
+-------------
+
+This release fixes two silly bugs in the last one.  The pattern that is
+unintentionally developing is that every other release is an immediate
+hotfix! :-/
+
 Release 1.3.5
 -------------
 
-This release fixes X issues:
+This release fixes 5 issues:
 
 - Movement keys (arrows and page up/down) are no longer counted as
   interrupting sequences of mouse clicks.
