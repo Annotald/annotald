@@ -1,6 +1,18 @@
 News
 ====
 
+Release 1.3.5
+-------------
+
+This release fixes X issues:
+
+- Movement keys (arrows and page up/down) are no longer counted as
+  interrupting sequences of mouse clicks.
+- guessLeafNode properly treats \*T* and \*ICH* as non-leafs
+- addConLeafAfter is now added
+- The urtext window is a little smarter
+- leafAfter inserts (VB *) by default now
+
 Release 1.3.4
 -------------
 
