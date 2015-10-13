@@ -1820,10 +1820,18 @@ function makeLeaf(before, label, word, target) {
     if (!(target || startnode)) return;
 
     if (!label) {
-        label = "NP-SBJ";
+        if (before) {
+            label = "NP-SBJ";
+        } else {
+            label = "VB";
+        }
     }
     if (!word) {
-        word = "*con*";
+        if (before) {
+            word = "*con*";
+        } else {
+            word = "*";
+        }
     }
     if (!target) {
         target = startnode;
