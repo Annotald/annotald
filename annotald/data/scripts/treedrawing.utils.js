@@ -321,8 +321,8 @@ function guessLeafNode(node) {
         // not a valid label, fall through to structural check
     }
     if (isLeafNode(node)) {
-        if (_.startsWith(wnodeString(node), "*T*") ||
-            _.startsWith(wnodeString(node), "*ICH*")) {
+        if (wnodeString(node).indexOf("*T*") === 0 ||
+            wnodeString(node).indexOf("*ICH*") === 0) {
             // TODO: should not hardcode these labels
 
             // A movement trace is structurally a leaf, but in fact counts as

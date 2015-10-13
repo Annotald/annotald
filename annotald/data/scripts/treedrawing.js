@@ -308,7 +308,7 @@ function handleKeyDown(e) {
     }
     // Becasuse of bug #75, we don't want to count keys used for scrolling as
     // keypresses that interrupt a chain of mouse clicks.
-    if (! _.includes([33, //page up
+    if (! _.contains([33, //page up
                       34, // page down
                       37,38,39,40 // arrow keys
                      ], e.keyCode)) {
