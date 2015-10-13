@@ -67,6 +67,20 @@ function addConLeafBefore(phrase, terminal) {
                true, phrase, terminal);
 }
 
+/**
+ * Add a terminal node to the context menu.
+ *
+ * Add a terminal node that the context menu will allow inserting in the tree
+ * after the sleected node.
+ *
+ * @param {String} phrase the label of the leaf
+ * @param {String} terminal the text of the leaf
+ */
+function addConLeafAfter(phrase, terminal) {
+    addConLeaf("(" + phrase + " " + terminal + ") &gt;",
+               false, phrase, terminal);
+}
+
 // Load the custom context menu "leaf before" items
 customConLeafBefore();
 

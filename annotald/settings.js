@@ -164,6 +164,7 @@ function customConLeafBefore() {
     addConLeafBefore("NP-SBJ" , "*pro*"     );
     addConLeafBefore("C"      , "0"         );
     addConLeafBefore("CODE"   , "{COM:XXX}" );
+    addConLeafAfter("CODE"   , "{COM:XXX}" );
 }
 
 // An example of a CSS rule for coloring a syntactic tag.  The styleTag
