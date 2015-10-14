@@ -513,7 +513,10 @@ link:../api-doc/symbols/global.html#addConMenuGroup[`addConMenuGroup` function].
 
 `customConLeafBefore`:: a Javascript function to configure the new node
 options in the context menu.  This should be a series of calls to the
-link:../api-doc/symbols/global.html#addConLeafBefore[`addConLeafBefore` function].
+link:../api-doc/symbols/global.html#addConLeafBefore[`addConLeafBefore`]
+and
+link:../api-doc/symbols/global.html#addConLeafAfter[`addConLeafAfter`]
+functions.
 
 ===== Color schemes
 
