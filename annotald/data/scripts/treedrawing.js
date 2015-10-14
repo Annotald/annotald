@@ -948,7 +948,7 @@ function displayRename() {
         // this is a terminal
         var word, lemma;
         // is this right? we still want to allow editing of index, maybe?
-        var isLeafNode = isLeafNode($(startnode));
+        var isLeaf = isLeafNode($(startnode));
         if ($(startnode).children(".wnode").children(".lemma").size() > 0) {
             var preword = $.trim($(startnode).children().first().text());
             preword = preword.split("-");
