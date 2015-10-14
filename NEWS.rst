@@ -1,6 +1,11 @@
 News
 ====
 
+Release 1.3.7
+-------------
+
+This release fixes one bug with the displayRename function (L key).
+
 Release 1.3.6
 -------------
 
