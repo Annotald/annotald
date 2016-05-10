@@ -544,14 +544,11 @@ function shouldIndexLeaf(node) {
  * @param {DOM node} token the token to work on
  */
 function maxIndex(token) {
-    var allSNodes = $(token).find(".snode,.wnode");
-    var temp = "";
+    var allNodes = $(token).find(".snode");
     var ind = 0;
-    var label;
 
-    for (var i = 0; i < allSNodes.length; i++) {
-        label = getLabel($(allSNodes[i]));
-        ind = Math.max(parseIndex(label), ind);
+    for (var i = 0; i < allNodes.length; i++) {
+        ind = Math.max(getIndex($(allNodes[i])), ind);
     }
     return ind;
 }
