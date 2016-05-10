@@ -46,6 +46,6 @@ deploy-docs: api-doc doc
 sdist:
 	python2 setup.py sdist
 
-release: deploy-docs
+release:
 	python2 setup.py sdist upload -r pypi
 	python2 setup.py bdist_wheel upload -r pypi
