@@ -360,6 +360,8 @@ function wnodeString(node) {
  *
  * This function removes any empty material (traces, comments, etc.)  It does
  * not rejoin words which have been split.  It also does not add spaces.
+ * TODO: the previous is now inaccurate.  Do we still need sep argument now
+ * that currentTextPretty exists?
  *
  * @param {JQuery Node} root the node to operate on
  * @param {String} sep the separator between elements
@@ -376,6 +378,32 @@ function currentText(root, sep) {
             text += sep;
         }
     }
+    return text;
+}
+
+/**
+ * Get the ur-text dominated by a node.
+ *
+ * This function removes any empty material (traces, comments, CODE nodes,
+ * etc.)  It does rejoins words which have been split and adds spaces.
+ * Compare to `currentText`.
+ *
+ * @param {JQuery Node} root the node to operate on
+ * @param {String} sep the separator between elements
+ */
+function currentTextPretty(root, sep) {
+    var nodes = root.get(0).getElementsByClassName("wnode");
+    var text = "",
+        nv;
+    sep = sep || "";
+    for (var i = 0; i < nodes.length; i++) {
+        nv = nodes[i].childNodes[0].nodeValue;
+        if (!isEmpty(nv) && !nodes[i].parentNode.classList.contains("CODE")) {
+            text += nv;
+            text += sep;
+        }
+    }
+    text = text.replace(RegExp("@" + sep + "@", "g"), "");
     return text;
 }
 

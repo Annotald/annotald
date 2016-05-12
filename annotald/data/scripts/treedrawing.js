@@ -590,7 +590,7 @@ function updateSelection() {
 function updateUrtext() {
     if (startnode) {
         var tr = getTokenRoot($(startnode));
-        var str = currentText($(tr), " ");
+        var str = currentTextPretty($(tr), " ");
         var md = JSON.parse(tr.getAttribute("data-metadata"));
         var id = (md || {ID: ""}).ID;
         if (id !== "") {
