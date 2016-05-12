@@ -135,7 +135,7 @@ function assignEvents() {
     // load custom commands from user settings file
     customCommands();
     document.body.onkeydown = handleKeyDown;
-    $("#sn0").mousedown(handleNodeClick);
+    $("#sn0").click(handleNodeClick);
     document.body.onmouseup = killTextSelection;
     $("#butsave").mousedown(save);
     $("#butundo").mousedown(undo);
