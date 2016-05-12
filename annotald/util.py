@@ -105,7 +105,21 @@ def updateVersionCookie(tree, key, val):
     return unicode(T.Tree('', [ret]))
 
 
-def treeToHtml(tree, version, extra_data = None):
+def getAudioLimits(metadata):
+    r = [None, None]
+    for daughter in metadata:
+        if daughter.node == "TIME":
+            for d in daughter:
+                if d.node == "START":
+                    r[0] = float(d[0])
+                elif d.node == "END":
+                    r[1] = float(d[0])
+    if r[0] is None or r[1] is None:
+        raise Exception("bogus audio limits")
+    return tuple(r)
+
+
+def treeToHtml(tree, version, extra_data = None, audio_limits = None):
     if isinstance(tree[0], basestring):
         # Leaf node
         if len(tree) > 1:
@@ -137,6 +151,8 @@ def treeToHtml(tree, version, extra_data = None):
             if daughter.node == "ID" or daughter.node == "METADATA":
                 # TODO(AWE): conditional is non-portable
                 sisters.append(daughter)
+                if daughter.node == "METADATA":
+                    audio_limits = getAudioLimits(daughter)
             else:
                 if real_root:
                     raise AnnotaldException(
@@ -144,7 +160,7 @@ def treeToHtml(tree, version, extra_data = None):
                 else:
                     real_root = daughter
         xtra_data = sisters
-        return treeToHtml(real_root, version, xtra_data)
+        return treeToHtml(real_root, version, xtra_data, audio_limits)
     else:
         cssClass = re.sub("[-=][0-9]+$", "", tree.node)
         res = '<div class="snode ' + cssClass + '"'
@@ -152,6 +168,10 @@ def treeToHtml(tree, version, extra_data = None):
             res += (' data-metadata="' + safe_json(nodeListToDict(extra_data))
                     + '"')
         res += '>' + tree.node + ' '
+        if audio_limits:
+            res += ("<a href=\"#\" class=\"audio-link\" " +
+                    "data-audiostart=\"%s\" " +
+                    "data-audioend=\"%s\">audio</a> ") % audio_limits
         res += "\n".join(map(lambda x: treeToHtml(x, version), tree))
         res += "</div>"
         return res

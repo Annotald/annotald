@@ -353,6 +353,16 @@ function addClickHook(fn) {
 function handleNodeClick(e) {
     e = e || window.event;
     var element = (e.target || e.srcElement);
+    if (element.classList.contains("audio-link")) {
+        // TODO: this works around the fact that handleNodeClick is an
+        // onmousedown handler, whereas playAudioClip is an onclick.  Ideally
+        // both would be click handlers, and the stopPropagation() in
+        // playAudioClip would take care of making sure this function is not
+        // reached.  But I'm not immediately sure why this is an onmousedown
+        // rather than an onclick, so I'm putting this kludge in for the
+        // meantime.
+        // return true;
+    }
     saveMetadata();
     if (e.button == 2) {
         // rightclick
@@ -2970,6 +2980,22 @@ function resetLabelClasses(alertOnError) {
         });
 }
 
+// ===== Audio
+
+function playAudioSnippet(e) {
+    var start = $(e.target).attr("data-audiostart");
+    var end = $(e.target).attr("data-audioend");
+    var audio = new Audio("audio?start=" + start + "&end=" + end);
+    audio.play();
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+}
+
+addStartupHook(function () {
+    $(".audio-link").click(playAudioSnippet);
+});
+
 
 // TODO: badly need a DSL for forms
 
@@ -2987,6 +3013,6 @@ function resetLabelClasses(alertOnError) {
 // " "toggleStringExtension" "lookupNextLabel" "commentTypes\
 // " "invisibleCategories" "invisibleRootCategories" "ipnodes" "messageHistory\
 // " "scrollToNext" "clearTimeout" "logDetail" "hasLemma" "getLemma\
-// " "logDetail" "isEmptyNode" "escapeHtml")
+// " "logDetail" "isEmptyNode" "escapeHtml" "Audio")
 // indent-tabs-mode: nil
 // End:

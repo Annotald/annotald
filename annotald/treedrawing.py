@@ -411,6 +411,15 @@ class Treedraw(object):
                      treeIndexEnd = self.treeIndexEnd,
                      totalTrees = len(self.trees)))
 
+    @cherrypy.expose
+    def audio(self, start, end):
+        cherrypy.response.headers['Content-Type'] = 'audio/wav'
+        filename = str(int(100 * float(start))) + "_" + \
+                   str(int(100 * float(end))) + ".wav"
+        if not os.path.exists(filename):
+            raise cherrypy.HTTPError(404)
+        return cherrypy.lib.static.serve_file(os.path.abspath(filename))
+
 
 def _main(argv):
     parser = argparse.ArgumentParser(
