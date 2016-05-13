@@ -2982,11 +2982,57 @@ function resetLabelClasses(alertOnError) {
 
 // ===== Audio
 
+function getAudioFileName (elt, extension) {
+    var start = Math.round(100 * parseFloat($(elt).attr("data-audiostart")), 0);
+    var end = Math.round(100 * parseFloat($(elt).attr("data-audioend")), 0);
+    var file = $(elt).attr("data-audiofile");
+    return "audio/" + file + "_" + start + "_" + end + "." + extension;
+}
+
 function playAudioSnippet(e) {
-    var start = $(e.target).attr("data-audiostart");
-    var end = $(e.target).attr("data-audioend");
-    var audio = new Audio("audio?start=" + start + "&end=" + end);
+    // Double parentElement - from teh img one parent gets us the a tag and
+    // another gets the root node itself.
+    var audio = new Audio(getAudioFileName(
+        e.target.parentElement.parentElement, "wav"));
     audio.play();
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+}
+
+function zipWriterError (error) {
+    displayError("ZIP file creation failed: " + error);
+}
+
+function handleDownload (e) {
+    // TODO: this is pretty bogus, but I haven't set up the infrastructure yet
+    // for proper asynchronous programming.  Ideally we'd use a promise
+    // library to do the addition of both files in parallel, somewhat
+    // streamline the error handling, etc.  But it's good enough for now, I
+    // suppose...
+    var wavFile = getAudioFileName(e.target.parentElement.parentElement, "wav");
+    var textgridFile = getAudioFileName(e.target.parentElement.parentElement, "TextGrid");
+    zip.createWriter(new zip.Data64URIWriter(), function (writer) {
+        writer.add(wavFile.replace("audio/", ""), new zip.HttpReader(wavFile),
+                   function () {
+                       writer.add(textgridFile.replace("audio/", ""),
+                                  new zip.HttpReader(textgridFile),
+                                  function () {
+                                      writer.close(function (uri) {
+                                          var a = document.body.appendChild(
+                                              document.createElement("a")
+                                          );
+                                          a.download = "dl.zip"; // TODO: name
+                                          // according to file/start/end
+                                          a.href = uri;
+                                          a.click();
+                                          setTimeout(0, function () {
+                                              document.removeElement(a);
+                                          });
+                                      });
+                                  }, undefined, zipWriterError);
+                   }, undefined, zipWriterError);
+    }, zipWriterError);
     e.preventDefault();
     e.stopPropagation();
     return false;
@@ -2994,6 +3040,7 @@ function playAudioSnippet(e) {
 
 addStartupHook(function () {
     $(".audio-link").click(playAudioSnippet);
+    $(".dl-link").click(handleDownload);
 });
 
 
@@ -3013,6 +3060,6 @@ addStartupHook(function () {
 // " "toggleStringExtension" "lookupNextLabel" "commentTypes\
 // " "invisibleCategories" "invisibleRootCategories" "ipnodes" "messageHistory\
 // " "scrollToNext" "clearTimeout" "logDetail" "hasLemma" "getLemma\
-// " "logDetail" "isEmptyNode" "escapeHtml" "Audio")
+// " "logDetail" "isEmptyNode" "escapeHtml" "Audio" "zip")
 // indent-tabs-mode: nil
 // End:

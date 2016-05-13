@@ -106,7 +106,7 @@ def updateVersionCookie(tree, key, val):
 
 
 def getAudioLimits(metadata):
-    r = [None, None]
+    r = [None, None, None]
     for daughter in metadata:
         if daughter.node == "TIME":
             for d in daughter:
@@ -114,7 +114,9 @@ def getAudioLimits(metadata):
                     r[0] = float(d[0])
                 elif d.node == "END":
                     r[1] = float(d[0])
-    if r[0] is None or r[1] is None:
+                elif d.node == "FILE":
+                    r[2] = d[0]
+    if any(map(lambda x: x is None, r)):
         raise Exception("bogus audio limits")
     return tuple(r)
 
@@ -165,13 +167,19 @@ def treeToHtml(tree, version, extra_data = None, audio_limits = None):
         cssClass = re.sub("[-=][0-9]+$", "", tree.node)
         res = '<div class="snode ' + cssClass + '"'
         if extra_data:
-            res += (' data-metadata="' + safe_json(nodeListToDict(extra_data))
-                    + '"')
+            res += (' data-metadata="' +
+                    safe_json(nodeListToDict(extra_data)) +
+                    '"')
+        if audio_limits:
+            res += ("data-audiostart=\"%s\" data-audioend=\"%s\" " +
+                    "data-audiofile=\"%s\"") % audio_limits
         res += '>' + tree.node + ' '
         if audio_limits:
-            res += ("<a href=\"#\" class=\"audio-link\" " +
-                    "data-audiostart=\"%s\" " +
-                    "data-audioend=\"%s\">audio</a> ") % audio_limits
+            res += ("<a href=\"#\" class=\"audio-link\"><img src=\"/images/" +
+                    "play.svg\" width=12 height=12 " +
+                    "style=\"margin-left:10px\"></a> ")
+            res += ("<a href=\"#\" class=\"dl-link\"><img src=\"/images/" +
+                    "download.svg\" width=12 height=12></a> ")
         res += "\n".join(map(lambda x: treeToHtml(x, version), tree))
         res += "</div>"
         return res

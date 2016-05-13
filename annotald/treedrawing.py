@@ -412,13 +412,12 @@ class Treedraw(object):
                      totalTrees = len(self.trees)))
 
     @cherrypy.expose
-    def audio(self, start, end):
-        cherrypy.response.headers['Content-Type'] = 'audio/wav'
-        filename = str(int(100 * float(start))) + "_" + \
-                   str(int(100 * float(end))) + ".wav"
-        if not os.path.exists(filename):
-            raise cherrypy.HTTPError(404)
-        return cherrypy.lib.static.serve_file(os.path.abspath(filename))
+    def audio(self):
+        pass
+    audio._cp_config = { 'tools.staticdir.on'    : True,
+                         'tools.staticdir.dir'   : os.path.abspath("audio"),
+                         'tools.caching.on'      : False
+    }
 
 
 def _main(argv):
