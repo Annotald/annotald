@@ -57,3 +57,21 @@ Annotald development has been funded by the following funding sources:
   Pennsylvania.
 
 .. _Anthony Kroch: http://www.ling.upenn.edu/~kroch/
+
+Third party libraries
+---------------------
+
+Annotald uses the following free software libraries and resources:
+
+- `NLTK`_ for manipulating trees
+- `Mako`_ and `CherryPy`_ for serving the HTML interface
+- `jQuery`_, `Underscore`_, some jQuery plugins, and `zip.js`_ in the browser
+- Icons from Google’s `Material Design`_ icon pack
+
+.. _NLTK: http://www.nltk.org/
+.. _Mako: http://www.makotemplates.org/
+.. _CherryPy: http://www.cherrypy.org/
+.. _jQuery: https://jquery.com/
+.. _Underscore: http://underscorejs.org/
+.. _Material Design: https://github.com/google/material-design-icons
+.. _zip.js: https://gildas-lormeau.github.io/zip.js/
