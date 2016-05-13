@@ -97,7 +97,6 @@ class Treedraw(object):
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   :
                    pkg_resources.resource_filename("annotald", "data/"),
-                   'tools.staticdir.index' : 'index.html',
                    'tools.caching.on'      : False
                    }
     if os.name == "nt":
