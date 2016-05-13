@@ -235,7 +235,7 @@ class Treedraw(object):
             self.eventLog = None
         # forceful exit to make up for lack of proper thread management
         os._exit(0)
-        #raise SystemExit(0)
+        # raise SystemExit(0)
 
     @cherrypy.expose
     def test(self):
