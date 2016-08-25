@@ -443,10 +443,22 @@ function getLemma(node) {
 function getMetadata(node) {
     var m = node.attr("data-metadata");
     if (m) {
-        return JSON.parse(m);
+        return JSON.parse(m)["METADATA"] || {};
     } else {
-        return undefined;
+        return {};
     }
+}
+
+function setMetadata (node, md) {
+    // TODO: encapsulation violation; utils fns should not know about undo
+    touchTree(node);
+    var m = JSON.parse(node.attr("data-metadata") || "{}");
+    if (_.keys(md).length > 0) {
+        m["METADATA"] = md;
+    } else {
+        delete m["METADATA"];
+    }
+    node.attr("data-metadata", JSON.stringify(m));
 }
 
 /**
