@@ -155,10 +155,12 @@ function assignEvents() {
 }
 
 function styleIpNodes() {
-    for (var i = 0; i < ipnodes.length; i++) {
-        styleTag(ipnodes[i], "border-top: 1px solid black;" +
-                 "border-bottom: 1px solid black;" +
-                 "background-color: #C5908E;");
+    if (typeof ipnodes !== "undefined") {
+        for (var i = 0; i < ipnodes.length; i++) {
+            styleTag(ipnodes[i], "border-top: 1px solid black;" +
+                     "border-bottom: 1px solid black;" +
+                     "background-color: #C5908E;");
+        }
     }
 }
 
@@ -787,11 +789,13 @@ function editNode() {
 var commentTypeCheckboxes = "Type of comment: ";
 
 function setupCommentTypes() {
-    for (var i = 0; i < commentTypes.length; i++) {
-        commentTypeCheckboxes +=
-            '<input type="radio" name="commentType" value="' +
-            commentTypes[i] + '" id="commentType' + commentTypes[i] +
-            '" /> ' + commentTypes[i];
+    if (typeof commentTypes !== "undefined") {
+        for (var i = 0; i < commentTypes.length; i++) {
+            commentTypeCheckboxes +=
+                '<input type="radio" name="commentType" value="' +
+                commentTypes[i] + '" id="commentType' + commentTypes[i] +
+                '" /> ' + commentTypes[i];
+        }
     }
 }
 
@@ -2486,7 +2490,7 @@ function resume() {
 
 addStartupHook(function () {
     // This must be delayed, because this file is loaded before settings.js is
-    if (logDetail) {
+    if (typeof logDetail !== "undefined" && logDetail) {
         addKeyDownHook(function (keydata, fn, args) {
             var key = (keydata.ctrl ? "C-" : "") +
                     (keydata.shift ? "S-" : "") +
