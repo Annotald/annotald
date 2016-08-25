@@ -2699,6 +2699,12 @@ function registerDeletedRootTree(tree) {
     });
 }
 
+var undoHooks = [];
+
+function addUndoHook (hook) {
+    undoHooks.push(hook);
+}
+
 /**
  * Perform an undo operation.
  *
@@ -2708,12 +2714,14 @@ function registerDeletedRootTree(tree) {
 function doUndo(undoData) {
     var map = {},
         newTr = [],
-        delTr = [];
+        delTr = [],
+        touchedTrees = [];
 
     _.each(undoData.map, function(v, k) {
         var theNode = $("#" + k);
         map[k] = theNode.clone();
         theNode.replaceWith(v);
+        touchedTrees.push(v);
     });
 
     // Add back the deleted trees before removing the new trees, just in case
@@ -2727,6 +2735,7 @@ function doUndo(undoData) {
             v.tree.prependTo($("#sn0"));
         }
         newTr.push(v.tree.attr("id"));
+        touchedTrees.push(v.tree);
     });
 
     _.each(undoData.newTr, function(v) {
@@ -2741,6 +2750,11 @@ function doUndo(undoData) {
         });
         theNode.remove();
     });
+
+    _.each(undoHooks,
+           function (hook) {
+               hook(touchedTrees);
+           });
 
     return {
         map: map,
