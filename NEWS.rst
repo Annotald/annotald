@@ -1,6 +1,22 @@
 News
 ====
 
+Release 1.4.0
+-------------
+
+This release adds the following new features:
+
+- Popup choice menus (TODO: link doc)
+- Node relationships (TODO: link doc)
+- For developers: the setMetadata function and undo hooks
+
+It also fixes the following bugs:
+
+- Annotald would not start if certain variables were not set in the
+  settings.js file.
+- The corpus text would erroneously be regarding as having been changed
+  (on save) if the metadata was changed.
+
 Release 1.3.8
 -------------
 
