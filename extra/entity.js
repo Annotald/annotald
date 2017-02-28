@@ -2,7 +2,8 @@
  popupChoice: false, toggleExtension: false, startnode: true, endnode: true,
  clearSelection: false, _: false, addStyle: false, styleTag: false,
  getTokenRoot: false, getMetadata: false, setMetadata: false,
- displayWarning: false */
+ displayWarning: false, undo: false, addUndoHook: false, connectNodes: false,
+ unconnectNodes: false */
 
 var entityIndex;
 
@@ -24,7 +25,9 @@ addStartupHook(function () {
 
 var entityTags = ["COMID","DOCREF","FAC","LOC","MILPLAT",
                   "MONEY","NATLTY","ORG","PERS","QTY",
-                  "DATE","DTTM","TIME","TIMESP","VEH"];
+                  "DATE","DTTM","TIME","TIMESP","VEH", "NONE"];
+
+// TODO: relationship directionality, validate entity/relationship types
 
 var entityRe = RegExp("-(" + entityTags.join("|") + ")[0-9]+$");
 
@@ -58,23 +61,95 @@ function buildLabel (type, help, helpUrl) {
 function customCommands() {
     addCommand({ keycode: 69 }, // E
                popupChoice,
-               { "A": [buildLabel("COMID", "Communications Identifier"),
+               { "C": [buildLabel("COMID", "Communications Identifier"),
                        function () {tagEntity("COMID");}],
+                 "V": [buildLabel("VEH", "Vehicle"),
+                       function () {tagEntity("VEH");}],
+                 "R": [buildLabel("DOCREF", "Document Reference"),
+                       function () {tagEntity("DOCREF");}],
+                 "F": [buildLabel("FAC", "Facility"),
+                       function () {tagEntity("FAC");}],
+                 "W": [buildLabel("MILPLAT", "Military Platform"),
+                       function () {tagEntity("MILPLAT");}],
+                 "4": [buildLabel("MONEY", "Money"),
+                       function () {tagEntity("MONEY");}],
                  "X": ["Remove tag", function () { removeEntityTag();
                                                    clearSelection(); }]
                });
+    addCommand({ keycode: 65 }, // A
+               tagEntity, "LOC");
+    addCommand({ keycode: 83 }, // S
+               tagEntity, "ORG");
+    addCommand({ keycode: 68 }, // D
+               popupChoice,
+               { "D": [buildLabel("DATE", "Date"),
+                       function () {tagEntity("DATE");}],
+                 "T": [buildLabel("TIME", "Time"),
+                       function () {tagEntity("TIME");}],
+                 "R": [buildLabel("TIMESP", "Time span (range)"),
+                       function () {tagEntity("TIMESP");}],
+                 "E": [buildLabel("DTTM", "Date and time"),
+                       function () {tagEntity("DTTM");}]});
+    addCommand({ keycode: 70 }, // F
+               tagEntity, "PERS");
+    addCommand({ keycode: 84 }, // T
+               tagEntity, "NATLTY");
+    addCommand({ keycode: 81 }, // Q
+               tagEntity, "QTY");
+    addCommand({ keycode: 87 }, // W
+               tagEntity, "NONE");
     addCommand({ keycode: 32 }, clearSelection); // spacebar
-    addCommand({ keycode: 90 }, undo); // z
+    addCommand({ keycode: 90 }, undo); // Z
+    addCommand({ keycode: 82 }, // R
+               popupChoice,
+               {"2": [buildLabel("Located", "Physically located in"),
+                      function () {connectRelationship("LOC");}],
+                "3": [buildLabel("Near", "Physically located near"),
+                      function () {connectRelationship("NEAR");}],
+                "W": [buildLabel("PW-Geog", "Part-whole geographical"),
+                      function () {connectRelationship("PWGEO");}],
+                "S": [buildLabel("PW-Subs", "Part-whole subsidiary"),
+                      function () {connectRelationship("PWSUB");}],
+                "B": [buildLabel("Business", "Personal: business"),
+                      function () {connectRelationship("PBUS");}],
+                "F": [buildLabel("Family", "Personal: family"),
+                      function () {connectRelationship("PFAM");}],
+                "T": [buildLabel("Lasting", "Personal: lasting"),
+                      function () {connectRelationship("PLAST");}],
+                "E": [buildLabel("Employment", "Employment"),
+                      function () {connectRelationship("EMPL");}],
+                "A": [buildLabel("Ownership", "Ownership"),
+                      function () {connectRelationship("OWN");}],
+                "Z": [buildLabel("Founder", "Founder"),
+                      function () {connectRelationship("FOUND");}],
+                "R": [buildLabel("Student", "Student"),
+                      function () {connectRelationship("STUD");}],
+                "V": [buildLabel("Member", "Membership"),
+                      function () {connectRelationship("MEMB");}],
+                "G": [buildLabel("Agent-artifact", "Agent-artifact (owner," +
+                                 "user, inventor, manufacturer)"),
+                      function () {connectRelationship("AGAR");}],
+                "C": [buildLabel("Citizenship", "Citizenship/Resident/Religion/Ethnicity"),
+                      function () {connectRelationship("CITZ");}],
+                "D": [buildLabel("Org-Loc", "Organization-Location Origin"),
+                      function () {connectRelationship("ORGLOC");}],
+                "X": [buildLabel("Remove relationship", ""),
+                      function () {unconnectRelationship();}]});
+    addCommand({ keycode: 88 }, removeEntityTag);
 }
 
 (function () {
     var selector = "";
     _.each(entityTags, function (val) {
-        selector += '*[class*="-' + val + '"],';
+        if (val !== "NONE") {
+            selector += '*[class*="-' + val + '"],';
+        }
     });
     selector = selector.substr(0, selector.length - 1);
     addStyle(selector + " {border: 1px solid silver !important; border-left: 4px solid #99CC00 !important;}");
 })();
+
+addStyle('*[class*="-NONE"] {border: 1px solid silver !important; border-left: 4px solid #4682B4 !important;}');
 
 styleTag("NP", "border-color: #CC0000;");
 
@@ -156,6 +231,7 @@ function toggleRelationship (type) {
     } else {
         connectRelationship(type);
     }
+    clearSelection();
 }
 
 function drawRelationshipsInRoot (root) {

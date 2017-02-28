@@ -2974,6 +2974,7 @@ function popupChoice (choices) {
                               key + "</span><span class='choiceVal'>" +
                               val[0] + "</span></span>");
                choice.appendTo(el);
+               el.append(document.createTextNode(" "));
            });
 }
 
@@ -3076,7 +3077,7 @@ function unconnectNodes(node1, node2) {
 }
 
 addStartupHook(function () {
-    $("<svg id='lineSvg'></svg>").appendTo(document.body);
+    $("<svg id='lineSvg'></svg>").appendTo(document.body).height($(document).height());
 });
 
 //================================================== Obsolete/other

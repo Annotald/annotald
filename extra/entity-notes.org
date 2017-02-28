@@ -1,0 +1,11 @@
+https://web.stanford.edu/class/cs124/lec/Information_Extraction_and_Named_Entity_Recognition.pdf
+
+http://courses.cs.washington.edu/courses/cse517/13wi/slides/cse517wi13-RelationExtraction.pdf
+
+https://www.cs.cmu.edu/~nbach/papers/A-survey-on-Relation-Extraction.pdf
+
+http://www.aclweb.org/anthology/W09-2421
+
+http://www.lrec-conf.org/proceedings/lrec2010/pdf/905_Paper.pdf
+
+https://arxiv.org/pdf/1308.0661.pdf
