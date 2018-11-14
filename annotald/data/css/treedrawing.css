@@ -341,44 +341,6 @@ body {
     border-left: 4px solid yellow !important;
 }
 
-/* Popup choice menu */
-
-#popupChoices {
-    border: 1px solid black;
-    position: fixed;
-    bottom: 10px;
-    left: 15%;
-    background-color: white;
-    padding: 10px;
-    width: 600px;
-    line-height: 300%;
-}
-
-.choiceKey {
-    border: 1px solid grey;
-    /* TODO: rounded border */
-    font-family: monospace;
-    border-radius: 3px;
-    margin-right: 5px;
-}
-
-.choice {
-    border: 1px solid black;
-    margin: 10px;
-    padding: 5px;
-    white-space: nowrap;
-}
-
-/* Node connections */
-
-#lineSvg {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0px;
-    pointer-events: none;
-}
-
 /* TODO: special styles for the root node, or/deep/etc nodes */
 
 /* Misc */
@@ -393,8 +355,4 @@ body {
     background-color: #D2B48C;
     border: 1px solid black;
     padding: 4px;
-}
-
-abbr {
-    border-bottom: 1px dotted black;
 }

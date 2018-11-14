@@ -155,12 +155,10 @@ function assignEvents() {
 }
 
 function styleIpNodes() {
-    if (typeof ipnodes !== "undefined") {
-        for (var i = 0; i < ipnodes.length; i++) {
-            styleTag(ipnodes[i], "border-top: 1px solid black;" +
-                     "border-bottom: 1px solid black;" +
-                     "background-color: #C5908E;");
-        }
+    for (var i = 0; i < ipnodes.length; i++) {
+        styleTag(ipnodes[i], "border-top: 1px solid black;" +
+                 "border-bottom: 1px solid black;" +
+                 "background-color: #C5908E;");
     }
 }
 
@@ -308,16 +306,6 @@ function handleKeyDown(e) {
         // Don't handle shift, ctrl, and meta presses
         return true;
     }
-
-    if (popupChoices) {
-        // TODO: doesn't call keyDownHooks
-        var letter = String.fromCharCode(e.keyCode);
-        if (popupChoices[letter]) {
-            popupChoices[letter][1]();
-        }
-        cancelPopup();
-        return true;
-    }
     // Becasuse of bug #75, we don't want to count keys used for scrolling as
     // keypresses that interrupt a chain of mouse clicks.
     if (! _.contains([33, //page up
@@ -366,9 +354,6 @@ function handleNodeClick(e) {
     e = e || window.event;
     var element = (e.target || e.srcElement);
     saveMetadata();
-    if (popupChoices) {
-        cancelPopup();
-    }
     if (e.button == 2) {
         // rightclick
         if (startnode && !endnode) {
@@ -802,13 +787,11 @@ function editNode() {
 var commentTypeCheckboxes = "Type of comment: ";
 
 function setupCommentTypes() {
-    if (typeof commentTypes !== "undefined") {
-        for (var i = 0; i < commentTypes.length; i++) {
-            commentTypeCheckboxes +=
-                '<input type="radio" name="commentType" value="' +
-                commentTypes[i] + '" id="commentType' + commentTypes[i] +
-                '" /> ' + commentTypes[i];
-        }
+    for (var i = 0; i < commentTypes.length; i++) {
+        commentTypeCheckboxes +=
+            '<input type="radio" name="commentType" value="' +
+            commentTypes[i] + '" id="commentType' + commentTypes[i] +
+            '" /> ' + commentTypes[i];
     }
 }
 
@@ -2503,7 +2486,7 @@ function resume() {
 
 addStartupHook(function () {
     // This must be delayed, because this file is loaded before settings.js is
-    if (typeof logDetail !== "undefined" && logDetail) {
+    if (logDetail) {
         addKeyDownHook(function (keydata, fn, args) {
             var key = (keydata.ctrl ? "C-" : "") +
                     (keydata.shift ? "S-" : "") +
@@ -2699,12 +2682,6 @@ function registerDeletedRootTree(tree) {
     });
 }
 
-var undoHooks = [];
-
-function addUndoHook (hook) {
-    undoHooks.push(hook);
-}
-
 /**
  * Perform an undo operation.
  *
@@ -2714,14 +2691,12 @@ function addUndoHook (hook) {
 function doUndo(undoData) {
     var map = {},
         newTr = [],
-        delTr = [],
-        touchedTrees = [];
+        delTr = [];
 
     _.each(undoData.map, function(v, k) {
         var theNode = $("#" + k);
         map[k] = theNode.clone();
         theNode.replaceWith(v);
-        touchedTrees.push(v);
     });
 
     // Add back the deleted trees before removing the new trees, just in case
@@ -2735,7 +2710,6 @@ function doUndo(undoData) {
             v.tree.prependTo($("#sn0"));
         }
         newTr.push(v.tree.attr("id"));
-        touchedTrees.push(v.tree);
     });
 
     _.each(undoData.newTr, function(v) {
@@ -2750,11 +2724,6 @@ function doUndo(undoData) {
         });
         theNode.remove();
     });
-
-    _.each(undoHooks,
-           function (hook) {
-               hook(touchedTrees);
-           });
 
     return {
         map: map,
@@ -2959,126 +2928,6 @@ function updateCssClass(node, oldlabel) {
     node.removeClass(oldlabel);
     node.addClass(parseLabel(getLabel(node)));
 }
-
-///// Choice menus
-
-var popupChoices;
-
-function popupChoice (choices) {
-    popupChoices = choices;
-    var el = $("<div id=\"popupChoices\"></div>");
-    el.appendTo(document.body);
-    _.each(choices,
-           function (val, key) {
-               var choice = $("<span class='choice'><span class='choiceKey'>" +
-                              key + "</span><span class='choiceVal'>" +
-                              val[0] + "</span></span>");
-               choice.appendTo(el);
-               el.append(document.createTextNode(" "));
-           });
-}
-
-function cancelPopup () {
-    $("#popupChoices").remove();
-    popupChoices = undefined;
-}
-
-///// Node connections
-
-// From https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-function generateUUID() {
-    var d = new Date().getTime();
-    if(window.performance && typeof window.performance.now === "function"){
-        d += performance.now(); // Use high-precision timer if available
-    }
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (d + Math.random()*16)%16 | 0;
-        d = Math.floor(d/16);
-        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
-    });
-    return uuid;
-}
-
-function ensureId (node) {
-    if (node.attr("id")) {
-        return node.attr("id");
-    }
-    node.attr("id", generateUUID());
-    return node.attr("id");
-}
-
-function connectNodes (node1, node2) {
-    var pos1 = node1.offset(), pos2 = node2.offset();
-
-    if (pos1.top > pos2.top) {
-        var tmp = node2;
-        node2 = node1;
-        node1 = tmp;
-
-        tmp = pos2;
-        pos2 = pos1;
-        pos1 = tmp;
-    }
-
-    pos1.right = pos1.left + node1.width();
-    pos2.right = pos2.left + node2.width();
-
-    var id1 = ensureId(node1), id2 = ensureId(node2);
-    var parentId = getTokenRoot(node1).id;
-    var compoundClass = id1 + "-" + id2;
-    var lineSvg = document.getElementById("lineSvg");
-    var horiz1 = document.createElementNS("http://www.w3.org/2000/svg", "line"),
-        horiz2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    horiz1.classList.add(compoundClass, "horiz");
-    horiz2.classList.add(compoundClass, "horiz");
-
-    var right50 = Math.max(pos1.right, pos2.right) + 50;
-
-    horiz1.setAttribute("x1", pos1.right);
-    horiz1.setAttribute("y1", pos1.top + 5);
-    horiz1.setAttribute("x2", right50);
-    horiz1.setAttribute("y2", pos1.top + 5);
-    horiz1.setAttribute("stroke", "black");
-    horiz1.setAttribute("stroke-width", 2);
-    horiz1.setAttribute("stroke-linecap", "round");
-    horiz1.setAttribute("data-parent", parentId);
-
-
-    horiz2.setAttribute("x1", pos2.right);
-    horiz2.setAttribute("y1", pos2.top + 5);
-    horiz2.setAttribute("x2", right50);
-    horiz2.setAttribute("y2", pos2.top + 5);
-    horiz2.setAttribute("stroke", "black");
-    horiz2.setAttribute("stroke-width", 2);
-    horiz2.setAttribute("stroke-linecap", "round");
-    horiz2.setAttribute("data-parent", parentId);
-
-
-    var vert = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    vert.classList.add(compoundClass, "vert");
-    vert.setAttribute("x1", right50);
-    vert.setAttribute("y1", pos1.top + 5);
-    vert.setAttribute("x2", right50);
-    vert.setAttribute("y2", pos2.top + 5);
-    vert.setAttribute("stroke", "black");
-    vert.setAttribute("stroke-width", 2);
-    vert.setAttribute("stroke-linecap", "round");
-    vert.setAttribute("data-parent", parentId);
-
-
-    lineSvg.appendChild(horiz1);
-    lineSvg.appendChild(horiz2);
-    lineSvg.appendChild(vert);
-}
-
-function unconnectNodes(node1, node2) {
-    var id1 = ensureId(node1), id2 = ensureId(node2);
-    $("." + id1 + "-" + id2).add("." + id2 + "-" + id1).remove();
-}
-
-addStartupHook(function () {
-    $("<svg id='lineSvg'></svg>").appendTo(document.body).height($(document).height());
-});
 
 //================================================== Obsolete/other
 

@@ -6,9 +6,5 @@ Steps to make a release:
 - Push commits and tags to annotald github account
 - Deploy docs
 - Deploy to PyPI
-  - Must use the following commands (makefile is not yet up to date):
-  $ python2 setup.py bdist_wheel
-  $ python2 setup.py sdist
-  $ twine upload dist/annotald-X.Y.Z*
 - Bump version to next-dev, commit
 - Push to github

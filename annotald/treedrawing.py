@@ -20,6 +20,8 @@ from __future__ import unicode_literals
 
 import annotald
 
+VERSION = annotald.__version__
+
 # Python standard library
 import codecs
 import getpass
@@ -43,8 +45,6 @@ import nltk.tree as T
 
 # Local libraries
 import util
-
-VERSION = annotald.__version__
 
 
 class Treedraw(object):

@@ -52,9 +52,7 @@ function addConMenuGroup(group) {
 }
 
 // Load the custom context menu groups from user settings file
-if (typeof customConMenuGroups !== "undefined") {
-    customConMenuGroups();
-}
+customConMenuGroups();
 
 /**
  * Add a terminal node to the context menu.
@@ -84,11 +82,9 @@ function addConLeafAfter(phrase, terminal) {
 }
 
 // Load the custom context menu "leaf before" items
-if (typeof customConLeafBefore !== "undefined") {
-    customConLeafBefore();
-}
+customConLeafBefore();
 
-var defaultsPhrases = typeof defaultConMenuGroup === "undefined" ? "NP" : defaultConMenuGroup;
+var defaultsPhrases = defaultConMenuGroup;
 
 /**
  * Compute the suggested changes for the context menu for a label.
@@ -297,7 +293,6 @@ function doConLeaf(conleaf, node) {
 // " "parseIndex" "parseLabel" "defaultConMenuGroup" "getIndex" "parseIndexType\
 // " "displayCaseMenu" "caseTags" "casePhrases" "hasCase" "touchTree\
 // " "startnode" "_" "setCase" "caseBarriers" "isCasePhrase" "isCaseNode\
-// " "isCaseLabel" "labelHasCase" "labelGetCase" "labelRemoveCase" "shouldIndexLeaf\
-// " "undoBarrier")
+// " "isCaseLabel" "labelHasCase" "labelGetCase" "labelRemoveCase" "shouldIndexLeaf")
 // indent-tabs-mode: nil
 // End:
