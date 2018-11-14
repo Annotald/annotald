@@ -9,7 +9,7 @@ Steps to make a release:
 - Bump version in __init__.py and manual, commit
 - Make git tag on previous commit
 - Push commits and tags to annotald github account
-- Deploy docs
-- Deploy to PyPI
+- Deploy docs (make deploy-docs; commit and push in docs folder)
+- Deploy to PyPI (make release)
 - Bump version to next-dev, commit
 - Push to github

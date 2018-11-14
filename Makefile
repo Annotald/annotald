@@ -45,8 +45,6 @@ deploy-docs: api-doc doc
 
 ### Packaging targets
 
-sdist:
-	python2 setup.py sdist
-
 release:
+	python2 setup.py sdist
 	twine upload dist/*
