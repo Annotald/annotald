@@ -34,7 +34,7 @@
 This manual is designed to teach users how to use the Annotald program
 for annotating parsed corpora according to (a version of) the Penn
 treebank standards.  This version of the manual accompanies version
-*1.3.9* of Annotald.
+*1.3.10* of Annotald.
 
 // TODO: our labgroup docs/updates (incorp. latter into this doc?)
 
