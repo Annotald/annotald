@@ -3,13 +3,13 @@
 ### Documentation targets
 
 api-doc:
-	jsdoc -d api-doc -c doc/conf.json -t templates/awe \
+	npx jsdoc -d api-doc -c doc/conf.json -t awe \
 		annotald/data/scripts/treedrawing.js \
 		annotald/data/scripts/treedrawing.utils.js \
 		annotald/data/scripts/treedrawing.contextMenu.js
 
 priv-doc:
-	jsdoc -p -d priv-doc -c doc/conf.json -t templates/awe \
+	npx jsdoc -p -d priv-doc -c doc/conf.json -t awe \
 		annotald/data/scripts/treedrawing.js \
 		annotald/data/scripts/treedrawing.utils.js \
 		annotald/data/scripts/treedrawing.contextMenu.js
@@ -47,5 +47,4 @@ sdist:
 	python2 setup.py sdist
 
 release:
-	python2 setup.py sdist upload -r pypi
-	python2 setup.py bdist_wheel upload -r pypi
+	twine upload dist/*
