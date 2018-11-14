@@ -1,12 +1,18 @@
 News
 ====
 
+Release 1.3.9
+-------------
+
+This release fixes further bugs relating to the installation of NLTK.  A
+patched version of NLTK is now used to avoid such occurrences.
+
 Release 1.3.8
 -------------
 
 This release fixes a bug which caused errors on installation related to
 an old version of NLTK.  It also fixed an issue with the display of CODE
-nodes int eh text preview.
+nodes in the text preview.
 
 Release 1.3.7
 -------------
