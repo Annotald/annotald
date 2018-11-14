@@ -1,3 +1,8 @@
+Need to be installed:
+- twine (for pypi uploads)
+- npm packages in this repo
+- npx
+
 Steps to make a release:
 
 - Write news, commit
