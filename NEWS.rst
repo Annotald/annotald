@@ -1,6 +1,16 @@
 News
 ====
 
+Release 1.3.10
+--------------
+
+This release fixes the follwing bugs:
+
+- Annotald would not start if certain variables were not set in the
+  settings.js file.
+- The corpus text would erroneously be regarding as having been changed
+  (on save) if the metadata was changed.
+
 Release 1.3.9
 -------------
 
