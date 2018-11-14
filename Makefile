@@ -2,8 +2,10 @@
 
 ### Documentation targets
 
+# TODO: -t awe for the jsdocs: something about the template is broken
+
 api-doc:
-	npx jsdoc -d api-doc -c doc/conf.json -t awe \
+	npx jsdoc -d api-doc -c doc/conf.json \
 		annotald/data/scripts/treedrawing.js \
 		annotald/data/scripts/treedrawing.utils.js \
 		annotald/data/scripts/treedrawing.contextMenu.js
