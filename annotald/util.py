@@ -399,6 +399,12 @@ def _stripLemma(s):
 
 def _getText(tree_text, strip_lemmata = False):
     tree = T.Tree(tree_text)
+    to_delete = []
+    for i, t in enumerate(tree):
+        if t.node in ["ID", "METADATA"]:
+            to_delete.append(i)
+    for td in reversed(sorted(to_delete)):
+        del tree[td]
     l = tree.pos()
     l = filter(lambda t: not _isEmpty(t), l)
     l = map(lambda t: t[0], l)
