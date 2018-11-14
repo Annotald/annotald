@@ -83,7 +83,7 @@ else:
         , package_data={'annotald': ["data/*/*", "settings.py",
                                      "settings.js",
                                      "CS_Tony_oct19.jar"]}
-        , install_requires=["mako", "cherrypy", "argparse", "nltk==2.0.5"]
+        , install_requires=["mako", "cherrypy", "argparse", "nltk2-fixed==2.0.6"]
         , setup_requires = ["setuptools"]
         , provides=["annotald"]
         , **setup_args
