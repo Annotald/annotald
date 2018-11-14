@@ -73,14 +73,14 @@
  * This variable holds the selected node, or "start" node if multiple
  * selection is in effect.  Otherwise undefined.
  *
- * @type DOM Node
+ * @type Node
  */
 var startnode = null;
 /**
  * This variable holds the "end" node if multiple selection is in effect.
  * Otherwise undefined.
  *
- * @type DOM Node
+ * @type Node
  */
 var endnode = null;
 var ctrlKeyMap = {};
@@ -508,7 +508,7 @@ function setInputFieldEnter(field, fn) {
 /**
  * Select a node, and update the GUI to reflect that.
  *
- * @param {DOM Node} node the node to be selected
+ * @param {Node} node the node to be selected
  * @param {Boolean} force if true, force this node to be a secondary
  * selection, even if it wouldn't otherwise be.
  */
@@ -1349,7 +1349,7 @@ function searchPrecNode(e) {
 /**
  * Indicate that a node matches a search
  *
- * @param {DOM node} node the node to flag
+ * @param {Node} node the node to flag
  */
 function flagSearchMatch(node) {
     $(node).addClass("searchmatch");
@@ -1454,10 +1454,10 @@ function clearSearch() {
  * node.
  * @private
  *
- * @param {DOM node} node the search node to interpret
- * @param {DOM node} target the tree node to match it against
+ * @param {Node} node the search node to interpret
+ * @param {Node} target the tree node to match it against
  * @param {Object} options search options
- * @returns {DOM node} `target` if it matched the query, otherwise `undefined`
+ * @returns {Node} `target` if it matched the query, otherwise `undefined`
  */
 
 function interpretSearchNode(node, target, options) {
@@ -1584,7 +1584,7 @@ function toggleCollapsed() {
  * Empty categories are not allowed to be moved as a leaf.  However, a
  * non-terminal containing only empty categories can be moved.
  *
- * @param {DOM Node} parent the parent node to move selection under
+ * @param {Node} parent the parent node to move selection under
  *
  * @returns {Boolean} whether the operation was successful
  */
@@ -1739,7 +1739,7 @@ function moveNode(parent) {
  * The two selected nodes must be sisters, and they and all intervening sisters
  * will be moved as a unit.  Calls {@link moveNode} to do the heavy lifting.
  *
- * @param {DOM Node} parent the parent to move the selection under
+ * @param {Node} parent the parent to move the selection under
  */
 function moveNodes(parent) {
     if (!startnode || !endnode) {
@@ -1814,7 +1814,7 @@ function leafAfter() {
  * @param {Boolean} before whether to create the node before or after selection
  * @param {String} label the label to give the new node
  * @param {String} word the text to give the new node
- * @param {DOM Node} target where to put the new node (default: selected node)
+ * @param {Node} target where to put the new node (default: selected node)
  */
 function makeLeaf(before, label, word, target) {
     if (!(target || startnode)) return;
@@ -2049,7 +2049,7 @@ function pruneNode() {
  * `clause_extensions` variables in the `settings.js` file.
  *
  * @param {String} extension the dash tag to toggle
- * @param {Array of String} [extensionList] override the guess as to the
+ * @param {Array<String>} [extensionList] override the guess as to the
  * appropriate ordered list of possible extensions.
  */
 function toggleExtension(extension, extensionList) {
@@ -2645,7 +2645,7 @@ function ignoringUndo(fn) {
 /**
  * Inform the undo system that changes are being made.
  *
- * @param {JQuery Node} node the node in which changes are being made
+ * @param {jQuery} node the node in which changes are being made
  */
 function touchTree(node) {
     var root = $(getTokenRoot(node));
@@ -2657,7 +2657,7 @@ function touchTree(node) {
 /**
  * Inform the undo system of the addition of a new tree at the root level.
  *
- * @param {JQuery Node} tree the tree being added
+ * @param {jQuery} tree the tree being added
  */
 function registerNewRootTree(tree) {
     var newid = "id" + idNumber;
@@ -2669,7 +2669,7 @@ function registerNewRootTree(tree) {
 /**
  * Inform the undo system of a tree's removal at the root level
  *
- * @param {JQuery Node} tree the tree being removed
+ * @param {jQuery} tree the tree being removed
  */
 function registerDeletedRootTree(tree) {
     var prev = tree.prev();
@@ -2910,7 +2910,7 @@ function setLabelLL(node, label) {
 /**
  * Update the CSS class of a node to reflect its label.
  *
- * @param {JQuery Node} node
+ * @param {jQuery} node
  * @param {String} oldlabel (optional) the former label of this node
  */
 function updateCssClass(node, oldlabel) {
@@ -2936,7 +2936,7 @@ function updateCssClass(node, oldlabel) {
  *
  * Contains none of the heuristics of {@link setLabel}.
  *
- * @param {JQuery Node} node the target node
+ * @param {jQuery} node the target node
  * @param {String} label the new label
  * @param {Boolean} noUndo whether to record this operation for later undo
  */
