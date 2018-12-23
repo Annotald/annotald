@@ -4,13 +4,6 @@ import os
 import sys
 import subprocess
 
-if sys.version_info[0] == 3:
-    print ("Python 3 detected, re-exec-ing.")
-    args = ['python2']
-    args.extend(sys.argv)
-    # v = args in list; p = use path to find binary
-    os.execvp("python2", args)
-
 import annotald.treedrawing
 
 annotald.treedrawing._main(sys.argv[1:])

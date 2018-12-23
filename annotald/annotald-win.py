@@ -1,13 +1,14 @@
+import os
+import sys
+import time
+import traceback
+import webbrowser
+import _thread
+
 import wx
 from wxPython.wx import *
-import sys
-import treedrawing
-import traceback
-import thread
-import os
-import webbrowser
-import time
-import util 
+
+from annotald import treedrawing, util
 
 ID_LAUNCH_SERVER = wx.NewId()
 ID_CHROME = wx.NewId()
@@ -48,7 +49,7 @@ class TaskBarApp(wx.Frame):
             dialog = wxFileDialog ( None, style = wxOPEN, message = 'Hey what\'s up, please pick a psd file for Annotald' )         
             # Show the dialog and get user input
             if dialog.ShowModal() == wxID_OK:
-                print 'Selected:', dialog.GetPath()
+                print(('Selected:', dialog.GetPath()))
                 path = dialog.GetPath()
                 dialog.Destroy()
                 return path
@@ -62,7 +63,7 @@ class TaskBarApp(wx.Frame):
             print('>>> end of traceback <<<')           
 
     def startServer(self,event):
-        thread.start_new_thread(self.serverThread, ())
+        _thread.start_new_thread(self.serverThread, ())
     
     def serverThread(self):
         #print('stuff')
@@ -87,7 +88,7 @@ class TaskBarApp(wx.Frame):
                 print('>>> end of traceback <<<')
                   
     def startChrome(self,event=None):
-        thread.start_new_thread(self.chromeThread, ())
+        _thread.start_new_thread(self.chromeThread, ())
                         
     def chromeThread(self):
         os.system("start chrome localhost:8080")
