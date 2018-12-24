@@ -209,14 +209,17 @@ class Treedraw(object):
     @cherrypy.expose
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
-    def doLogEvent(self, eventData):
+    def doLogEvent(self, eventData=None):
+        if eventData is None:
+            eventData = cherrypy.request.json
+
         if not self.options.timelog:
-            return {}
+            return {"result": "success"}
         evtTime = time.time()
         eventData['filename'] = self.options.psd[0]
         with open("annotaldLog.txt", "a") as f:
             f.write(str(evtTime) + ": " + json.dumps(eventData) + "\n")
-        return {}
+        return dict(result="success")
 
     @cherrypy.expose
     def doExit(self):
@@ -370,7 +373,10 @@ class Treedraw(object):
         else:
             currentHtml = self.treesToHtml(currentTrees)
 
-        self.doLogEvent({'type': "page-load"})
+        self.doLogEvent({
+            'type': "page-load",
+            'loc': "inner_index",
+        })
         return self.renderIndex(currentHtml, currentSettings, False)
 
     @cherrypy.expose
