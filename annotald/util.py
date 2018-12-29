@@ -28,6 +28,7 @@
 # Standard library
 import codecs
 from collections import defaultdict
+from functools import reduce
 import hashlib
 import json
 import os
@@ -39,7 +40,6 @@ import tempfile
 
 # External libraries
 import nltk.tree as T
-from functools import reduce
 
 # Conditional imports
 if os.name == "nt":  # pragma: no cover
@@ -279,9 +279,13 @@ def writeTreesToFile(meta, trees, filename, reformat = False,
         os.rename(fn, filename)
 
 
+def is_leaf(tree):
+    return len(tree) == 1 and isinstance(tree[0], str)
+
+
 def _formatTree(tree, indent = 0):
     # Should come from lovett
-    if len(tree) == 1 and isinstance(tree[0], str):
+    if is_leaf(tree):
         # This is a leaf node
         return "(%s %s)" % (str(tree.label()), str(tree[0]))
     else:
