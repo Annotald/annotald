@@ -41,10 +41,6 @@ import tempfile
 # External libraries
 import nltk.tree as T
 
-# Conditional imports
-if os.name == "nt":  # pragma: no cover
-    import win32process
-
 
 class AnnotaldException(Exception):
     pass
@@ -313,12 +309,7 @@ def corpusSearchValidate(queryFile):  # pragma: no cover
                       "annotald", 'CS_Tony_oct19.jar') + \
                   ' csearch.CorpusSearch ' + queryFile + ' ' + name + \
                   ' -out ' + name + '.out'
-        # make sure console is hidden in windows py2exe version
-        if os.name == "nt":
-            subprocess.check_call(cmdline.split(" "),
-                                  creationflags=win32process.CREATE_NO_WINDOW)
-        else:
-            subprocess.check_call(cmdline.split(" "))
+        subprocess.check_call(cmdline.split(" "))
 
         with open(name + ".out") as f:
             newtrees = f.read()
