@@ -71,8 +71,8 @@ SPECIAL_VERBS = frozenset(_SPECIAL_VERB_MAP.keys())
 
 
 _GREYNIR_ICEPACH_NT_MAP = {
-    "P": "",
-    "S-MAIN": "IP-MAT",
+    "P": "IP-MAT",
+    "S-MAIN": "IP",
     "S": "CP",
     "S-COND": "CP-COND",
     "S-CONS": "CP-CONS",
@@ -150,8 +150,7 @@ def treemap(tree, nonterm_fn, term_fn):
 def reynir_tree_to_icepach(simple_tree, affix_lemma=1):
     """ Outer function for _reynir_tree_to_icepach """
     nltk_tree = _reynir_tree_to_icepach(simple_tree, affix_lemma=affix_lemma)
-    nltk_tree = nltk_tree[0] if isinstance(nltk_tree, list) and nltk_tree else nltk_tree
-    return nltk_tree
+    return Tree("", nltk_tree)
 
 
 def _reynir_tree_to_icepach(tree, affix_lemma=1):
@@ -167,19 +166,22 @@ def _reynir_tree_to_icepach(tree, affix_lemma=1):
             else:
                 children.extend(child)
 
+
         # Merge trees according to:
         # IP-MAT idomsonly IP => (merge IP-MAT IP)
         # !IP idoms IP => (rename IP IP-SUB)
         # !VP-SEQ idoms VP-SEQ => (merge !VP-SEQ VP-SEQ)
         # !VP idoms VP => (merge !VP VP)
-        if xp == "IP-MAT" and len(children) == 1 and children[0].label() == "IP":
-            children[0].set_label("IP-MAT")
-            return children[0]
-
+        if tree.tag in ("S-MAIN",):
+            # Merge P and S-MAIN and IP
+            return children
         ext_children = []
+        if xp == "IP-MAT" and children and children[0].label() == "IP":
+            children = [c for c in children[0] ] + (children[1:])
+
         for child in children:
             label = child.label()
-            if xp and xp != "IP" and label == "IP":
+            if xp and xp[:2] != "IP" and label == "IP":
                 ext_children.append(child)
                 child.set_label("IP-SUB")
             elif label in ("VP-SEQ", "VP"):
@@ -188,8 +190,9 @@ def _reynir_tree_to_icepach(tree, affix_lemma=1):
             else:
                 ext_children.append(child)
 
-        node = Tree(xp, ext_children)
-        return [node]
+        else:
+            node = Tree(xp, ext_children)
+            return [node]
 
     # No children
     if tree._head.get("k") == "PUNCTUATION":

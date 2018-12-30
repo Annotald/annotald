@@ -322,4 +322,4 @@ def compare(sample, display_targets=True):
 # compare(_SAMPLE_VILJA_VBPI_02, _DISPLAY_TARGETS)
 # compare(_SAMPLE_VILJA_MDPI_02, _DISPLAY_TARGETS)
 
-compare(SETNINGAR3_PSD, 0)
+# compare(SETNINGAR3_PSD, 0)
