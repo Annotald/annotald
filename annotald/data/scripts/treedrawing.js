@@ -2416,14 +2416,16 @@ function goToTree() {
 function logEvent(type, data) {
     data = data || {};
     data.type = type;
-    $.ajax("/doLogEvent",
-          {
-              async: true,
-              dataType: "json",
-              type: "POST",
-              data: { eventData: JSON.stringify(data) },
-              traditional: true
-          });
+    payload = { eventData: data };
+    $.ajax({
+               url: "/doLogEvent",
+               async: true,
+               dataType: "json",
+               type: "POST",
+               data: JSON.stringify(payload),
+               contentType : "application/json",
+               traditional: true
+           });
 }
 
 // =============== Idle timeout

@@ -25,12 +25,10 @@
 
 # TODO: add a file-saving test that really exercises the unicode fns
 
-# Time travel
-from __future__ import unicode_literals
-
 # Standard library
 import codecs
 from collections import defaultdict
+from functools import reduce
 import hashlib
 import json
 import os
@@ -43,10 +41,6 @@ import tempfile
 # External libraries
 import nltk.tree as T
 
-# Conditional imports
-if os.name == "nt":  # pragma: no cover
-    import win32process
-
 
 class AnnotaldException(Exception):
     pass
@@ -57,11 +51,11 @@ def safe_json(dict):
     return j.replace('"', "&#34;")
 
 
-def queryVersionCookie(tree, key):
-    if tree == "" or not tree:
+def queryVersionCookie(treestr, key):
+    if treestr == "" or not treestr:
         return None
-    t = T.Tree(tree)[0]
-    if t.node != "VERSION":
+    t = T.Tree.fromstring(treestr)[0]
+    if t.label() != "VERSION":
         return
     return _queryVersionCookieInner(t, key)
 
@@ -70,7 +64,7 @@ def _queryVersionCookieInner(tree, key):
     # TODO: maybe we should just convert the version cookie into a dict
     # and use that
     keys = key.split(".")
-    f = filter(lambda n: n.node == keys[0], tree)
+    f = [n for n in tree if n.label() == keys[0]]
     if len(f) == 1:
         if len(keys) == 1:
             return f[0][0]
@@ -80,12 +74,12 @@ def _queryVersionCookieInner(tree, key):
         return None
 
 
-def updateVersionCookie(tree, key, val):
-    if tree == "" or not tree:
+def updateVersionCookie(treestr, key, val):
+    if treestr == "" or not treestr:
         return None
-    tree = T.Tree(tree)
+    tree = T.Tree.fromstring(treestr)
     tree = tree[0]
-    if tree.node != "VERSION":
+    if tree.label() != "VERSION":
         return
     dd = metadataToDict(tree)
     d = dd
@@ -94,32 +88,32 @@ def updateVersionCookie(tree, key, val):
         if len(k) == 1:
             d[k[0]] = val
             break
-        if isinstance(d[k[0]], basestring):
+        if isinstance(d[k[0]], str):
             f = lambda: defaultdict(f)
             d[k[0]] = defaultdict(f)
         d = d[k[0]]
         k = k[1:]
 
     ret = dictToMetadata(dd)
-    ret.node = "VERSION"
-    return unicode(T.Tree('', [ret]))
+    ret.set_label("VERSION")
+    return str(T.Tree('', [ret]))
 
 
 def treeToHtml(tree, version, extra_data = None):
-    if isinstance(tree[0], basestring):
+    if isinstance(tree[0], str):
         # Leaf node
         if len(tree) > 1:
             raise AnnotaldException("Leaf node with more than one " +
                                     "daughter!: %s" % tree)
-        cssClass = re.sub("[-=][0-9]+$", "", tree.node)
-        res = '<div class="snode ' + cssClass + '">' + tree.node + \
+        cssClass = re.sub("[-=][0-9]+$", "", tree.label())
+        res = '<div class="snode ' + cssClass + '">' + tree.label() + \
               '<span class="wnode">'
         temp = tree[0].split("-")
-        if version == "dash" and len(temp) > 1 and tree.node != "CODE":
+        if version == "dash" and len(temp) > 1 and tree.label() != "CODE":
             temp = tree[0].split("-")
             lemma = temp.pop()
             word = "-".join(temp)
-            if lemma.isdigit() and tree.node != "NUM":
+            if lemma.isdigit() and tree.label() != "NUM":
                 # If the lemma is all numbers, it is probably a trace index.
                 # Do nothing special with it.
                 res += word + "-" + lemma
@@ -129,12 +123,12 @@ def treeToHtml(tree, version, extra_data = None):
             res += tree[0]
         res += '</span></div>'
         return res
-    elif tree.node == "":
+    elif tree.label() == "":
         # Root node
         sisters = []
         real_root = None
         for daughter in tree:
-            if daughter.node == "ID" or daughter.node == "METADATA":
+            if daughter.label() == "ID" or daughter.label() == "METADATA":
                 # TODO(AWE): conditional is non-portable
                 sisters.append(daughter)
             else:
@@ -146,13 +140,13 @@ def treeToHtml(tree, version, extra_data = None):
         xtra_data = sisters
         return treeToHtml(real_root, version, xtra_data)
     else:
-        cssClass = re.sub("[-=][0-9]+$", "", tree.node)
+        cssClass = re.sub("[-=][0-9]+$", "", tree.label())
         res = '<div class="snode ' + cssClass + '"'
         if extra_data:
             res += (' data-metadata="' + safe_json(nodeListToDict(extra_data))
                     + '"')
-        res += '>' + tree.node + ' '
-        res += "\n".join(map(lambda x: treeToHtml(x, version), tree))
+        res += '>' + tree.label() + ' '
+        res += "\n".join([treeToHtml(x, version) for x in tree])
         res += "</div>"
         return res
 
@@ -169,13 +163,13 @@ def cssClassFromLabel(label):
 
 
 def orthoFromTree(tree):
-    orthoNodes = [t for t in tree if t.node == "ORTHO"]
+    orthoNodes = [t for t in tree if t.label() == "ORTHO"]
     if len(orthoNodes) == 1:
         return orthoNodes[0][0]
-    metadata = [t for t in tree if t.node == "META"]
+    metadata = [t for t in tree if t.label() == "META"]
     if len(metadata) == 1:
         metadata = metadata[0]
-        altOrthoNode = [t for t in metadata if t.node == "ALT-ORTHO"]
+        altOrthoNode = [t for t in metadata if t.label() == "ALT-ORTHO"]
         if len(altOrthoNode) == 1:
             return altOrthoNode[0][0]
     return "XXX-ORTHO-UNKNOWN"
@@ -191,16 +185,16 @@ def metadataToDict(metadata):
     d = defaultdict(f)
     for datum in metadata:
         if isinstance(datum[0], T.Tree):
-            d[datum.node] = metadataToDict(datum)
+            d[datum.label()] = metadataToDict(datum)
         else:
-            d[datum.node] = datum[0]
+            d[datum.label()] = datum[0]
     return d
 
 
 def dictToMetadata(d, label = ""):
-    if isinstance(d, basestring):
+    if isinstance(d, str):
         return [d]
-    keys = d.keys()
+    keys = list(d.keys())
     l = []
     for k in keys:
         l.append(T.Tree(k, dictToMetadata(d[k])))
@@ -211,17 +205,17 @@ def dictToMetadata(d, label = ""):
 
 # TODO: unify the calling convention of these fns, so we don't need *args
 def deepTreeToHtml(tree, *args):
-    if tree.node == "META":
+    if tree.label() == "META":
         # Metadata nodes have an empty string as html representation.
         return ""
     isLeaf = True
     metadata = None
     isSimpleLeaf = False
-    if isinstance(tree[0], basestring):
+    if isinstance(tree[0], str):
         isSimpleLeaf = True
     else:
         for t in tree:
-            if t.node == "META":
+            if t.label() == "META":
                 # Find this tree's metadata; we will need it later
                 metadata = t
             elif isinstance(t[0], T.Tree):
@@ -230,7 +224,7 @@ def deepTreeToHtml(tree, *args):
                 isLeaf = False
 
     # Find out what to call this node
-    theLabel = labelFromLabelAndMetadata(tree.node, metadata)
+    theLabel = labelFromLabelAndMetadata(tree.label(), metadata)
     # Start building the result
     res = '<div class="snode ' + \
         cssClassFromLabel(theLabel) + '"'
@@ -244,7 +238,7 @@ def deepTreeToHtml(tree, *args):
         res += '<span class="wnode">' + \
             orthoFromTree(tree) + '</span>'
     else:
-        leafHtml = "".join(map(lambda x: deepTreeToHtml(x), tree))
+        leafHtml = "".join([deepTreeToHtml(x) for x in tree])
         res += leafHtml
     res += '</div>'
     return res
@@ -252,17 +246,17 @@ def deepTreeToHtml(tree, *args):
 
 def writeTreesToFile(meta, trees, filename, reformat = False,
                      fix_indices = False):
-    if not isinstance(trees, basestring):
+    if not isinstance(trees, str):
         raise AnnotaldException("writeTreesToFile got a non-string!")
 
     trees = trees.split("\n\n")
-    trees = filter(lambda x: x != "", trees)
+    trees = [x for x in trees if x != ""]
 
     if reformat or fix_indices:
-        trees = map(T.Tree, trees)
+        trees = [T.Tree.fromstring(s) for s in trees]
         if fix_indices:
-            trees = map(rewriteIndices, trees)
-        trees = map(_formatTree, trees)
+            trees = list(map(rewriteIndices, trees))
+        trees = list(map(_formatTree, trees))
         try:
             meta = _formatTree(T.Tree(meta))
         except:
@@ -281,17 +275,21 @@ def writeTreesToFile(meta, trees, filename, reformat = False,
         os.rename(fn, filename)
 
 
+def is_leaf(tree):
+    return len(tree) == 1 and isinstance(tree[0], str)
+
+
 def _formatTree(tree, indent = 0):
     # Should come from lovett
-    if len(tree) == 1 and isinstance(tree[0], basestring):
+    if is_leaf(tree):
         # This is a leaf node
-        return u"(%s %s)" % (unicode(tree.node), unicode(tree[0]))
+        return "(%s %s)" % (str(tree.label()), str(tree[0]))
     else:
-        s = u"(%s " % (unicode(tree.node))
+        s = "(%s " % (str(tree.label()))
         l = len(s)
-        leaves = (u"\n" + u" " * (indent + l)).join(
-            map(lambda x: _formatTree(x, indent + l), tree))
-        return u"%s%s%s" % (s, leaves, u")")
+        leaves = ("\n" + " " * (indent + l)).join(
+            [_formatTree(x, indent + l) for x in tree])
+        return "%s%s%s" % (s, leaves, ")")
 
 
 def corpusSearchValidate(queryFile):  # pragma: no cover
@@ -311,12 +309,7 @@ def corpusSearchValidate(queryFile):  # pragma: no cover
                       "annotald", 'CS_Tony_oct19.jar') + \
                   ' csearch.CorpusSearch ' + queryFile + ' ' + name + \
                   ' -out ' + name + '.out'
-        # make sure console is hidden in windows py2exe version
-        if os.name == "nt":
-            subprocess.check_call(cmdline.split(" "),
-                                  creationflags=win32process.CREATE_NO_WINDOW)
-        else:
-            subprocess.check_call(cmdline.split(" "))
+        subprocess.check_call(cmdline.split(" "))
 
         with open(name + ".out") as f:
             newtrees = f.read()
@@ -401,15 +394,15 @@ def _getText(tree_text, strip_lemmata = False):
     tree = T.Tree(tree_text)
     to_delete = []
     for i, t in enumerate(tree):
-        if t.node in ["ID", "METADATA"]:
+        if t.label() in ["ID", "METADATA"]:
             to_delete.append(i)
     for td in reversed(sorted(to_delete)):
         del tree[td]
     l = tree.pos()
-    l = filter(lambda t: not _isEmpty(t), l)
-    l = map(lambda t: t[0], l)
+    l = [t for t in l if not _isEmpty(t)]
+    l = [t[0] for t in l]
     if strip_lemmata:
-        l = map(_stripLemma, l)
+        l = list(map(_stripLemma, l))
     l = reduce(_squashAt, l, "")
     return l
 
@@ -433,7 +426,7 @@ def _getIndexInner(tree, grp):
     if _shouldIndexLeaf(tree):
         s = tree[0]
     else:
-        s = tree.node
+        s = tree.label()
     res = re.search(_idxRe, s)
     if res:
         return res.group(grp)
@@ -465,7 +458,7 @@ def _setIndex(tree, idx):
     if _shouldIndexLeaf(tree):
         tree[0] = tree[0] + it + str(idx)
     else:
-        tree.node = tree.node + it + str(idx)
+        tree.set_label(tree.label() + it + str(idx))
     return tree
 
 
@@ -475,32 +468,32 @@ def _stripIndex(tree):
     if _shouldIndexLeaf(tree):
         tree[0] = re.sub(_idxRe, "", tree[0])
     else:
-        tree.node = re.sub(_idxRe, "", tree.node)
+        tree.set_label(re.sub(_idxRe, "", tree.label()))
     return tree
 
 
 def _shouldIndexLeaf(tree):
     try:
-        if not isinstance(tree[0], basestring):
+        if not isinstance(tree[0], str):
             return False
         s = tree[0]
         return re.split("[-=]", s)[0] in ["*T*", "*ICH*", "*CL*", "*"]
     except IndexError as e:
         # Github issue #45
-        print "shouldIndexLeaf error, tree is: "
-        print tree.pprint()
-        print "Whole tree (from root): "
+        print("shouldIndexLeaf error, tree is: ")
+        print(tree.pprint())
+        print("Whole tree (from root): ")
         r = tree.root
-        if not isinstance(r, nltk.tree.Tree):
+        if not isinstance(r, T.Tree):
             r = r()
-        print r.pprint()
+        print(r.pprint())
         raise e
 
 
 def rewriteIndices(tree):
     indexMap = {}
     maxIndex = 1
-    subtrees = list(tree.subtrees())
+    subtrees = [t for t in tree.subtrees()]
     subtrees.insert(0, tree)
     for t in subtrees:
         if _hasIndex(t):

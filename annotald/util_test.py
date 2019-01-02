@@ -1,6 +1,6 @@
 import unittest, textwrap
 
-import util
+from annotald import util
 
 import nltk.tree as T
 
@@ -51,7 +51,7 @@ class UtilTest(unittest.TestCase):
 
 
     def test_treeToHtml(self):
-        test_tree = T.Tree("( (IP-MAT (NP-SBJ (D this-this)) (BEP is-is) (NP-PRD (D a-a) (N test-test))))")
+        test_tree = T.Tree.fromstring("( (IP-MAT (NP-SBJ (D this-this)) (BEP is-is) (NP-PRD (D a-a) (N test-test))))")
         self.assertMultiLineEqual(util.treeToHtml(test_tree, None),
                              """
 <div class=\"snode IP-MAT\">IP-MAT <div class=\"snode NP-SBJ\">NP-SBJ <div class=\"snode D\">D<span class=\"wnode\">this-this</span></div></div>
@@ -69,30 +69,36 @@ class UtilTest(unittest.TestCase):
                                   """.strip())
 
     def test_treeToHtml_index(self):
-        self.assertMultiLineEqual(util.treeToHtml(T.Tree("(FOO-1 bar)"), None),
+        self.assertMultiLineEqual(util.treeToHtml(T.Tree.fromstring("(FOO-1 bar)"), None),
                                   "<div class=\"snode FOO\">FOO-1" +
                                   "<span class=\"wnode\">bar</span></div>")
 
     def test_treeToHtml_mult_daughters(self):
-        anomalous = T.Tree("(FOO (BAR baz quux))")
+        anomalous = T.Tree.fromstring("(FOO (BAR baz quux))")
         self.assertRaises(util.AnnotaldException, util.treeToHtml, anomalous, None)
 
     def test_treeToHtml_NUM(self):
-        num = T.Tree("(FOO (X two-2))")
+        num = T.Tree.fromstring("(FOO (X two-2))")
         self.assertMultiLineEqual(util.treeToHtml(num, "dash"),
                                   """
 <div class=\"snode FOO\">FOO <div class=\"snode X\">X<span class=\"wnode\">two-2</span></div></div>
                                   """.strip())
 
     def test_treeToHtml_metadata(self):
-        md = T.Tree("( (FOO (BAR baz)) (ID foobar-1) (METADATA (AUTHOR me)))")
-        self.assertMultiLineEqual(util.treeToHtml(md, "dash"),
-                                  """
+        md = T.Tree.fromstring("( (FOO (BAR baz)) (ID foobar-1) (METADATA (AUTHOR me)))")
+        html = util.treeToHtml(md, "dash")
+        # We need both because of indeterminacy
+        tgt1 = """
 <div class=\"snode FOO\" data-metadata=\"{&#34;ID&#34;: &#34;foobar-1&#34;, &#34;METADATA&#34;: {&#34;AUTHOR&#34;: &#34;me&#34;}}\">FOO <div class=\"snode BAR\">BAR<span class=\"wnode\">baz</span></div></div>
-                                  """.strip())
+                                  """.strip()
+        tgt2 = """
+<div class="snode FOO" data-metadata="{&#34;METADATA&#34;: {&#34;AUTHOR&#34;: &#34;me&#34;}, &#34;ID&#34;: &#34;foobar-1&#34;}">FOO <div class="snode BAR">BAR<span class="wnode">baz</span></div></div>
+        """.strip()
+        tgt_list = [tgt1, tgt2]
+        self.assertIn(html, tgt_list)
 
     def test_treeToHtml_bad_metadata(self):
-        md = T.Tree("( (FOO (BAR baz)) (ID foobar-1) (METADATA (AUTHOR me)) (BAD metadata))")
+        md = T.Tree.fromstring("( (FOO (BAR baz)) (ID foobar-1) (METADATA (AUTHOR me)) (BAD metadata))")
         self.assertRaises(util.AnnotaldException, util.treeToHtml, md, None)
 
     def test_deepTreeToHtml(self):
@@ -110,7 +116,8 @@ class UtilTest(unittest.TestCase):
         pass
 
     def test_nodeListToDict(self):
-        l = map(T.Tree, ["(FOO 1)", "(BAR (BAZ a) (QUUX b))"])
+        treestrings = ["(FOO 1)", "(BAR (BAZ a) (QUUX b))"]
+        l = [T.Tree.fromstring(t) for t in treestrings]
         self.assertEqual(util.nodeListToDict(l),
                          {
                              'FOO': "1",
@@ -121,7 +128,7 @@ class UtilTest(unittest.TestCase):
                          })
 
     def test_metadataToDict(self):
-        m = T.Tree("(METADATA (FOO 1) (BAR (BAZ a) (QUUX b)))")
+        m = T.Tree.fromstring("(METADATA (FOO 1) (BAR (BAZ a) (QUUX b)))")
         self.assertEqual(util.metadataToDict(m),
                          {
                              'FOO': "1",
@@ -160,7 +167,7 @@ foo bar
         self.assertEqual(util._squashAt(*l), "chocolate- @chip")
 
     def test_isEmpty(self):
-        tree = T.Tree("((CODE foo) (NP *T*-1) (C 0) (NUM 0) (N foo))")
+        tree = T.Tree.fromstring("((CODE foo) (NP *T*-1) (C 0) (NUM 0) (N foo))")
         p = tree.pos()
         t = p[0]
         self.assertTrue(util._isEmpty(t))
@@ -192,7 +199,7 @@ foo bar
                 "MD5": "none"
             }
         }, "VERSION"),
-                         T.Tree("(VERSION (FORMAT dash) (HASH (MD5 none)))"))
+                         T.Tree.fromstring("(VERSION (FORMAT dash) (HASH (MD5 none)))"))
 
     def test_getIndex(self):
         cases = [("(NP-1 (D foo))", 1, "-"),
@@ -204,9 +211,9 @@ foo bar
                  ("(XP *FOO*-1)", None, None),
                  ("(NP (D foo))", None, None)]
         for (s, i, t) in cases:
-            self.assertEqual(util._getIndex(T.Tree(s)), i)
-            self.assertEqual(util._getIndexType(T.Tree(s)), t)
-            self.assertEqual(util._hasIndex(T.Tree(s)), i is not None)
+            self.assertEqual(util._getIndex(T.Tree.fromstring(s)), i)
+            self.assertEqual(util._getIndexType(T.Tree.fromstring(s)), t)
+            self.assertEqual(util._hasIndex(T.Tree.fromstring(s)), i is not None)
 
     def test_setIndex(self):
         cases = [("(NP-1 (D foo))", "(NP (D foo))"),
@@ -218,7 +225,8 @@ foo bar
                  ("(XP *FOO*-1)", "(XP *FOO*-1)"),
                  ("(NP (D foo))", "(NP (D foo))")]
         for (orig, new) in cases:
-            self.assertEqual(util._stripIndex(T.Tree(orig)), T.Tree(new))
+            self.assertEqual(util._stripIndex(T.Tree.fromstring(orig)),
+                             T.Tree.fromstring(new))
 
     def test_setIndex(self):
         cases = [("(NP-1 (D foo))", "(NP-7 (D foo))"),
@@ -231,7 +239,8 @@ foo bar
                  ("(NP (D foo))", "(NP-7 (D foo))")]
 
         for (orig, new) in cases:
-            self.assertEqual(util._setIndex(T.Tree(orig), 7), T.Tree(new))
+            self.assertEqual(util._setIndex(T.Tree.fromstring(orig), 7),
+                             T.Tree.fromstring(new))
 
     def test_rewriteIndices(self):
         t = """
@@ -250,4 +259,4 @@ foo bar
                        (NP *CL*-3)
                        (N test))))
         """
-        self.assertEqual(util.rewriteIndices(T.Tree(t)), T.Tree(r))
+        self.assertEqual(util.rewriteIndices(T.Tree.fromstring(t)), T.Tree.fromstring(r))

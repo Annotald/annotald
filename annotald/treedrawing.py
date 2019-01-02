@@ -42,7 +42,7 @@ from mako.template import Template
 import nltk.tree as T
 
 # Local libraries
-import util
+from annotald import util
 
 VERSION = annotald.__version__
 
@@ -81,7 +81,7 @@ class Treedraw(object):
         if args.pythonSettings is not None:
             if sys.version_info[0] == 2 and sys.version_info[1] < 7 or \
                sys.version_info[0] == 3 and sys.version_info[1] < 2:
-                print ("Specifying python settings requires Python v." +
+                print("Specifying python settings requires Python v." +
                        ">2.7 or >3.2.")
                 sys.exit(1)
             else:
@@ -90,21 +90,16 @@ class Treedraw(object):
                                                     self.pythonOptions)
         cherrypy.engine.autoreload.files.add(args.pythonSettings)
 
-        self.doLogEvent(json.dumps({'type': "program-start",
-                                    'filename': self.thefile}))
+        self.doLogEvent({'type': "program-start", 'filename': self.thefile})
 
     _cp_config = { 'tools.staticdir.on'    : True,
                    'tools.staticdir.dir'   :
                    pkg_resources.resource_filename("annotald", "data/"),
                    'tools.staticdir.index' : 'index.html',
-                   'tools.caching.on'      : False
+                   'tools.caching.on'      : False,
+                   'tools.encode.on': True,
+                   'tools.encode.encoding': 'utf-8',
                    }
-    if os.name == "nt":
-        cherrypy.config.update({ "server.logToScreen" : False })
-        cherrypy.config.update({ 'log.screen'         : False})
-        # TODO: why do we do this? if all it does is remove the bt from the
-        # browser, it isn't what we want.
-        cherrypy.config.update({ "environment"        : "embedded" })
 
     def integrateTrees(self, trees):
         trees = trees.strip().split("\n\n")
@@ -118,18 +113,18 @@ class Treedraw(object):
         return "\n\n".join(self.trees)
 
     @cherrypy.expose
-    def doSave(self, trees = None, startTime = None, force = None,
-               update_md5 = None):
+    @cherrypy.tools.json_out()
+    def doSave(self, trees = None, startTime = None, force = None, update_md5 = None):
         # Save failure reason codes
         NON_MATCHING_ANNOTALDS = 1
         NON_MATCHING_HASHES = 2
 
         cherrypy.response.headers['Content-Type'] = 'application/json'
         if (startTime != self.startTime) and not (force == "true"):
-            return json.dumps(dict(result = "failure",
+            return dict(result = "failure",
                                    reason = "non-matching invocations of Annotald",  # noqa
                                    reasonCode = NON_MATCHING_ANNOTALDS,
-                                   startTime = self.startTime))
+                                   startTime = self.startTime)
         tosave = self.integrateTrees(trees)
         tosave = tosave.replace("-FLAG", "")
         print ("self.thefile is: %s" % self.thefile)
@@ -146,28 +141,28 @@ class Treedraw(object):
                                                "HASH.MD5")
             new_hash = util.hashTrees(tosave, self.versionCookie)
             if old_hash != new_hash:
-                return json.dumps(dict(result = "failure",
+                return dict(result = "failure",
                                        reason = ("corpus text has changed" +
                                                  " (it shouldn't!)"),
                                        reasonCode = NON_MATCHING_HASHES,
-                                       startTime = self.startTime))
+                                       startTime = self.startTime)
         tosave = tosave.replace("-FLAG", "")
         try:
             util.writeTreesToFile(self.versionCookie, tosave, self.thefile)
-            self.doLogEvent(json.dumps({'type': "save"}))
-            return json.dumps(dict(result = "success"))
+            self.doLogEvent({'type': "save"})
+            return dict(result = "success")
         except Exception as e:
             print ("something went wrong: %s" % e)
             traceback.print_exc()
-            return json.dumps(dict(result = "failure",
-                                   reason = "server got an exception"))
+            return dict(result = "failure",
+                                   reason = "server got an exception")
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def doValidate(self, trees = None, validator = None, shift = None):
         cherrypy.response.headers['Content-Type'] = 'application/json'
         tovalidate = self.integrateTrees(trees)
-        self.doLogEvent(json.dumps({'type': "validate",
-                                    'validator': validator}))
+        self.doLogEvent({'type': "validate", 'validator': validator})
 
         # When showing part of the file, a regular click of the validation
         # button validates only the showing trees, whereas shift-click does
@@ -184,8 +179,8 @@ class Treedraw(object):
             print ("something went wrong with validation: %s, %s" %
                    (type(e), e))
             traceback.print_exc()
-            return json.dumps(dict(result = "failure",
-                                   reason = str(e)))
+            return dict(result = "failure",
+                                   reason = str(e))
 
         # What to do with the resultant trees depends on whether they are all
         # the trees in the file, and on whether we want to show all the trees
@@ -202,19 +197,23 @@ class Treedraw(object):
             self.trees = validatedTrees
             validatedHtml = self.treesToHtml(validatedTrees)
 
-        return json.dumps(dict(result = "success",
-                               html = validatedHtml))
+        return dict(result = "success",
+                               html = validatedHtml)
 
     @cherrypy.expose
-    def doLogEvent(self, eventData):
-        eventData = json.loads(eventData)  # TODO: so fucking asinine
+    @cherrypy.tools.json_in()
+    @cherrypy.tools.json_out()
+    def doLogEvent(self, eventData=None):
+        if eventData is None:
+            eventData = cherrypy.request.json
+
         if not self.options.timelog:
-            return
+            return {"result": "success"}
         evtTime = time.time()
         eventData['filename'] = self.options.psd[0]
         with open("annotaldLog.txt", "a") as f:
             f.write(str(evtTime) + ": " + json.dumps(eventData) + "\n")
-        return ""
+        return dict(result="success")
 
     @cherrypy.expose
     def doExit(self):
@@ -228,7 +227,7 @@ class Treedraw(object):
                               True, self.pythonOptions['rewriteIndices'])
         print ("Done. :)")
 
-        self.doLogEvent(json.dumps({'type': "program-exit"}))
+        self.doLogEvent({'type': "program-exit"})
         time.sleep(3)           # Wait for log events from server
         if self.eventLog:
             self.eventLog.close()
@@ -249,10 +248,10 @@ class Treedraw(object):
         return self.renderIndex(currentTree, currentSettings, True)
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def testLoadTrees(self, trees = None):
         cherrypy.response.headers['Content-Type'] = 'application/json'
-        return json.dumps(dict(
-            trees = self.treesToHtml(self.readTrees(None, text = trees))))
+        return dict(trees = self.treesToHtml(self.readTrees(None, text = trees)))
 
     def readVersionCookie(self, filename):
         f = codecs.open(filename, 'r', "utf-8")
@@ -294,7 +293,7 @@ class Treedraw(object):
             tree = tree.replace("<", "&lt;")
             tree = tree.replace(">", "&gt;")
             if not tree == "":
-                nltk_tree = T.Tree(tree)
+                nltk_tree = T.Tree.fromstring(tree)
                 alltrees = alltrees + self.conversionFn(nltk_tree, version)
 
         alltrees = alltrees + '</div>'
@@ -314,7 +313,7 @@ class Treedraw(object):
             pass
 
         useValidator = len(validators) > 0
-        validatorNames = validators.keys()
+        validatorNames = list(validators.keys())
 
         if self.options.oneTree:
             ti = "1 out of " + str(len(self.trees))
@@ -368,16 +367,20 @@ class Treedraw(object):
         else:
             currentHtml = self.treesToHtml(currentTrees)
 
-        self.doLogEvent(json.dumps({'type': "page-load"}))
+        self.doLogEvent({
+            'type': "page-load",
+            'loc': "inner_index",
+        })
         return self.renderIndex(currentHtml, currentSettings, False)
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def advanceTree(self, offset = None, trees = None, find = None):
         cherrypy.response.headers['Content-Type'] = 'application/json'
         offset = int(offset)
         if not self.showingPartialFile:
-            return json.dumps(dict(result = 'failure',
-                                   reason = 'Not in partial-file mode.'))
+            return dict(result = 'failure',
+                                   reason = 'Not in partial-file mode.')
         else:
             oldindex = (self.treeIndexStart, self.treeIndexEnd)
             self.integrateTrees(trees)
@@ -390,12 +393,12 @@ class Treedraw(object):
                     self.treeIndexEnd = len(self.trees)
                 if self.treeIndexStart >= len(self.trees):
                     self.treeIndexStart, self.treeIndexEnd = oldindex
-                    return json.dumps(dict(result = 'failure',
-                                           reason = 'At end of file.'))
+                    return dict(result = 'failure',
+                                           reason = 'At end of file.')
                 elif self.treeIndexStart < 0:
                     self.treeIndexStart, self.treeIndexEnd = oldindex
-                    return json.dumps(dict(result = 'failure',
-                                           reason = 'At beginning of file.'))
+                    return dict(result = 'failure',
+                                           reason = 'At beginning of file.')
                 if not find:
                     # my kingdom for a do...while loop
                     break
@@ -403,13 +406,12 @@ class Treedraw(object):
                         self.treeIndexStart:self.treeIndexEnd]):
                     break
 
-            return json.dumps(
-                dict(result = 'success',
+            return dict(result = 'success',
                      tree = self.treesToHtml(self.trees[
                          self.treeIndexStart:self.treeIndexEnd]),
                      treeIndexStart = self.treeIndexStart,
                      treeIndexEnd = self.treeIndexEnd,
-                     totalTrees = len(self.trees)))
+                     totalTrees = len(self.trees))
 
 
 def _main(argv):
@@ -457,7 +459,9 @@ def _main(argv):
     # TODO: can we calculate this in __init__?
     shortfile = re.search("^.*?([0-9A-Za-z\-\.]*)$", args.psd[0]).group(1)
 
-    cherrypy.config.update({'server.socket_port': args.port})
+    cherrypy.config.update({
+        'server.socket_port': args.port,
+    })
 
     treedraw = Treedraw(args, shortfile)
     cherrypy.quickstart(treedraw)
