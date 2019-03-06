@@ -26,6 +26,8 @@ In order to use it, you must first install the ReynirPackage,
    pip install reynir
 """
 
+import os
+
 from nltk import Tree
 
 try:
@@ -393,3 +395,41 @@ def parse_text(text, affix_lemma=1, id_prefix=None, start_index=1):
         if id_prefix is not None:
             insert_id(nltk_tree, id_prefix, start_index + idx)
         yield nltk_tree
+
+def annotate_file(in_path):
+    print("Parsing file {0}".format(in_path))
+    dirname = os.path.dirname(in_path)
+    basename = os.path.basename(in_path)
+    out_path = os.path.join(dirname, basename + ".parse")
+    print("Output file is {0}".format(out_path))
+    with open(in_path, "r") as in_handle:
+        text = in_handle.read()
+        with open(out_path, "w") as out_handle:
+            for tree in parse_text(text, id_prefix=basename):
+                formatted_trees = util._formatTree(tree)
+                out_handle.write(formatted_trees)
+                out_handle.write("\n")
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser("Parse a text file of contiguous text into IcePaHC-like parse trees")
+
+    def file_type_guard(path):
+        if os.path.isfile(path):
+            return path
+        raise argparse.ArgumentError("Expected path to a file but got '{0}'".format(path))
+
+    parser.add_argument(
+        "-i",
+        "--in_path",
+        dest="in_path",
+        type=file_type_guard,
+        required=True,
+        default="default",
+        help="Path to input file with contiguous text",
+    )
+
+    args = parser.parse_args()
+    annotate_file(args.in_path)
+
+
